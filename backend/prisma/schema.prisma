@@ -1,13 +1,29 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
+// This is your Prisma schema file
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// --- MODELOS DO BANCO DE DADOS ---
+
+model Usuario {
+  id                   Int       @id @default(autoincrement())
+  nome                 String
+  email                String    @unique
+  senha_hash           String
+  saldo_rubys          Int       @default(0)
+  ultima_coleta_banner DateTime?
+  is_admin             Boolean   @default(false)
+  
+  // Campos de controle (Soft Delete)
+  ativo                Boolean   @default(true)
+  criado_em            DateTime  @default(now())
+  atualizado_em        DateTime  @updatedAt
+  excluido_em          DateTime?
+
+  @@map("usuario")
 }
