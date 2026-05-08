@@ -4,10 +4,17 @@ export type Usuario = {
   id: string;
   nome: string;
   email: string;
+  email_verificado?: boolean;
+  bloqueado?: boolean | null;
+  tentativas_login?: number | null;
   is_admin?: boolean | null;
   nivel?: number | null;
   pontos_experiencia?: number | null;
   saldo_rubys_cache?: number | null;
+  criado_em?: string | null;
+  atualizado_em?: string | null;
+  excluido_em?: string | null;
+  token_verificacao_expira_em?: string | null;
 };
 
 type AuthResponse = {
@@ -15,7 +22,18 @@ type AuthResponse = {
   access_token: string;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+type ApiErrorDetail = {
+  field?: string;
+  messages?: string[];
+};
+
+type ApiErrorResponse = {
+  statusCode?: number;
+  message?: string | string[];
+  details?: ApiErrorDetail[];
+};
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const TOKEN_KEY = "card_game_rpg_token";
 const USER_KEY = "card_game_rpg_user";
 const AUTH_EVENT = "card_game_rpg_auth_change";
@@ -35,11 +53,7 @@ async function request<T>(
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const message =
-      typeof data?.message === "string"
-        ? data.message
-        : "Nao foi possivel concluir a solicitacao.";
-    throw new Error(message);
+    throw new Error(formatApiError(data));
   }
 
   return data as T;
@@ -124,4 +138,28 @@ export function subscribeAuthChange(callback: () => void) {
 
 function notifyAuthChange() {
   window.dispatchEvent(new Event(AUTH_EVENT));
+}
+
+function formatApiError(data: ApiErrorResponse | null) {
+  const fallback = "Nao foi possivel concluir a solicitacao.";
+
+  if (!data) {
+    return fallback;
+  }
+
+  const message = Array.isArray(data.message)
+    ? data.message.join(" ")
+    : data.message;
+
+  const details = data.details
+    ?.flatMap((detail) =>
+      detail.messages?.map((detailMessage) => detailMessage) ?? [],
+    )
+    .filter(Boolean);
+
+  if (details?.length) {
+    return details.join("\n");
+  }
+
+  return message ?? fallback;
 }

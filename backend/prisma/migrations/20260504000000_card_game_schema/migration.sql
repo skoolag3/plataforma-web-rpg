@@ -149,7 +149,7 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SET search_path = public, pg_temp;
 
 CREATE TRIGGER check_soma_taxa_drop
 AFTER INSERT OR UPDATE ON banner_carta
@@ -245,7 +245,8 @@ CREATE TABLE log_partida (
     )
 );
 
-CREATE VIEW ranking_jogadores AS
+CREATE VIEW ranking_jogadores
+WITH (security_invoker = true) AS
 SELECT
     u.id AS id_usuario,
     u.nome,
@@ -271,7 +272,7 @@ BEGIN
     NEW.atualizado_em = CURRENT_TIMESTAMP;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SET search_path = public, pg_temp;
 
 CREATE TRIGGER set_timestamp_usuario BEFORE UPDATE ON usuario FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
 CREATE TRIGGER set_timestamp_pacote BEFORE UPDATE ON pacote_ruby FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
@@ -298,7 +299,7 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SET search_path = public, pg_temp;
 
 CREATE TRIGGER check_dono_carta_deck
 BEFORE INSERT OR UPDATE ON deck_carta
@@ -325,7 +326,7 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SET search_path = public, pg_temp;
 
 CREATE TRIGGER sync_saldo_rubys_cache
 AFTER INSERT ON ledger_ruby
@@ -354,3 +355,36 @@ CREATE INDEX idx_deck_usuario ON deck(id_usuario) WHERE excluido_em IS NULL;
 CREATE INDEX idx_log_partida_usuario ON log_partida(id_usuario);
 CREATE INDEX idx_log_partida_oponente ON log_partida(id_usuario_oponente);
 CREATE INDEX idx_log_partida_timestamp ON log_partida(timestamp_inicio DESC);
+
+-- ==========================================
+-- 8. SUPABASE SECURITY LINTER
+-- ==========================================
+
+ALTER TABLE usuario ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pacote_ruby ENABLE ROW LEVEL SECURITY;
+ALTER TABLE log_transacao ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ledger_ruby ENABLE ROW LEVEL SECURITY;
+ALTER TABLE carta ENABLE ROW LEVEL SECURITY;
+ALTER TABLE banner ENABLE ROW LEVEL SECURITY;
+ALTER TABLE banner_carta ENABLE ROW LEVEL SECURITY;
+ALTER TABLE log_gacha ENABLE ROW LEVEL SECURITY;
+ALTER TABLE usuario_banner_coleta ENABLE ROW LEVEL SECURITY;
+ALTER TABLE inventario ENABLE ROW LEVEL SECURITY;
+ALTER TABLE deck ENABLE ROW LEVEL SECURITY;
+ALTER TABLE deck_carta ENABLE ROW LEVEL SECURITY;
+ALTER TABLE log_partida ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON TABLE usuario FROM anon, authenticated;
+REVOKE ALL ON TABLE pacote_ruby FROM anon, authenticated;
+REVOKE ALL ON TABLE log_transacao FROM anon, authenticated;
+REVOKE ALL ON TABLE ledger_ruby FROM anon, authenticated;
+REVOKE ALL ON TABLE carta FROM anon, authenticated;
+REVOKE ALL ON TABLE banner FROM anon, authenticated;
+REVOKE ALL ON TABLE banner_carta FROM anon, authenticated;
+REVOKE ALL ON TABLE log_gacha FROM anon, authenticated;
+REVOKE ALL ON TABLE usuario_banner_coleta FROM anon, authenticated;
+REVOKE ALL ON TABLE inventario FROM anon, authenticated;
+REVOKE ALL ON TABLE deck FROM anon, authenticated;
+REVOKE ALL ON TABLE deck_carta FROM anon, authenticated;
+REVOKE ALL ON TABLE log_partida FROM anon, authenticated;
+REVOKE ALL ON TABLE ranking_jogadores FROM anon, authenticated;

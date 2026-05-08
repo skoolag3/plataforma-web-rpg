@@ -11,18 +11,18 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.registrar(dto);
   }
 
   @Post('login')
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(@Body() dto: LoginDto) {
+    return this.authService.login(dto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  me(@CurrentUser() usuario: AuthenticatedUser) {
+  async me(@CurrentUser() usuario: AuthenticatedUser) {
     return this.authService.buscarPerfil(usuario.id);
   }
 }

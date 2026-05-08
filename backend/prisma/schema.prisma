@@ -7,27 +7,32 @@ datasource db {
 }
 
 model Usuario {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nome               String    @db.VarChar(100)
-  email              String    @unique @db.VarChar(255)
-  senha_hash         String    @db.VarChar(255)
-  is_admin           Boolean?  @default(false)
-  nivel              Int?      @default(1)
-  pontos_experiencia Int?      @default(0)
-  saldo_rubys_cache  Int?      @default(0)
-  ativo              Boolean?  @default(true)
-  criado_em          DateTime? @default(now()) @db.Timestamptz(6)
-  atualizado_em      DateTime? @default(now()) @db.Timestamptz(6)
-  excluido_em        DateTime? @db.Timestamptz(6)
+  id                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome                        String    @db.VarChar(100)
+  email                       String    @unique @db.VarChar(255)
+  senha_hash                  String    @db.VarChar(255)
+  email_verificado            Boolean   @default(false)
+  token_verificacao_email     String?   @unique @db.VarChar(255)
+  token_verificacao_expira_em DateTime? @db.Timestamptz(0)
+  bloqueado                   Boolean?  @default(false)
+  tentativas_login            Int?      @default(0)
+  is_admin                    Boolean?  @default(false)
+  nivel                       Int?      @default(1)
+  pontos_experiencia          Int?      @default(0)
+  saldo_rubys_cache           Int?      @default(0)
+  ativo                       Boolean?  @default(true)
+  criado_em                   DateTime? @default(now()) @db.Timestamptz(0)
+  atualizado_em               DateTime? @default(now()) @db.Timestamptz(0)
+  excluido_em                 DateTime? @db.Timestamptz(0)
 
-  transacoes          LogTransacao[]
-  ledgerRubys         LedgerRuby[]
-  gachaLogs           LogGacha[]
-  bannerColetas       UsuarioBannerColeta[]
-  inventarios         Inventario[]
-  decks               Deck[]
-  partidas            LogPartida[] @relation("PartidasUsuario")
-  partidasComoOponente LogPartida[] @relation("PartidasOponente")
+  transacoes           LogTransacao[]
+  ledgerRubys          LedgerRuby[]
+  gachaLogs            LogGacha[]
+  bannerColetas        UsuarioBannerColeta[]
+  inventarios          Inventario[]
+  decks                Deck[]
+  partidas             LogPartida[]          @relation("PartidasUsuario")
+  partidasComoOponente LogPartida[]          @relation("PartidasOponente")
 
   @@map("usuario")
 }
@@ -39,8 +44,8 @@ model PacoteRuby {
   quantidade_rubys Int
   preco_brl        Decimal   @db.Decimal(10, 2)
   ativo            Boolean?  @default(true)
-  criado_em        DateTime? @default(now()) @db.Timestamptz(6)
-  atualizado_em    DateTime? @default(now()) @db.Timestamptz(6)
+  criado_em        DateTime? @default(now()) @db.Timestamptz(0)
+  atualizado_em    DateTime? @default(now()) @db.Timestamptz(0)
 
   transacoes LogTransacao[]
 
@@ -54,7 +59,7 @@ model LogTransacao {
   valor_brl        Decimal   @db.Decimal(10, 2)
   status_pagamento String    @db.VarChar(50)
   id_stripe_intent String?   @db.VarChar(255)
-  timestamp_compra DateTime? @default(now()) @db.Timestamptz(6)
+  timestamp_compra DateTime? @default(now()) @db.Timestamptz(0)
 
   usuario Usuario?    @relation(fields: [id_usuario], references: [id])
   pacote  PacoteRuby? @relation(fields: [id_pacote], references: [id])
@@ -70,7 +75,7 @@ model LedgerRuby {
   motivo        String    @db.VarChar(50)
   id_referencia String?   @db.Uuid
   descricao     String?
-  criado_em     DateTime? @default(now()) @db.Timestamptz(6)
+  criado_em     DateTime? @default(now()) @db.Timestamptz(0)
 
   usuario Usuario @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
 
@@ -89,9 +94,9 @@ model Carta {
   passiva       Json?
   foto          String?   @db.VarChar(255)
   ativo         Boolean?  @default(true)
-  criado_em     DateTime? @default(now()) @db.Timestamptz(6)
-  atualizado_em DateTime? @default(now()) @db.Timestamptz(6)
-  excluido_em   DateTime? @db.Timestamptz(6)
+  criado_em     DateTime? @default(now()) @db.Timestamptz(0)
+  atualizado_em DateTime? @default(now()) @db.Timestamptz(0)
+  excluido_em   DateTime? @db.Timestamptz(0)
 
   banners     BannerCarta[]
   gachaLogs   LogGacha[]
@@ -106,11 +111,11 @@ model Banner {
   nome          String    @db.VarChar(150)
   custo_giro    Int       @default(100)
   ativo         Boolean?  @default(true)
-  criado_em     DateTime? @default(now()) @db.Timestamptz(6)
-  atualizado_em DateTime? @default(now()) @db.Timestamptz(6)
+  criado_em     DateTime? @default(now()) @db.Timestamptz(0)
+  atualizado_em DateTime? @default(now()) @db.Timestamptz(0)
 
-  cartas        BannerCarta[]
-  gachaLogs     LogGacha[]
+  cartas         BannerCarta[]
+  gachaLogs      LogGacha[]
   usuarioColetas UsuarioBannerColeta[]
 
   @@map("banner")
@@ -136,7 +141,7 @@ model LogGacha {
   id_carta_obtida String    @db.Uuid
   rubys_gastos    Int
   pity_contador   Int       @default(0)
-  timestamp_pull  DateTime? @default(now()) @db.Timestamptz(6)
+  timestamp_pull  DateTime? @default(now()) @db.Timestamptz(0)
 
   usuario     Usuario @relation(fields: [id_usuario], references: [id])
   banner      Banner  @relation(fields: [id_banner], references: [id])
@@ -151,7 +156,7 @@ model LogGacha {
 model UsuarioBannerColeta {
   id_usuario    String    @db.Uuid
   id_banner     String    @db.Uuid
-  ultima_coleta DateTime? @db.Timestamptz(6)
+  ultima_coleta DateTime? @db.Timestamptz(0)
 
   usuario Usuario @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
   banner  Banner  @relation(fields: [id_banner], references: [id], onDelete: Cascade)
@@ -165,8 +170,8 @@ model Inventario {
   id_usuario    String?   @db.Uuid
   id_carta      String?   @db.Uuid
   quantidade    Int?      @default(1)
-  criado_em     DateTime? @default(now()) @db.Timestamptz(6)
-  atualizado_em DateTime? @default(now()) @db.Timestamptz(6)
+  criado_em     DateTime? @default(now()) @db.Timestamptz(0)
+  atualizado_em DateTime? @default(now()) @db.Timestamptz(0)
 
   usuario Usuario? @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
   carta   Carta?   @relation(fields: [id_carta], references: [id])
@@ -181,9 +186,9 @@ model Deck {
   id_usuario    String?   @db.Uuid
   nome          String    @default("Meu Deck") @db.VarChar(100)
   ativo         Boolean?  @default(false)
-  criado_em     DateTime? @default(now()) @db.Timestamptz(6)
-  atualizado_em DateTime? @default(now()) @db.Timestamptz(6)
-  excluido_em   DateTime? @db.Timestamptz(6)
+  criado_em     DateTime? @default(now()) @db.Timestamptz(0)
+  atualizado_em DateTime? @default(now()) @db.Timestamptz(0)
+  excluido_em   DateTime? @db.Timestamptz(0)
 
   usuario  Usuario?     @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
   cartas   DeckCarta[]
@@ -196,7 +201,7 @@ model DeckCarta {
   id_deck      String    @db.Uuid
   id_carta     String    @db.Uuid
   posicao_slot Int
-  criado_em    DateTime? @default(now()) @db.Timestamptz(6)
+  criado_em    DateTime? @default(now()) @db.Timestamptz(0)
 
   deck  Deck  @relation(fields: [id_deck], references: [id], onDelete: Cascade)
   carta Carta @relation(fields: [id_carta], references: [id], onDelete: Cascade)
@@ -214,8 +219,8 @@ model LogPartida {
   resultado           String    @db.VarChar(20)
   turnos_jogados      Int       @default(0)
   variacao_pontos     Int?      @default(0)
-  timestamp_inicio    DateTime? @default(now()) @db.Timestamptz(6)
-  timestamp_fim       DateTime? @db.Timestamptz(6)
+  timestamp_inicio    DateTime? @default(now()) @db.Timestamptz(0)
+  timestamp_fim       DateTime? @db.Timestamptz(0)
 
   usuario  Usuario? @relation("PartidasUsuario", fields: [id_usuario], references: [id])
   oponente Usuario? @relation("PartidasOponente", fields: [id_usuario_oponente], references: [id])
