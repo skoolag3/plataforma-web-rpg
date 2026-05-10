@@ -19,7 +19,13 @@ export type Usuario = {
 
 type AuthResponse = {
   usuario: Usuario;
-  access_token: string;
+  access_token?: string;
+  message?: string;
+};
+
+type MessageResponse = {
+  message: string;
+  usuario?: Usuario;
 };
 
 type ApiErrorDetail = {
@@ -70,13 +76,24 @@ export async function login(email: string, senha: string) {
 }
 
 export async function register(nome: string, email: string, senha: string) {
-  const data = await request<AuthResponse>("/auth/register", {
+  return request<MessageResponse>("/auth/register", {
     method: "POST",
     body: JSON.stringify({ nome, email, senha }),
   });
+}
 
-  saveSession(data);
-  return data;
+export async function verifyEmail(token: string) {
+  return request<MessageResponse>("/auth/verify-email", {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function reenviarVerificacao(email: string) {
+  return request<MessageResponse>("/auth/reenviar-verificacao", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
 }
 
 export async function getProfile(token: string) {
@@ -88,6 +105,10 @@ export async function getProfile(token: string) {
 }
 
 export function saveSession(data: AuthResponse) {
+  if (!data.access_token) {
+    return;
+  }
+
   localStorage.setItem(TOKEN_KEY, data.access_token);
   localStorage.setItem(USER_KEY, JSON.stringify(data.usuario));
   notifyAuthChange();

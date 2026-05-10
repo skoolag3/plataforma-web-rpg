@@ -1,26 +1,25 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { register } from "../../lib/auth";
 
 export default function CadastroPage() {
-  const router = useRouter();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
   const [carregando, setCarregando] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErro("");
+    setSucesso("");
     setCarregando(true);
 
     try {
-      await register(nome, email, senha);
-      router.push("/dashboard");
-      router.refresh();
+      const response = await register(nome, email, senha);
+      setSucesso(response.message);
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Erro ao criar conta.");
     } finally {
@@ -74,6 +73,11 @@ export default function CadastroPage() {
           {erro ? (
             <p className="rounded-md border border-red-500/40 bg-red-950/40 px-3 py-2 text-sm text-red-100">
               {erro}
+            </p>
+          ) : null}
+          {sucesso ? (
+            <p className="rounded-md border border-emerald-500/40 bg-emerald-950/40 px-3 py-2 text-sm text-emerald-100">
+              {sucesso}
             </p>
           ) : null}
           <button

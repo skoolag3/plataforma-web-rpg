@@ -4,6 +4,8 @@ import type { AuthenticatedUser } from '../../../common/decorators/current-user.
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
+import { ReenviarVerificacaoDto } from '../dto/reenviar-verificacao.dto';
+import { VerifyEmailDto } from '../dto/verify-email.dto';
 import { AuthService } from '../services/auth.service';
 
 @Controller('auth')
@@ -13,6 +15,16 @@ export class AuthController {
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     return this.authService.registrar(dto);
+  }
+
+  @Post('verify-email')
+  async verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verificarEmail(dto);
+  }
+
+  @Post('reenviar-verificacao')
+  async reenviarVerificacao(@Body() dto: ReenviarVerificacaoDto) {
+    return this.authService.reenviarVerificacao(dto);
   }
 
   @Post('login')
