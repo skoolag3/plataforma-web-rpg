@@ -15,6 +15,7 @@ export type Usuario = {
   atualizado_em?: string | null;
   excluido_em?: string | null;
   token_verificacao_expira_em?: string | null;
+  token_redefinicao_expira_em?: string | null;
 };
 
 type AuthResponse = {
@@ -93,6 +94,20 @@ export async function reenviarVerificacao(email: string) {
   return request<MessageResponse>("/auth/reenviar-verificacao", {
     method: "POST",
     body: JSON.stringify({ email }),
+  });
+}
+
+export async function solicitarRedefinicaoSenha(email: string) {
+  return request<MessageResponse>("/auth/solicitar-redefinicao-senha", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function redefinirSenha(token: string, senha: string) {
+  return request<MessageResponse>("/auth/redefinir-senha", {
+    method: "POST",
+    body: JSON.stringify({ token, senha }),
   });
 }
 

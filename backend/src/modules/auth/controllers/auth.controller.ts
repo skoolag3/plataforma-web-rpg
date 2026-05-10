@@ -3,8 +3,10 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { LoginDto } from '../dto/login.dto';
+import { RedefinirSenhaDto } from '../dto/redefinir-senha.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { ReenviarVerificacaoDto } from '../dto/reenviar-verificacao.dto';
+import { SolicitarRedefinicaoSenhaDto } from '../dto/solicitar-redefinicao-senha.dto';
 import { VerifyEmailDto } from '../dto/verify-email.dto';
 import { AuthService } from '../services/auth.service';
 
@@ -25,6 +27,16 @@ export class AuthController {
   @Post('reenviar-verificacao')
   async reenviarVerificacao(@Body() dto: ReenviarVerificacaoDto) {
     return this.authService.reenviarVerificacao(dto);
+  }
+
+  @Post('solicitar-redefinicao-senha')
+  async solicitarRedefinicaoSenha(@Body() dto: SolicitarRedefinicaoSenhaDto) {
+    return this.authService.solicitarRedefinicaoSenha(dto);
+  }
+
+  @Post('redefinir-senha')
+  async redefinirSenha(@Body() dto: RedefinirSenhaDto) {
+    return this.authService.redefinirSenha(dto);
   }
 
   @Post('login')

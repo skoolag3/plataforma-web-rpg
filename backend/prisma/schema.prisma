@@ -14,6 +14,8 @@ model Usuario {
   email_verificado            Boolean   @default(false)
   token_verificacao_email     String?   @unique @db.VarChar(255)
   token_verificacao_expira_em DateTime? @db.Timestamptz(0)
+  token_redefinicao_senha     String?   @unique @db.VarChar(255)
+  token_redefinicao_expira_em DateTime? @db.Timestamptz(0)
   bloqueado                   Boolean?  @default(false)
   tentativas_login            Int?      @default(0)
   is_admin                    Boolean?  @default(false)

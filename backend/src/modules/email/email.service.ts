@@ -7,6 +7,8 @@ type SendVerificationEmailInput = {
   token: string;
 };
 
+type SendPasswordResetEmailInput = SendVerificationEmailInput;
+
 type SmtpConfig = {
   host: string;
   port: number;
@@ -51,6 +53,40 @@ export class EmailService {
       subject: 'Verifique seu e-mail',
       html: this.buildVerificationHtml(nome, verificationUrl),
       text: `Ola, ${nome}. Verifique seu e-mail acessando: ${verificationUrl}`,
+    });
+  }
+
+  async sendPasswordResetEmail({
+    email,
+    nome,
+    token,
+  }: SendPasswordResetEmailInput) {
+    const resetUrl = this.buildPasswordResetUrl(token);
+    const smtpConfig = this.getSmtpConfig();
+
+    if (!smtpConfig) {
+      this.logger.warn(
+        `SMTP nao configurado. Link de redefinicao de senha: ${resetUrl}`,
+      );
+      return;
+    }
+
+    const transporter = nodemailer.createTransport({
+      host: smtpConfig.host,
+      port: smtpConfig.port,
+      secure: smtpConfig.secure,
+      auth: {
+        user: smtpConfig.user,
+        pass: smtpConfig.pass,
+      },
+    });
+
+    await transporter.sendMail({
+      from: smtpConfig.from,
+      to: email,
+      subject: 'Redefina sua senha',
+      html: this.buildPasswordResetHtml(nome, resetUrl),
+      text: `Ola, ${nome}. Redefina sua senha acessando: ${resetUrl}`,
     });
   }
 
@@ -103,9 +139,23 @@ export class EmailService {
     `;
   }
 
+  private buildPasswordResetHtml(nome: string, resetUrl: string) {
+    return `
+      <p>Ola, ${nome}.</p>
+      <p>Recebemos uma solicitacao para alterar sua senha.</p>
+      <p><a href="${resetUrl}">Alterar senha</a></p>
+      <p>Esse link expira em 1 hora. Se voce nao pediu isso, ignore este e-mail.</p>
+    `;
+  }
+
   private buildVerificationUrl(token: string) {
     const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
     return `${frontendUrl}/verificar-email?token=${token}`;
+  }
+
+  private buildPasswordResetUrl(token: string) {
+    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+    return `${frontendUrl}/alterar-senha?token=${token}`;
   }
 
   private parseBoolean(value: string | undefined) {

@@ -14,12 +14,15 @@ import { PrismaService } from '../../../database/prisma.service';
 import { EmailService } from '../../email/email.service';
 import { emailRegex } from '../dto/email.regex';
 import { LoginDto } from '../dto/login.dto';
+import { RedefinirSenhaDto } from '../dto/redefinir-senha.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { ReenviarVerificacaoDto } from '../dto/reenviar-verificacao.dto';
+import { SolicitarRedefinicaoSenhaDto } from '../dto/solicitar-redefinicao-senha.dto';
 import { VerifyEmailDto } from '../dto/verify-email.dto';
 
 const maxTentativasLogin = 5;
 const tokenVerificacaoHoras = 24;
+const tokenRedefinicaoSenhaHoras = 1;
 
 @Injectable()
 export class AuthService {
@@ -145,6 +148,65 @@ export class AuthService {
     };
   }
 
+  async solicitarRedefinicaoSenha(data: SolicitarRedefinicaoSenhaDto) {
+    const email = data.email.toLowerCase().trim();
+    this.validarEmail(email);
+
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { email },
+    });
+
+    if (usuario && !usuario.excluido_em) {
+      const usuarioComToken = await this.atualizarTokenRedefinicaoSenha(
+        usuario.id,
+      );
+
+      await this.emailService.sendPasswordResetEmail({
+        email: usuarioComToken.email,
+        nome: usuarioComToken.nome,
+        token: usuarioComToken.token_redefinicao_senha!,
+      });
+    }
+
+    return {
+      message: 'Se o e-mail existir, enviaremos um link para alterar a senha.',
+    };
+  }
+
+  async redefinirSenha(data: RedefinirSenhaDto) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { token_redefinicao_senha: data.token },
+    });
+
+    if (!usuario || !usuario.token_redefinicao_expira_em) {
+      throw new BadRequestException('Link de redefinicao invalido.');
+    }
+
+    if (usuario.token_redefinicao_expira_em.getTime() < Date.now()) {
+      throw new BadRequestException('Link de redefinicao expirado.');
+    }
+
+    const senhaHash = await bcrypt.hash(data.senha, 10);
+
+    await this.prisma.usuario.update({
+      where: { id: usuario.id },
+      data: {
+        senha_hash: senhaHash,
+        token_redefinicao_senha: null,
+        token_redefinicao_expira_em: null,
+        email_verificado: true,
+        token_verificacao_email: null,
+        token_verificacao_expira_em: null,
+        bloqueado: false,
+        tentativas_login: 0,
+      },
+    });
+
+    return {
+      message: 'Senha alterada com sucesso. Voce ja pode entrar.',
+    };
+  }
+
   async login(data: LoginDto) {
     const email = data.email.toLowerCase().trim();
     this.validarEmail(email);
@@ -263,6 +325,10 @@ export class AuthService {
     return new Date(Date.now() + tokenVerificacaoHoras * 60 * 60 * 1000);
   }
 
+  private gerarExpiracaoTokenRedefinicaoSenha() {
+    return new Date(Date.now() + tokenRedefinicaoSenhaHoras * 60 * 60 * 1000);
+  }
+
   private atualizarTokenVerificacao(id: string) {
     return this.prisma.usuario.update({
       where: { id },
@@ -273,10 +339,21 @@ export class AuthService {
     });
   }
 
+  private atualizarTokenRedefinicaoSenha(id: string) {
+    return this.prisma.usuario.update({
+      where: { id },
+      data: {
+        token_redefinicao_senha: this.gerarTokenVerificacao(),
+        token_redefinicao_expira_em: this.gerarExpiracaoTokenRedefinicaoSenha(),
+      },
+    });
+  }
+
   private removerSenha(usuario: Usuario) {
     const {
       senha_hash: _senhaHash,
       token_verificacao_email: _tokenVerificacaoEmail,
+      token_redefinicao_senha: _tokenRedefinicaoSenha,
       ...usuarioSemSenha
     } = usuario;
 
