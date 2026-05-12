@@ -1,0 +1,292 @@
+.fundoModal {
+  --corBg: #0a0a0f;
+  --corPainel: #10101a;
+  --corRoxo: #7c3aed;
+  --corRoxoClaro: #a78bfa;
+  --corTexto: #fff;
+  --corMuted: #a8a8b8;
+  --corBorda: rgba(167, 139, 250, 0.34);
+  --raio: 0.75rem;
+  --sombra: 0 2rem 5rem rgba(0, 0, 0, 0.72);
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(0.45rem);
+}
+
+.modal {
+  position: relative;
+  width: min(100%, 27rem);
+  border: 1px solid var(--corBorda);
+  border-radius: var(--raio);
+  background:
+    radial-gradient(circle at 50% 0, rgba(124, 58, 237, 0.22), transparent 34%),
+    var(--corPainel);
+  padding: clamp(1.35rem, 4vw, 2.2rem);
+  color: var(--corTexto);
+  box-shadow: var(--sombra);
+}
+
+.btnFechar {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--corMuted);
+  cursor: pointer;
+  font-size: 1.35rem;
+}
+
+.btnFechar:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--corTexto);
+}
+
+.titulo {
+  margin: 0;
+  color: var(--corTexto);
+  font-size: clamp(1.7rem, 5vw, 2.2rem);
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.subtitulo {
+  margin: 0.75rem auto 0;
+  max-width: 22rem;
+  color: var(--corMuted);
+  line-height: 1.55;
+  text-align: center;
+}
+
+.form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.7rem;
+}
+
+.campo {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.rotulo {
+  color: var(--corTexto);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.entrada {
+  width: 100%;
+  min-height: 3.1rem;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 0.45rem;
+  background: var(--corBg);
+  color: var(--corTexto);
+  font: inherit;
+  outline: none;
+  padding: 0.8rem 0.9rem;
+}
+
+.entrada:focus {
+  border-color: var(--corRoxoClaro);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
+}
+
+.campoSenha {
+  position: relative;
+  display: block;
+}
+
+.campoSenha .entrada {
+  padding-right: 5.3rem;
+}
+
+.campoSenha button {
+  position: absolute;
+  top: 50%;
+  right: 0.65rem;
+  border: 0;
+  background: transparent;
+  color: var(--corRoxoClaro);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 900;
+  transform: translateY(-50%);
+}
+
+.btnTexto,
+.btnVoltar {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  color: var(--corRoxoClaro);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 0;
+}
+
+.btnEnviar {
+  min-height: 3.2rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: linear-gradient(180deg, #9333ea, var(--corRoxo));
+  color: var(--corTexto);
+  cursor: pointer;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.btnEnviar:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.separador {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.8rem;
+  align-items: center;
+  margin: 1.25rem 0;
+  color: var(--corMuted);
+}
+
+.separador span {
+  height: 1px;
+  background: rgba(167, 139, 250, 0.2);
+}
+
+.btnGoogle {
+  width: 100%;
+  min-height: 3rem;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--corTexto);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.rotuloCheck {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  color: #d4d4df;
+  font-size: 0.9rem;
+}
+
+.rotuloCheck input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--corRoxo);
+}
+
+.rodape {
+  margin: 1.25rem 0 0;
+  color: #d4d4df;
+  text-align: center;
+}
+
+.rodape button {
+  border: 0;
+  background: transparent;
+  color: var(--corRoxoClaro);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+  padding: 0;
+}
+
+.alerta {
+  margin: 0;
+  border: 1px solid;
+  border-radius: 0.45rem;
+  padding: 0.75rem 0.85rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.erro {
+  border-color: rgba(248, 113, 113, 0.46);
+  background: rgba(127, 29, 29, 0.34);
+  color: #fecaca;
+}
+
+.sucesso {
+  border-color: rgba(52, 211, 153, 0.46);
+  background: rgba(6, 78, 59, 0.34);
+  color: #bbf7d0;
+}
+
+.iconeStatus {
+  display: grid;
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.btnVoltar {
+  margin-top: 1.2rem;
+}
+
+.tela {
+  min-height: calc(100svh - 4.5rem);
+  background: #0a0a0f;
+  color: #fff;
+}
+
+.gradeTela {
+  display: grid;
+  min-height: inherit;
+  place-items: center;
+  width: min(100% - 2rem, 36rem);
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.textoTela {
+  display: none;
+}
+
+.painelTela {
+  width: 100%;
+  border: 1px solid rgba(167, 139, 250, 0.24);
+  border-radius: 0.75rem;
+  background: #10101a;
+  padding: clamp(1.35rem, 4vw, 2rem);
+}
+
+.tituloTela {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+  text-transform: uppercase;
+}
+
+.voltar {
+  display: inline-flex;
+  margin-top: 1.25rem;
+  color: #a78bfa;
+  font-weight: 800;
+  text-decoration: none;
+}

@@ -1,0 +1,101 @@
+.gradeRecursos {
+  display: grid;
+  grid-column: 1;
+  grid-row: 2;
+  grid-template-columns: 1fr;
+  align-self: end;
+  gap: 0.62rem;
+  max-width: 31rem;
+  margin: 0 0 clamp(0.9rem, 2vw, 1.6rem);
+}
+
+.recurso {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 0.65rem;
+  align-items: start;
+  border: 1px solid rgba(167, 139, 250, 0.16);
+  border-radius: 0.34rem;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
+    rgba(10, 10, 15, 0.34);
+  padding: 0.72rem;
+  backdrop-filter: blur(0.5rem);
+}
+
+.recurso > span {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(167, 139, 250, 0.7);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(190, 242, 100, 0.13));
+  clip-path: polygon(50% 4%, 91% 27%, 91% 73%, 50% 96%, 9% 73%, 9% 27%);
+  color: var(--corTexto);
+  font-size: 0.6rem;
+  font-weight: 950;
+}
+
+.recurso strong,
+.recurso small {
+  display: block;
+}
+
+.recurso strong {
+  color: var(--corTexto);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.recurso small {
+  margin-top: 0.18rem;
+  color: #b9b7c8;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.btnJogar {
+  display: inline-flex;
+  min-width: min(100%, 16.5rem);
+  min-height: 3.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 1.35rem;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(190, 242, 100, 0.32);
+  border-radius: 0.28rem;
+  background:
+    linear-gradient(135deg, rgba(190, 242, 100, 0.92), #a78bfa 42%, var(--corRoxo)),
+    #7c3aed;
+  box-shadow:
+    0 1.1rem 2.5rem rgba(124, 58, 237, 0.42),
+    0 0 1.8rem rgba(190, 242, 100, 0.22);
+  color: var(--corTexto);
+  font-weight: 950;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    filter 160ms ease,
+    transform 160ms ease;
+}
+
+.btnJogar::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 0 34%, rgba(255, 255, 255, 0.34) 48%, transparent 62%);
+  transform: translateX(-110%);
+  content: "";
+  transition: transform 420ms ease;
+}
+
+.btnJogar:hover::before {
+  transform: translateX(110%);
+}
+
+.btnJogar:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+

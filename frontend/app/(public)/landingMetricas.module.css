@@ -1,0 +1,45 @@
+.metricas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-column: 2;
+  grid-row: 2;
+  z-index: 8;
+  align-self: end;
+  justify-self: center;
+  overflow: hidden;
+  width: min(100%, 38rem);
+  margin: 0 0 clamp(0.9rem, 2vw, 1.6rem);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  border-radius: 0.38rem;
+  background:
+    linear-gradient(90deg, rgba(124, 58, 237, 0.18), rgba(190, 242, 100, 0.06)),
+    rgba(10, 10, 15, 0.62);
+  box-shadow: 0 1.5rem 3.5rem rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(0.8rem);
+}
+
+.metrica {
+  padding: 1rem 1.15rem;
+  text-align: left;
+}
+
+.metrica + .metrica {
+  border-left: 1px solid var(--corBorda);
+}
+
+.metrica strong {
+  display: block;
+  color: #fff;
+  font-size: clamp(1.15rem, 2vw, 1.65rem);
+  line-height: 1;
+}
+
+.metrica span {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--corVerde);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+

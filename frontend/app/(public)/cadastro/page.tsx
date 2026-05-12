@@ -1,5 +1,5 @@
-import { LandingContent } from "../landing-content";
+import { LandingContent } from "../landingContent";
 
 export default function CadastroPage() {
-  return <LandingContent initialModal="cadastro" />;
+  return <LandingContent modalInicial="cadastro" />;
 }

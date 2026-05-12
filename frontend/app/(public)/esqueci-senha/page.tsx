@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { solicitarRedefinicaoSenha } from "../../lib/auth";
+import { Alerta, Campo } from "../authModal";
+import styles from "../authPanel.module.css";
 
 export default function EsqueciSenhaPage() {
   const [email, setEmail] = useState("");
@@ -10,19 +12,19 @@ export default function EsqueciSenhaPage() {
   const [sucesso, setSucesso] = useState("");
   const [carregando, setCarregando] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function aoEnviar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErro("");
     setSucesso("");
     setCarregando(true);
 
     try {
-      const response = await solicitarRedefinicaoSenha(email);
-      setSucesso(response.message);
-    } catch (error) {
+      const resposta = await solicitarRedefinicaoSenha(email);
+      setSucesso(resposta.message);
+    } catch (erroCapturado) {
       setErro(
-        error instanceof Error
-          ? error.message
+        erroCapturado instanceof Error
+          ? erroCapturado.message
           : "Nao foi possivel solicitar a alteracao de senha.",
       );
     } finally {
@@ -31,46 +33,46 @@ export default function EsqueciSenhaPage() {
   }
 
   return (
-    <main className="min-h-[calc(100vh-65px)] bg-zinc-950 px-6 py-12 text-zinc-50">
-      <section className="mx-auto w-full max-w-md">
-        <h1 className="text-3xl font-semibold">Esqueci minha senha</h1>
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          <label className="block">
-            <span className="text-sm text-zinc-300">E-mail</span>
+    <main className={styles.tela}>
+      <section className={styles.gradeTela}>
+        <div className={styles.textoTela}>
+          <h1 className={styles.tituloTela}>Recupere seu acesso</h1>
+          <p>
+            Informe o e-mail da conta. Se ele existir na plataforma, o servidor
+            envia um link para alterar a senha.
+          </p>
+        </div>
+
+        <div className={styles.painelTela}>
+          <h2 className={styles.titulo}>Esqueci minha senha</h2>
+          <p className={styles.subtitulo}>Receba um link seguro para criar uma nova senha.</p>
+
+          <form className={styles.form} onSubmit={aoEnviar}>
+          <Campo rotulo="E-mail">
             <input
               type="email"
               name="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="mt-2 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-50 outline-none focus:border-red-400"
+              className={styles.entrada}
               placeholder="voce@email.com"
+              autoComplete="email"
               required
             />
-          </label>
-          {erro ? (
-            <p className="rounded-md border border-red-500/40 bg-red-950/40 px-3 py-2 text-sm text-red-100">
-              {erro}
-            </p>
-          ) : null}
-          {sucesso ? (
-            <p className="rounded-md border border-emerald-500/40 bg-emerald-950/40 px-3 py-2 text-sm text-emerald-100">
-              {sucesso}
-            </p>
-          ) : null}
-          <button
-            type="submit"
-            disabled={carregando}
-            className="w-full rounded-md bg-red-500 px-4 py-2 font-medium text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-60"
-          >
+          </Campo>
+
+          {erro ? <Alerta tom="erro">{erro}</Alerta> : null}
+          {sucesso ? <Alerta tom="sucesso">{sucesso}</Alerta> : null}
+
+          <button type="submit" disabled={carregando} className={styles.btnEnviar}>
             {carregando ? "Enviando..." : "Enviar link"}
           </button>
-        </form>
-        <Link
-          href="/login"
-          className="mt-6 inline-block text-sm text-zinc-300 transition hover:text-zinc-100"
-        >
-          Voltar para login
-        </Link>
+          </form>
+
+          <Link href="/login" className={styles.voltar}>
+            Voltar para login
+          </Link>
+        </div>
       </section>
     </main>
   );

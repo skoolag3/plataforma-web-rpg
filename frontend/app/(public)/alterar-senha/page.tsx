@@ -5,16 +5,16 @@ import { useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
 import { redefinirSenha } from "../../lib/auth";
 
-function AlterarSenhaContent() {
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+function ConteudoAlterarSenha() {
+  const parametrosBusca = useSearchParams();
+  const token = parametrosBusca.get("token");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
   const [carregando, setCarregando] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function aoEnviar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErro("");
     setSucesso("");
@@ -32,14 +32,14 @@ function AlterarSenhaContent() {
     setCarregando(true);
 
     try {
-      const response = await redefinirSenha(token, senha);
-      setSucesso(response.message);
+      const resposta = await redefinirSenha(token, senha);
+      setSucesso(resposta.message);
       setSenha("");
       setConfirmarSenha("");
-    } catch (error) {
+    } catch (erroCapturado) {
       setErro(
-        error instanceof Error
-          ? error.message
+        erroCapturado instanceof Error
+          ? erroCapturado.message
           : "Nao foi possivel alterar a senha.",
       );
     } finally {
@@ -51,7 +51,7 @@ function AlterarSenhaContent() {
     <main className="min-h-[calc(100vh-65px)] bg-zinc-950 px-6 py-12 text-zinc-50">
       <section className="mx-auto w-full max-w-md">
         <h1 className="text-3xl font-semibold">Alterar senha</h1>
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-5" onSubmit={aoEnviar}>
           <label className="block">
             <span className="text-sm text-zinc-300">Nova senha</span>
             <input
@@ -112,7 +112,7 @@ function AlterarSenhaContent() {
 export default function AlterarSenhaPage() {
   return (
     <Suspense fallback={null}>
-      <AlterarSenhaContent />
+      <ConteudoAlterarSenha />
     </Suspense>
   );
 }

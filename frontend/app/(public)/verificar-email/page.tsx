@@ -5,9 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { verifyEmail } from "../../lib/auth";
 
-function VerificarEmailContent() {
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+function ConteudoVerificarEmail() {
+  const parametrosBusca = useSearchParams();
+  const token = parametrosBusca.get("token");
   const [mensagem, setMensagem] = useState("Verificando e-mail...");
   const [erro, setErro] = useState("");
 
@@ -17,14 +17,14 @@ function VerificarEmailContent() {
     }
 
     verifyEmail(token)
-      .then((response) => {
-        setMensagem(response.message);
+      .then((resposta) => {
+        setMensagem(resposta.message);
         setErro("");
       })
-      .catch((error) => {
+      .catch((erroCapturado) => {
         setErro(
-          error instanceof Error
-            ? error.message
+          erroCapturado instanceof Error
+            ? erroCapturado.message
             : "Nao foi possivel verificar o e-mail.",
         );
         setMensagem("");
@@ -62,7 +62,7 @@ function VerificarEmailContent() {
 export default function VerificarEmailPage() {
   return (
     <Suspense fallback={null}>
-      <VerificarEmailContent />
+      <ConteudoVerificarEmail />
     </Suspense>
   );
 }

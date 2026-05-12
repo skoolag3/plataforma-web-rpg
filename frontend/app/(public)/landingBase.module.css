@@ -1,0 +1,16 @@
+.pagina {
+  --corBg: #0a0a0f;
+  --corPainel: #10101a;
+  --corRoxo: #7c3aed;
+  --corRoxo2: #9333ea;
+  --corRoxoClaro: #a78bfa;
+  --corVerde: #bef264;
+  --corCiano: #67e8f9;
+  --corTexto: #fff;
+  --corMuted: #a8a8b8;
+  --corBorda: rgba(167, 139, 250, 0.18);
+  min-height: 100svh;
+  background: var(--corBg);
+  color: var(--corTexto);
+}
+

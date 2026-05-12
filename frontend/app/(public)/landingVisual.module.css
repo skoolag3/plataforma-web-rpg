@@ -1,0 +1,224 @@
+.visualHero {
+  position: relative;
+  z-index: 3;
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: start;
+  min-height: clamp(39rem, 59vw, 53rem);
+  margin-top: clamp(-2rem, -2.6vw, -1rem);
+  margin-left: clamp(-11rem, -8vw, -4.5rem);
+}
+
+.personagemHero {
+  position: absolute;
+  inset: -4.1rem -8rem -3.9rem -9rem;
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 48% 28%, rgba(190, 242, 100, 0.22), transparent 12rem),
+    radial-gradient(circle at 50% 42%, rgba(167, 139, 250, 0.5), transparent 19rem),
+    radial-gradient(circle at 54% 64%, rgba(124, 58, 237, 0.3), transparent 27rem);
+}
+
+.personagemHero::before {
+  position: absolute;
+  inset: -0.8rem -1rem 0 -4.5rem;
+  background-image: url("https://res.cloudinary.com/djqmayaj1/image/upload/v1778564318/dca07fa0-0e76-47bd-aa6f-954dd3037737-Photoroom_1_-Photoroom_az4yog.png");
+  background-position: center top 2rem;
+  background-repeat: no-repeat;
+  background-size: auto min(118%, 55rem);
+  content: "";
+  filter:
+    drop-shadow(0 2.8rem 3.2rem rgba(0, 0, 0, 0.78))
+    drop-shadow(0 0 2.4rem rgba(124, 58, 237, 0.52));
+  animation: respirarPersonagem 7s ease-in-out infinite alternate;
+}
+
+.personagemHero::after {
+  position: absolute;
+  right: 50%;
+  bottom: 8.2rem;
+  width: min(58vw, 35rem);
+  height: min(58vw, 35rem);
+  border: 1px solid rgba(190, 242, 100, 0.18);
+  border-radius: 999px;
+  background: radial-gradient(circle, transparent 52%, rgba(190, 242, 100, 0.08) 53%, transparent 55%);
+  filter: blur(0.2rem);
+  transform: translateX(50%);
+  content: "";
+}
+
+@keyframes respirarPersonagem {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(0.3rem, -0.45rem, 0) scale(1.018);
+  }
+}
+
+.conjuntoCartas {
+  position: absolute;
+  right: clamp(2rem, 4vw, 4.2rem);
+  bottom: clamp(7.1rem, 9.5vw, 10.2rem);
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  filter: drop-shadow(0 1.25rem 2rem rgba(0, 0, 0, 0.52));
+}
+
+.conjuntoCartas article:nth-child(1) {
+  --transformBase: perspective(52rem) rotateZ(-11deg) rotacaoY(13deg);
+  margin-right: -2.15rem;
+  margin-bottom: 2rem;
+  animation-delay: -1.6s;
+}
+
+.conjuntoCartas article:nth-child(2) {
+  --transformBase: perspective(52rem) translateY(-0.25rem) rotateZ(2deg);
+  z-index: 2;
+  margin-bottom: 0;
+  animation-delay: -0.4s;
+}
+
+.conjuntoCartas article:nth-child(3) {
+  --transformBase: perspective(52rem) rotateZ(11deg) rotacaoY(-13deg);
+  margin-left: -2.2rem;
+  margin-bottom: 1.4rem;
+  animation-delay: -2.2s;
+}
+
+.cartaAnime {
+  --transformBase: perspective(52rem);
+  --mouseX: 50%;
+  --mouseY: 34%;
+  --rotacaoX: 0deg;
+  --rotacaoY: 0deg;
+  position: relative;
+  width: clamp(7.2rem, 10vw, 10rem);
+  aspect-ratio: 2.5 / 3.5;
+  overflow: hidden;
+  border: 1px solid rgba(250, 204, 21, 0.28);
+  border-radius: 0.42rem;
+  box-shadow:
+    0 1.1rem 2.5rem rgba(0, 0, 0, 0.46),
+    0 0 0.9rem rgba(167, 139, 250, 0.1);
+  transform: var(--transformBase) rotacaoX(var(--rotacaoX)) rotacaoY(var(--rotacaoY));
+  translate: 0 0;
+  transition:
+    box-shadow 180ms ease,
+    transform 180ms ease;
+  animation: flutuarCarta 5.8s ease-in-out infinite alternate;
+  transform-style: preserve-3d;
+  will-change: transform, translate;
+}
+
+.cartaAnime:hover {
+  box-shadow:
+    0 1.5rem 3rem rgba(0, 0, 0, 0.55),
+    0 0 2.2rem rgba(167, 139, 250, 0.32),
+    0 0 1.8rem rgba(190, 242, 100, 0.14);
+}
+
+.cartaAnime::after {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background:
+    radial-gradient(circle at var(--mouseX) var(--mouseY), rgba(255, 255, 255, 0.34), transparent 22%),
+    linear-gradient(115deg, transparent 12%, rgba(255, 255, 255, 0.16), transparent 36%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+  content: "";
+  transition: opacity 160ms ease;
+}
+
+.cartaAnime:hover::after {
+  opacity: 1;
+}
+
+@keyframes flutuarCarta {
+  from {
+    translate: 0 0;
+  }
+
+  to {
+    translate: 0 -0.42rem;
+  }
+}
+
+.fundoCarta,
+.molduraCarta,
+.infoCarta {
+  position: absolute;
+  inset: 0;
+}
+
+.fundoCarta {
+  z-index: 1;
+}
+
+.cartaUm .fundoCarta,
+.cartaDois .fundoCarta,
+.cartaTres .fundoCarta {
+  background:
+    linear-gradient(180deg, rgba(10, 10, 15, 0), rgba(10, 10, 15, 0.72)),
+    url("https://res.cloudinary.com/djqmayaj1/image/upload/v1778560369/cbec6afb-0b8e-417b-951c-be06c253287b_ebvc4k.png"),
+    linear-gradient(145deg, #2e1065, #0f0a1f 58%, #111827);
+  background-position: center;
+  background-size: cover;
+}
+
+.cartaDois .fundoCarta {
+  filter: hue-rotate(85deg) saturate(1.12);
+}
+
+.cartaTres .fundoCarta {
+  filter: hue-rotate(175deg) saturate(1.08);
+}
+
+.molduraCarta {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.molduraCarta::before {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    url("https://res.cloudinary.com/djqmayaj1/image/upload/v1778560544/e8a6e78e-4d0c-40b9-9912-043fc5eaae6f_yvbn20.png"),
+    linear-gradient(135deg, rgba(250, 204, 21, 0.2), transparent 20%),
+    linear-gradient(315deg, rgba(147, 51, 234, 0.28), transparent 24%);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%, cover, cover;
+  box-shadow: inset 0 -4rem 4rem rgba(0, 0, 0, 0.58);
+  content: "";
+}
+
+.infoCarta {
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0.95rem;
+}
+
+.infoCarta strong {
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.infoCarta span {
+  margin-top: 0.25rem;
+  color: #c4b5fd;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+

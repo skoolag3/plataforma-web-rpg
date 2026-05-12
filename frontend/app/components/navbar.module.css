@@ -1,0 +1,159 @@
+.cabecalho {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  border-bottom: 0;
+  background: linear-gradient(180deg, rgba(5, 5, 10, 0.3), rgba(5, 5, 10, 0.08));
+  color: #f8fafc;
+  backdrop-filter: blur(0.28rem);
+}
+
+.nav {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  width: min(100% - 2rem, 78rem);
+  min-height: 4rem;
+  margin: 0 auto;
+}
+
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #fff;
+  font-size: 0.98rem;
+  font-style: italic;
+  font-weight: 950;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.seloMarca {
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  place-items: center;
+  border: 1px solid rgba(190, 242, 100, 0.36);
+  border-radius: 0.28rem;
+  background:
+    linear-gradient(135deg, rgba(124, 58, 237, 0.42), rgba(21, 128, 61, 0.16)),
+    rgba(10, 10, 15, 0.5);
+  box-shadow: 0 0 1.5rem rgba(124, 58, 237, 0.32);
+  color: #d9f99d;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.destaqueMarca {
+  color: #8b5cf6;
+}
+
+.linksNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+}
+
+.link {
+  border: 1px solid transparent;
+  border-radius: 0.26rem;
+  color: rgba(226, 232, 240, 0.8);
+  font-size: 0.74rem;
+  font-weight: 900;
+  padding: 0.48rem 0.72rem;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.link:hover,
+.linkAtivo {
+  border-color: rgba(167, 139, 250, 0.24);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.acoes {
+  display: flex;
+  gap: 0.55rem;
+  justify-content: end;
+}
+
+.btn,
+.btnPrimario {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(167, 139, 250, 0.34);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ede9fe;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 900;
+  padding: 0.52rem 0.82rem;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    background 160ms ease,
+    filter 160ms ease,
+    color 160ms ease;
+}
+
+.btn:hover {
+  background: rgba(124, 58, 237, 0.25);
+  color: #fff;
+}
+
+.btnPrimario {
+  border-color: transparent;
+  background: linear-gradient(135deg, #bef264, #8b5cf6 46%, #6d28d9);
+  box-shadow: 0 0.8rem 1.7rem rgba(91, 33, 182, 0.34);
+  color: #fff;
+}
+
+.btnPrimario:hover {
+  filter: brightness(1.08);
+}
+
+@media (max-width: 860px) {
+  .nav {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 0.8rem 0;
+  }
+
+  .acoes {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .linksNav {
+    max-width: 100%;
+    overflow-x: auto;
+    justify-content: start;
+    padding-bottom: 0.15rem;
+  }
+
+  .acoes,
+  .btn,
+  .btnPrimario {
+    width: 100%;
+  }
+
+  .acoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -1,0 +1,86 @@
+.secaoNoticias {
+  background: var(--corBg);
+  padding: clamp(2.5rem, 7vw, 5rem) 0;
+}
+
+.cabecalhoNoticias {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: min(100% - 2rem, 78rem);
+  margin: 0 auto 1.4rem;
+}
+
+.cabecalhoNoticias h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.cabecalhoNoticias p {
+  max-width: 32rem;
+  margin: 0;
+  color: var(--corMuted);
+  line-height: 1.65;
+}
+
+.gradeNoticias {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  width: min(100% - 2rem, 78rem);
+  margin: 0 auto;
+}
+
+.cardNoticia {
+  min-height: 12rem;
+  border: 1px solid var(--corBorda);
+  border-radius: 0.6rem;
+  background:
+    radial-gradient(circle at 80% 18%, rgba(147, 51, 234, 0.16), transparent 30%),
+    var(--corPainel);
+  padding: 1.2rem;
+}
+
+.tagNoticia {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.tagTemporada {
+  background: rgba(124, 58, 237, 0.18);
+  color: #c4b5fd;
+}
+
+.tagBalanceamento {
+  background: rgba(14, 165, 233, 0.18);
+  color: #7dd3fc;
+}
+
+.tagEvento {
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+}
+
+.cardNoticia h3 {
+  margin: 1.25rem 0 0;
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1.15;
+}
+
+.cardNoticia time {
+  display: block;
+  margin-top: 1.4rem;
+  color: var(--corRoxoClaro);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+

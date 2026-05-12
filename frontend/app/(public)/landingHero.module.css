@@ -1,0 +1,198 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(43rem, 92svh, 54rem);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 74% 38%, rgba(190, 242, 100, 0.22), transparent 18rem),
+    radial-gradient(circle at 73% 14%, rgba(147, 51, 234, 0.44), transparent 32rem),
+    radial-gradient(circle at 18% 82%, rgba(34, 211, 238, 0.1), transparent 21rem),
+    linear-gradient(112deg, rgba(5, 5, 10, 0.98) 0%, rgba(12, 7, 24, 0.9) 46%, rgba(8, 12, 14, 0.72) 100%),
+    var(--corBg);
+}
+
+.hero::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(105deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 8.5rem),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 7rem);
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.8), transparent 82%);
+  opacity: 0.34;
+  content: "";
+}
+
+.hero::after {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: -1;
+  height: 32%;
+  background: linear-gradient(180deg, transparent, var(--corBg) 82%);
+  content: "";
+}
+
+.particulas {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particulas::before,
+.particulas::after {
+  position: absolute;
+  inset: auto -12% 0;
+  height: 34%;
+  background:
+    radial-gradient(ellipse at 45% 80%, rgba(167, 139, 250, 0.16), transparent 38%),
+    radial-gradient(ellipse at 67% 86%, rgba(190, 242, 100, 0.08), transparent 34%),
+    linear-gradient(180deg, transparent, rgba(5, 5, 10, 0.64));
+  filter: blur(1.1rem);
+  opacity: 0.72;
+  content: "";
+  animation: moverNeblina 10s ease-in-out infinite alternate;
+}
+
+.particulas::after {
+  inset: 18% -18% auto;
+  height: 42%;
+  background:
+    radial-gradient(ellipse at 60% 50%, rgba(124, 58, 237, 0.13), transparent 38%),
+    radial-gradient(ellipse at 42% 45%, rgba(103, 232, 249, 0.08), transparent 28%);
+  filter: blur(2rem);
+  opacity: 0.5;
+  animation-duration: 14s;
+}
+
+.particulas span {
+  position: absolute;
+  left: var(--posEsquerda);
+  top: var(--posTopo);
+  width: var(--tamanho);
+  height: var(--tamanho);
+  border-radius: 999px;
+  background: var(--corRoxoClaro);
+  box-shadow:
+    0 0 1rem rgba(167, 139, 250, 0.85),
+    0 0 2rem rgba(190, 242, 100, 0.32);
+  opacity: 0.62;
+  animation: flutuarParticula var(--duracao) ease-in-out infinite alternate;
+}
+
+@keyframes flutuarParticula {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.7);
+  }
+
+  to {
+    transform: translate3d(2.6rem, -3.8rem, 0) scale(1.25);
+  }
+}
+
+@keyframes moverNeblina {
+  from {
+    transform: translate3d(-1.8rem, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(2rem, -0.7rem, 0) scale(1.04);
+  }
+}
+
+.gradeHero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(18rem, 31rem) minmax(28rem, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  width: min(100% - 2rem, 78rem);
+  min-height: inherit;
+  margin: 0 auto;
+  padding: clamp(4.9rem, 6.5vw, 5.8rem) 0 0.85rem;
+}
+
+.gradeHero::before,
+.gradeHero::after {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  content: "";
+}
+
+.gradeHero::before {
+  right: 17%;
+  bottom: 10%;
+  width: clamp(17rem, 31vw, 27rem);
+  height: clamp(17rem, 31vw, 27rem);
+  border: 1px solid rgba(190, 242, 100, 0.13);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(190, 242, 100, 0.08), transparent 55%),
+    conic-gradient(from 140deg, transparent, rgba(167, 139, 250, 0.22), transparent 36%, rgba(190, 242, 100, 0.13), transparent 62%);
+  filter: blur(0.1rem);
+  opacity: 0.68;
+}
+
+.gradeHero::after {
+  right: 4%;
+  top: 23%;
+  width: 31rem;
+  height: 9rem;
+  background: linear-gradient(95deg, transparent, rgba(167, 139, 250, 0.16), rgba(190, 242, 100, 0.07), transparent);
+  filter: blur(1.5rem);
+  transform: rotate(-13deg);
+  opacity: 0.78;
+}
+
+.conteudoHero {
+  position: relative;
+  z-index: 4;
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  padding-top: clamp(0.8rem, 2.5vh, 1.8rem);
+  padding-bottom: 0;
+}
+
+.kicker {
+  display: inline-flex;
+  margin: 0 0 0.95rem;
+  border: 1px solid rgba(190, 242, 100, 0.24);
+  border-radius: 0.32rem;
+  background: rgba(190, 242, 100, 0.08);
+  box-shadow: 0 0 1.5rem rgba(124, 58, 237, 0.18);
+  color: var(--corVerde);
+  font-size: clamp(0.72rem, 1vw, 0.85rem);
+  font-weight: 900;
+  padding: 0.45rem 0.75rem;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.tituloHero {
+  margin: 0;
+  color: var(--corTexto);
+  max-width: 13ch;
+  font-size: clamp(2.85rem, 5.55vw, 5.35rem);
+  font-weight: 950;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.tituloHero span {
+  color: #d9f99d;
+  text-shadow:
+    0 0 1.3rem rgba(190, 242, 100, 0.32),
+    0 0 2rem rgba(124, 58, 237, 0.52);
+}
+
+.textoHero {
+  max-width: 30rem;
+  margin: 1.1rem 0 0;
+  color: #dad8e8;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+

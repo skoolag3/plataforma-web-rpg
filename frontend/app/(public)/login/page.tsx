@@ -1,5 +1,5 @@
-import { LandingContent } from "../landing-content";
+import { LandingContent } from "../landingContent";
 
 export default function LoginPage() {
-  return <LandingContent initialModal="login" />;
+  return <LandingContent modalInicial="login" />;
 }
