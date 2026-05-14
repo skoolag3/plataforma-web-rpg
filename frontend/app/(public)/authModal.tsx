@@ -1,5 +1,22 @@
 "use client";
 
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Globe2,
+  KeyRound,
+  LockKeyhole,
+  LogIn,
+  Mail,
+  Send,
+  ShieldCheck,
+  User,
+  UserPlus,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
 import { useState } from "react";
@@ -34,11 +51,23 @@ export function Campo({ rotulo, children }: PropsCampo) {
 
 export function Alerta({ tom, children }: PropsAlerta) {
   const classe = tom === "erro" ? styles.erro : styles.sucesso;
+  const Icone = tom === "erro" ? AlertCircle : CheckCircle2;
 
-  return <p className={[styles.alerta, classe].join(" ")}>{children}</p>;
+  return (
+    <p className={[styles.alerta, classe].join(" ")}>
+      <Icone size={18} aria-hidden="true" />
+      <span>{children}</span>
+    </p>
+  );
 }
 
-function EstruturaModal({ children, aoFechar }: { children: ReactNode; aoFechar: () => void }) {
+function EstruturaModal({
+  children,
+  aoFechar,
+}: {
+  children: ReactNode;
+  aoFechar: () => void;
+}) {
   const router = useRouter();
 
   function fechar() {
@@ -54,8 +83,13 @@ function EstruturaModal({ children, aoFechar }: { children: ReactNode; aoFechar:
         role="dialog"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <button type="button" className={styles.btnFechar} onClick={fechar} aria-label="Fechar">
-          x
+        <button
+          type="button"
+          className={styles.btnFechar}
+          onClick={fechar}
+          aria-label="Fechar"
+        >
+          <X size={19} aria-hidden="true" />
         </button>
         {children}
       </section>
@@ -91,7 +125,11 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
       router.push("/dashboard");
       router.refresh();
     } catch (erroCapturado) {
-      setErro(erroCapturado instanceof Error ? erroCapturado.message : "Erro ao fazer login.");
+      setErro(
+        erroCapturado instanceof Error
+          ? erroCapturado.message
+          : "Erro ao fazer login.",
+      );
     } finally {
       setCarregando(false);
     }
@@ -103,21 +141,33 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
 
       <form className={styles.form} onSubmit={aoEnviar}>
         <Campo rotulo="Email">
-          <input
-            className={styles.entrada}
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="seu@email.com"
-            autoComplete="email"
-            required
-          />
+          <span className={styles.campoIcone}>
+            <Mail
+              className={styles.iconeEntrada}
+              size={18}
+              aria-hidden="true"
+            />
+            <input
+              className={[styles.entrada, styles.entradaComIcone].join(" ")}
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="seu@email.com"
+              autoComplete="email"
+              required
+            />
+          </span>
         </Campo>
 
         <Campo rotulo="Senha">
           <span className={styles.campoSenha}>
+            <LockKeyhole
+              className={styles.iconeEntrada}
+              size={18}
+              aria-hidden="true"
+            />
             <input
-              className={styles.entrada}
+              className={[styles.entrada, styles.entradaComIcone].join(" ")}
               type={mostrarSenha ? "text" : "password"}
               value={senha}
               onChange={(event) => setSenha(event.target.value)}
@@ -126,25 +176,44 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
               minLength={6}
               required
             />
-            <button type="button" onClick={() => setMostrarSenha((valor) => !valor)}>
-              {mostrarSenha ? "Ocultar" : "Mostrar"}
+            <button
+              type="button"
+              onClick={() => setMostrarSenha((valor) => !valor)}
+              aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+              title={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+            >
+              {mostrarSenha ? (
+                <EyeOff size={18} aria-hidden="true" />
+              ) : (
+                <Eye size={18} aria-hidden="true" />
+              )}
             </button>
           </span>
         </Campo>
 
-        <button type="button" className={styles.btnTexto} onClick={() => aoTrocar("forgot")}>
+        <button
+          type="button"
+          className={styles.btnTexto}
+          onClick={() => aoTrocar("forgot")}
+        >
           Esqueci minha senha
         </button>
 
         {erro ? <Alerta tom="erro">{erro}</Alerta> : null}
 
-        <button type="submit" className={styles.btnEnviar} disabled={carregando}>
+        <button
+          type="submit"
+          className={styles.btnEnviar}
+          disabled={carregando}
+        >
+          <LogIn size={18} aria-hidden="true" />
           {carregando ? "Entrando..." : "Entrar"}
         </button>
       </form>
 
       <Separador />
       <button type="button" className={styles.btnGoogle}>
+        <Globe2 size={18} aria-hidden="true" />
         Google
       </button>
 
@@ -163,6 +232,7 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [aceitou, setAceitou] = useState(false);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
@@ -189,7 +259,11 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
       const resposta = await register(nome, email, senha);
       setSucesso(resposta.message);
     } catch (erroCapturado) {
-      setErro(erroCapturado instanceof Error ? erroCapturado.message : "Erro ao criar conta.");
+      setErro(
+        erroCapturado instanceof Error
+          ? erroCapturado.message
+          : "Erro ao criar conta.",
+      );
     } finally {
       setCarregando(false);
     }
@@ -201,54 +275,94 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
 
       <form className={styles.form} onSubmit={aoEnviar}>
         <Campo rotulo="Nome de usuario">
-          <input
-            className={styles.entrada}
-            type="text"
-            value={nome}
-            onChange={(event) => setNome(event.target.value)}
-            placeholder="Seu nome"
-            autoComplete="username"
-            minLength={3}
-            required
-          />
+          <span className={styles.campoIcone}>
+            <User
+              className={styles.iconeEntrada}
+              size={18}
+              aria-hidden="true"
+            />
+            <input
+              className={[styles.entrada, styles.entradaComIcone].join(" ")}
+              type="text"
+              value={nome}
+              onChange={(event) => setNome(event.target.value)}
+              placeholder="Seu nome"
+              autoComplete="username"
+              minLength={3}
+              required
+            />
+          </span>
         </Campo>
 
         <Campo rotulo="Email">
-          <input
-            className={styles.entrada}
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="seu@email.com"
-            autoComplete="email"
-            required
-          />
+          <span className={styles.campoIcone}>
+            <Mail
+              className={styles.iconeEntrada}
+              size={18}
+              aria-hidden="true"
+            />
+            <input
+              className={[styles.entrada, styles.entradaComIcone].join(" ")}
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="seu@email.com"
+              autoComplete="email"
+              required
+            />
+          </span>
         </Campo>
 
         <Campo rotulo="Senha">
-          <input
-            className={styles.entrada}
-            type="password"
-            value={senha}
-            onChange={(event) => setSenha(event.target.value)}
-            placeholder="Minimo de 6 caracteres"
-            autoComplete="new-password"
-            minLength={6}
-            required
-          />
+          <span className={styles.campoSenha}>
+            <KeyRound
+              className={styles.iconeEntrada}
+              size={18}
+              aria-hidden="true"
+            />
+            <input
+              className={[styles.entrada, styles.entradaComIcone].join(" ")}
+              type={mostrarSenha ? "text" : "password"}
+              value={senha}
+              onChange={(event) => setSenha(event.target.value)}
+              placeholder="Minimo de 6 caracteres"
+              autoComplete="new-password"
+              minLength={6}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setMostrarSenha((valor) => !valor)}
+              aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+              title={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+            >
+              {mostrarSenha ? (
+                <EyeOff size={18} aria-hidden="true" />
+              ) : (
+                <Eye size={18} aria-hidden="true" />
+              )}
+            </button>
+          </span>
         </Campo>
 
         <Campo rotulo="Confirmar senha">
-          <input
-            className={styles.entrada}
-            type="password"
-            value={confirmarSenha}
-            onChange={(event) => setConfirmarSenha(event.target.value)}
-            placeholder="Repita sua senha"
-            autoComplete="new-password"
-            minLength={6}
-            required
-          />
+          <span className={styles.campoSenha}>
+            <ShieldCheck
+              className={styles.iconeEntrada}
+              size={18}
+              aria-hidden="true"
+            />
+            <input
+              className={[styles.entrada, styles.entradaComIcone].join(" ")}
+              type={mostrarSenha ? "text" : "password"}
+              value={confirmarSenha}
+              onChange={(event) => setConfirmarSenha(event.target.value)}
+              placeholder="Repita sua senha"
+              autoComplete="new-password"
+              minLength={6}
+              required
+            />
+          </span>
         </Campo>
 
         <label className={styles.rotuloCheck}>
@@ -263,7 +377,12 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
         {erro ? <Alerta tom="erro">{erro}</Alerta> : null}
         {sucesso ? <Alerta tom="sucesso">{sucesso}</Alerta> : null}
 
-        <button type="submit" className={styles.btnEnviar} disabled={carregando}>
+        <button
+          type="submit"
+          className={styles.btnEnviar}
+          disabled={carregando}
+        >
+          <UserPlus size={18} aria-hidden="true" />
           {carregando ? "Criando..." : "Criar conta"}
         </button>
       </form>
@@ -294,7 +413,11 @@ export function ModalEsqueciSenha({ aoFechar, aoTrocar }: PropsModal) {
       const resposta = await solicitarRedefinicaoSenha(email);
       setSucesso(resposta.message || "Verifique seu e-mail.");
     } catch (erroCapturado) {
-      setErro(erroCapturado instanceof Error ? erroCapturado.message : "Nao foi possivel enviar o link.");
+      setErro(
+        erroCapturado instanceof Error
+          ? erroCapturado.message
+          : "Nao foi possivel enviar o link.",
+      );
     } finally {
       setCarregando(false);
     }
@@ -302,32 +425,55 @@ export function ModalEsqueciSenha({ aoFechar, aoTrocar }: PropsModal) {
 
   return (
     <EstruturaModal aoFechar={aoFechar}>
-      <div className={styles.iconeStatus}>OK</div>
+      <div className={styles.iconeStatus}>
+        <KeyRound size={25} aria-hidden="true" />
+      </div>
       <h2 className={styles.titulo}>Recuperar senha</h2>
-      <p className={styles.subtitulo}>Informe seu email para receber um link de redefinicao.</p>
+      <p className={styles.subtitulo}>
+        Informe seu email para receber um link de redefinicao.
+      </p>
 
       <form className={styles.form} onSubmit={aoEnviar}>
         <Campo rotulo="Email">
-          <input
-            className={styles.entrada}
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="seu@email.com"
-            autoComplete="email"
-            required
-          />
+          <span className={styles.campoIcone}>
+            <Mail
+              className={styles.iconeEntrada}
+              size={18}
+              aria-hidden="true"
+            />
+            <input
+              className={[styles.entrada, styles.entradaComIcone].join(" ")}
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="seu@email.com"
+              autoComplete="email"
+              required
+            />
+          </span>
         </Campo>
 
         {erro ? <Alerta tom="erro">{erro}</Alerta> : null}
-        {sucesso ? <Alerta tom="sucesso">Verifique seu e-mail. {sucesso}</Alerta> : null}
+        {sucesso ? (
+          <Alerta tom="sucesso">Verifique seu e-mail. {sucesso}</Alerta>
+        ) : null}
 
-        <button type="submit" className={styles.btnEnviar} disabled={carregando}>
+        <button
+          type="submit"
+          className={styles.btnEnviar}
+          disabled={carregando}
+        >
+          <Send size={18} aria-hidden="true" />
           {carregando ? "Enviando..." : "Enviar link"}
         </button>
       </form>
 
-      <button type="button" className={styles.btnVoltar} onClick={() => aoTrocar("login")}>
+      <button
+        type="button"
+        className={styles.btnVoltar}
+        onClick={() => aoTrocar("login")}
+      >
+        <ArrowLeft size={17} aria-hidden="true" />
         Voltar ao login
       </button>
     </EstruturaModal>

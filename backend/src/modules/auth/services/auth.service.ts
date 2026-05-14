@@ -220,7 +220,9 @@ export class AuthService {
     }
 
     if (usuario.bloqueado) {
-      throw new ForbiddenException('Conta bloqueada por excesso de tentativas.');
+      throw new ForbiddenException(
+        'Conta bloqueada por excesso de tentativas.',
+      );
     }
 
     if (!usuario.email_verificado) {
@@ -242,7 +244,9 @@ export class AuthService {
       });
 
       if (bloqueado) {
-        throw new ForbiddenException('Conta bloqueada por excesso de tentativas.');
+        throw new ForbiddenException(
+          'Conta bloqueada por excesso de tentativas.',
+        );
       }
 
       throw new UnauthorizedException('Credenciais invalidas.');
@@ -285,19 +289,26 @@ export class AuthService {
 
   private validarEmail(email: string) {
     if (!emailRegex.test(email)) {
-      throw new BadRequestException('Digite um e-mail valido, sem caracteres especiais.');
+      throw new BadRequestException(
+        'Digite um e-mail valido, sem caracteres especiais.',
+      );
     }
   }
 
   private async validarEmailEntregavel(email: string) {
+    if (!this.parseBoolean(process.env.EMAIL_VALIDATE_DELIVERY)) {
+      return;
+    }
+
     const result = await validateEmailDelivery({
       email,
-      sender: process.env.SMTP_USER ?? process.env.MAIL_FROM ?? 'no-reply@localhost',
+      sender:
+        process.env.SMTP_USER ?? process.env.MAIL_FROM ?? 'no-reply@localhost',
       validateRegex: true,
       validateMx: true,
       validateTypo: true,
       validateDisposable: true,
-      validateSMTP: true,
+      validateSMTP: this.parseBoolean(process.env.EMAIL_VALIDATE_SMTP) ?? false,
     });
 
     if (result.valid) {
@@ -313,7 +324,8 @@ export class AuthService {
     };
 
     throw new BadRequestException(
-      messages[result.reason ?? 'smtp'] ?? 'Nao foi possivel validar esse e-mail.',
+      messages[result.reason ?? 'smtp'] ??
+        'Nao foi possivel validar esse e-mail.',
     );
   }
 
@@ -350,12 +362,11 @@ export class AuthService {
   }
 
   private removerSenha(usuario: Usuario) {
-    const {
-      senha_hash: _senhaHash,
-      token_verificacao_email: _tokenVerificacaoEmail,
-      token_redefinicao_senha: _tokenRedefinicaoSenha,
-      ...usuarioSemSenha
-    } = usuario;
+    const usuarioSemSenha: Partial<Usuario> = { ...usuario };
+
+    delete usuarioSemSenha.senha_hash;
+    delete usuarioSemSenha.token_verificacao_email;
+    delete usuarioSemSenha.token_redefinicao_senha;
 
     return this.formatarDatasBrasil(usuarioSemSenha);
   }
@@ -381,5 +392,13 @@ export class AuthService {
     })
       .format(data)
       .replace(',', '');
+  }
+
+  private parseBoolean(value: string | undefined) {
+    if (value === undefined) {
+      return null;
+    }
+
+    return ['true', '1', 'yes'].includes(value.toLowerCase());
   }
 }

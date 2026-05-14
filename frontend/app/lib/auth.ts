@@ -40,15 +40,12 @@ type ApiErrorResponse = {
   details?: ApiErrorDetail[];
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 const TOKEN_KEY = "card_game_rpg_token";
 const USER_KEY = "card_game_rpg_user";
 const AUTH_EVENT = "card_game_rpg_auth_change";
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
@@ -188,8 +185,8 @@ function formatApiError(data: ApiErrorResponse | null) {
     : data.message;
 
   const details = data.details
-    ?.flatMap((detail) =>
-      detail.messages?.map((detailMessage) => detailMessage) ?? [],
+    ?.flatMap(
+      (detail) => detail.messages?.map((detailMessage) => detailMessage) ?? [],
     )
     .filter(Boolean);
 
