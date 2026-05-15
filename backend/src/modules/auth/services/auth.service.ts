@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { Usuario } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
-import { validate as validateEmailDelivery } from 'deep-email-validator';
+import { promises as dns } from 'dns';
 import { PrismaService } from '../../../database/prisma.service';
 import { EmailService } from '../../email/email.service';
 import { emailRegex } from '../dto/email.regex';
@@ -23,6 +23,8 @@ import { VerifyEmailDto } from '../dto/verify-email.dto';
 const maxTentativasLogin = 5;
 const tokenVerificacaoHoras = 24;
 const tokenRedefinicaoSenhaHoras = 1;
+const mensagemVerificacaoPendente =
+  'Cadastro pendente de verificacao. Tentamos enviar o e-mail; se o endereco existir, ele chegara em instantes.';
 
 @Injectable()
 export class AuthService {
@@ -51,7 +53,7 @@ export class AuthService {
         });
 
         return {
-          message: 'Enviamos um novo e-mail de verificacao.',
+          message: mensagemVerificacaoPendente,
           usuario: this.removerSenha(usuario),
         };
       }
@@ -81,7 +83,7 @@ export class AuthService {
     });
 
     return {
-      message: 'Cadastro criado. Verifique seu e-mail para ativar a conta.',
+      message: mensagemVerificacaoPendente,
       usuario: this.removerSenha(usuario),
     };
   }
@@ -151,25 +153,28 @@ export class AuthService {
   async solicitarRedefinicaoSenha(data: SolicitarRedefinicaoSenhaDto) {
     const email = data.email.toLowerCase().trim();
     this.validarEmail(email);
+    await this.validarEmailEntregavel(email);
 
     const usuario = await this.prisma.usuario.findUnique({
       where: { email },
     });
 
-    if (usuario && !usuario.excluido_em) {
-      const usuarioComToken = await this.atualizarTokenRedefinicaoSenha(
-        usuario.id,
-      );
-
-      await this.emailService.sendPasswordResetEmail({
-        email: usuarioComToken.email,
-        nome: usuarioComToken.nome,
-        token: usuarioComToken.token_redefinicao_senha!,
-      });
+    if (!usuario || usuario.excluido_em) {
+      throw new BadRequestException('E-mail nao encontrado.');
     }
 
+    const usuarioComToken = await this.atualizarTokenRedefinicaoSenha(
+      usuario.id,
+    );
+
+    await this.emailService.sendPasswordResetEmail({
+      email: usuarioComToken.email,
+      nome: usuarioComToken.nome,
+      token: usuarioComToken.token_redefinicao_senha!,
+    });
+
     return {
-      message: 'Se o e-mail existir, enviaremos um link para alterar a senha.',
+      message: 'Enviamos um link para alterar a senha.',
     };
   }
 
@@ -300,33 +305,70 @@ export class AuthService {
       return;
     }
 
-    const result = await validateEmailDelivery({
-      email,
-      sender:
-        process.env.SMTP_USER ?? process.env.MAIL_FROM ?? 'no-reply@localhost',
-      validateRegex: true,
-      validateMx: true,
-      validateTypo: true,
-      validateDisposable: true,
-      validateSMTP: this.parseBoolean(process.env.EMAIL_VALIDATE_SMTP) ?? false,
-    });
+    const domain = this.extrairDominioEmail(email);
 
-    if (result.valid) {
+    const domainStatus = await this.verificarDominioEmail(domain);
+
+    if (domainStatus !== 'invalid') {
       return;
     }
 
-    const messages: Record<string, string> = {
-      regex: 'Digite um e-mail valido.',
-      typo: 'Confira se o dominio do e-mail foi digitado corretamente.',
-      disposable: 'Use um e-mail permanente.',
-      mx: 'O dominio do e-mail nao recebe mensagens.',
-      smtp: 'Nao foi possivel confirmar que essa caixa de e-mail existe.',
-    };
+    throw new BadRequestException('O dominio do e-mail nao existe.');
+  }
 
-    throw new BadRequestException(
-      messages[result.reason ?? 'smtp'] ??
-        'Nao foi possivel validar esse e-mail.',
+  private extrairDominioEmail(email: string) {
+    const domain = email.split('@').pop()?.trim();
+
+    if (!domain) {
+      throw new BadRequestException('Digite um e-mail valido.');
+    }
+
+    return domain;
+  }
+
+  private async verificarDominioEmail(domain: string) {
+    const mxRecords = await this.resolveDns(() => dns.resolveMx(domain));
+
+    if (mxRecords.records?.some((record) => record.exchange)) {
+      return 'valid';
+    }
+
+    const [ipv4Records, ipv6Records] = await Promise.all([
+      this.resolveDns(() => dns.resolve4(domain)),
+      this.resolveDns(() => dns.resolve6(domain)),
+    ]);
+
+    if (ipv4Records.records?.length || ipv6Records.records?.length) {
+      return 'valid';
+    }
+
+    const codes = [mxRecords.code, ipv4Records.code, ipv6Records.code].filter(
+      Boolean,
     );
+
+    if (codes.length && codes.every((code) => this.isDnsMissingCode(code))) {
+      return 'invalid';
+    }
+
+    return 'unknown';
+  }
+
+  private async resolveDns<T>(resolver: () => Promise<T>) {
+    try {
+      return { records: await resolver() };
+    } catch (error) {
+      return {
+        records: null,
+        code:
+          typeof error === 'object' && error && 'code' in error
+            ? String(error.code)
+            : undefined,
+      };
+    }
+  }
+
+  private isDnsMissingCode(code: string | undefined) {
+    return code === 'ENOTFOUND' || code === 'ENODATA';
   }
 
   private gerarTokenVerificacao() {

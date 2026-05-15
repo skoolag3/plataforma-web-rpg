@@ -4,6 +4,7 @@ import {
   faArrowLeft,
   faCircleCheck,
   faCircleExclamation,
+  faCircleInfo,
   faEnvelope,
   faEye,
   faEyeSlash,
@@ -37,7 +38,7 @@ type PropsCampo = {
 };
 
 type PropsAlerta = {
-  tom: "erro" | "sucesso";
+  tom: "erro" | "sucesso" | "aviso";
   children: ReactNode;
 };
 
@@ -51,12 +52,20 @@ export function Campo({ rotulo, children }: PropsCampo) {
 }
 
 export function Alerta({ tom, children }: PropsAlerta) {
-  const classe = tom === "erro" ? styles.erro : styles.sucesso;
-  const icone = tom === "erro" ? faCircleExclamation : faCircleCheck;
+  const classes = {
+    erro: styles.erro,
+    sucesso: styles.sucesso,
+    aviso: styles.aviso,
+  };
+  const icones = {
+    erro: faCircleExclamation,
+    sucesso: faCircleCheck,
+    aviso: faCircleInfo,
+  };
 
   return (
-    <p className={[styles.alerta, classe].join(" ")}>
-      <FontAwesomeIcon icon={icone} aria-hidden="true" />
+    <p className={[styles.alerta, classes[tom]].join(" ")}>
+      <FontAwesomeIcon icon={icones[tom]} aria-hidden="true" />
       <span>{children}</span>
     </p>
   );
@@ -368,7 +377,7 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
         </label>
 
         {erro ? <Alerta tom="erro">{erro}</Alerta> : null}
-        {sucesso ? <Alerta tom="sucesso">{sucesso}</Alerta> : null}
+        {sucesso ? <Alerta tom="aviso">{sucesso}</Alerta> : null}
 
         <button
           type="submit"
@@ -404,7 +413,7 @@ export function ModalEsqueciSenha({ aoFechar, aoTrocar }: PropsModal) {
 
     try {
       const resposta = await solicitarRedefinicaoSenha(email);
-      setSucesso(resposta.message || "Verifique seu e-mail.");
+      setSucesso(resposta.message || "Enviamos um link para alterar a senha.");
     } catch (erroCapturado) {
       setErro(
         erroCapturado instanceof Error
@@ -447,9 +456,7 @@ export function ModalEsqueciSenha({ aoFechar, aoTrocar }: PropsModal) {
         </Campo>
 
         {erro ? <Alerta tom="erro">{erro}</Alerta> : null}
-        {sucesso ? (
-          <Alerta tom="sucesso">Verifique seu e-mail. {sucesso}</Alerta>
-        ) : null}
+        {sucesso ? <Alerta tom="sucesso">{sucesso}</Alerta> : null}
 
         <button
           type="submit"
