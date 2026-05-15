@@ -1,5 +1,7 @@
 "use client";
 
+import { faRightFromBracket, faRightToBracket, faUserPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
@@ -41,7 +43,7 @@ export function Navbar() {
           <span className={styles.seloMarca}>
             RPG
           </span>
-          <span>
+          <span className={styles.nomeMarca}>
             Anime<span className={styles.destaqueMarca}>Cards</span>
           </span>
         </Link>
@@ -73,7 +75,8 @@ export function Navbar() {
               onClick={sair}
               className={styles.btn}
             >
-              Sair
+              <FontAwesomeIcon icon={faRightFromBracket} aria-hidden="true" />
+              <span className={styles.textoAcao}>Sair</span>
             </button>
           ) : (
             <>
@@ -81,13 +84,15 @@ export function Navbar() {
                 href="/login"
                 className={styles.btn}
               >
-                Entrar
+                <FontAwesomeIcon icon={faRightToBracket} aria-hidden="true" />
+                <span className={styles.textoAcao}>Entrar</span>
               </Link>
               <Link
                 href="/cadastro"
                 className={styles.btnPrimario}
               >
-                Registrar
+                <FontAwesomeIcon icon={faUserPlus} aria-hidden="true" />
+                <span className={styles.textoAcao}>Registrar</span>
               </Link>
             </>
           )}

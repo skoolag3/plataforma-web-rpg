@@ -1,22 +1,23 @@
 "use client";
 
 import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  Globe2,
-  KeyRound,
-  LockKeyhole,
-  LogIn,
-  Mail,
-  Send,
-  ShieldCheck,
-  User,
-  UserPlus,
-  X,
-} from "lucide-react";
+  faArrowLeft,
+  faCircleCheck,
+  faCircleExclamation,
+  faEnvelope,
+  faEye,
+  faEyeSlash,
+  faGlobe,
+  faKey,
+  faLock,
+  faPaperPlane,
+  faRightToBracket,
+  faShieldHalved,
+  faUser,
+  faUserPlus,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
 import { useState } from "react";
@@ -51,11 +52,11 @@ export function Campo({ rotulo, children }: PropsCampo) {
 
 export function Alerta({ tom, children }: PropsAlerta) {
   const classe = tom === "erro" ? styles.erro : styles.sucesso;
-  const Icone = tom === "erro" ? AlertCircle : CheckCircle2;
+  const icone = tom === "erro" ? faCircleExclamation : faCircleCheck;
 
   return (
     <p className={[styles.alerta, classe].join(" ")}>
-      <Icone size={18} aria-hidden="true" />
+      <FontAwesomeIcon icon={icone} aria-hidden="true" />
       <span>{children}</span>
     </p>
   );
@@ -89,7 +90,7 @@ function EstruturaModal({
           onClick={fechar}
           aria-label="Fechar"
         >
-          <X size={19} aria-hidden="true" />
+          <FontAwesomeIcon icon={faXmark} aria-hidden="true" />
         </button>
         {children}
       </section>
@@ -142,9 +143,9 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
       <form className={styles.form} onSubmit={aoEnviar}>
         <Campo rotulo="Email">
           <span className={styles.campoIcone}>
-            <Mail
+            <FontAwesomeIcon
+              icon={faEnvelope}
               className={styles.iconeEntrada}
-              size={18}
               aria-hidden="true"
             />
             <input
@@ -161,9 +162,9 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
 
         <Campo rotulo="Senha">
           <span className={styles.campoSenha}>
-            <LockKeyhole
+            <FontAwesomeIcon
+              icon={faLock}
               className={styles.iconeEntrada}
-              size={18}
               aria-hidden="true"
             />
             <input
@@ -182,11 +183,7 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
               aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
               title={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
             >
-              {mostrarSenha ? (
-                <EyeOff size={18} aria-hidden="true" />
-              ) : (
-                <Eye size={18} aria-hidden="true" />
-              )}
+              <FontAwesomeIcon icon={mostrarSenha ? faEyeSlash : faEye} aria-hidden="true" />
             </button>
           </span>
         </Campo>
@@ -206,14 +203,14 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
           className={styles.btnEnviar}
           disabled={carregando}
         >
-          <LogIn size={18} aria-hidden="true" />
+          <FontAwesomeIcon icon={faRightToBracket} aria-hidden="true" />
           {carregando ? "Entrando..." : "Entrar"}
         </button>
       </form>
 
       <Separador />
       <button type="button" className={styles.btnGoogle}>
-        <Globe2 size={18} aria-hidden="true" />
+        <FontAwesomeIcon icon={faGlobe} aria-hidden="true" />
         Google
       </button>
 
@@ -276,9 +273,9 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
       <form className={styles.form} onSubmit={aoEnviar}>
         <Campo rotulo="Nome de usuario">
           <span className={styles.campoIcone}>
-            <User
+            <FontAwesomeIcon
+              icon={faUser}
               className={styles.iconeEntrada}
-              size={18}
               aria-hidden="true"
             />
             <input
@@ -296,9 +293,9 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
 
         <Campo rotulo="Email">
           <span className={styles.campoIcone}>
-            <Mail
+            <FontAwesomeIcon
+              icon={faEnvelope}
               className={styles.iconeEntrada}
-              size={18}
               aria-hidden="true"
             />
             <input
@@ -315,9 +312,9 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
 
         <Campo rotulo="Senha">
           <span className={styles.campoSenha}>
-            <KeyRound
+            <FontAwesomeIcon
+              icon={faKey}
               className={styles.iconeEntrada}
-              size={18}
               aria-hidden="true"
             />
             <input
@@ -336,20 +333,16 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
               aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
               title={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
             >
-              {mostrarSenha ? (
-                <EyeOff size={18} aria-hidden="true" />
-              ) : (
-                <Eye size={18} aria-hidden="true" />
-              )}
+              <FontAwesomeIcon icon={mostrarSenha ? faEyeSlash : faEye} aria-hidden="true" />
             </button>
           </span>
         </Campo>
 
         <Campo rotulo="Confirmar senha">
           <span className={styles.campoSenha}>
-            <ShieldCheck
+            <FontAwesomeIcon
+              icon={faShieldHalved}
               className={styles.iconeEntrada}
-              size={18}
               aria-hidden="true"
             />
             <input
@@ -382,7 +375,7 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
           className={styles.btnEnviar}
           disabled={carregando}
         >
-          <UserPlus size={18} aria-hidden="true" />
+          <FontAwesomeIcon icon={faUserPlus} aria-hidden="true" />
           {carregando ? "Criando..." : "Criar conta"}
         </button>
       </form>
@@ -426,7 +419,7 @@ export function ModalEsqueciSenha({ aoFechar, aoTrocar }: PropsModal) {
   return (
     <EstruturaModal aoFechar={aoFechar}>
       <div className={styles.iconeStatus}>
-        <KeyRound size={25} aria-hidden="true" />
+        <FontAwesomeIcon icon={faKey} aria-hidden="true" />
       </div>
       <h2 className={styles.titulo}>Recuperar senha</h2>
       <p className={styles.subtitulo}>
@@ -436,9 +429,9 @@ export function ModalEsqueciSenha({ aoFechar, aoTrocar }: PropsModal) {
       <form className={styles.form} onSubmit={aoEnviar}>
         <Campo rotulo="Email">
           <span className={styles.campoIcone}>
-            <Mail
+            <FontAwesomeIcon
+              icon={faEnvelope}
               className={styles.iconeEntrada}
-              size={18}
               aria-hidden="true"
             />
             <input
@@ -463,7 +456,7 @@ export function ModalEsqueciSenha({ aoFechar, aoTrocar }: PropsModal) {
           className={styles.btnEnviar}
           disabled={carregando}
         >
-          <Send size={18} aria-hidden="true" />
+          <FontAwesomeIcon icon={faPaperPlane} aria-hidden="true" />
           {carregando ? "Enviando..." : "Enviar link"}
         </button>
       </form>
@@ -473,7 +466,7 @@ export function ModalEsqueciSenha({ aoFechar, aoTrocar }: PropsModal) {
         className={styles.btnVoltar}
         onClick={() => aoTrocar("login")}
       >
-        <ArrowLeft size={17} aria-hidden="true" />
+        <FontAwesomeIcon icon={faArrowLeft} aria-hidden="true" />
         Voltar ao login
       </button>
     </EstruturaModal>

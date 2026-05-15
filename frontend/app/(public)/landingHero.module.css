@@ -26,9 +26,15 @@
 .hero::after {
   position: absolute;
   inset: auto 0 0;
-  z-index: -1;
-  height: 32%;
-  background: linear-gradient(180deg, transparent, var(--corBg) 82%);
+  z-index: 3;
+  height: max(40%, clamp(18rem, 42vw, 28rem));
+  background:
+    linear-gradient(180deg, rgba(10, 10, 15, 0), rgba(10, 10, 15, 0.4) 24%, rgba(10, 10, 15, 0.84) 56%, #050508 86%, var(--corBg) 100%),
+    linear-gradient(90deg, rgba(167, 139, 250, 0.08) 0 1px, transparent 1px 4.4rem),
+    linear-gradient(0deg, rgba(190, 242, 100, 0.05) 0 1px, transparent 1px 3.6rem);
+  mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.55) 10%, rgba(0, 0, 0, 0.92) 34%, #000 100%);
+  opacity: 0.96;
+  pointer-events: none;
   content: "";
 }
 

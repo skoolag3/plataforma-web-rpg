@@ -1,5 +1,21 @@
 "use client";
 
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import {
+  faBolt,
+  faCalendarDays,
+  faDiceD6,
+  faLayerGroup,
+  faNewspaper,
+  faPlay,
+  faRankingStar,
+  faRobot,
+  faScaleBalanced,
+  faShieldHalved,
+  faTrophy,
+  faWandMagicSparkles,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import type { CSSProperties, PointerEvent } from "react";
 import { useEffect, useState } from "react";
@@ -38,17 +54,37 @@ type PropriedadesLandingContent = {
   modalInicial?: Exclude<TipoModal, "forgot">;
 };
 
+type TopicoLanding = {
+  icone: IconDefinition;
+  titulo: string;
+  texto: string;
+};
+
+type MetricaLanding = {
+  icone: IconDefinition;
+  valor: string;
+  texto: string;
+};
+
+type NoticiaLanding = {
+  icone: IconDefinition;
+  tag: string;
+  tagClasse: string;
+  titulo: string;
+  data: string;
+};
+
 const recursos = [
-  { icone: "RJ", titulo: "Regras justas", texto: "As jogadas sao validadas pelo servidor." },
-  { icone: "D6", titulo: "Decks de 6 cartas", texto: "Monte combinacoes curtas e estrategicas." },
-  { icone: "PT", titulo: "Progressao sem pay-to-win", texto: "Ganhe cartas e Rubys jogando." },
-];
+  { icone: faScaleBalanced, titulo: "Regras justas", texto: "As jogadas sao validadas pelo servidor." },
+  { icone: faDiceD6, titulo: "Decks de 6 cartas", texto: "Monte combinacoes curtas e estrategicas." },
+  { icone: faShieldHalved, titulo: "Progressao sem pay-to-win", texto: "Ganhe cartas e Rubys jogando." },
+] satisfies TopicoLanding[];
 
 const metricas = [
-  { valor: "6", texto: "Cartas por deck" },
-  { valor: "Duelos", texto: "Contra bot" },
-  { valor: "Progressao", texto: "Sem pay-to-win" },
-];
+  { icone: faLayerGroup, valor: "6", texto: "Cartas por deck" },
+  { icone: faRobot, valor: "Duelos", texto: "Contra bot" },
+  { icone: faRankingStar, valor: "Progressao", texto: "Sem pay-to-win" },
+] satisfies MetricaLanding[];
 
 const imagemCarta =
   "https://res.cloudinary.com/djqmayaj1/image/upload/v1778560369/cbec6afb-0b8e-417b-951c-be06c253287b_ebvc4k.png";
@@ -60,10 +96,10 @@ const cartas = [
 ];
 
 const noticias = [
-  { tag: "Temporada", tagClasse: styles.tagTemporada, titulo: "Eclipse Roxo inicia a liga", data: "12 MAI 2026" },
-  { tag: "Balance", tagClasse: styles.tagBalanceamento, titulo: "Ajustes no custo de energia", data: "10 MAI 2026" },
-  { tag: "Evento", tagClasse: styles.tagEvento, titulo: "Registro antecipado libera carta rara", data: "08 MAI 2026" },
-];
+  { icone: faTrophy, tag: "Temporada", tagClasse: styles.tagTemporada, titulo: "Eclipse Roxo inicia a liga", data: "12 MAI 2026" },
+  { icone: faBolt, tag: "Balance", tagClasse: styles.tagBalanceamento, titulo: "Ajustes no custo de energia", data: "10 MAI 2026" },
+  { icone: faWandMagicSparkles, tag: "Evento", tagClasse: styles.tagEvento, titulo: "Registro antecipado libera carta rara", data: "08 MAI 2026" },
+] satisfies NoticiaLanding[];
 
 function obterEstiloParticula(indice: number) {
   return {
@@ -127,7 +163,7 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
             </p>
 
             <Link href="/cadastro" className={styles.btnJogar}>
-              <span aria-hidden="true">-&gt;</span>
+              <FontAwesomeIcon className={styles.iconeBtnJogar} icon={faPlay} aria-hidden="true" />
               Jogar agora
             </Link>
 
@@ -157,7 +193,9 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
           <div id="como-jogar" className={styles.gradeRecursos}>
             {recursos.map((recurso) => (
               <div className={styles.recurso} key={recurso.titulo}>
-                <span>{recurso.icone}</span>
+                <span className={styles.iconeRecurso} aria-hidden="true">
+                  <FontAwesomeIcon icon={recurso.icone} />
+                </span>
                 <div>
                   <strong>{recurso.titulo}</strong>
                   <small>{recurso.texto}</small>
@@ -169,8 +207,11 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
           <div id="ranking" className={styles.metricas}>
             {metricas.map((metrica) => (
               <div className={styles.metrica} key={metrica.texto}>
-                <strong>{metrica.valor}</strong>
-                <span>{metrica.texto}</span>
+                <FontAwesomeIcon className={styles.iconeMetrica} icon={metrica.icone} aria-hidden="true" />
+                <div>
+                  <strong>{metrica.valor}</strong>
+                  <span>{metrica.texto}</span>
+                </div>
               </div>
             ))}
           </div>
@@ -179,15 +220,24 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
 
       <section id="noticias" className={styles.secaoNoticias}>
         <div className={styles.cabecalhoNoticias}>
-          <h2>Noticias</h2>
+          <h2>
+            <FontAwesomeIcon icon={faNewspaper} aria-hidden="true" />
+            Noticias
+          </h2>
           <p>Atualizacoes de temporada, balanceamento e eventos especiais.</p>
         </div>
         <div className={styles.gradeNoticias}>
           {noticias.map((noticia) => (
             <article className={styles.cardNoticia} key={noticia.titulo}>
-              <span className={`${styles.tagNoticia} ${noticia.tagClasse}`}>{noticia.tag}</span>
+              <div className={styles.topoNoticia}>
+                <span className={`${styles.tagNoticia} ${noticia.tagClasse}`}>{noticia.tag}</span>
+                <FontAwesomeIcon className={styles.iconeNoticia} icon={noticia.icone} aria-hidden="true" />
+              </div>
               <h3>{noticia.titulo}</h3>
-              <time>{noticia.data}</time>
+              <time>
+                <FontAwesomeIcon icon={faCalendarDays} aria-hidden="true" />
+                {noticia.data}
+              </time>
             </article>
           ))}
         </div>

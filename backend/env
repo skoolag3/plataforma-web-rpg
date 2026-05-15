@@ -1,0 +1,17 @@
+# Banco de Dados (PostgreSQL rodando no Docker)
+DATABASE_URL="postgresql://postgres.epyhzehzsnpujqhniqph:r3lusiv32005vasco@aws-1-sa-east-1.pooler.supabase.com:5432/postgres"
+# Autenticação (JWT)
+JWT_SECRET="vascodasilva12"
+
+# E-mail (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=redgamesdzn@gmail.com
+SMTP_PASS=icoxgnozgiosaawa
+MAIL_FROM="Plataforma RPG <redgamesdzn@gmail.com>"
+FRONTEND_URL=http://localhost:3000
+
+
+# Stripe (Integração de Pagamento)
+STRIPE_SECRET_KEY="vascodasilva12"

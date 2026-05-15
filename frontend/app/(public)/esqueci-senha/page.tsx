@@ -1,5 +1,7 @@
 "use client";
 
+import { faArrowLeft, faEnvelope, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { solicitarRedefinicaoSenha } from "../../lib/auth";
@@ -49,27 +51,36 @@ export default function EsqueciSenhaPage() {
 
           <form className={styles.form} onSubmit={aoEnviar}>
           <Campo rotulo="E-mail">
-            <input
-              type="email"
-              name="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className={styles.entrada}
-              placeholder="voce@email.com"
-              autoComplete="email"
-              required
-            />
+            <span className={styles.campoIcone}>
+              <FontAwesomeIcon
+                icon={faEnvelope}
+                className={styles.iconeEntrada}
+                aria-hidden="true"
+              />
+              <input
+                type="email"
+                name="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className={[styles.entrada, styles.entradaComIcone].join(" ")}
+                placeholder="voce@email.com"
+                autoComplete="email"
+                required
+              />
+            </span>
           </Campo>
 
           {erro ? <Alerta tom="erro">{erro}</Alerta> : null}
           {sucesso ? <Alerta tom="sucesso">{sucesso}</Alerta> : null}
 
           <button type="submit" disabled={carregando} className={styles.btnEnviar}>
+            <FontAwesomeIcon icon={faPaperPlane} aria-hidden="true" />
             {carregando ? "Enviando..." : "Enviar link"}
           </button>
           </form>
 
           <Link href="/login" className={styles.voltar}>
+            <FontAwesomeIcon icon={faArrowLeft} aria-hidden="true" />
             Voltar para login
           </Link>
         </div>

@@ -7,8 +7,8 @@
   align-self: end;
   justify-self: center;
   overflow: hidden;
-  width: min(100%, 38rem);
-  margin: 0 0 clamp(0.9rem, 2vw, 1.6rem);
+  width: min(100%, 45rem);
+  margin: 0 0 clamp(1.0rem, 2.1vw, 1.7rem);
   border: 1px solid rgba(167, 139, 250, 0.2);
   border-radius: 0.38rem;
   background:
@@ -19,8 +19,19 @@
 }
 
 .metrica {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 0.50rem;
+  align-items: center;
   padding: 1rem 1.15rem;
   text-align: left;
+}
+
+.iconeMetrica {
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--corRoxoClaro);
+  filter: drop-shadow(0 0 0.75rem rgba(167, 139, 250, 0.36));
 }
 
 .metrica + .metrica {
@@ -30,7 +41,7 @@
 .metrica strong {
   display: block;
   color: #fff;
-  font-size: clamp(1.15rem, 2vw, 1.65rem);
+  font-size: clamp(1.15rem, 2vw, 1.60rem);
   line-height: 1;
 }
 
