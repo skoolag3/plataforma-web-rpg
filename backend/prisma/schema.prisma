@@ -16,17 +16,31 @@ model Usuario {
   token_verificacao_expira_em DateTime? @db.Timestamptz(0)
   token_redefinicao_senha     String?   @unique @db.VarChar(255)
   token_redefinicao_expira_em DateTime? @db.Timestamptz(0)
+  email_pendente              String?   @db.VarChar(255)
+  token_confirmacao_troca_email    String?   @unique @db.VarChar(255)
+  token_troca_email_expira_em      DateTime? @db.Timestamptz(0)
+  token_verificacao_email_pendente String?   @unique @db.VarChar(255)
+  token_email_pendente_expira_em   DateTime? @db.Timestamptz(0)
   bloqueado                   Boolean?  @default(false)
   tentativas_login            Int?      @default(0)
   is_admin                    Boolean?  @default(false)
   nivel                       Int?      @default(1)
   pontos_experiencia          Int?      @default(0)
   saldo_rubys_cache           Int?      @default(0)
+  saldo_moedas_cache          Int?      @default(0)
   ativo                       Boolean?  @default(true)
   criado_em                   DateTime? @default(now()) @db.Timestamptz(0)
   atualizado_em               DateTime? @default(now()) @db.Timestamptz(0)
   excluido_em                 DateTime? @db.Timestamptz(0)
+  ultimo_login_em             DateTime? @db.Timestamptz(0)
+  desativado_em               DateTime? @db.Timestamptz(0)
+  exclusao_agendada_em        DateTime? @db.Timestamptz(0)
 
+  perfil               PerfilUsuario?
+  provedores           ProvedorUsuario[]
+  molduras             UsuarioMoldura[]
+  ledgerMoedas         LedgerMoeda[]
+  solicitacoesExclusao SolicitacaoExclusao[]
   transacoes           LogTransacao[]
   ledgerRubys          LedgerRuby[]
   gachaLogs            LogGacha[]
@@ -37,6 +51,98 @@ model Usuario {
   partidasComoOponente LogPartida[]          @relation("PartidasOponente")
 
   @@map("usuario")
+}
+
+model PerfilUsuario {
+  id_usuario             String   @id @db.Uuid
+  biografia              String   @default("") @db.VarChar(280)
+  avatar_url             String?  @db.VarChar(500)
+  banner_url             String?  @db.VarChar(500)
+  id_moldura              String?  @db.Uuid
+  receber_notificacoes   Boolean  @default(true)
+  mostrar_no_ranking     Boolean  @default(true)
+  ocultar_historico      Boolean  @default(false)
+  criado_em              DateTime @default(now()) @db.Timestamptz(0)
+  atualizado_em          DateTime @default(now()) @db.Timestamptz(0)
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+  molduraSelecionada Moldura? @relation(fields: [id_moldura], references: [id])
+
+  @@map("perfil_usuario")
+}
+
+model Moldura {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug          String    @unique @db.VarChar(80)
+  nome          String    @db.VarChar(100)
+  descricao     String?   @db.VarChar(255)
+  classe_css    String    @db.VarChar(80)
+  preco_moedas  Int       @default(0)
+  ativo         Boolean   @default(true)
+  criado_em     DateTime  @default(now()) @db.Timestamptz(0)
+
+  perfis   PerfilUsuario[]
+  usuarios UsuarioMoldura[]
+
+  @@map("moldura")
+}
+
+model UsuarioMoldura {
+  id_usuario String   @db.Uuid
+  id_moldura String   @db.Uuid
+  obtido_em  DateTime @default(now()) @db.Timestamptz(0)
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+  moldura Moldura @relation(fields: [id_moldura], references: [id], onDelete: Cascade)
+
+  @@id([id_usuario, id_moldura])
+  @@map("usuario_moldura")
+}
+
+model ProvedorUsuario {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id_usuario       String    @db.Uuid
+  provedor         String    @db.VarChar(30)
+  id_provedor      String    @db.VarChar(255)
+  email_provedor   String?   @db.VarChar(255)
+  criado_em        DateTime  @default(now()) @db.Timestamptz(0)
+  ultimo_login_em  DateTime? @db.Timestamptz(0)
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+
+  @@unique([provedor, id_provedor])
+  @@unique([id_usuario, provedor])
+  @@map("provedor_usuario")
+}
+
+model LedgerMoeda {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id_usuario    String   @db.Uuid
+  quantidade    Int
+  motivo        String   @db.VarChar(50)
+  id_referencia String?  @db.Uuid
+  descricao     String?
+  criado_em     DateTime @default(now()) @db.Timestamptz(0)
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+
+  @@index([id_usuario])
+  @@map("ledger_moeda")
+}
+
+model SolicitacaoExclusao {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id_usuario          String    @db.Uuid
+  status              String    @default("AGENDADA") @db.VarChar(30)
+  solicitada_em       DateTime  @default(now()) @db.Timestamptz(0)
+  executar_apos       DateTime  @db.Timestamptz(0)
+  cancelada_em        DateTime? @db.Timestamptz(0)
+  executada_em        DateTime? @db.Timestamptz(0)
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+
+  @@index([status, executar_apos])
+  @@map("solicitacao_exclusao")
 }
 
 model PacoteRuby {

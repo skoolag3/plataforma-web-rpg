@@ -13,7 +13,7 @@ import { useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
 import { redefinirSenha } from "../../lib/auth";
 import { Alerta, Campo } from "../authModal";
-import styles from "../authPanel.module.css";
+import styles from "../../styles/authPanel.module.css";
 
 function ConteudoAlterarSenha() {
   const parametrosBusca = useSearchParams();

@@ -1,0 +1,186 @@
+.fundoModal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  overflow-y: auto;
+  place-items: center;
+  background: #01030ac7;
+  padding: 1rem;
+  backdrop-filter: blur(0.45rem);
+}
+
+.modalEdicao {
+  width: min(100%, 30rem);
+  border: 1px solid #8b5cf680;
+  border-radius: 0.8rem;
+  background: linear-gradient(145deg, #0f162afa, #050914fc);
+  box-shadow: 0 2rem 5rem #0009;
+  padding: 1.2rem;
+}
+
+.modalEdicao > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modalEdicao h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.modalEdicao header p {
+  margin: 0.3rem 0 0;
+  color: #9da5b8;
+  font-size: 0.74rem;
+}
+
+.modalEdicao header > button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid #717d9e4d;
+  border-radius: 50%;
+  background: #ffffff08;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.modalEdicao header > button svg {
+  width: 0.9rem;
+}
+
+.formModal {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.formModal label {
+  display: grid;
+  gap: 0.4rem;
+  color: #d3d7e0;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.formModal input,
+.formModal textarea {
+  min-height: 2.7rem;
+  border: 1px solid #717d9e5c;
+  border-radius: 0.48rem;
+  outline: 0;
+  background: #020610bf;
+  color: #fff;
+  font: inherit;
+  padding: 0.7rem 0.75rem;
+}
+
+.formModal textarea {
+  resize: vertical;
+}
+
+.formModal input:focus,
+.formModal textarea:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 2px #8b5cf621;
+}
+
+.formModal input:disabled {
+  color: #8790a3;
+}
+
+.campoSenhaModal {
+  position: relative;
+  display: block;
+}
+
+.campoSenhaModal input {
+  width: 100%;
+  padding-right: 2.8rem;
+}
+
+.campoSenhaModal button {
+  position: absolute;
+  top: 50%;
+  right: 0.45rem;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: #aeb5c4;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.campoSenhaModal button:hover {
+  background: #8b5cf61f;
+  color: #ddd6fe;
+}
+
+.campoSenhaModal button svg {
+  width: 1rem;
+}
+
+.erroForm,
+.sucessoForm {
+  margin: 0;
+  border: 1px solid;
+  border-radius: 0.4rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.72rem;
+}
+
+.erroForm {
+  border-color: #f43f5252;
+  background: #7f1d1d24;
+  color: #fda4af;
+}
+
+.sucessoForm {
+  border-color: #34d39947;
+  background: #064e3b26;
+  color: #a7f3d0;
+}
+
+.acoesModal {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.35rem;
+}
+
+.acoesModal button {
+  min-height: 2.45rem;
+  border: 1px solid #717d9e57;
+  border-radius: 0.45rem;
+  background: #ffffff08;
+  color: #cbd5e1;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 0 0.85rem;
+}
+
+.acoesModal button[type="submit"] {
+  border-color: #8b5cf6ad;
+  background: #5b21b68c;
+  color: #fff;
+}
+
+.acoesModal button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.modalEdicao button:focus-visible {
+  outline: 2px solid #a78bfad9;
+  outline-offset: 2px;
+}

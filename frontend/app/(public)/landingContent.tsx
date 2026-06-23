@@ -20,13 +20,13 @@ import Link from "next/link";
 import type { CSSProperties, PointerEvent } from "react";
 import { useEffect, useState } from "react";
 import { ModalEsqueciSenha, ModalLogin, ModalCadastro } from "./authModal";
-import estilosBase from "./landingBase.module.css";
-import estilosHero from "./landingHero.module.css";
-import estilosInfo from "./landingInfo.module.css";
-import estilosMetricas from "./landingMetricas.module.css";
-import estilosNoticias from "./landingNoticias.module.css";
-import estilosResponsivo from "./landingResponsivo.module.css";
-import estilosVisual from "./landingVisual.module.css";
+import estilosBase from "../styles/landingBase.module.css";
+import estilosHero from "../styles/landingHero.module.css";
+import estilosInfo from "../styles/landingInfo.module.css";
+import estilosMetricas from "../styles/landingMetricas.module.css";
+import estilosNoticias from "../styles/landingNoticias.module.css";
+import estilosResponsivo from "../styles/landingResponsivo.module.css";
+import estilosVisual from "../styles/landingVisual.module.css";
 
 function combinarEstilos(...modulos: Array<Record<string, string>>) {
   return modulos.reduce<Record<string, string>>((classes, modulo) => {

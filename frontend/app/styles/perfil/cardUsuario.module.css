@@ -1,0 +1,392 @@
+.cardUsuario {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #5b6a912e;
+  border-radius: 0.75rem;
+  background: linear-gradient(145deg, #0d1426f0, #060b17f5);
+}
+
+.bannerPerfil {
+  position: relative;
+  display: grid;
+  min-height: 5.8rem;
+  overflow: hidden;
+  place-items: center;
+  border-bottom: 1px solid #8b5cf64d;
+  background:
+    radial-gradient(circle at 70% 30%, #8b5cf68c, transparent 22%),
+    linear-gradient(135deg, #111827, #27124f 52%, #0b1634);
+  background-position: center;
+  background-size: cover;
+  color: #c4b5fd6b;
+}
+
+.bannerPerfil::before,
+.bannerPerfil::after {
+  position: absolute;
+  width: 55%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+  box-shadow: 0 0 0.8rem #7c3aed;
+  content: "";
+  transform: rotate(-12deg);
+}
+
+.bannerPerfil::after {
+  transform: translateX(10rem) rotate(18deg);
+}
+
+.bannerPerfil > svg {
+  width: 2rem;
+}
+
+.bannerPerfil button,
+.biografiaUsuario button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid #a78bfa6b;
+  border-radius: 50%;
+  background: #080c1ae0;
+  color: #e5e7eb;
+  cursor: pointer;
+}
+
+.bannerPerfil button {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.8rem;
+  z-index: 2;
+}
+
+.bannerPerfil button svg,
+.biografiaUsuario button svg {
+  width: 0.8rem;
+}
+
+.identidadeUsuario {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: 1.1rem 1.5rem;
+}
+
+.avatarArea {
+  position: relative;
+  width: 8.2rem;
+  height: 8.2rem;
+  margin-top: -3.4rem;
+}
+
+.avatarUsuario {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid #a78bfad9;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #0f17211a, #030712d9 51%),
+    conic-gradient(from 210deg, #4c1d95, #111827, #7c3aed, #172554);
+  background-position: center;
+  background-size: cover;
+}
+
+.avatarUsuario::before,
+.avatarUsuario::after {
+  position: absolute;
+  width: 110%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+  content: "";
+  transform: rotate(-35deg);
+}
+
+.avatarUsuario::after {
+  transform: translateY(1.5rem) rotate(28deg);
+}
+
+.avatarUsuario > svg {
+  z-index: 2;
+  width: 4.6rem;
+  color: #d8d2e8;
+  filter: drop-shadow(0 0 0.8rem #7c3aed);
+}
+
+.brilhoAvatar {
+  position: absolute;
+  inset: 20%;
+  border-radius: 50%;
+  background: #8b5cf657;
+  filter: blur(1.2rem);
+}
+
+.btnEditarAvatar {
+  position: absolute;
+  right: 0;
+  bottom: 0.3rem;
+  z-index: 3;
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 1px solid #8b5cf673;
+  border-radius: 50%;
+  background: #111827;
+  color: #d9dce6;
+  cursor: pointer;
+}
+
+.btnEditarAvatar svg {
+  width: 0.95rem;
+}
+
+.bannerPerfil button:disabled,
+.btnEditarAvatar:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.dadosUsuario {
+  align-self: center;
+}
+
+.nomeUsuario {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.nomeUsuario h2 {
+  margin: 0;
+  font-size: 1.7rem;
+}
+
+.nomeUsuario button {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border: 1px solid #8b5cf652;
+  border-radius: 50%;
+  background: #4c1d9529;
+  color: #c4b5fd;
+  cursor: pointer;
+}
+
+.nomeUsuario button svg {
+  width: 0.75rem;
+}
+
+.nivelUsuario {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  color: #b794f6;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.nivelUsuario svg,
+.btnCopiarId svg {
+  width: 1rem;
+}
+
+.btnCopiarId,
+.btnMoldura {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.btnCopiarId {
+  position: relative;
+  margin-top: 0.8rem;
+  color: #a9b0c0;
+  font-size: 0.84rem;
+}
+
+.btnCopiarId small {
+  position: absolute;
+  left: 100%;
+  margin-left: 0.5rem;
+  color: #c4b5fd;
+}
+
+.biografiaUsuario {
+  display: flex;
+  max-width: 34rem;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.7rem;
+}
+
+.biografiaUsuario p {
+  margin: 0;
+  color: #aeb5c4;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.biografiaUsuario button {
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: 0 0 auto;
+}
+
+.btnMoldura {
+  margin-top: 0.65rem;
+  color: #a987ff;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.btnMoldura svg {
+  width: 0.9rem;
+}
+
+.listaStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0 1.5rem;
+  border-top: 1px solid #58658540;
+  padding: 1rem 0 1.2rem;
+}
+
+.listaStats > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-right: 1px solid #58658540;
+}
+
+.listaStats > div:last-child {
+  border-right: 0;
+}
+
+.listaStats svg {
+  width: 2rem;
+}
+
+.listaStats dt {
+  color: #abb2c1;
+  font-size: 0.76rem;
+}
+
+.listaStats dd {
+  margin: 0.18rem 0 0;
+  font-weight: 800;
+}
+
+.statVitoria svg {
+  color: #9b6cff;
+}
+
+.statDerrota svg {
+  color: #f43f5e;
+}
+
+.statRanking svg {
+  color: #fbbf24;
+}
+
+.inputArquivo {
+  display: none;
+}
+
+.listaMolduras {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.listaMolduras button {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.7rem;
+  align-items: center;
+  border: 1px solid #717d9e4d;
+  border-radius: 0.5rem;
+  background: #02061080;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.7rem;
+  text-align: left;
+}
+
+.listaMolduras button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.listaMolduras button > span {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+}
+
+.listaMolduras small {
+  color: #aeb5c4;
+}
+
+.molduraPadrao {
+  box-shadow: 0 0 0 2px #64748b;
+}
+
+.molduraVioleta {
+  box-shadow: 0 0 0 2px #8b5cf6, 0 0 1rem #8b5cf6bf;
+}
+
+.molduraRubi {
+  box-shadow: 0 0 0 2px #ef4444, 0 0 1rem #ef4444b3;
+}
+
+@media (max-width: 650px) {
+  .identidadeUsuario {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding-inline: 1rem;
+    text-align: center;
+  }
+
+  .avatarArea {
+    margin-top: -3.2rem;
+  }
+
+  .dadosUsuario {
+    display: grid;
+    justify-items: center;
+  }
+
+  .biografiaUsuario {
+    justify-content: center;
+  }
+
+  .listaStats {
+    margin-inline: 0.9rem;
+  }
+
+  .listaStats > div {
+    gap: 0.4rem;
+  }
+
+  .listaStats svg {
+    width: 1.35rem;
+  }
+
+  .listaStats dt {
+    font-size: 0.64rem;
+  }
+
+  .listaStats dd {
+    font-size: 0.82rem;
+  }
+}

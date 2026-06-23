@@ -1,0 +1,164 @@
+.cardResumo,
+.cardPreferencias,
+.zonaPerigo {
+  border: 1px solid #5b6a912e;
+  border-radius: 0.75rem;
+  background: linear-gradient(145deg, #0d1426f0, #060b17f5);
+  padding: 1.2rem 1.3rem;
+}
+
+.cardResumo {
+  border-color: #8b5cf69e;
+  box-shadow: 0 0 1.5rem #4c1d9533;
+}
+
+.cardResumo h2,
+.cardPreferencias h2,
+.zonaPerigo h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+}
+
+.cardResumo h2 svg,
+.cardPreferencias h2 svg {
+  width: 1.45rem;
+  color: #9b6cff;
+}
+
+.listaResumo {
+  display: grid;
+  margin: 0;
+}
+
+.listaResumo > div {
+  display: flex;
+  min-height: 2.7rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.listaResumo dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.62rem;
+  color: #c2c7d2;
+  font-size: 0.78rem;
+}
+
+.listaResumo dt svg {
+  width: 1.05rem;
+  color: #8d95aa;
+}
+
+.listaResumo dd {
+  margin: 0;
+  color: #a987ff;
+  font-size: 0.82rem;
+  font-weight: 750;
+  text-align: right;
+}
+
+.divisorResumo {
+  margin-top: 0.35rem;
+  border-top: 1px solid #5865853d;
+  padding-top: 0.35rem;
+}
+
+.cardPreferencias {
+  display: grid;
+  gap: 0.78rem;
+}
+
+.cardPreferencias h2 {
+  margin-bottom: 0.45rem;
+}
+
+.cardPreferencias label {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #d0d4de;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.cardPreferencias input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  accent-color: #7c3aed;
+}
+
+.cardPreferencias > small {
+  color: #8f98ac;
+  font-size: 0.66rem;
+}
+
+.sucessoPreferencia {
+  color: #6ee7b7 !important;
+}
+
+.erroPreferencia {
+  color: #fda4af !important;
+}
+
+.zonaPerigo {
+  border-color: #f43f5240;
+}
+
+.zonaPerigo h2 {
+  margin-bottom: 0.45rem;
+  color: #fb3f5c;
+}
+
+.zonaPerigo h2 svg {
+  width: 1.35rem;
+}
+
+.zonaPerigo p {
+  margin: 0 0 0.8rem;
+  color: #9ca3b3;
+  font-size: 0.72rem;
+}
+
+.zonaPerigo button {
+  display: flex;
+  width: 100%;
+  min-height: 2.55rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+  border: 1px solid #f43f52b8;
+  border-radius: 0.45rem;
+  background: #7f1d1d0d;
+  color: #fb4d67;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.zonaPerigo button:hover {
+  background: #be185e1f;
+}
+
+.zonaPerigo button svg {
+  width: 1rem;
+}
+
+@media (max-width: 850px) {
+  .cardResumo {
+    grid-row: span 2;
+  }
+}
+
+@media (max-width: 650px) {
+  .cardResumo {
+    grid-row: auto;
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import styles from "./cardModel.module.css";
+import styles from "../styles/cardModel.module.css";
 
 export type TomCarta = "roxo" | "carmesim" | "ciano";
 

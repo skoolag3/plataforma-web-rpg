@@ -23,7 +23,7 @@ import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
 import { useState } from "react";
 import { login, register, solicitarRedefinicaoSenha } from "../lib/auth";
-import styles from "./authPanel.module.css";
+import styles from "../styles/authPanel.module.css";
 
 type TipoModal = "login" | "cadastro" | "forgot" | null;
 

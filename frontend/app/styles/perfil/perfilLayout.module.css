@@ -1,0 +1,402 @@
+.paginaPerfil {
+  --roxo: #8b5cf6;
+  --roxoClaro: #b794f6;
+  display: flex;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 74% 0%, rgba(82, 45, 145, 0.13), transparent 25rem),
+    #030711;
+  color: #f7f7fb;
+}
+
+.estadoPerfil {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  background: #030711;
+  color: #f8fafc;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.estadoPerfil h1 {
+  margin: 0;
+}
+
+.estadoPerfil p,
+.cabecalhoPerfil p {
+  color: #aeb5c4;
+}
+
+.sidebarPerfil {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 30;
+  display: flex;
+  width: 13.25rem;
+  flex-direction: column;
+  border-right: 1px solid rgba(84, 96, 133, 0.3);
+  background: linear-gradient(180deg, #030712fa, #050411fa);
+}
+
+.marcaPerfil {
+  display: flex;
+  min-height: 6.5rem;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 1.25rem 1.35rem;
+  color: #fff;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.marcaPerfil strong,
+.marcaPerfil small {
+  display: block;
+}
+
+.marcaPerfil strong {
+  font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 900;
+}
+
+.marcaPerfil small {
+  margin-top: 0.14rem;
+  color: #a78bfa;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.simboloMarca {
+  display: grid;
+  width: 2.7rem;
+  height: 2.7rem;
+  place-items: center;
+  border: 1px solid rgba(167, 139, 250, 0.65);
+  border-radius: 0.75rem 0.25rem;
+  background: linear-gradient(145deg, #8b5cf6, #312e81);
+  box-shadow: 0 0 1.5rem rgba(124, 58, 237, 0.55);
+}
+
+.simboloMarca svg {
+  width: 1.5rem;
+}
+
+.menuPerfil {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.7rem 0.75rem;
+}
+
+.linkMenu {
+  display: flex;
+  min-height: 3.35rem;
+  align-items: center;
+  gap: 0.9rem;
+  border: 1px solid transparent;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: #cbd1e1;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 0 0.9rem;
+  text-align: left;
+  text-decoration: none;
+}
+
+.linkMenu svg {
+  width: 1.3rem;
+  flex: 0 0 auto;
+}
+
+.linkMenu:hover {
+  border-color: rgba(139, 92, 246, 0.2);
+  background: rgba(124, 58, 237, 0.1);
+  color: #fff;
+}
+
+.linkMenuAtivo {
+  border-color: rgba(139, 92, 246, 0.38);
+  background: linear-gradient(90deg, #5b21b6e0, #4c1d95b8);
+  color: #fff;
+}
+
+.arteSidebar {
+  position: relative;
+  display: grid;
+  min-height: 11rem;
+  margin-top: auto;
+  overflow: hidden;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 78%, rgba(167, 139, 250, 0.58), transparent 20%),
+    linear-gradient(160deg, transparent, rgba(76, 29, 149, 0.4));
+  color: #ddd6feb3;
+}
+
+.arteSidebar svg {
+  width: 3.5rem;
+  filter: drop-shadow(0 0 1rem #7c3aed);
+}
+
+.arteSidebar span {
+  position: absolute;
+  bottom: 1rem;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.areaPerfil {
+  width: calc(100% - 13.25rem);
+  min-width: 0;
+  margin-left: 13.25rem;
+}
+
+.topoPerfil {
+  display: flex;
+  min-height: 4.2rem;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.2rem;
+  border-bottom: 1px solid rgba(84, 96, 133, 0.25);
+  padding: 0.55rem clamp(1rem, 3vw, 2.2rem);
+  background: #030711db;
+}
+
+.saldoTopo {
+  display: flex;
+  gap: 1.35rem;
+  padding-right: 1.3rem;
+  border-right: 1px solid rgba(84, 96, 133, 0.3);
+}
+
+.saldoTopo span,
+.contaTopo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.saldoTopo span {
+  color: #e5e7ef;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.saldoTopo svg {
+  width: 1.1rem;
+  color: #a78bfa;
+}
+
+.saldoTopo span:first-child svg {
+  color: #fbbf24;
+}
+
+.btnNotificacao {
+  position: relative;
+  display: grid;
+  width: 2.4rem;
+  height: 2.4rem;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #d4d7e1;
+  cursor: pointer;
+}
+
+.btnNotificacao span {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.35rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: #ef334e;
+}
+
+.contaTopo strong,
+.contaTopo small {
+  display: block;
+}
+
+.contaTopo strong {
+  font-size: 0.82rem;
+}
+
+.contaTopo small {
+  color: #b794f6;
+  font-size: 0.68rem;
+}
+
+.contaTopo > svg {
+  width: 1rem;
+}
+
+.avatarTopo {
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  place-items: center;
+  border: 1px solid #a78bfa9e;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #1f2937, #4c1d95);
+}
+
+.conteudoPerfil {
+  width: min(100% - 2rem, 78rem);
+  margin: 0 auto;
+  padding: 1.5rem 0 3rem;
+}
+
+.cabecalhoPerfil {
+  margin-bottom: 1rem;
+}
+
+.sobretitulo {
+  margin: 0 0 0.3rem;
+  color: #b794f6 !important;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.cabecalhoPerfil h1 {
+  margin: 0;
+  font-size: clamp(1.55rem, 2.5vw, 2rem);
+}
+
+.cabecalhoPerfil p {
+  margin: 0.4rem 0 0;
+  font-size: 0.86rem;
+}
+
+.gradePerfil {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(18.5rem, 1fr);
+  gap: 1.1rem;
+  align-items: start;
+}
+
+.colunaPrincipal,
+.colunaLateral {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.ajudaPerfil {
+  margin: 0.35rem 0 0;
+  color: #8f97a9;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.ajudaPerfil a {
+  color: #a987ff;
+}
+
+@media (max-width: 1050px) {
+  .sidebarPerfil {
+    width: 5.25rem;
+  }
+
+  .marcaPerfil {
+    justify-content: center;
+    padding-inline: 0.6rem;
+  }
+
+  .marcaPerfil > span:last-child,
+  .linkMenu span,
+  .arteSidebar span {
+    display: none;
+  }
+
+  .linkMenu {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .areaPerfil {
+    width: calc(100% - 5.25rem);
+    margin-left: 5.25rem;
+  }
+}
+
+@media (max-width: 850px) {
+  .gradePerfil {
+    grid-template-columns: 1fr;
+  }
+
+  .colunaLateral {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .paginaPerfil {
+    display: block;
+  }
+
+  .sidebarPerfil {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: auto;
+    border-right: 0;
+  }
+
+  .marcaPerfil,
+  .arteSidebar {
+    display: none;
+  }
+
+  .menuPerfil {
+    display: flex;
+    overflow-x: auto;
+    padding: 0.45rem;
+  }
+
+  .linkMenu {
+    min-width: 3rem;
+    min-height: 2.8rem;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .areaPerfil {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .topoPerfil {
+    min-height: 3.7rem;
+    gap: 0.65rem;
+    padding-inline: 0.8rem;
+  }
+
+  .saldoTopo {
+    gap: 0.7rem;
+    margin-right: auto;
+    border-right: 0;
+    padding-right: 0;
+  }
+
+  .contaTopo > span:nth-child(2),
+  .contaTopo > svg,
+  .btnNotificacao {
+    display: none;
+  }
+
+  .conteudoPerfil {
+    width: calc(100% - 1.2rem);
+  }
+
+  .colunaLateral {
+    grid-template-columns: 1fr;
+  }
+}

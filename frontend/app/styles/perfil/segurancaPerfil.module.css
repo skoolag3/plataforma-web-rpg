@@ -1,0 +1,151 @@
+.cardSeguranca {
+  border: 1px solid #5b6a912e;
+  border-radius: 0.75rem;
+  background: linear-gradient(145deg, #0d1426f0, #060b17f5);
+  padding: 1.1rem;
+}
+
+.cabecalhoSeguranca {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.95rem;
+}
+
+.cabecalhoSeguranca h2 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.cabecalhoSeguranca p {
+  margin: 0.25rem 0 0;
+  color: #9da5b8;
+  font-size: 0.74rem;
+}
+
+.iconeConfig,
+.iconeItemSeguranca {
+  display: grid;
+  place-items: center;
+  background: #4c1d9524;
+  color: #a78bfa;
+}
+
+.iconeConfig {
+  width: 2.55rem;
+  height: 2.55rem;
+  border: 1px solid #8b5cf63d;
+  border-radius: 50%;
+}
+
+.iconeItemSeguranca {
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 0.5rem;
+}
+
+.iconeConfig svg,
+.iconeItemSeguranca svg {
+  width: 1rem;
+}
+
+.listaSeguranca {
+  overflow: hidden;
+  border: 1px solid #5865853d;
+  border-radius: 0.6rem;
+}
+
+.itemSeguranca,
+.itemGoogle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.8rem;
+  align-items: center;
+  min-height: 4.25rem;
+  padding: 0.7rem 0.85rem;
+}
+
+.itemSeguranca + .itemSeguranca,
+.itemGoogle {
+  border-top: 1px solid #58658533;
+}
+
+.itemSeguranca small,
+.itemSeguranca strong,
+.itemGoogle small,
+.itemGoogle strong {
+  display: block;
+}
+
+.itemSeguranca small,
+.itemGoogle small {
+  color: #8f98ac;
+  font-size: 0.67rem;
+}
+
+.itemSeguranca strong,
+.itemGoogle strong {
+  margin-top: 0.22rem;
+  color: #e1e5ed;
+  font-size: 0.78rem;
+}
+
+.itemSeguranca > button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid #8b5cf647;
+  border-radius: 50%;
+  background: #4c1d951f;
+  color: #c4b5fd;
+  cursor: pointer;
+}
+
+.itemSeguranca > button svg {
+  width: 0.78rem;
+}
+
+.senhaMascarada {
+  letter-spacing: 0.13em;
+}
+
+.iconeGoogle {
+  display: grid;
+  width: 2.55rem;
+  height: 2.55rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #f8fafc;
+  color: #4285f4;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.btnGoogle {
+  min-height: 2.5rem;
+  border: 1px solid #60a5fa66;
+  border-radius: 0.45rem;
+  background: #f8fafc;
+  color: #26334d;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0 0.8rem;
+}
+
+.btnGoogle:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+@media (max-width: 650px) {
+  .itemGoogle {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .itemGoogle .btnGoogle {
+    grid-column: 1 / -1;
+  }
+}

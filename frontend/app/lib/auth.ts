@@ -44,6 +44,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 const TOKEN_KEY = "card_game_rpg_token";
 const USER_KEY = "card_game_rpg_user";
 const AUTH_EVENT = "card_game_rpg_auth_change";
+let cachedUserText: string | null = null;
+let cachedUser: Usuario | null = null;
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
@@ -126,6 +128,20 @@ export function saveSession(data: AuthResponse) {
   notifyAuthChange();
 }
 
+export function updateStoredUser(changes: Partial<Usuario>) {
+  const usuario = getStoredUser();
+
+  if (!usuario) {
+    return;
+  }
+
+  const usuarioAtualizado = { ...usuario, ...changes };
+  localStorage.setItem(USER_KEY, JSON.stringify(usuarioAtualizado));
+  cachedUserText = JSON.stringify(usuarioAtualizado);
+  cachedUser = usuarioAtualizado;
+  notifyAuthChange();
+}
+
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
@@ -134,12 +150,22 @@ export function getStoredUser() {
   const storedUser = localStorage.getItem(USER_KEY);
 
   if (!storedUser) {
+    cachedUserText = null;
+    cachedUser = null;
     return null;
   }
 
+  if (storedUser === cachedUserText) {
+    return cachedUser;
+  }
+
   try {
-    return JSON.parse(storedUser) as Usuario;
+    cachedUserText = storedUser;
+    cachedUser = JSON.parse(storedUser) as Usuario;
+    return cachedUser;
   } catch {
+    cachedUserText = null;
+    cachedUser = null;
     clearSession();
     return null;
   }
@@ -148,6 +174,8 @@ export function getStoredUser() {
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  cachedUserText = null;
+  cachedUser = null;
   notifyAuthChange();
 }
 

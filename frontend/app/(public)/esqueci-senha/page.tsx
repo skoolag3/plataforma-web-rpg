@@ -6,7 +6,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { solicitarRedefinicaoSenha } from "../../lib/auth";
 import { Alerta, Campo } from "../authModal";
-import styles from "../authPanel.module.css";
+import styles from "../../styles/authPanel.module.css";
 
 export default function EsqueciSenhaPage() {
   const [email, setEmail] = useState("");

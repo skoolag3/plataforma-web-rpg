@@ -224,6 +224,10 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais invalidas.');
     }
 
+    if (usuario.excluido_em || usuario.ativo === false) {
+      throw new ForbiddenException('Conta desativada ou excluida.');
+    }
+
     if (usuario.bloqueado) {
       throw new ForbiddenException(
         'Conta bloqueada por excesso de tentativas.',
@@ -268,9 +272,14 @@ export class AuthService {
           })
         : usuario;
 
+    const usuarioComUltimoLogin = await this.prisma.usuario.update({
+      where: { id: usuarioAtualizado.id },
+      data: { ultimo_login_em: new Date() },
+    });
+
     return {
-      usuario: this.removerSenha(usuarioAtualizado),
-      access_token: this.gerarToken(usuarioAtualizado),
+      usuario: this.removerSenha(usuarioComUltimoLogin),
+      access_token: this.gerarToken(usuarioComUltimoLogin),
     };
   }
 
@@ -357,11 +366,17 @@ export class AuthService {
     try {
       return { records: await resolver() };
     } catch (error) {
+      const errorWithCode =
+        typeof error === 'object' && error && 'code' in error
+          ? (error as { code?: unknown })
+          : null;
+
       return {
         records: null,
         code:
-          typeof error === 'object' && error && 'code' in error
-            ? String(error.code)
+          typeof errorWithCode?.code === 'string' ||
+          typeof errorWithCode?.code === 'number'
+            ? String(errorWithCode.code)
             : undefined,
       };
     }
@@ -409,6 +424,11 @@ export class AuthService {
     delete usuarioSemSenha.senha_hash;
     delete usuarioSemSenha.token_verificacao_email;
     delete usuarioSemSenha.token_redefinicao_senha;
+    delete usuarioSemSenha.email_pendente;
+    delete usuarioSemSenha.token_confirmacao_troca_email;
+    delete usuarioSemSenha.token_troca_email_expira_em;
+    delete usuarioSemSenha.token_verificacao_email_pendente;
+    delete usuarioSemSenha.token_email_pendente_expira_em;
 
     return this.formatarDatasBrasil(usuarioSemSenha);
   }

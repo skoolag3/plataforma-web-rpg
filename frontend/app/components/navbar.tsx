@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import { clearSession, isAuthenticated, subscribeAuthChange } from "../lib/auth";
-import styles from "./navbar.module.css";
+import styles from "../styles/navbar.module.css";
 
 const linksNav = [
   { href: "/", label: "Home", private: false },
@@ -35,6 +35,10 @@ export function Navbar() {
 
     return !link.private;
   });
+
+  if (caminho === "/perfil") {
+    return null;
+  }
 
   return (
     <header className={styles.cabecalho}>
