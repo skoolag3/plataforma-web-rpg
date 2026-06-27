@@ -1,0 +1,235 @@
+.sidebar {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1.6rem;
+  border-right: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(3, 7, 18, 0.78);
+  padding: 1.45rem 0.9rem;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+  padding: 0 0.45rem;
+}
+
+.marcaIcone {
+  display: grid;
+  flex: 0 0 auto;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  border: 1px solid rgba(216, 180, 254, 0.54);
+  border-radius: 0.55rem;
+  background: linear-gradient(145deg, #8b5cf6, #4c1d95);
+  box-shadow: 0 0 1.6rem rgba(124, 58, 237, 0.38);
+}
+
+.marcaIcone svg {
+  width: 1.65rem;
+  height: 1.65rem;
+}
+
+.marcaTexto {
+  min-width: 0;
+}
+
+.marcaTexto strong {
+  display: block;
+  overflow: hidden;
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.marcaTexto span {
+  color: #b794ff;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.12rem;
+  text-transform: uppercase;
+}
+
+.nav {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.navLink,
+.navLinkAtivo {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 3.35rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  color: #dbe4f4;
+  font-size: 1rem;
+  font-weight: 800;
+  padding: 0 0.9rem;
+  text-decoration: none;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.navLink svg,
+.navLinkAtivo svg {
+  flex: 0 0 auto;
+  width: 1.24rem;
+  height: 1.24rem;
+}
+
+.navLink span,
+.navLinkAtivo span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navLink:hover {
+  background: rgba(148, 163, 184, 0.08);
+  color: #fff;
+  transform: translateX(2px);
+}
+
+.navLinkAtivo {
+  border-color: rgba(168, 85, 247, 0.68);
+  background: linear-gradient(135deg, rgba(126, 34, 206, 0.92), rgba(88, 28, 135, 0.9));
+  color: #fff;
+}
+
+.presente {
+  margin-top: auto;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.55rem;
+  background:
+    radial-gradient(circle at 24% 16%, rgba(168, 85, 247, 0.42), transparent 4.8rem),
+    rgba(15, 23, 42, 0.72);
+  padding: 1rem;
+}
+
+.presenteIcone {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  color: #f0abfc;
+}
+
+.presenteIcone svg {
+  width: 2.1rem;
+  height: 2.1rem;
+  filter: drop-shadow(0 0 0.9rem rgba(217, 70, 239, 0.72));
+}
+
+.presente strong {
+  display: block;
+  margin-top: 0.65rem;
+  font-size: 0.94rem;
+}
+
+.presente p {
+  margin: 0.35rem 0 0;
+  color: #cbd5e1;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.presente button {
+  display: inline-flex;
+  width: 100%;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.9rem;
+  border: 1px solid rgba(216, 180, 254, 0.34);
+  border-radius: 0.42rem;
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 900;
+  transition:
+    filter 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.presente button:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.presente button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.navLink:focus-visible,
+.navLinkAtivo:focus-visible,
+.presente button:focus-visible {
+  outline: 2px solid rgba(190, 242, 100, 0.78);
+  outline-offset: 0.2rem;
+}
+
+@media (max-width: 1320px) {
+  .marca {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .marcaTexto,
+  .navLink span,
+  .navLinkAtivo span,
+  .presente {
+    display: none;
+  }
+
+  .navLink,
+  .navLinkAtivo {
+    justify-content: center;
+    padding: 0;
+  }
+}
+
+@media (max-width: 1040px) {
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: block;
+    border-right: 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    padding: 0.7rem;
+  }
+
+  .marca,
+  .presente {
+    display: none;
+  }
+
+  .nav {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    padding-bottom: 0.1rem;
+  }
+
+  .navLink,
+  .navLinkAtivo {
+    flex: 0 0 3.1rem;
+    justify-content: center;
+    min-height: 3.1rem;
+    padding: 0;
+  }
+}

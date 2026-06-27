@@ -36,7 +36,7 @@ export function Navbar() {
     return !link.private;
   });
 
-  if (caminho === "/perfil") {
+  if (caminho === "/perfil" || caminho === "/cartas") {
     return null;
   }
 

@@ -41,7 +41,7 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      {pathname !== "/perfil" ? (
+      {pathname !== "/perfil" && pathname !== "/cartas" ? (
         <Link
           href="/perfil"
           className={styles.atalhoPerfil}
