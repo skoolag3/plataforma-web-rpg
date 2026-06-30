@@ -36,7 +36,12 @@ export function Navbar() {
     return !link.private;
   });
 
-  if (caminho === "/perfil" || caminho === "/cartas") {
+  if (
+    caminho === "/perfil" ||
+    caminho === "/cartas" ||
+    caminho === "/gacha" ||
+    caminho.startsWith("/admin")
+  ) {
     return null;
   }
 

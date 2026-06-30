@@ -1,0 +1,170 @@
+.banner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16rem;
+  min-height: 20rem;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.65rem;
+  background:
+    linear-gradient(90deg, rgba(2, 6, 23, 0.96), rgba(15, 23, 42, 0.56)),
+    radial-gradient(circle at 70% 38%, rgba(34, 197, 94, 0.24), transparent 14rem),
+    url("https://res.cloudinary.com/djqmayaj1/image/upload/v1778560369/cbec6afb-0b8e-417b-951c-be06c253287b_ebvc4k.png");
+  background-position: center;
+  background-size: cover;
+}
+
+.bannerTexto {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  padding: 2rem;
+}
+
+.bannerTexto h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 950;
+}
+
+.bannerTexto p {
+  max-width: 27rem;
+  margin: 0.5rem 0 1.2rem;
+  color: #cbd5e1;
+}
+
+.bannerTexto > span {
+  display: inline-flex;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.64);
+  color: #cbd5e1;
+  font-size: 0.82rem;
+  padding: 0.45rem 0.75rem;
+}
+
+.pityMini {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.7rem;
+  align-items: center;
+  max-width: 24rem;
+  margin-top: 1rem;
+}
+
+.pityMini span,
+.pityBarra {
+  height: 0.52rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(51, 65, 85, 0.78);
+}
+
+.pityMini span::before {
+  display: block;
+  width: 72%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  content: "";
+}
+
+.bannerAcoes {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.bannerAcoes button,
+.rubysBox button {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.42rem;
+  background: rgba(15, 23, 42, 0.72);
+  color: #dbe4f4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 850;
+  padding: 0.7rem 1rem;
+}
+
+.bannerCartas {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.pityBox {
+  grid-column: 2;
+  grid-row: 3 / 5;
+  align-self: stretch;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 0.65rem;
+  background:
+    radial-gradient(circle at 86% 30%, rgba(168, 85, 247, 0.26), transparent 8rem),
+    rgba(15, 23, 42, 0.42);
+  padding: 1.25rem;
+}
+
+.fecharPity {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  margin-left: auto;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.pityBox h3 {
+  margin: 2rem 0 0.65rem;
+  font-size: 1.45rem;
+}
+
+.pityBox p {
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.pityBox strong {
+  display: block;
+  margin-top: 1rem;
+  color: #a855f7;
+  font-size: 2.2rem;
+}
+
+.pityBarra {
+  display: block;
+  margin-top: 0.55rem;
+}
+
+.pityBarra span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+}
+
+@media (max-width: 1040px) {
+  .banner {
+    grid-template-columns: 1fr;
+  }
+
+  .pityBox {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .bannerTexto {
+    padding: 1rem;
+  }
+}

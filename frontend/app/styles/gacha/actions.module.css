@@ -1,0 +1,74 @@
+.invocacoes,
+.rubysBox {
+  grid-column: 1 / 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.65rem;
+  background: rgba(15, 23, 42, 0.34);
+  padding: 1.5rem;
+}
+
+.invocarUm,
+.invocarDez,
+.btnPrimario,
+.btnSecundario {
+  display: inline-flex;
+  min-height: 3.2rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: 0.48rem;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+}
+
+.invocarUm,
+.btnPrimario {
+  border: 1px solid rgba(147, 197, 253, 0.48);
+  background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+  color: #fff;
+}
+
+.invocarDez {
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #1f1300;
+}
+
+.rubysBox {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.rubysBox span {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #cbd5e1;
+}
+
+.rubysBox strong {
+  color: #fff;
+  font-size: 1.15rem;
+}
+
+.btnPrimario,
+.btnSecundario {
+  min-width: 10rem;
+  border: 1px solid rgba(168, 85, 247, 0.52);
+  color: #fff;
+}
+
+.btnSecundario {
+  background: rgba(15, 23, 42, 0.68);
+}
+
+@media (max-width: 1040px) {
+  .invocacoes,
+  .rubysBox {
+    grid-template-columns: 1fr;
+  }
+}

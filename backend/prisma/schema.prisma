@@ -200,7 +200,8 @@ model Carta {
   dano_base     Int       @default(0)
   defesa_base   Int       @default(0)
   passiva       Json?
-  foto          String?   @db.VarChar(255)
+  foto          String?   @db.VarChar(500)
+  moldura       String?   @db.VarChar(500)
   ativo         Boolean?  @default(true)
   criado_em     DateTime? @default(now()) @db.Timestamptz(0)
   atualizado_em DateTime? @default(now()) @db.Timestamptz(0)

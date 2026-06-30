@@ -1,0 +1,108 @@
+.invocando,
+.resultadoUnico {
+  display: grid;
+  min-height: calc(100vh - 8rem);
+  place-items: center;
+  align-content: center;
+  gap: 1rem;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(124, 58, 237, 0.48), transparent 20rem),
+    #050814;
+  text-align: center;
+}
+
+.portal {
+  display: grid;
+  width: min(60vw, 34rem);
+  aspect-ratio: 1.3;
+  place-items: center;
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse, rgba(168, 85, 247, 0.36), transparent 58%),
+    conic-gradient(from 30deg, transparent, rgba(168, 85, 247, 0.6), transparent);
+  filter: drop-shadow(0 0 2rem rgba(168, 85, 247, 0.55));
+}
+
+.cartaPortal {
+  display: grid;
+  width: 10rem;
+  aspect-ratio: 0.68;
+  place-items: center;
+  border: 2px solid #a855f7;
+  border-radius: 0.65rem;
+  background: linear-gradient(180deg, #160b2f, #090815);
+  box-shadow: 0 0 2rem rgba(168, 85, 247, 0.72);
+}
+
+.cartaPortal svg {
+  width: 3rem;
+  height: 3rem;
+  color: #d8b4fe;
+}
+
+.resultadoUnico {
+  position: relative;
+}
+
+.raridadeGrande {
+  color: #a855f7;
+  font-size: clamp(3rem, 8vw, 5rem);
+  line-height: 1;
+  text-shadow: 0 0 1.2rem rgba(168, 85, 247, 0.62);
+}
+
+.resultadoBotoes {
+  display: flex;
+  gap: 1rem;
+}
+
+.resultadoMultiplo {
+  padding: 2rem;
+}
+
+.gradeResultado {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.resultadoAcoes {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1.4rem;
+}
+
+.resultadoAcoes span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #cbd5e1;
+  font-weight: 850;
+}
+
+@media (max-width: 1040px) {
+  .resultadoAcoes {
+    grid-template-columns: 1fr;
+  }
+
+  .gradeResultado {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .resultadoMultiplo {
+    padding: 0.8rem;
+  }
+
+  .gradeResultado {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .resultadoBotoes {
+    width: 100%;
+    flex-direction: column;
+  }
+}

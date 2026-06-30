@@ -69,7 +69,7 @@ const navItems = [
   { href: "/cartas", label: "Colecao", icon: Layers, ativo: true },
   { href: "/decks", label: "Decks", icon: Boxes },
   { href: "#", label: "Loja", icon: Shirt },
-  { href: "#", label: "Gacha", icon: Sparkles },
+  { href: "/gacha", label: "Gacha", icon: Sparkles },
   { href: "#", label: "Historico", icon: BookOpen },
   { href: "#", label: "Ranking", icon: Trophy },
   { href: "/perfil", label: "Perfil", icon: User },
