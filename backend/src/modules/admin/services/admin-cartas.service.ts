@@ -10,11 +10,23 @@ import {
 export class AdminCartasService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listar(busca?: string) {
-    const q = busca?.trim();
+  async listar(filtros: {
+    busca?: string;
+    raridade?: string;
+    elemento?: string;
+    status?: string;
+  }) {
+    const q = filtros.busca?.trim();
+    const status = filtros.status?.trim();
     const cartas = await this.prisma.carta.findMany({
       where: {
-        excluido_em: null,
+        ...(status === 'removidas'
+          ? { excluido_em: { not: null } }
+          : { excluido_em: null }),
+        ...(filtros.raridade ? { raridade: filtros.raridade } : {}),
+        ...(filtros.elemento ? { elemento: filtros.elemento } : {}),
+        ...(status === 'ativas' ? { ativo: true } : {}),
+        ...(status === 'inativas' ? { ativo: false } : {}),
         ...(q
           ? {
               OR: [
@@ -25,7 +37,7 @@ export class AdminCartasService {
             }
           : {}),
       },
-      orderBy: [{ raridade: 'asc' }, { nome: 'asc' }],
+      orderBy: [{ criado_em: 'desc' }, { nome: 'asc' }],
     });
 
     return cartas.map((carta) => this.toResponse(carta));

@@ -23,8 +23,13 @@ export class AdminCartasController {
   constructor(private readonly cartasService: AdminCartasService) {}
 
   @Get()
-  listar(@Query('q') busca?: string) {
-    return this.cartasService.listar(busca);
+  listar(
+    @Query('q') busca?: string,
+    @Query('raridade') raridade?: string,
+    @Query('elemento') elemento?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.cartasService.listar({ busca, raridade, elemento, status });
   }
 
   @Get(':id')

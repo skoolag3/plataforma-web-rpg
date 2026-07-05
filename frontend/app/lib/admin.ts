@@ -42,17 +42,45 @@ export type CreateAdminCartaPayload = {
   ativo?: boolean;
 };
 
+export type UpdateAdminCartaPayload = Partial<CreateAdminCartaPayload>;
+
+export type AdminDashboardResumo = {
+  metricas: {
+    usuarios: number;
+    usuariosAtivos: number;
+    cartas: number;
+    cartasAtivas: number;
+    partidas: number;
+    rubysEmCirculacao: number;
+  };
+  raridades: { raridade: AdminCarta["raridade"] | string; total: number }[];
+  atividadeRecente: {
+    tipo: string;
+    texto: string;
+    data: string | null;
+    status: string;
+    detalhe: string;
+  }[];
+  topCartas: {
+    id: string | null;
+    nome: string;
+    raridade: string;
+    quantidade: number;
+  }[];
+};
+
 export type UploadedAsset = {
-  kind: "foto" | "moldura";
   url: string;
   publicId: string;
+  bytes: number;
   width: number;
   height: number;
   format: string;
 };
 
 export type UploadCartaAssetsResponse = {
-  assets: UploadedAsset[];
+  foto: UploadedAsset | null;
+  moldura: UploadedAsset | null;
 };
 
 async function adminRequest<T>(path: string, options: RequestInit = {}) {
@@ -75,11 +103,32 @@ async function adminRequest<T>(path: string, options: RequestInit = {}) {
   return data as T;
 }
 
-export function listarAdminCartas(busca?: string) {
+export function obterAdminDashboard() {
+  return adminRequest<AdminDashboardResumo>("/admin/dashboard");
+}
+
+export function listarAdminCartas(filtros: {
+  busca?: string;
+  raridade?: string;
+  elemento?: string;
+  status?: string;
+} = {}) {
   const params = new URLSearchParams();
 
-  if (busca?.trim()) {
-    params.set("q", busca.trim());
+  if (filtros.busca?.trim()) {
+    params.set("q", filtros.busca.trim());
+  }
+
+  if (filtros.raridade) {
+    params.set("raridade", filtros.raridade);
+  }
+
+  if (filtros.elemento) {
+    params.set("elemento", filtros.elemento);
+  }
+
+  if (filtros.status) {
+    params.set("status", filtros.status);
   }
 
   const query = params.toString();
@@ -90,6 +139,19 @@ export function criarAdminCarta(payload: CreateAdminCartaPayload) {
   return adminRequest<AdminCarta>("/admin/cartas", {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+export function atualizarAdminCarta(id: string, payload: UpdateAdminCartaPayload) {
+  return adminRequest<AdminCarta>(`/admin/cartas/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removerAdminCarta(id: string) {
+  return adminRequest<{ message: string; carta: AdminCarta }>(`/admin/cartas/${id}`, {
+    method: "DELETE",
   });
 }
 

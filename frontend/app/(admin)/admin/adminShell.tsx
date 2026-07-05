@@ -16,30 +16,36 @@ import {
   LogOut,
   MoreHorizontal,
   Plus,
+  RefreshCw,
   Save,
   Search,
   Settings,
   Shield,
   Sparkles,
   Swords,
+  Trash2,
   Users,
   Wallet,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   useEffect,
-  useMemo,
   useState,
   type ChangeEvent,
   type FormEvent,
   type ReactNode,
 } from "react";
 import {
+  atualizarAdminCarta,
   criarAdminCarta,
+  obterAdminDashboard,
   listarAdminCartas,
+  removerAdminCarta,
   uploadCartaAssets,
   type AdminCarta,
+  type AdminDashboardResumo,
   type CreateAdminCartaPayload,
 } from "../../lib/admin";
 import styles from "../../styles/admin/admin.module.css";
@@ -231,49 +237,92 @@ function DataTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
 }
 
 function Dashboard() {
+  const [resumo, setResumo] = useState<AdminDashboardResumo | null>(null);
+  const [erro, setErro] = useState<string | null>(null);
+  const [carregando, setCarregando] = useState(true);
+
+  async function carregarDashboard() {
+    setCarregando(true);
+    setErro(null);
+
+    try {
+      setResumo(await obterAdminDashboard());
+    } catch (error) {
+      setErro(error instanceof Error ? error.message : "Nao foi possivel carregar o dashboard.");
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  useEffect(() => {
+    void carregarDashboard();
+  }, []);
+
+  const metricas = resumo?.metricas;
+  const raridadesResumo = resumo?.raridades ?? [];
+  const totalRaridades = raridadesResumo.reduce((total, item) => total + item.total, 0);
+
   return (
     <AdminLayout title="Dashboard" subtitle="Visao geral da plataforma">
+      {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
+      {carregando ? <p className={styles.feedbackInfo}>Carregando dashboard...</p> : null}
       <section className={styles.metrics}>
         {[
-          ["Usuarios", "12.487", "+12.9%"],
-          ["Partidas Jogadas", "45.231", "+8.3%"],
-          ["Rubys em Circulacao", "2.350.980", "+15.7%"],
-          ["Receita estimada", "R$ 8.742,21", "+9.4%"],
-        ].map(([label, value, delta]) => (
+          ["Usuarios", formatNumber(metricas?.usuarios ?? 0), `${formatNumber(metricas?.usuariosAtivos ?? 0)} ativos`],
+          ["Cartas", formatNumber(metricas?.cartas ?? 0), `${formatNumber(metricas?.cartasAtivas ?? 0)} ativas`],
+          ["Partidas Jogadas", formatNumber(metricas?.partidas ?? 0), "total registrado"],
+          ["Rubys em Circulacao", formatNumber(metricas?.rubysEmCirculacao ?? 0), "saldo em usuarios"],
+        ].map(([label, value, detail]) => (
           <article className={styles.metricCard} key={label}>
             <span>{label}</span>
             <strong>{value}</strong>
-            <small>{delta} vs mes anterior</small>
+            <small>{detail}</small>
           </article>
         ))}
       </section>
 
       <section className={styles.dashboardGrid}>
         <article className={styles.chartCard}>
-          <h2>Partidas por dia</h2>
+          <h2>Distribuicao de Raridades</h2>
           <div className={styles.lineChart}>
-            {Array.from({ length: 8 }).map((_, index) => (
-              <span key={index} style={{ height: `${34 + ((index * 17) % 48)}%` }} />
-            ))}
+            {raridades.map((raridade) => {
+              const total = raridadesResumo.find((item) => item.raridade === raridade)?.total ?? 0;
+              const height = totalRaridades ? Math.max(10, (total / totalRaridades) * 100) : 10;
+              return (
+                <span key={raridade} title={`${raridade}: ${total}`} style={{ height: `${height}%` }}>
+                  {raridade}
+                </span>
+              );
+            })}
           </div>
         </article>
         <article className={styles.chartCard}>
-          <h2>Distribuicao de Raridades</h2>
+          <h2>Total de Cartas</h2>
           <div className={styles.donut}>
-            <span>Total<br />84.326</span>
+            <span>Total<br />{formatNumber(metricas?.cartas ?? 0)}</span>
           </div>
         </article>
         <article className={styles.panelCard}>
           <h2>Atividade Recente</h2>
-          {["Novo usuario registrado", "Carta criada", "Banner atualizado", "Partida reportada"].map((item) => (
-            <p key={item}><Activity aria-hidden="true" /> {item}</p>
+          {(resumo?.atividadeRecente.length ? resumo.atividadeRecente : []).map((item) => (
+            <p key={`${item.texto}-${item.data}`}>
+              <Activity aria-hidden="true" />
+              {item.texto}
+              <span>{formatDate(item.data)}</span>
+            </p>
           ))}
+          {!resumo?.atividadeRecente.length ? <p>Nenhuma atividade recente</p> : null}
         </article>
         <article className={styles.panelCard}>
-          <h2>Top Cartas Mais Usadas</h2>
-          {["Kael Arcano", "Lyria da Luz", "Riven Duelista", "Mira Sombria", "Eron Guardiao"].map((item, index) => (
-            <p key={item}><strong>{index + 1}</strong> {item}<span>{18 - index * 3},7%</span></p>
+          <h2>Top Cartas no Inventario</h2>
+          {(resumo?.topCartas.length ? resumo.topCartas : []).map((item, index) => (
+            <p key={`${item.id}-${index}`}>
+              <strong>{index + 1}</strong>
+              {item.nome}
+              <span>{formatNumber(item.quantidade)}</span>
+            </p>
           ))}
+          {!resumo?.topCartas.length ? <p>Nenhum inventario registrado</p> : null}
         </article>
       </section>
     </AdminLayout>
@@ -282,16 +331,32 @@ function Dashboard() {
 
 function Cartas() {
   const [busca, setBusca] = useState("");
+  const [filtroRaridade, setFiltroRaridade] = useState("");
+  const [filtroElemento, setFiltroElemento] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState("");
   const [cartasApi, setCartasApi] = useState<AdminCarta[]>([]);
+  const [selecionada, setSelecionada] = useState<AdminCarta | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
-  async function carregarCartas(termo = busca) {
+  async function carregarCartas() {
     setCarregando(true);
     setErro(null);
 
     try {
-      setCartasApi(await listarAdminCartas(termo));
+      const cartas = await listarAdminCartas({
+        busca,
+        raridade: filtroRaridade,
+        elemento: filtroElemento,
+        status: filtroStatus,
+      });
+      setCartasApi(cartas);
+      setSelecionada((current) => {
+        if (!current) return null;
+        return cartas.find((carta) => carta.id === current.id) ?? null;
+      });
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Nao foi possivel carregar as cartas.");
     } finally {
@@ -299,23 +364,63 @@ function Cartas() {
     }
   }
 
+  async function alternarStatus(carta: AdminCarta) {
+    setSalvando(true);
+    setFeedback(null);
+
+    try {
+      const atualizada = await atualizarAdminCarta(carta.id, { ativo: !carta.ativo });
+      setCartasApi((current) => current.map((item) => (item.id === atualizada.id ? atualizada : item)));
+      setSelecionada((current) => (current?.id === atualizada.id ? atualizada : current));
+      setFeedback(`Carta ${atualizada.ativo ? "ativada" : "inativada"}.`);
+    } catch (error) {
+      setErro(error instanceof Error ? error.message : "Nao foi possivel atualizar a carta.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function removerCarta(carta: AdminCarta) {
+    if (!window.confirm(`Remover ${carta.nome}?`)) {
+      return;
+    }
+
+    setSalvando(true);
+    setFeedback(null);
+
+    try {
+      await removerAdminCarta(carta.id);
+      setCartasApi((current) => current.filter((item) => item.id !== carta.id));
+      setSelecionada((current) => (current?.id === carta.id ? null : current));
+      setFeedback("Carta removida.");
+    } catch (error) {
+      setErro(error instanceof Error ? error.message : "Nao foi possivel remover a carta.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function salvarEdicao(carta: AdminCarta, payload: CreateAdminCartaPayload) {
+    setSalvando(true);
+    setErro(null);
+    setFeedback(null);
+
+    try {
+      const atualizada = await atualizarAdminCarta(carta.id, payload);
+      setCartasApi((current) => current.map((item) => (item.id === atualizada.id ? atualizada : item)));
+      setSelecionada(atualizada);
+      setFeedback("Carta atualizada.");
+    } catch (error) {
+      setErro(error instanceof Error ? error.message : "Nao foi possivel salvar a edicao.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
   useEffect(() => {
-    void carregarCartas("");
+    void carregarCartas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const rows = useMemo(
-    () =>
-      cartasApi.map((carta) => [
-        carta.nome,
-        carta.raridade,
-        formatElemento(carta.elemento),
-        carta.classe ?? "-",
-        carta.custo?.toString() ?? "-",
-        carta.ativo ? "Ativa" : "Inativa",
-      ]),
-    [cartasApi],
-  );
 
   return (
     <AdminLayout title="Cartas" subtitle="Gerencie todas as cartas do jogo.">
@@ -334,17 +439,91 @@ function Cartas() {
             onChange={(event) => setBusca(event.target.value)}
           />
         </label>
+        <select value={filtroRaridade} onChange={(event) => setFiltroRaridade(event.target.value)}>
+          <option value="">Raridade</option>
+          {raridades.map((raridade) => <option key={raridade}>{raridade}</option>)}
+        </select>
+        <select value={filtroElemento} onChange={(event) => setFiltroElemento(event.target.value)}>
+          <option value="">Elemento</option>
+          {elementos.map((elemento) => (
+            <option key={elemento.value} value={elemento.value}>{elemento.label}</option>
+          ))}
+        </select>
+        <select value={filtroStatus} onChange={(event) => setFiltroStatus(event.target.value)}>
+          <option value="">Status</option>
+          <option value="ativas">Ativas</option>
+          <option value="inativas">Inativas</option>
+          <option value="removidas">Removidas</option>
+        </select>
+        <button type="submit"><RefreshCw aria-hidden="true" /> Filtrar</button>
         <Link href="/admin/cartas/nova" className={styles.primaryBtn}><Plus aria-hidden="true" /> Nova Carta</Link>
       </form>
-      <div className={styles.tabs}>
-        {["Todas", "UR", "SSR", "SR", "R", "N"].map((tab) => <button key={tab}>{tab}</button>)}
-      </div>
+
       {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
+      {feedback ? <p className={styles.feedbackSuccess}>{feedback}</p> : null}
       {carregando ? <p className={styles.feedbackInfo}>Carregando cartas...</p> : null}
-      {!carregando && !erro && rows.length === 0 ? (
+      {!carregando && !erro && cartasApi.length === 0 ? (
         <p className={styles.feedbackInfo}>Nenhuma carta encontrada.</p>
       ) : null}
-      <DataTable headers={["Carta", "Raridade", "Elemento", "Classe", "Custo", "Status"]} rows={rows} />
+
+      <div className={styles.tableWrap}>
+        <table>
+          <thead>
+            <tr>
+              <th>Carta</th>
+              <th>Raridade</th>
+              <th>Elemento</th>
+              <th>Classe</th>
+              <th>Custo</th>
+              <th>Status</th>
+              <th>Acoes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {cartasApi.map((carta) => (
+              <tr key={carta.id}>
+                <td>
+                  <span className={styles.cardCell}>
+                    <span
+                      className={styles.cardThumb}
+                      style={carta.foto ? { backgroundImage: `url("${carta.foto}")` } : undefined}
+                    />
+                    {carta.nome}
+                  </span>
+                </td>
+                <td>{carta.raridade}</td>
+                <td>{formatElemento(carta.elemento)}</td>
+                <td>{carta.classe ?? "-"}</td>
+                <td>{carta.custo ?? "-"}</td>
+                <td><Status value={carta.ativo ? "Ativa" : "Inativa"} /></td>
+                <td>
+                  <span className={styles.rowActions}>
+                    <button type="button" onClick={() => setSelecionada(carta)} title="Editar">
+                      <Edit3 aria-hidden="true" />
+                    </button>
+                    <button type="button" onClick={() => void alternarStatus(carta)} disabled={salvando} title={carta.ativo ? "Inativar" : "Ativar"}>
+                      <Eye aria-hidden="true" />
+                    </button>
+                    <button type="button" onClick={() => void removerCarta(carta)} disabled={salvando} title="Remover">
+                      <Trash2 aria-hidden="true" />
+                    </button>
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {selecionada ? (
+        <CartaEditor
+          key={selecionada.id}
+          carta={selecionada}
+          onClose={() => setSelecionada(null)}
+          onSave={(payload) => salvarEdicao(selecionada, payload)}
+          salvando={salvando}
+        />
+      ) : null}
     </AdminLayout>
   );
 }
@@ -407,10 +586,8 @@ function NovaCarta() {
         if (moldura) formData.append("moldura", moldura);
 
         const upload = await uploadCartaAssets(formData);
-        const fotoAsset = upload.assets.find((asset) => asset.kind === "foto");
-        const molduraAsset = upload.assets.find((asset) => asset.kind === "moldura");
-        payload.foto = fotoAsset?.url;
-        payload.moldura = molduraAsset?.url;
+        payload.foto = upload.foto?.url;
+        payload.moldura = upload.moldura?.url;
       }
 
       const carta = await criarAdminCarta(payload);
@@ -508,8 +685,166 @@ function NovaCarta() {
   );
 }
 
+function CartaEditor({
+  carta,
+  onClose,
+  onSave,
+  salvando,
+}: {
+  carta: AdminCarta;
+  onClose: () => void;
+  onSave: (payload: CreateAdminCartaPayload) => Promise<void>;
+  salvando: boolean;
+}) {
+  const [form, setForm] = useState<CartaFormState>(() => cartaToForm(carta));
+  const [foto, setFoto] = useState<File | null>(null);
+  const [moldura, setMoldura] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [erroLocal, setErroLocal] = useState<string | null>(null);
+
+  function updateField<K extends keyof CartaFormState>(field: K, value: CartaFormState[K]) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function handleFotoChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    setFoto(file);
+    setPreviewUrl((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return file ? URL.createObjectURL(file) : null;
+    });
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErroLocal(null);
+
+    try {
+      const payload: CreateAdminCartaPayload = {
+        nome: form.nome.trim(),
+        raridade: form.raridade,
+        elemento: form.elemento,
+        classe: form.classe.trim() || undefined,
+        custo: toNumber(form.custo, "Custo"),
+        hpBase: toNumber(form.hpBase, "HP"),
+        danoBase: toNumber(form.danoBase, "ATK"),
+        defesaBase: toNumber(form.defesaBase, "DEF"),
+        passiva: parsePassiva(form.passiva),
+        ativo: form.ativo,
+      };
+
+      if (foto || moldura) {
+        const formData = new FormData();
+        if (foto) formData.append("foto", foto);
+        if (moldura) formData.append("moldura", moldura);
+
+        const upload = await uploadCartaAssets(formData);
+        payload.foto = upload.foto?.url ?? carta.foto ?? undefined;
+        payload.moldura = upload.moldura?.url ?? carta.moldura ?? undefined;
+      } else {
+        payload.foto = carta.foto ?? undefined;
+        payload.moldura = carta.moldura ?? undefined;
+      }
+
+      await onSave(payload);
+    } catch (error) {
+      setErroLocal(error instanceof Error ? error.message : "Nao foi possivel salvar a carta.");
+    }
+  }
+
+  const cardImage = previewUrl ?? carta.foto ?? undefined;
+
+  return (
+    <form className={styles.editPanel} onSubmit={handleSubmit}>
+      <header>
+        <div>
+          <h2>Editando carta</h2>
+          <p>{carta.nome}</p>
+        </div>
+        <button type="button" onClick={onClose} aria-label="Fechar editor">
+          <X aria-hidden="true" />
+        </button>
+      </header>
+      {erroLocal ? <p className={styles.feedbackError}>{erroLocal}</p> : null}
+      <section className={styles.editorGrid}>
+        <div className={styles.formPanel}>
+          <label>Nome<input value={form.nome} onChange={(event) => updateField("nome", event.target.value)} /></label>
+          <label>
+            Raridade
+            <select value={form.raridade} onChange={(event) => updateField("raridade", event.target.value as CartaFormState["raridade"])}>
+              {raridades.map((raridade) => <option key={raridade}>{raridade}</option>)}
+            </select>
+          </label>
+          <label>
+            Elemento
+            <select value={form.elemento} onChange={(event) => updateField("elemento", event.target.value as CartaFormState["elemento"])}>
+              {elementos.map((elemento) => (
+                <option key={elemento.value} value={elemento.value}>{elemento.label}</option>
+              ))}
+            </select>
+          </label>
+          <label>Classe<input value={form.classe} onChange={(event) => updateField("classe", event.target.value)} /></label>
+          <label>Custo<input inputMode="numeric" value={form.custo} onChange={(event) => updateField("custo", event.target.value)} /></label>
+          <label className={styles.toggleRow}>
+            <input type="checkbox" checked={form.ativo} onChange={(event) => updateField("ativo", event.target.checked)} />
+            Carta ativa
+          </label>
+          <label>Passiva<textarea className={styles.codeArea} value={form.passiva} onChange={(event) => updateField("passiva", event.target.value)} /></label>
+        </div>
+        <aside className={styles.previewPanel}>
+          <div className={styles.cardPreview} style={cardImage ? { backgroundImage: `linear-gradient(180deg, transparent 40%, rgba(2, 6, 23, 0.94) 84%), url("${cardImage}")` } : undefined}>
+            <strong>{form.raridade}</strong>
+            <span>{form.nome || "Carta"}</span>
+          </div>
+          <label>Foto/personagem<input type="file" accept="image/*" onChange={handleFotoChange} /></label>
+          <label>Moldura<input type="file" accept="image/*" onChange={(event) => setMoldura(event.target.files?.[0] ?? null)} /></label>
+          <label>HP<input inputMode="numeric" value={form.hpBase} onChange={(event) => updateField("hpBase", event.target.value)} /></label>
+          <label>ATK<input inputMode="numeric" value={form.danoBase} onChange={(event) => updateField("danoBase", event.target.value)} /></label>
+          <label>DEF<input inputMode="numeric" value={form.defesaBase} onChange={(event) => updateField("defesaBase", event.target.value)} /></label>
+          <div className={styles.editorActions}>
+            <button type="button" onClick={onClose}>Cancelar</button>
+            <button type="submit" className={styles.primaryBtn} disabled={salvando}>
+              <Save aria-hidden="true" /> {salvando ? "Salvando..." : "Salvar"}
+            </button>
+          </div>
+        </aside>
+      </section>
+    </form>
+  );
+}
+
+function cartaToForm(carta: AdminCarta): CartaFormState {
+  return {
+    nome: carta.nome,
+    raridade: carta.raridade,
+    elemento: carta.elemento,
+    classe: carta.classe ?? "",
+    custo: carta.custo?.toString() ?? "0",
+    hpBase: carta.hpBase.toString(),
+    danoBase: carta.danoBase.toString(),
+    defesaBase: carta.defesaBase.toString(),
+    passiva: JSON.stringify(carta.passiva ?? {}, null, 2),
+    ativo: carta.ativo,
+  };
+}
+
 function formatElemento(elemento: AdminCarta["elemento"]) {
   return elementos.find((item) => item.value === elemento)?.label ?? elemento;
+}
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat("pt-BR").format(value);
+}
+
+function formatDate(value: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+  }).format(new Date(value));
 }
 
 function parsePassiva(value: string) {
