@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   Bell,
@@ -26,6 +26,13 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  buscarGacha,
+  girarGacha,
+  resgatarGiroDiario,
+  type BannerGacha,
+  type CartaGachaApi,
+} from "../../lib/jogo";
 import cardsStyles from "../../styles/inventario/cards.module.css";
 import layoutStyles from "../../styles/inventario/layout.module.css";
 import sidebarStyles from "../../styles/inventario/sidebar.module.css";
@@ -49,9 +56,10 @@ const styles = {
 };
 
 type CartaGacha = {
+  id?: string;
   nome: string;
   subtitulo: string;
-  raridade: "UR" | "SR" | "R" | "N";
+  raridade: "UR" | "SSR" | "SR" | "R" | "N";
   elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
   icon: LucideIcon;
   borda: string;
@@ -60,6 +68,8 @@ type CartaGacha = {
   artB: string;
   glow: string;
   destaque?: boolean;
+  foto?: string | null;
+  nova?: boolean;
 };
 
 const navItems = [
@@ -149,40 +159,54 @@ function cardStyle(card: CartaGacha): CSSProperties {
 }
 
 function estrelas(raridade: CartaGacha["raridade"]) {
-  return raridade === "UR" ? 5 : raridade === "SR" ? 4 : raridade === "R" ? 3 : 2;
+  return raridade === "UR" ? 5 : raridade === "SSR" ? 4 : raridade === "SR" ? 3 : raridade === "R" ? 2 : 1;
 }
 
-function sortear(qtd: number) {
-  if (qtd === 1) {
-    return [cartasPool[0]];
-  }
-
-  return [
-    cartasPool[3],
-    cartasPool[2],
-    cartasPool[4],
-    cartasPool[0],
-    cartasPool[3],
-    cartasPool[4],
-    cartasPool[1],
-    cartasPool[2],
-    cartasPool[4],
-    cartasPool[4],
-  ];
+function mapearCarta(carta: CartaGachaApi): CartaGacha {
+  const base = cartasPool.find((item) => item.elemento === carta.elemento) ?? cartasPool[0];
+  return {
+    ...base,
+    ...carta,
+    subtitulo: carta.nova ? "Nova na colecao" : "Copia adicional",
+    icon:
+      carta.elemento === "natureza" ? Leaf :
+      carta.elemento === "agua" ? Waves :
+      carta.elemento === "fogo" ? Flame :
+      carta.elemento === "sombra" ? Moon : Zap,
+    borda: carta.raridade === "UR" ? "#a78bfa" : carta.raridade === "SSR" ? "#f59e0b" : base.borda,
+  };
 }
 
 export default function GachaPage() {
-  const [aba, setAba] = useState("Eclipse Roxo");
-  const [rubys, setRubys] = useState(380);
-  const [pity, setPity] = useState(79);
+  const [banners, setBanners] = useState<BannerGacha[]>([]);
+  const [aba, setAba] = useState("");
+  const [jogador, setJogador] = useState({ nome: "Jogador", nivel: 1, moedas: 0 });
+  const [rubys, setRubys] = useState(0);
+  const [pity, setPity] = useState(0);
   const [invocando, setInvocando] = useState(false);
   const [resultado, setResultado] = useState<CartaGacha[]>([]);
   const [resgatado, setResgatado] = useState(false);
+  const [erro, setErro] = useState("");
+
+  const bannerAtivo = banners.find((banner) => banner.id === aba) ?? banners[0];
+
+  useEffect(() => {
+    buscarGacha()
+      .then((dados) => {
+        setBanners(dados.banners);
+        setAba(dados.banners[0]?.id ?? "");
+        setRubys(dados.jogador.rubys);
+        setJogador(dados.jogador);
+        setPity(dados.banners[0]?.pity ?? 0);
+        setResgatado(!dados.banners[0]?.diarioDisponivel);
+      })
+      .catch((e) => setErro(e instanceof Error ? e.message : "Erro ao carregar gacha."));
+  }, []);
 
   const destaque = resultado[0] ?? cartasPool[0];
   const IconeDestaque = destaque.icon;
   const resultadoMultiplo = resultado.length > 1;
-  const custo10 = 2700;
+  const custo10 = bannerAtivo?.custoDez ?? 2700;
 
   const statusResultado = useMemo(() => {
     if (!resultado.length) return "principal";
@@ -190,22 +214,38 @@ export default function GachaPage() {
     return destaque.raridade;
   }, [destaque.raridade, resultado.length, resultadoMultiplo]);
 
-  function invocar(qtd: 1 | 10) {
+  async function invocar(qtd: 1 | 10) {
+    if (!bannerAtivo) return;
     setInvocando(true);
     setResultado([]);
-
-    window.setTimeout(() => {
-      const novasCartas = sortear(qtd);
-      setResultado(novasCartas);
-      setPity(novasCartas.some((carta) => carta.raridade === "UR") ? 0 : Math.min(80, pity + qtd));
-      setRubys((atual) => Math.max(0, atual - (qtd === 1 ? 300 : custo10)));
+    setErro("");
+    try {
+      const resposta = await girarGacha(bannerAtivo.id, qtd);
+      setResultado(resposta.cartas.map(mapearCarta));
+      setPity(resposta.pity);
+      setRubys(resposta.rubys);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Erro ao realizar giro.");
+    } finally {
       setInvocando(false);
-    }, 900);
+    }
   }
 
   function resetar() {
     setResultado([]);
     setInvocando(false);
+  }
+
+  async function resgatarDiario() {
+    if (!bannerAtivo) return;
+    setErro("");
+    try {
+      const resposta = await resgatarGiroDiario(bannerAtivo.id);
+      setRubys((atual) => atual + resposta.rubysRecebidos);
+      setResgatado(true);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Erro ao resgatar recompensa.");
+    }
   }
 
   return (
@@ -244,7 +284,7 @@ export default function GachaPage() {
             </span>
             <strong>{resgatado ? "Giro diario resgatado" : "Giro diario disponivel!"}</strong>
             <p>{resgatado ? "Volte amanha para novas recompensas." : "Resgate agora suas recompensas gratuitas."}</p>
-            <button type="button" onClick={() => setResgatado(true)} disabled={resgatado}>
+            <button type="button" onClick={() => void resgatarDiario()} disabled={resgatado || !bannerAtivo}>
               {resgatado ? "Resgatado" : "Resgatar"}
             </button>
           </section>
@@ -264,7 +304,7 @@ export default function GachaPage() {
             <div className={styles.status}>
               <button type="button" className={styles.moeda} title="Moedas">
                 <Coins className={styles.ouro} aria-hidden="true" />
-                1.250
+                {jogador.moedas.toLocaleString("pt-BR")}
               </button>
               <span className={styles.divisor} aria-hidden="true" />
               <button type="button" className={styles.moeda} title="Rubys">
@@ -281,8 +321,8 @@ export default function GachaPage() {
                   <User aria-hidden="true" />
                 </span>
                 <span>
-                  <strong>Gabriel1</strong>
-                  <span>Nivel 1</span>
+                  <strong>{jogador.nome}</strong>
+                  <span>Nivel {jogador.nivel}</span>
                 </span>
                 <ChevronDown aria-hidden="true" />
               </Link>
@@ -290,6 +330,7 @@ export default function GachaPage() {
           </header>
 
           <section className={styles.gachaPainel} data-estado={statusResultado}>
+            {erro ? <p role="alert">{erro}</p> : null}
             {invocando ? (
               <div className={styles.invocando}>
                 <div className={styles.portal} aria-hidden="true">
@@ -368,23 +409,27 @@ export default function GachaPage() {
             ) : (
               <div className={styles.gachaPrincipal}>
                 <div className={styles.abas}>
-                  {["Eclipse Roxo", "Invocacao de Herois", "Convocacao da Luz"].map((item) => (
+                  {banners.map((item) => (
                     <button
                       type="button"
-                      key={item}
-                      className={aba === item ? styles.abaAtiva : styles.aba}
-                      onClick={() => setAba(item)}
+                      key={item.id}
+                      className={aba === item.id ? styles.abaAtiva : styles.aba}
+                      onClick={() => {
+                        setAba(item.id);
+                        setPity(item.pity);
+                        setResgatado(!item.diarioDisponivel);
+                      }}
                     >
-                      {item}
+                      {item.nome}
                     </button>
                   ))}
                 </div>
 
                 <section className={styles.banner}>
                   <div className={styles.bannerTexto}>
-                    <h2>{aba.toUpperCase()}</h2>
-                    <p>Chance aumentada para cartas UR Kael Arcano e Mira Sombria.</p>
-                    <span>Termina em: 6d 10h 23m</span>
+                    <h2>{bannerAtivo?.nome.toUpperCase() ?? "SEM BANNERS"}</h2>
+                    <p>{bannerAtivo ? `${bannerAtivo.cartas.length} cartas disponiveis neste banner.` : "Cadastre cartas ativas para habilitar o gacha."}</p>
+                    <span>Pity garantido em {bannerAtivo?.limitePity ?? 80} giros</span>
                     <div className={styles.pityMini}>
                       <span />
                       <strong>{pity}/80</strong>
@@ -395,7 +440,7 @@ export default function GachaPage() {
                     </div>
                   </div>
                   <div className={styles.bannerCartas}>
-                    {cartasPool.slice(0, 2).map((carta) => (
+                    {(bannerAtivo?.cartas.slice(0, 2).map(mapearCarta) ?? []).map((carta) => (
                       <article className={styles.cartaPequena} style={cardStyle(carta)} key={carta.nome}>
                         <span className={styles.arte} aria-hidden="true" />
                         <span className={styles.raridade}>{carta.raridade}</span>
@@ -408,10 +453,10 @@ export default function GachaPage() {
                 </section>
 
                 <section className={styles.invocacoes}>
-                  <button type="button" className={styles.invocarUm} onClick={() => invocar(1)}>
-                    Invocar 1x <Gem aria-hidden="true" /> 300
+                  <button type="button" className={styles.invocarUm} disabled={!bannerAtivo || rubys < (bannerAtivo?.custoGiro ?? 0)} onClick={() => void invocar(1)}>
+                    Invocar 1x <Gem aria-hidden="true" /> {bannerAtivo?.custoGiro ?? 0}
                   </button>
-                  <button type="button" className={styles.invocarDez} onClick={() => invocar(10)}>
+                  <button type="button" className={styles.invocarDez} disabled={!bannerAtivo || rubys < custo10} onClick={() => void invocar(10)}>
                     Invocar 10x <Gem aria-hidden="true" /> {custo10.toLocaleString("pt-BR")}
                   </button>
                 </section>
@@ -430,9 +475,9 @@ export default function GachaPage() {
                   </button>
                   <h3>Garantia UR</h3>
                   <p>A cada 80 invocacoes, voce garante uma carta UR.</p>
-                  <strong>{pity} / 80</strong>
+                  <strong>{pity} / {bannerAtivo?.limitePity ?? 80}</strong>
                   <span className={styles.pityBarra}>
-                    <span style={{ width: `${(pity / 80) * 100}%` }} />
+                    <span style={{ width: `${(pity / (bannerAtivo?.limitePity ?? 80)) * 100}%` }} />
                   </span>
                 </aside>
               </div>

@@ -27,6 +27,7 @@ export type PerfilConta = {
   rubys: number;
   moedas: number;
   ultimoLogin: string;
+  exclusaoAgendadaPara: string | null;
   preferencias: PreferenciasConta;
 };
 
@@ -188,6 +189,12 @@ export function solicitarExclusaoApi(token: string, senhaAtual: string) {
       body: JSON.stringify({ senhaAtual }),
     },
   );
+}
+
+export function cancelarExclusaoApi(token: string) {
+  return requisicaoPerfil<RespostaMensagem>(token, "/perfil/exclusao/cancelar", {
+    method: "PATCH",
+  });
 }
 
 export async function confirmarTrocaEmailApi(token: string) {

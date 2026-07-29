@@ -9,6 +9,7 @@ import {
   atualizarPreferenciasApi,
   atualizarSenhaApi,
   buscarPerfilApi,
+  cancelarExclusaoApi,
   desativarContaApi,
   enviarImagemPerfilApi,
   listarMoldurasApi,
@@ -168,6 +169,16 @@ export default function PerfilPage() {
     return mensagem;
   }
 
+  async function cancelarExclusao() {
+    const token = getToken();
+    if (!token) throw new Error("Sessao expirada.");
+    const resposta = await cancelarExclusaoApi(token);
+    setPerfil((atual) =>
+      atual ? { ...atual, exclusaoAgendadaPara: null } : atual,
+    );
+    return resposta.message;
+  }
+
   if (erro) {
     return (
       <main className={styles.estadoPerfil}>
@@ -232,8 +243,10 @@ export default function PerfilPage() {
                 aoAtualizar={atualizarPreferencias}
               />
               <ZonaPerigo
+                exclusaoAgendadaPara={perfil.exclusaoAgendadaPara}
                 aoDesativar={desativarConta}
                 aoExcluir={solicitarExclusao}
+                aoCancelarExclusao={cancelarExclusao}
               />
             </aside>
           </div>

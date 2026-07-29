@@ -137,6 +137,9 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       ultimoLogin: usuario.ultimo_login_em
         ? this.formatarDataBrasil(usuario.ultimo_login_em)
         : 'Primeiro acesso',
+      exclusaoAgendadaPara: usuario.exclusao_agendada_em
+        ? this.formatarDataBrasil(usuario.exclusao_agendada_em)
+        : null,
       preferencias: {
         receberNotificacoes: perfil.receber_notificacoes,
         mostrarNoRanking: perfil.mostrar_no_ranking,

@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   Bell,
@@ -34,6 +34,8 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { buscarColecao, type CartaColecao } from "../../lib/jogo";
 import cardsStyles from "../../styles/inventario/cards.module.css";
 import controlsStyles from "../../styles/inventario/controls.module.css";
 import detailsStyles from "../../styles/inventario/details.module.css";
@@ -51,10 +53,11 @@ const styles = {
 };
 
 type Card = {
+  id?: string;
   nome: string;
   raridade: "UR" | "SSR" | "SR" | "R" | "N";
   elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
-  classe: "Mago" | "Guerreiro" | "Cacador" | "Guardiao" | "Vidente";
+  classe: string;
   elementoIcone: LucideIcon;
   copias: string;
   borda: string;
@@ -62,6 +65,13 @@ type Card = {
   artA: string;
   artB: string;
   glow: string;
+  quantidade?: number;
+  obtida?: boolean;
+  foto?: string | null;
+  hpBase?: number;
+  danoBase?: number;
+  defesaBase?: number;
+  passiva?: Record<string, unknown>;
 };
 
 const navItems = [
@@ -76,7 +86,7 @@ const navItems = [
   { href: "#", label: "Sair", icon: LogOut },
 ];
 
-const cards: Card[] = [
+const fallbackCards: Card[] = [
   {
     nome: "Kael Arcano",
     raridade: "UR",
@@ -289,7 +299,50 @@ function cardStyle(card: Card): CSSProperties {
   } as CSSProperties;
 }
 
+const elementoVisual: Record<
+  CartaColecao["elemento"],
+  Pick<Card, "elementoIcone" | "elementoCor" | "artA" | "artB" | "glow">
+> = {
+  natureza: { elementoIcone: Leaf, elementoCor: "#7ee757", artA: "#0f2d1f", artB: "#172554", glow: "rgba(74, 222, 128, .55)" },
+  agua: { elementoIcone: Waves, elementoCor: "#38bdf8", artA: "#0c4a6e", artB: "#172554", glow: "rgba(56, 189, 248, .55)" },
+  fogo: { elementoIcone: Flame, elementoCor: "#ef4444", artA: "#7f1d1d", artB: "#111827", glow: "rgba(248, 113, 113, .52)" },
+  sombra: { elementoIcone: Moon, elementoCor: "#a855f7", artA: "#3b0764", artB: "#020617", glow: "rgba(168, 85, 247, .52)" },
+  luz: { elementoIcone: Zap, elementoCor: "#facc15", artA: "#713f12", artB: "#1f2937", glow: "rgba(250, 204, 21, .48)" },
+};
+
+const bordaRaridade: Record<Card["raridade"], string> = {
+  UR: "#a78bfa",
+  SSR: "#f59e0b",
+  SR: "#c084fc",
+  R: "#60a5fa",
+  N: "#64748b",
+};
+
+function mapearCarta(carta: CartaColecao): Card {
+  return {
+    ...carta,
+    ...elementoVisual[carta.elemento],
+    copias: String(carta.quantidade),
+    borda: bordaRaridade[carta.raridade],
+  };
+}
+
 export default function CartasPage() {
+  const router = useRouter();
+  const [cards, setCards] = useState<Card[]>(fallbackCards);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
+  const [resumo, setResumo] = useState({
+    totalCartas: 0,
+    cartasObtidas: 0,
+    percentual: 0,
+  });
+  const [jogador, setJogador] = useState({
+    nome: "Jogador",
+    nivel: 1,
+    moedas: 0,
+    rubys: 0,
+  });
   const [raridade, setRaridade] = useState("Todas");
   const [elemento, setElemento] = useState("Todos");
   const [classe, setClasse] = useState("Todas");
@@ -304,6 +357,23 @@ export default function CartasPage() {
   const [modalDeckAberto, setModalDeckAberto] = useState(false);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
   const [recompensaResgatada, setRecompensaResgatada] = useState(false);
+
+  useEffect(() => {
+    buscarColecao()
+      .then((dados) => {
+        setCards(dados.itens.map(mapearCarta));
+        setResumo(dados.resumo);
+        setJogador(dados.jogador);
+      })
+      .catch((error) =>
+        setErro(
+          error instanceof Error
+            ? error.message
+            : "Nao foi possivel carregar a colecao.",
+        ),
+      )
+      .finally(() => setCarregando(false));
+  }, []);
 
   const filtradas = useMemo(() => {
     const texto = busca.trim().toLowerCase();
@@ -327,7 +397,7 @@ export default function CartasPage() {
         combinaFavorita
       );
     });
-  }, [busca, classe, elemento, favoritas, raridade, somenteFavoritas]);
+  }, [busca, cards, classe, elemento, favoritas, raridade, somenteFavoritas]);
 
   const totalPaginas = Math.max(1, Math.ceil(filtradas.length / cartasPorPagina));
   const paginaAtual = Math.min(pagina, totalPaginas);
@@ -385,6 +455,14 @@ export default function CartasPage() {
       atuais.map((nome) => (nome === cartaSelecionada.nome ? null : nome)),
     );
     setModalDeckAberto(false);
+  }
+
+  if (carregando) {
+    return (
+      <main className={styles.pagina}>
+        <p className={styles.semResultados}>Carregando sua colecao...</p>
+      </main>
+    );
   }
 
   return (
@@ -447,23 +525,23 @@ export default function CartasPage() {
                 </span>
               </h1>
               <div className={styles.progressoLinha}>
-                <strong>84 / 326 cartas coletadas</strong>
+                <strong>{resumo.cartasObtidas} / {resumo.totalCartas} cartas coletadas</strong>
                 <span className={styles.barra} aria-hidden="true">
-                  <span />
+                  <span style={{ width: `${resumo.percentual}%` }} />
                 </span>
-                <strong>26%</strong>
+                <strong>{resumo.percentual}%</strong>
               </div>
             </div>
 
             <div className={styles.status}>
               <button type="button" className={styles.moeda} title="Moedas">
                 <Coins className={styles.ouro} aria-hidden="true" />
-                1.250
+                {jogador.moedas.toLocaleString("pt-BR")}
               </button>
               <span className={styles.divisor} aria-hidden="true" />
               <button type="button" className={styles.moeda} title="Gemas">
                 <Gem className={styles.gema} aria-hidden="true" />
-                380
+                {jogador.rubys.toLocaleString("pt-BR")}
               </button>
               <span className={styles.divisor} aria-hidden="true" />
               <button type="button" className={styles.iconeTopo} aria-label="Notificacoes">
@@ -475,8 +553,8 @@ export default function CartasPage() {
                   <User aria-hidden="true" />
                 </span>
                 <span>
-                  <strong>Gabriel1</strong>
-                  <span>Nivel 1</span>
+                  <strong>{jogador.nome}</strong>
+                  <span>Nivel {jogador.nivel}</span>
                 </span>
               </Link>
             </div>
@@ -484,6 +562,7 @@ export default function CartasPage() {
 
           <div className={styles.workspace}>
             <section className={styles.lista} aria-label="Lista de cartas">
+              {erro ? <p className={styles.semResultados} role="alert">{erro}</p> : null}
               <div className={styles.filtros}>
                 <label className={styles.selectVisual}>
                   <span>Raridade</span>
@@ -691,17 +770,17 @@ export default function CartasPage() {
                         <span className={styles.atributo}>
                           <Heart className={styles.verde} aria-hidden="true" />
                           HP
-                          <strong className={styles.verde}>320</strong>
+                          <strong className={styles.verde}>{cartaSelecionada.hpBase ?? 0}</strong>
                         </span>
                         <span className={styles.atributo}>
                           <Swords className={styles.vermelho} aria-hidden="true" />
                           ATK
-                          <strong className={styles.vermelho}>190</strong>
+                          <strong className={styles.vermelho}>{cartaSelecionada.danoBase ?? 0}</strong>
                         </span>
                         <span className={styles.atributo}>
                           <Shield className={styles.azul} aria-hidden="true" />
                           DEF
-                          <strong className={styles.azul}>120</strong>
+                          <strong className={styles.azul}>{cartaSelecionada.defesaBase ?? 0}</strong>
                         </span>
                       </div>
                     </div>
@@ -714,9 +793,14 @@ export default function CartasPage() {
                         <ElementoSelecionado aria-hidden="true" />
                       </span>
                       <p>
-                        <strong>Vontade da Floresta</strong>
-                        Quando esta carta atacar, ganha +10% de dano ate o final do
-                        turno. Acumula ate 3 vezes.
+                        <strong>
+                          {typeof cartaSelecionada.passiva?.nome === "string"
+                            ? cartaSelecionada.passiva.nome
+                            : "Sem passiva cadastrada"}
+                        </strong>
+                        {typeof cartaSelecionada.passiva?.descricao === "string"
+                          ? cartaSelecionada.passiva.descricao
+                          : "Esta carta ainda nao possui uma descricao de passiva."}
                       </p>
                     </div>
                   </section>
@@ -724,9 +808,8 @@ export default function CartasPage() {
                   <section className={styles.secaoDetalhe}>
                     <h3>Descricao</h3>
                     <p>
-                      Um personagem de raridade {cartaSelecionada.raridade} ligado ao
-                      elemento {cartaSelecionada.elemento}. Este texto ainda e
-                      placeholder para a casca do inventario.
+                      Carta de raridade {cartaSelecionada.raridade} ligada ao
+                      elemento {cartaSelecionada.elemento} e a classe {cartaSelecionada.classe}.
                     </p>
                   </section>
 
@@ -740,7 +823,7 @@ export default function CartasPage() {
                       <strong>Detalhes completos</strong>
                       <span>Copias: {cartaSelecionada.copias}</span>
                       <span>Classe: {cartaSelecionada.classe}</span>
-                      <span>Status: placeholder sem backend</span>
+                      <span>Status: {cartaSelecionada.obtida ? "Obtida" : "Nao obtida"}</span>
                     </section>
                   ) : null}
 
@@ -748,10 +831,15 @@ export default function CartasPage() {
                     <button
                       className={styles.botaoPrimario}
                       type="button"
-                      onClick={() => setModalDeckAberto(true)}
+                      onClick={() => {
+                        if (cartaSelecionada.id) {
+                          router.push(`/decks?carta=${cartaSelecionada.id}`);
+                        }
+                      }}
+                      disabled={!cartaSelecionada.obtida}
                     >
                       <PackagePlus aria-hidden="true" />
-                      {cartaNoDeck ? `Equipada no slot ${slotDaCarta + 1}` : "Equipar no deck"}
+                      {cartaSelecionada.obtida ? "Adicionar a um deck" : "Carta nao obtida"}
                     </button>
                     <button
                       className={styles.botaoSecundario}
