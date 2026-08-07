@@ -4,14 +4,14 @@
   grid-column: 2;
   grid-row: 1 / 3;
   align-self: start;
-  min-height: clamp(39rem, 59vw, 53rem);
-  margin-top: clamp(-2rem, -2.6vw, -1rem);
-  margin-left: clamp(-11rem, -8vw, -4.5rem);
+  min-height: clamp(36rem, 52vw, 46rem);
+  margin-top: clamp(-1.5rem, -2vw, -0.75rem);
+  margin-left: clamp(-9rem, -7vw, -4rem);
 }
 
 .personagemHero {
   position: absolute;
-  inset: -4.1rem -8rem -3.9rem -9rem;
+  inset: -3rem -8rem -2rem -8rem;
   z-index: 0;
   border-radius: 1rem;
   background:
@@ -22,12 +22,12 @@
 
 .personagemHero::before {
   position: absolute;
-  inset: -0.8rem -1rem 0 -4.5rem;
+  inset: -0.8rem -1rem 0 -3.5rem;
   z-index: 1;
   background-image: url("https://res.cloudinary.com/djqmayaj1/image/upload/v1778564318/dca07fa0-0e76-47bd-aa6f-954dd3037737-Photoroom_1_-Photoroom_az4yog.png");
   background-position: center top 2rem;
   background-repeat: no-repeat;
-  background-size: auto min(118%, 55rem);
+  background-size: auto min(116%, 49rem);
   content: "";
   filter:
     drop-shadow(0 2.8rem 3.2rem rgba(0, 0, 0, 0.78))
@@ -38,7 +38,7 @@
 .personagemHero::after {
   position: absolute;
   right: 50%;
-  bottom: 8.2rem;
+  bottom: 5.8rem;
   z-index: 0;
   width: min(58vw, 35rem);
   height: min(58vw, 35rem);
@@ -63,7 +63,7 @@
 .conjuntoCartas {
   position: absolute;
   right: clamp(2rem, 4vw, 4.2rem);
-  bottom: clamp(7.1rem, 9.5vw, 10.2rem);
+  bottom: clamp(4.8rem, 7vw, 6.8rem);
   z-index: 3;
   display: flex;
   align-items: flex-end;
@@ -72,7 +72,7 @@
 }
 
 .conjuntoCartas article:nth-child(1) {
-  --transformBase: perspective(52rem) rotateZ(-11deg) rotacaoY(13deg);
+  --transformBase: perspective(52rem) rotateZ(-11deg) rotateY(13deg);
   margin-right: -2.15rem;
   margin-bottom: 2rem;
   animation-delay: -1.6s;
@@ -86,7 +86,7 @@
 }
 
 .conjuntoCartas article:nth-child(3) {
-  --transformBase: perspective(52rem) rotateZ(11deg) rotacaoY(-13deg);
+  --transformBase: perspective(52rem) rotateZ(11deg) rotateY(-13deg);
   margin-left: -2.2rem;
   margin-bottom: 1.4rem;
   animation-delay: -2.2s;
@@ -107,7 +107,7 @@
   box-shadow:
     0 1.1rem 2.5rem rgba(0, 0, 0, 0.46),
     0 0 0.9rem rgba(167, 139, 250, 0.1);
-  transform: var(--transformBase) rotacaoX(var(--rotacaoX)) rotacaoY(var(--rotacaoY));
+  transform: var(--transformBase) rotateX(var(--rotacaoX)) rotateY(var(--rotacaoY));
   translate: 0 0;
   transition:
     box-shadow 180ms ease,

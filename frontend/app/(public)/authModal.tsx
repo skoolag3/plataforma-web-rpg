@@ -8,10 +8,10 @@ import {
   faEnvelope,
   faEye,
   faEyeSlash,
-  faGlobe,
   faKey,
   faLock,
   faPaperPlane,
+  faWandSparkles,
   faRightToBracket,
   faShieldHalved,
   faUser,
@@ -74,9 +74,11 @@ export function Alerta({ tom, children }: PropsAlerta) {
 function EstruturaModal({
   children,
   aoFechar,
+  variante,
 }: {
   children: ReactNode;
   aoFechar: () => void;
+  variante?: "cadastro";
 }) {
   const router = useRouter();
 
@@ -88,7 +90,7 @@ function EstruturaModal({
   return (
     <div className={styles.fundoModal} onMouseDown={fechar}>
       <section
-        className={styles.modal}
+        className={[styles.modal, variante === "cadastro" ? styles.modalCadastro : ""].join(" ")}
         aria-modal="true"
         role="dialog"
         onMouseDown={(event) => event.stopPropagation()}
@@ -147,7 +149,11 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
 
   return (
     <EstruturaModal aoFechar={aoFechar}>
-      <h2 className={styles.titulo}>Entrar</h2>
+      <header className={styles.cabecalhoModal}>
+        <span className={styles.seloModal}><FontAwesomeIcon icon={faWandSparkles} aria-hidden="true" /> Bem-vindo de volta</span>
+        <h2 className={styles.titulo}>Entre na arena</h2>
+        <p className={styles.subtitulo}>Acesse seus decks e continue sua jornada.</p>
+      </header>
 
       <form className={styles.form} onSubmit={aoEnviar}>
         <Campo rotulo="Email">
@@ -219,12 +225,12 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
 
       <Separador />
       <button type="button" className={styles.btnGoogle}>
-        <FontAwesomeIcon icon={faGlobe} aria-hidden="true" />
-        Google
+        <span className={styles.googleMark} aria-hidden="true">G</span>
+        Continuar com Google
       </button>
 
       <p className={styles.rodape}>
-        Nao tem conta?{" "}
+        Não tem uma conta?{" "}
         <button type="button" onClick={() => aoTrocar("cadastro")}>
           Registrar
         </button>
@@ -250,7 +256,7 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
     setSucesso("");
 
     if (senha !== confirmarSenha) {
-      setErro("As senhas nao conferem.");
+      setErro("As senhas não conferem.");
       return;
     }
 
@@ -276,11 +282,15 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
   }
 
   return (
-    <EstruturaModal aoFechar={aoFechar}>
-      <h2 className={styles.titulo}>Criar conta</h2>
+    <EstruturaModal aoFechar={aoFechar} variante="cadastro">
+      <header className={styles.cabecalhoModal}>
+        <span className={styles.seloModal}><FontAwesomeIcon icon={faWandSparkles} aria-hidden="true" /> Novo duelista</span>
+        <h2 className={styles.titulo}>Crie sua conta</h2>
+        <p className={styles.subtitulo}>Monte seu primeiro deck e entre na arena gratuitamente.</p>
+      </header>
 
       <form className={styles.form} onSubmit={aoEnviar}>
-        <Campo rotulo="Nome de usuario">
+        <Campo rotulo="Nome de usuário">
           <span className={styles.campoIcone}>
             <FontAwesomeIcon
               icon={faUser}
@@ -319,53 +329,47 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
           </span>
         </Campo>
 
-        <Campo rotulo="Senha">
-          <span className={styles.campoSenha}>
-            <FontAwesomeIcon
-              icon={faKey}
-              className={styles.iconeEntrada}
-              aria-hidden="true"
-            />
-            <input
-              className={[styles.entrada, styles.entradaComIcone].join(" ")}
-              type={mostrarSenha ? "text" : "password"}
-              value={senha}
-              onChange={(event) => setSenha(event.target.value)}
-              placeholder="Minimo de 6 caracteres"
-              autoComplete="new-password"
-              minLength={6}
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setMostrarSenha((valor) => !valor)}
-              aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
-              title={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
-            >
-              <FontAwesomeIcon icon={mostrarSenha ? faEyeSlash : faEye} aria-hidden="true" />
-            </button>
-          </span>
-        </Campo>
+        <div className={styles.linhaCampos}>
+          <Campo rotulo="Senha">
+            <span className={styles.campoSenha}>
+              <FontAwesomeIcon icon={faKey} className={styles.iconeEntrada} aria-hidden="true" />
+              <input
+                className={[styles.entrada, styles.entradaComIcone].join(" ")}
+                type={mostrarSenha ? "text" : "password"}
+                value={senha}
+                onChange={(event) => setSenha(event.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                autoComplete="new-password"
+                minLength={6}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarSenha((valor) => !valor)}
+                aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                title={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+              >
+                <FontAwesomeIcon icon={mostrarSenha ? faEyeSlash : faEye} aria-hidden="true" />
+              </button>
+            </span>
+          </Campo>
 
-        <Campo rotulo="Confirmar senha">
-          <span className={styles.campoSenha}>
-            <FontAwesomeIcon
-              icon={faShieldHalved}
-              className={styles.iconeEntrada}
-              aria-hidden="true"
-            />
-            <input
-              className={[styles.entrada, styles.entradaComIcone].join(" ")}
-              type={mostrarSenha ? "text" : "password"}
-              value={confirmarSenha}
-              onChange={(event) => setConfirmarSenha(event.target.value)}
-              placeholder="Repita sua senha"
-              autoComplete="new-password"
-              minLength={6}
-              required
-            />
-          </span>
-        </Campo>
+          <Campo rotulo="Confirmar senha">
+            <span className={styles.campoSenha}>
+              <FontAwesomeIcon icon={faShieldHalved} className={styles.iconeEntrada} aria-hidden="true" />
+              <input
+                className={[styles.entrada, styles.entradaComIcone].join(" ")}
+                type={mostrarSenha ? "text" : "password"}
+                value={confirmarSenha}
+                onChange={(event) => setConfirmarSenha(event.target.value)}
+                placeholder="Repita a senha"
+                autoComplete="new-password"
+                minLength={6}
+                required
+              />
+            </span>
+          </Campo>
+        </div>
 
         <label className={styles.rotuloCheck}>
           <input
@@ -373,7 +377,7 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
             checked={aceitou}
             onChange={(event) => setAceitou(event.target.checked)}
           />
-          <span>Aceito os termos.</span>
+          <span>Li e aceito os <strong>termos de uso</strong>.</span>
         </label>
 
         {erro ? <Alerta tom="erro">{erro}</Alerta> : null}
@@ -390,7 +394,7 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
       </form>
 
       <p className={styles.rodape}>
-        Ja tem conta?{" "}
+        Já tem uma conta?{" "}
         <button type="button" onClick={() => aoTrocar("login")}>
           Entrar
         </button>
@@ -418,7 +422,7 @@ export function ModalEsqueciSenha({ aoFechar, aoTrocar }: PropsModal) {
       setErro(
         erroCapturado instanceof Error
           ? erroCapturado.message
-          : "Nao foi possivel enviar o link.",
+          : "Não foi possível enviar o link.",
       );
     } finally {
       setCarregando(false);
@@ -432,7 +436,7 @@ export function ModalEsqueciSenha({ aoFechar, aoTrocar }: PropsModal) {
       </div>
       <h2 className={styles.titulo}>Recuperar senha</h2>
       <p className={styles.subtitulo}>
-        Informe seu email para receber um link de redefinicao.
+        Informe seu email para receber um link de redefinição.
       </p>
 
       <form className={styles.form} onSubmit={aoEnviar}>

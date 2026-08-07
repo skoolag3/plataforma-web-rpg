@@ -1,15 +1,16 @@
 .cardResumo,
 .cardPreferencias,
 .zonaPerigo {
-  border: 1px solid #5b6a912e;
-  border-radius: 0.75rem;
-  background: linear-gradient(145deg, #0d1426f0, #060b17f5);
-  padding: 1.2rem 1.3rem;
+  border: 1px solid var(--member-border);
+  border-radius: var(--member-radius);
+  background: linear-gradient(145deg, rgba(255,255,255,.035), transparent 46%), var(--member-surface);
+  box-shadow: inset 0 1px rgba(255,255,255,.045), 0 1rem 3rem rgba(0,0,0,.12);
+  padding: 1.3rem 1.4rem;
 }
 
 .cardResumo {
-  border-color: #8b5cf69e;
-  box-shadow: 0 0 1.5rem #4c1d9533;
+  border-color: rgba(167,139,250,.3);
+  box-shadow: inset 0 1px rgba(255,255,255,.05), 0 1rem 3rem rgba(0,0,0,.14);
 }
 
 .cardResumo h2,
@@ -134,7 +135,7 @@
   gap: 0.5rem;
   margin-top: 0.55rem;
   border: 1px solid #f43f52b8;
-  border-radius: 0.45rem;
+  border-radius: 0.75rem;
   background: #7f1d1d0d;
   color: #fb4d67;
   cursor: pointer;

@@ -1,16 +1,13 @@
 "use client";
 
-import { UserCog } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { clearSession, getProfile, getToken } from "../lib/auth";
 import styles from "../styles/privateLayout.module.css";
+import { PrivateNavbar } from "../components/privateNavbar";
 
 export default function PrivateLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname();
   const [validando, setValidando] = useState(true);
 
   useEffect(() => {
@@ -31,27 +28,20 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
 
   if (validando) {
     return (
-      <main className="min-h-[calc(100vh-65px)] bg-zinc-950 px-6 py-12 text-zinc-50">
-        <section className="mx-auto w-full max-w-6xl">
-          <p className="text-zinc-300">Validando sessao...</p>
+      <main className={styles.loadingPage}>
+        <section className={styles.loadingCard}>
+          <span aria-hidden="true" />
+          <strong>Preparando sua jornada</strong>
+          <p>Validando sessão e carregando seus dados...</p>
         </section>
       </main>
     );
   }
 
   return (
-    <>
-      {pathname !== "/perfil" && pathname !== "/cartas" && pathname !== "/gacha" ? (
-        <Link
-          href="/perfil"
-          className={styles.atalhoPerfil}
-          aria-label="Gerenciar perfil"
-          title="Gerenciar perfil"
-        >
-          <UserCog aria-hidden="true" />
-        </Link>
-      ) : null}
-      {children}
-    </>
+    <div className={styles.privateShell}>
+      <PrivateNavbar />
+      <div className={styles.privateContent}>{children}</div>
+    </div>
   );
 }

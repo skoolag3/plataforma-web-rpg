@@ -1,11 +1,10 @@
 .paginaPerfil {
   --roxo: #8b5cf6;
   --roxoClaro: #b794f6;
-  display: flex;
-  min-height: 100vh;
+  min-height: calc(100vh - 4.7rem);
   background:
     radial-gradient(circle at 74% 0%, rgba(82, 45, 145, 0.13), transparent 25rem),
-    #030711;
+    transparent;
   color: #f7f7fb;
 }
 
@@ -152,9 +151,9 @@
 }
 
 .areaPerfil {
-  width: calc(100% - 13.25rem);
+  width: 100%;
   min-width: 0;
-  margin-left: 13.25rem;
+  margin-left: 0;
 }
 
 .topoPerfil {
@@ -248,13 +247,15 @@
 }
 
 .conteudoPerfil {
-  width: min(100% - 2rem, 78rem);
+  width: min(100% - 2rem, 74rem);
   margin: 0 auto;
-  padding: 1.5rem 0 3rem;
+  padding: clamp(2rem, 5vw, 4rem) 0 4rem;
 }
 
 .cabecalhoPerfil {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--member-border);
+  padding-bottom: 1.35rem;
 }
 
 .sobretitulo {
@@ -268,7 +269,8 @@
 
 .cabecalhoPerfil h1 {
   margin: 0;
-  font-size: clamp(1.55rem, 2.5vw, 2rem);
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.045em;
 }
 
 .cabecalhoPerfil p {
@@ -322,8 +324,8 @@
   }
 
   .areaPerfil {
-    width: calc(100% - 5.25rem);
-    margin-left: 5.25rem;
+    width: 100%;
+    margin-left: 0;
   }
 }
 

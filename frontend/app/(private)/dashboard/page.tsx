@@ -1,69 +1,43 @@
 "use client";
 
-import { Bot, Shield, Sparkles, Swords } from "lucide-react";
+import { Boxes, Gem, Layers, Swords, Trophy, WalletCards } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  buscarProvocacaoBot,
-  iniciarPartidaBot,
-  type ResultadoPartida,
-} from "../../lib/jogo";
+import { getToken } from "../../lib/auth";
+import { listarDecks, type Deck } from "../../lib/jogo";
+import { buscarPerfilApi, type PerfilConta } from "../../lib/perfil";
+import styles from "../../styles/dashboard.module.css";
 
 export default function DashboardPage() {
-  const [provocacao, setProvocacao] = useState({ personalidade: "", pergunta: "" });
-  const [resposta, setResposta] = useState("");
-  const [resultado, setResultado] = useState<ResultadoPartida | null>(null);
+  const [perfil, setPerfil] = useState<PerfilConta | null>(null);
+  const [decks, setDecks] = useState<Deck[]>([]);
   const [erro, setErro] = useState("");
-  const [lutando, setLutando] = useState(false);
-
   useEffect(() => {
-    buscarProvocacaoBot().then(setProvocacao).catch((e) => setErro(e.message));
+    const token = getToken();
+    if (!token) return;
+    Promise.all([buscarPerfilApi(token), listarDecks()])
+      .then(([dados, decksDados]) => { setPerfil(dados); setDecks(decksDados); })
+      .catch((e) => setErro(e instanceof Error ? e.message : "Nao foi possivel carregar o resumo."));
   }, []);
-
-  async function batalhar() {
-    setLutando(true);
-    setErro("");
-    try {
-      setResultado(await iniciarPartidaBot(resposta));
-    } catch (e) {
-      setErro(e instanceof Error ? e.message : "Erro ao iniciar a batalha.");
-    } finally {
-      setLutando(false);
-    }
-  }
-
+  const deckAtivo = decks.find((deck) => deck.ativo);
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#27134d,#080b12_55%)] px-5 py-10 text-zinc-100">
-      <section className="mx-auto max-w-5xl">
-        <header className="mb-8 flex items-center justify-between gap-4">
-          <div><p className="text-sm font-bold uppercase tracking-widest text-violet-400">Arena sombria</p><h1 className="text-4xl font-black">Partida 1v1 contra Bot</h1></div>
-          <Link href="/decks" className="rounded-lg border border-violet-500/50 px-4 py-2 text-violet-200">Gerenciar deck</Link>
+    <main className={styles.page}>
+      <section className={styles.container}>
+        <header className={styles.hero}>
+          <div><span>Home do jogador</span><h1>Bem-vindo, {perfil?.user ?? "aventureiro"}.</h1><p>Seu ponto de partida para organizar a colecao e entrar na arena.</p></div>
+          <Link href="/partida"><Swords /> Jogar agora</Link>
         </header>
-
-        {!resultado ? (
-          <section className="rounded-2xl border border-violet-500/30 bg-zinc-950/80 p-7 shadow-2xl">
-            <div className="mb-5 flex items-center gap-4"><span className="grid size-14 place-items-center rounded-full bg-violet-700"><Bot /></span><div><strong className="text-xl">{provocacao.personalidade || "Carregando oponente..."}</strong><p className="text-zinc-400">A resposta define como o bot enfrentará você.</p></div></div>
-            <blockquote className="mb-5 border-l-4 border-violet-500 bg-violet-950/40 p-5 text-lg italic">“{provocacao.pergunta}”</blockquote>
-            <textarea value={resposta} onChange={(e) => setResposta(e.target.value)} maxLength={500} placeholder="Responda ao vilão..." className="min-h-28 w-full rounded-xl border border-zinc-700 bg-zinc-900 p-4 outline-none focus:border-violet-500" />
-            {erro && <p className="mt-3 text-red-400">{erro}</p>}
-            <button onClick={() => void batalhar()} disabled={lutando || resposta.trim().length < 2} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 py-3 font-bold disabled:opacity-40"><Swords />{lutando ? "Simulando turnos..." : "Aceitar duelo"}</button>
-          </section>
-        ) : (
-          <section className="grid gap-5 lg:grid-cols-[280px_1fr]">
-            <aside className="rounded-2xl border border-zinc-700 bg-zinc-950/80 p-6">
-              <Sparkles className="mb-3 text-violet-400" />
-              <h2 className="text-3xl font-black">{resultado.resultado}</h2>
-              <p className="mt-2 text-zinc-400">Dificuldade: {resultado.dificuldade}</p>
-              <p className="text-zinc-400">Turnos: {resultado.estado.turno}</p>
-              <p className={resultado.variacaoPontos >= 0 ? "text-green-400" : "text-red-400"}>{resultado.variacaoPontos >= 0 ? "+" : ""}{resultado.variacaoPontos} pontos</p>
-              <button onClick={() => { setResultado(null); setResposta(""); }} className="mt-6 w-full rounded-lg bg-violet-600 py-2 font-bold">Nova partida</button>
-            </aside>
-            <div className="max-h-[650px] overflow-auto rounded-2xl border border-zinc-700 bg-zinc-950/80 p-6">
-              <h2 className="mb-4 flex items-center gap-2 text-xl font-bold"><Shield /> Log da partida</h2>
-              {resultado.estado.eventos.map((evento, i) => <div key={i} className="mb-2 rounded-lg bg-zinc-900 p-3"><span className="mr-3 text-xs font-bold text-violet-400">T{evento.turno}</span>{evento.texto}</div>)}
-            </div>
-          </section>
-        )}
+        {erro ? <p className={styles.error}>{erro}</p> : null}
+        <section className={styles.metrics}>
+          <article><Gem /><span>Rubys</span><strong>{perfil?.rubys?.toLocaleString("pt-BR") ?? "—"}</strong></article>
+          <article><WalletCards /><span>Moedas</span><strong>{perfil?.moedas?.toLocaleString("pt-BR") ?? "—"}</strong></article>
+          <article><Layers /><span>Colecao</span><strong>{perfil ? `${perfil.cartasObtidas}/${perfil.totalCartas}` : "—"}</strong></article>
+          <article><Trophy /><span>Ranking</span><strong>{perfil?.ranking?.toLocaleString("pt-BR") ?? "—"}</strong></article>
+        </section>
+        <section className={styles.grid}>
+          <article className={styles.deckCard}><div><Boxes /><span><small>Deck ativo</small><strong>{deckAtivo?.nome ?? "Nenhum deck ativo"}</strong><p>{deckAtivo ? `${deckAtivo.cartas.length}/6 cartas prontas` : "Monte um deck para liberar as batalhas."}</p></span></div><Link href="/decks">{deckAtivo ? "Gerenciar deck" : "Criar deck"}</Link></article>
+          <article className={styles.actions}><h2>Acessos rapidos</h2><Link href="/cartas"><Layers /><span><strong>Minha colecao</strong><small>Veja suas cartas e atributos</small></span></Link><Link href="/gacha"><Gem /><span><strong>Invocacoes</strong><small>Obtenha novas cartas</small></span></Link><Link href="/partida"><Swords /><span><strong>Arena</strong><small>Enfrente o bot</small></span></Link></article>
+        </section>
       </section>
     </main>
   );

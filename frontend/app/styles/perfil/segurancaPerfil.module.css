@@ -1,8 +1,9 @@
 .cardSeguranca {
-  border: 1px solid #5b6a912e;
-  border-radius: 0.75rem;
-  background: linear-gradient(145deg, #0d1426f0, #060b17f5);
-  padding: 1.1rem;
+  border: 1px solid var(--member-border);
+  border-radius: var(--member-radius);
+  background: linear-gradient(145deg, rgba(255,255,255,.035), transparent 46%), var(--member-surface);
+  box-shadow: inset 0 1px rgba(255,255,255,.045), 0 1rem 3rem rgba(0,0,0,.12);
+  padding: 1.25rem;
 }
 
 .cabecalhoSeguranca {
@@ -52,7 +53,7 @@
 .listaSeguranca {
   overflow: hidden;
   border: 1px solid #5865853d;
-  border-radius: 0.6rem;
+  border-radius: 0.9rem;
 }
 
 .itemSeguranca,

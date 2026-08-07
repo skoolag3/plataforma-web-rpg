@@ -460,12 +460,14 @@
   height: 2.75rem;
   border: 1px solid rgba(168, 85, 247, 0.55);
   border-radius: 0.3rem;
-  background:
-    linear-gradient(180deg, transparent 35%, rgba(2, 6, 23, 0.95) 88%),
-    url("https://res.cloudinary.com/djqmayaj1/image/upload/v1778560369/cbec6afb-0b8e-417b-951c-be06c253287b_ebvc4k.png");
+  display: inline-grid;
+  place-items: center;
+  color: #64748b;
+  background: linear-gradient(145deg, #24283a, #10131c);
   background-position: center;
   background-size: cover;
 }
+.cardThumb svg { width: 1rem; }
 
 .editPanel {
   display: grid;
@@ -577,13 +579,13 @@
   gap: 0.35rem;
   border: 1px solid rgba(168, 85, 247, 0.64);
   border-radius: 0.5rem;
-  background:
-    linear-gradient(180deg, transparent 40%, rgba(2, 6, 23, 0.94) 84%),
-    url("https://res.cloudinary.com/djqmayaj1/image/upload/v1778560369/cbec6afb-0b8e-417b-951c-be06c253287b_ebvc4k.png");
+  background: linear-gradient(145deg, #27233e, #10131c);
   background-position: center;
   background-size: cover;
   padding: 1rem;
 }
+.cardPreview > svg { width: 3rem; height: 3rem; align-self: center; justify-self: center; color: #64748b; }
+.formPanel small,.previewPanel small { color:#64748b;font-size:.72rem;font-weight:500;line-height:1.45; }
 
 .editorActions {
   display: grid;

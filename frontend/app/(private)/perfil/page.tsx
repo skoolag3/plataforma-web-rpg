@@ -25,8 +25,6 @@ import { CardUsuario } from "./components/cardUsuario";
 import { ConfigsPerfil } from "./components/configsPerfil";
 import { PreferenciasPerfil } from "./components/preferenciasPerfil";
 import { ResumoConta } from "./components/resumoConta";
-import { SidebarPerfil } from "./components/sidebarPerfil";
-import { TopoPerfil } from "./components/topoPerfil";
 import { ZonaPerigo } from "./components/zonaPerigo";
 
 export default function PerfilPage() {
@@ -198,11 +196,7 @@ export default function PerfilPage() {
 
   return (
     <main className={styles.paginaPerfil}>
-      <SidebarPerfil />
-
       <div className={styles.areaPerfil}>
-        <TopoPerfil perfil={perfil} />
-
         <div className={styles.conteudoPerfil}>
           <header className={styles.cabecalhoPerfil}>
             <p className={styles.sobretitulo}>Conta do jogador</p>

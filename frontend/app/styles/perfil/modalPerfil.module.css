@@ -13,8 +13,8 @@
 .modalEdicao {
   width: min(100%, 30rem);
   border: 1px solid #8b5cf680;
-  border-radius: 0.8rem;
-  background: linear-gradient(145deg, #0f162afa, #050914fc);
+  border-radius: 1.15rem;
+  background: linear-gradient(145deg, rgba(255,255,255,.04), transparent 45%), #0b0e18;
   box-shadow: 0 2rem 5rem #0009;
   padding: 1.2rem;
 }

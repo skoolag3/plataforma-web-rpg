@@ -155,6 +155,13 @@ function cardStyle(card: CartaGacha): CSSProperties {
     "--artA": card.artA,
     "--artB": card.artB,
     "--glow": card.glow,
+    ...(card.foto
+      ? {
+          backgroundImage: `linear-gradient(180deg, transparent 38%, rgba(2, 6, 23, 0.92) 86%), url("${card.foto}")`,
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+        }
+      : {}),
   } as CSSProperties;
 }
 
@@ -250,7 +257,7 @@ export default function GachaPage() {
 
   return (
     <main className={styles.pagina}>
-      <div className={styles.shell}>
+      <div className={styles.shellSemSidebar}>
         <aside className={styles.sidebar} aria-label="Menu do gacha">
           <div className={styles.marca}>
             <span className={styles.marcaIcone}>

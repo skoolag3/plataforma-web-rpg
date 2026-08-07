@@ -1,0 +1,71 @@
+"use client";
+
+import {
+  Boxes,
+  Gem,
+  Home,
+  Layers,
+  LogOut,
+  Menu,
+  ShieldCheck,
+  Sparkles,
+  Swords,
+  User,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useSyncExternalStore } from "react";
+import { clearSession, getStoredUser, subscribeAuthChange } from "../lib/auth";
+import styles from "../styles/privateNavbar.module.css";
+
+const links = [
+  { href: "/dashboard", label: "Inicio", icon: Home },
+  { href: "/cartas", label: "Colecao", icon: Layers },
+  { href: "/decks", label: "Decks", icon: Boxes },
+  { href: "/gacha", label: "Gacha", icon: Sparkles },
+  { href: "/partida", label: "Arena", icon: Swords },
+  { href: "/perfil", label: "Perfil", icon: User },
+];
+
+export function PrivateNavbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [aberto, setAberto] = useState(false);
+  const usuario = useSyncExternalStore(
+    subscribeAuthChange,
+    getStoredUser,
+    () => null,
+  );
+
+  function sair() {
+    clearSession();
+    router.replace("/");
+  }
+
+  return (
+    <header className={styles.header}>
+      <nav className={styles.nav}>
+        <Link href="/dashboard" className={styles.brand} onClick={() => setAberto(false)}>
+          <span><Gem aria-hidden="true" /></span>
+          <strong>Anime<em>Cards</em></strong>
+        </Link>
+        <button className={styles.menu} type="button" onClick={() => setAberto((valor) => !valor)} aria-label="Abrir menu">
+          {aberto ? <X /> : <Menu />}
+        </button>
+        <div className={`${styles.links} ${aberto ? styles.linksAbertos : ""}`}>
+          {links.map((item) => {
+            const Icon = item.icon;
+            const ativo = pathname === item.href;
+            return <Link key={item.href} href={item.href} className={ativo ? styles.ativo : ""} onClick={() => setAberto(false)}><Icon /><span>{item.label}</span></Link>;
+          })}
+          {usuario?.is_admin ? <Link href="/admin" onClick={() => setAberto(false)}><ShieldCheck /><span>Admin</span></Link> : null}
+        </div>
+        <div className={styles.usuario}>
+          <Link href="/perfil"><span><User /></span><div><strong>{usuario?.nome ?? "Jogador"}</strong><small>Nivel {usuario?.nivel ?? 1}</small></div></Link>
+          <button type="button" onClick={sair} title="Sair"><LogOut /></button>
+        </div>
+      </nav>
+    </header>
+  );
+}

@@ -2,13 +2,10 @@
 
 import {
   Activity,
-  Bell,
   Bot,
   ChevronDown,
-  Database,
   Edit3,
   Eye,
-  FileText,
   Gem,
   Home,
   ImagePlus,
@@ -19,13 +16,10 @@ import {
   RefreshCw,
   Save,
   Search,
-  Settings,
   Shield,
   Sparkles,
-  Swords,
   Trash2,
   Users,
-  Wallet,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -65,12 +59,7 @@ const nav = [
   { href: "/admin/habilidades", label: "Habilidades", icon: Sparkles },
   { href: "/admin/decks-npc", label: "Decks NPC", icon: Bot },
   { href: "/admin/usuarios", label: "Usuarios", icon: Users },
-  { href: "#", label: "Partidas", icon: Swords },
-  { href: "#", label: "Economia", icon: Wallet },
   { href: "/admin/banners", label: "Gacha (Banners)", icon: ImagePlus },
-  { href: "#", label: "Noticias / Eventos", icon: FileText },
-  { href: "#", label: "Logs do Sistema", icon: Database },
-  { href: "#", label: "Configuracoes", icon: Settings },
 ];
 
 const habilidades = [
@@ -164,9 +153,9 @@ function AdminLayout({ title, subtitle, children }: { title: string; subtitle: s
           })}
         </nav>
 
-        <Link href="/" className={styles.logout}>
+        <Link href="/dashboard" className={styles.logout}>
           <LogOut aria-hidden="true" />
-          Sair
+          Voltar ao jogo
         </Link>
       </aside>
 
@@ -177,12 +166,6 @@ function AdminLayout({ title, subtitle, children }: { title: string; subtitle: s
             <p>{subtitle}</p>
           </div>
           <div className={styles.adminActions}>
-            <button type="button" aria-label="Buscar">
-              <Search aria-hidden="true" />
-            </button>
-            <button type="button" aria-label="Notificacoes">
-              <Bell aria-hidden="true" />
-            </button>
             <Link href="/perfil" className={styles.adminUser}>
               <span>
                 <Users aria-hidden="true" />
@@ -487,7 +470,7 @@ function Cartas() {
                     <span
                       className={styles.cardThumb}
                       style={carta.foto ? { backgroundImage: `url("${carta.foto}")` } : undefined}
-                    />
+                    >{!carta.foto ? <ImagePlus aria-label="Sem imagem" /> : null}</span>
                     {carta.nome}
                   </span>
                 </td>
@@ -530,15 +513,15 @@ function Cartas() {
 
 function NovaCarta() {
   const [form, setForm] = useState<CartaFormState>({
-    nome: "Kael Arcano",
-    raridade: "UR",
+    nome: "",
+    raridade: "N",
     elemento: "natureza",
-    classe: "Mago",
-    custo: "4",
-    hpBase: "320",
-    danoBase: "190",
-    defesaBase: "120",
-    passiva: '{\n  "nome": "Vontade da Floresta",\n  "descricao": "Quando esta carta atacar, ganha +10% de dano ate o final do turno.",\n  "gatilho": "on_attack",\n  "valor": 10\n}',
+    classe: "",
+    custo: "1",
+    hpBase: "100",
+    danoBase: "20",
+    defesaBase: "10",
+    passiva: "{}",
     ativo: true,
   });
   const [foto, setFoto] = useState<File | null>(null);
@@ -644,6 +627,26 @@ function NovaCarta() {
             Carta ativa
           </label>
           <h2>Passiva Principal</h2>
+          <label>
+            Modelo rapido
+            <select
+              defaultValue=""
+              onChange={(event) => {
+                const modelos: Record<string, Record<string, unknown>> = {
+                  entradaBuff: { nome: "Impulso inicial", gatilho: "on_enter", tipo: "buff", alvo: "self", atributo: "ataque", valor: 10, velocidade: 12 },
+                  entradaDebuff: { nome: "Presenca opressora", gatilho: "on_enter", tipo: "debuff", alvo: "enemy", atributo: "defesa", valor: 10, velocidade: 10 },
+                  ataqueBuff: { nome: "Furia crescente", gatilho: "on_attack", tipo: "buff", alvo: "self", atributo: "ataque", valor: 5, velocidade: 14 },
+                };
+                updateField("passiva", JSON.stringify(modelos[event.target.value] ?? {}, null, 2));
+              }}
+            >
+              <option value="">Sem passiva</option>
+              <option value="entradaBuff">Buff ao entrar</option>
+              <option value="entradaDebuff">Debuff ao entrar</option>
+              <option value="ataqueBuff">Buff ao atacar</option>
+            </select>
+          </label>
+          <small>O modelo preenche o JSON abaixo; ajuste nome, atributo, valor e velocidade se necessario.</small>
           <textarea
             className={styles.codeArea}
             value={form.passiva}
@@ -653,12 +656,14 @@ function NovaCarta() {
         <aside className={styles.previewPanel}>
           <h2>Imagem da Carta</h2>
           <div className={styles.cardPreview} style={cardImage ? { backgroundImage: `linear-gradient(180deg, transparent 40%, rgba(2, 6, 23, 0.94) 84%), url("${cardImage}")` } : undefined}>
+            {!cardImage ? <ImagePlus aria-hidden="true" /> : null}
             <strong>{form.raridade}</strong>
             <span>{form.nome || "Nova Carta"}</span>
           </div>
           <label>
             Foto/personagem
             <input type="file" accept="image/*" onChange={handleFotoChange} />
+            <small>PNG, JPG ou WEBP, ate 5 MB. O arquivo sera enviado ao Cloudinary.</small>
           </label>
           <label>
             Moldura

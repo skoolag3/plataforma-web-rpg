@@ -3,8 +3,8 @@ import { Navbar } from "./components/navbar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Card Game RPG",
-  description: "Plataforma web para card game RPG",
+  title: "AnimeCards — Card Game RPG",
+  description: "Monte seu deck, dispute duelos táticos e suba no ranking de AnimeCards.",
 };
 
 export default function RootLayout({

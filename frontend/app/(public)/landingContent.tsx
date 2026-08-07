@@ -3,7 +3,9 @@
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
   faBolt,
+  faArrowRight,
   faCalendarDays,
+  faCheck,
   faDiceD6,
   faLayerGroup,
   faNewspaper,
@@ -71,19 +73,20 @@ type NoticiaLanding = {
   tag: string;
   tagClasse: string;
   titulo: string;
+  resumo: string;
   data: string;
 };
 
 const recursos = [
-  { icone: faScaleBalanced, titulo: "Regras justas", texto: "As jogadas sao validadas pelo servidor." },
-  { icone: faDiceD6, titulo: "Decks de 6 cartas", texto: "Monte combinacoes curtas e estrategicas." },
-  { icone: faShieldHalved, titulo: "Progressao sem pay-to-win", texto: "Ganhe cartas e Rubys jogando." },
+  { icone: faScaleBalanced, titulo: "Regras justas", texto: "As jogadas são validadas pelo servidor." },
+  { icone: faDiceD6, titulo: "Decks de 6 cartas", texto: "Monte combinações curtas e estratégicas." },
+  { icone: faShieldHalved, titulo: "Progressão sem pay-to-win", texto: "Ganhe cartas e Rubys jogando." },
 ] satisfies TopicoLanding[];
 
 const metricas = [
   { icone: faLayerGroup, valor: "6", texto: "Cartas por deck" },
   { icone: faRobot, valor: "Duelos", texto: "Contra bot" },
-  { icone: faRankingStar, valor: "Progressao", texto: "Sem pay-to-win" },
+  { icone: faRankingStar, valor: "Progressão", texto: "Sem pay-to-win" },
 ] satisfies MetricaLanding[];
 
 const imagemCarta =
@@ -96,9 +99,9 @@ const cartas = [
 ];
 
 const noticias = [
-  { icone: faTrophy, tag: "Temporada", tagClasse: styles.tagTemporada, titulo: "Eclipse Roxo inicia a liga", data: "12 MAI 2026" },
-  { icone: faBolt, tag: "Balance", tagClasse: styles.tagBalanceamento, titulo: "Ajustes no custo de energia", data: "10 MAI 2026" },
-  { icone: faWandMagicSparkles, tag: "Evento", tagClasse: styles.tagEvento, titulo: "Registro antecipado libera carta rara", data: "08 MAI 2026" },
+  { icone: faTrophy, tag: "Temporada", tagClasse: styles.tagTemporada, titulo: "Eclipse Roxo inicia a liga", resumo: "Uma nova escalada competitiva, recompensas exclusivas e ranking renovado.", data: "12 MAI 2026" },
+  { icone: faBolt, tag: "Balance", tagClasse: styles.tagBalanceamento, titulo: "Ajustes no custo de energia", resumo: "Mudanças pontuais deixam os duelos mais dinâmicos e abrem novas estratégias.", data: "10 MAI 2026" },
+  { icone: faWandMagicSparkles, tag: "Evento", tagClasse: styles.tagEvento, titulo: "Registro antecipado libera carta rara", resumo: "Crie sua conta antes da estreia e comece a jornada com uma carta especial.", data: "08 MAI 2026" },
 ] satisfies NoticiaLanding[];
 
 function obterEstiloParticula(indice: number) {
@@ -150,22 +153,37 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
         </div>
         <div className={styles.gradeHero}>
           <div className={styles.conteudoHero}>
+            <span className={styles.kicker}>
+              <FontAwesomeIcon icon={faBolt} aria-hidden="true" />
+              Temporada Eclipse Roxo
+            </span>
             <h1 className={styles.tituloHero}>
-              Monte seu deck.
-              <br />
-              Enfrente o bot.
-              <br />
-              <span>Suba no ranking.</span>
+              Sua estratégia.
+              <br />Seu deck.
+              <br /><span>Sua lenda.</span>
             </h1>
             <p className={styles.textoHero}>
-              Duelos estrategicos contra bot, decks de ate 6 cartas e progressao
-              justa direto pelo navegador.
+              Colecione heróis, crie combos poderosos e domine duelos táticos
+              em partidas rápidas direto do navegador.
             </p>
 
-            <Link href="/cadastro" className={styles.btnJogar}>
-              <FontAwesomeIcon className={styles.iconeBtnJogar} icon={faPlay} aria-hidden="true" />
-              Jogar agora
-            </Link>
+            <div className={styles.acoesHero}>
+              <Link href="/cadastro" className={styles.btnJogar}>
+                <FontAwesomeIcon className={styles.iconeBtnJogar} icon={faPlay} aria-hidden="true" />
+                Jogar grátis
+              </Link>
+              <Link href="#como-jogar" className={styles.btnSecundario}>
+                Conhecer o jogo
+                <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className={styles.provaSocial}>
+              <span className={styles.avatares} aria-hidden="true">
+                <i>K</i><i>R</i><i>N</i>
+              </span>
+              <span><strong>+2.400 duelistas</strong> já entraram na arena</span>
+            </div>
 
           </div>
 
@@ -194,7 +212,7 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
             {recursos.map((recurso) => (
               <div className={styles.recurso} key={recurso.titulo}>
                 <span className={styles.iconeRecurso} aria-hidden="true">
-                  <FontAwesomeIcon icon={recurso.icone} />
+                  <FontAwesomeIcon icon={faCheck} />
                 </span>
                 <div>
                   <strong>{recurso.titulo}</strong>
@@ -222,9 +240,9 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
         <div className={styles.cabecalhoNoticias}>
           <h2>
             <FontAwesomeIcon icon={faNewspaper} aria-hidden="true" />
-            Noticias
+            Notícias
           </h2>
-          <p>Atualizacoes de temporada, balanceamento e eventos especiais.</p>
+          <p>Atualizações de temporada, balanceamento e eventos especiais.</p>
         </div>
         <div className={styles.gradeNoticias}>
           {noticias.map((noticia) => (
@@ -234,10 +252,12 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
                 <FontAwesomeIcon className={styles.iconeNoticia} icon={noticia.icone} aria-hidden="true" />
               </div>
               <h3>{noticia.titulo}</h3>
+              <p>{noticia.resumo}</p>
               <time>
                 <FontAwesomeIcon icon={faCalendarDays} aria-hidden="true" />
                 {noticia.data}
               </time>
+              <span className={styles.lerMais}>Ler novidade <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" /></span>
             </article>
           ))}
         </div>

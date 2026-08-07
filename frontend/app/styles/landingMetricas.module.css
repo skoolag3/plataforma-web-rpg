@@ -7,10 +7,10 @@
   align-self: end;
   justify-self: center;
   overflow: hidden;
-  width: min(100%, 45rem);
-  margin: 0 0 clamp(1.0rem, 2.1vw, 1.7rem);
+  width: min(100%, 42rem);
+  margin: 0 0 clamp(0.5rem, 1.2vw, 1rem);
   border: 1px solid rgba(167, 139, 250, 0.2);
-  border-radius: 0.38rem;
+  border-radius: 0.75rem;
   background:
     linear-gradient(90deg, rgba(124, 58, 237, 0.18), rgba(190, 242, 100, 0.06)),
     rgba(10, 10, 15, 0.62);
@@ -20,10 +20,10 @@
 
 .metrica {
   display: grid;
-  grid-template-columns: 3rem 1fr;
-  gap: 0.50rem;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.45rem;
   align-items: center;
-  padding: 1rem 1.15rem;
+  padding: 0.85rem 1rem;
   text-align: left;
 }
 
@@ -41,7 +41,7 @@
 .metrica strong {
   display: block;
   color: #fff;
-  font-size: clamp(1.15rem, 2vw, 1.60rem);
+  font-size: clamp(1.05rem, 1.8vw, 1.4rem);
   line-height: 1;
 }
 

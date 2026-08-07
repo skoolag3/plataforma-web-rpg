@@ -10,7 +10,7 @@ import styles from "../styles/navbar.module.css";
 
 const linksNav = [
   { href: "/", label: "Home", private: false },
-  { href: "/#noticias", label: "Noticias", private: false },
+  { href: "/#noticias", label: "Notícias", private: false },
 ];
 
 export function Navbar() {
@@ -37,9 +37,9 @@ export function Navbar() {
   });
 
   if (
-    caminho === "/perfil" ||
-    caminho === "/cartas" ||
-    caminho === "/gacha" ||
+    ["/dashboard", "/perfil", "/cartas", "/decks", "/gacha", "/partida"].some(
+      (rota) => caminho === rota || caminho.startsWith(`${rota}/`),
+    ) ||
     caminho.startsWith("/admin")
   ) {
     return null;

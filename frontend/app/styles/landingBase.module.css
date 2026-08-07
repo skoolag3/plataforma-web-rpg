@@ -8,9 +8,10 @@
   --corCiano: #67e8f9;
   --corTexto: #fff;
   --corMuted: #a8a8b8;
-  --corBorda: rgba(167, 139, 250, 0.18);
+  --corBorda: rgba(167, 139, 250, 0.2);
   min-height: 100svh;
-  background: var(--corBg);
+  overflow: hidden;
+  background: #07070b;
   color: var(--corTexto);
 }
 
