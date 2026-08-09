@@ -236,10 +236,10 @@ export class DecksService {
           raridade: item.carta.raridade,
           elemento: item.carta.elemento,
           classe:
-            typeof passiva.classe === 'string'
-              ? passiva.classe
-              : 'Sem classe',
+            typeof passiva.classe === 'string' ? passiva.classe : 'Sem classe',
           foto: item.carta.foto,
+          moldura: item.carta.moldura,
+          configVisual: item.carta.config_visual,
           posicao: item.posicao_slot,
         };
       }),

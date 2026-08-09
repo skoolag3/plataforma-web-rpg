@@ -74,9 +74,15 @@
   }
 
   .gradeHero {
+    display: flex;
+    flex-direction: column;
     gap: 0.85rem;
     width: min(100% - 1.25rem, 78rem);
-    padding-top: clamp(7.5rem, 24vw, 9.5rem);
+    padding-top: 5.35rem;
+  }
+
+  .conteudoHero {
+    width: 100%;
   }
 
   .tituloHero {
@@ -97,25 +103,26 @@
   }
 
   .visualHero {
-    min-height: clamp(21rem, 86vw, 29rem);
-    margin-top: clamp(-1.6rem, -4vw, -0.8rem);
+    order: 2;
+    width: 100%;
+    min-height: clamp(22rem, 112vw, 29rem);
+    margin: 0;
+    overflow: hidden;
+    border-radius: 1rem;
   }
 
   .personagemHero {
-    inset: -1.7rem -4.2rem -1.5rem -4.2rem;
+    inset: 0 -2.2rem -1rem;
   }
 
   .personagemHero::before {
-    background-position: center top 1.35rem;
-    background-size: auto min(116%, 32rem);
+    inset: 0 -1rem -0.5rem;
+    background-position: center top;
+    background-size: auto min(112%, 32rem);
   }
 
   .conjuntoCartas {
-    left: 50%;
-    right: auto;
-    bottom: clamp(2rem, 8vw, 2.6rem);
-    transform: translateX(-50%) scale(0.8);
-    transform-origin: center bottom;
+    display: none;
   }
 
   .conjuntoCartas article:nth-child(3) {
@@ -123,7 +130,26 @@
   }
 
   .metricas {
+    order: 4;
     grid-template-columns: 1fr;
+  }
+
+  .gradeRecursos {
+    order: 3;
+  }
+
+  .acoesHero {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .btnJogar,
+  .btnSecundario {
+    width: 100%;
+  }
+
+  .btnSecundario {
+    justify-content: center;
   }
 
   .metrica + .metrica {
@@ -139,7 +165,7 @@
 
 @media (max-width: 430px) {
   .gradeHero {
-    padding-top: clamp(6.5rem, 22vw, 8rem);
+    padding-top: 5.1rem;
   }
 
   .tituloHero {
@@ -151,18 +177,15 @@
   }
 
   .visualHero {
-    min-height: clamp(19rem, 82vw, 24rem);
+    min-height: clamp(21rem, 118vw, 25rem);
   }
 
   .personagemHero {
-    inset: -1.35rem -3.35rem -1.2rem -3.35rem;
+    inset: 0 -1.6rem -0.8rem;
   }
 
   .personagemHero::before {
-    background-size: auto min(112%, 27rem);
-  }
-
-  .conjuntoCartas {
-    transform: translateX(-50%) scale(0.72);
+    inset: 0 -0.8rem -0.4rem;
+    background-size: auto min(108%, 27rem);
   }
 }

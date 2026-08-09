@@ -1,6 +1,7 @@
 .secaoNoticias {
   position: relative;
   z-index: 2;
+  scroll-margin-top: 1rem;
   overflow: hidden;
   background:
     radial-gradient(circle at 50% 0, rgba(124, 58, 237, 0.12), transparent 28rem),

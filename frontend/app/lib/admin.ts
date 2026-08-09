@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "./auth";
+import type { ConfigVisualCarta } from "../components/cartaMontada";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
@@ -22,6 +23,7 @@ export type AdminCarta = {
   passiva: Record<string, unknown>;
   foto: string | null;
   moldura: string | null;
+  configVisual: ConfigVisualCarta | null;
   ativo: boolean;
   criadoEm?: string;
   atualizadoEm?: string;
@@ -39,10 +41,35 @@ export type CreateAdminCartaPayload = {
   passiva?: Record<string, unknown>;
   foto?: string;
   moldura?: string;
+  configVisual?: ConfigVisualCarta;
   ativo?: boolean;
 };
 
 export type UpdateAdminCartaPayload = Partial<CreateAdminCartaPayload>;
+
+export type AdminUsuario = {
+  id: string;
+  nome: string;
+  email: string;
+  nivel: number;
+  partidas: number;
+  rubys: number;
+  moedas: number;
+  ativo: boolean;
+  bloqueado: boolean;
+  admin: boolean;
+  emailVerificado: boolean;
+  criadoEm: string | null;
+  ultimoLoginEm: string | null;
+};
+
+export type UpdateAdminUsuarioPayload = {
+  nome?: string;
+  nivel?: number;
+  ativo?: boolean;
+  bloqueado?: boolean;
+  emailVerificado?: boolean;
+};
 
 export type AdminDashboardResumo = {
   metricas: {
@@ -159,6 +186,21 @@ export function uploadCartaAssets(formData: FormData) {
   return adminRequest<UploadCartaAssetsResponse>("/admin/uploads/cartas", {
     method: "POST",
     body: formData,
+  });
+}
+
+export function listarAdminUsuarios(filtros: { busca?: string; status?: string } = {}) {
+  const params = new URLSearchParams();
+  if (filtros.busca?.trim()) params.set("q", filtros.busca.trim());
+  if (filtros.status) params.set("status", filtros.status);
+  const query = params.toString();
+  return adminRequest<AdminUsuario[]>(`/admin/usuarios${query ? `?${query}` : ""}`);
+}
+
+export function atualizarAdminUsuario(id: string, payload: UpdateAdminUsuarioPayload) {
+  return adminRequest<AdminUsuario>(`/admin/usuarios/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
   });
 }
 

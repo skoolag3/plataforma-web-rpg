@@ -1,8 +1,62 @@
 .gridCartas {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(8.6rem, 1fr));
-  gap: 1rem;
+  gap: 2rem 1.5rem;
+  padding: 1.35rem 0.9rem;
 }
+
+.cardArtefato {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  border: 0;
+  background: none !important;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.8rem;
+  text-align: left;
+}
+
+.cardArtefato > div {
+  transition: filter 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.cardArtefato:hover > div {
+  filter: brightness(1.08) saturate(1.05);
+  transform: translateY(-5px) scale(1.012);
+}
+
+.cardArtefato:focus-visible {
+  outline: 2px solid rgba(190, 242, 100, 0.78);
+  outline-offset: 0.2rem;
+}
+
+.cardArtefatoSelecionado > div {
+  filter: drop-shadow(0 0 0.8rem rgba(168, 85, 247, 0.72));
+}
+
+.cardMontadaInfo {
+  display: grid;
+  width: 100%;
+  gap: 0.35rem;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.78), 0 0 0.8rem #000;
+}
+
+.cardMontadaTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  color: #e9d5ff;
+  font-size: 0.66rem;
+  font-weight: 950;
+}
+
+.cardMontadaTopo svg { width: 0.9rem; height: 0.9rem; color: var(--elemento); }
+.cardMontadaInfo > strong { overflow-wrap: anywhere; font-size: 0.82rem; line-height: 1.1; }
+.cardMontadaInfo > small { display: flex; align-items: center; gap: 0.25rem; color: #d8b4fe; font-size: 0.68rem; font-weight: 850; }
+.cardMontadaInfo > small svg { width: 0.72rem; height: 0.72rem; }
 
 .card {
   position: relative;
@@ -153,8 +207,11 @@
 
 @media (max-width: 440px) {
   .gridCartas {
-    gap: 0.65rem;
+    gap: 1.15rem 0.65rem;
+    padding: 1rem 0;
   }
+
+  .cardArtefato { padding: 0.55rem; }
 
   .cardInfo {
     padding: 0.62rem;

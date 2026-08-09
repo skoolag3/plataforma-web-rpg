@@ -8,6 +8,10 @@
   --fonteMono: "Courier New", Courier, monospace;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --fundo: #0a0a0a;
@@ -16,7 +20,22 @@
 }
 
 body {
+  min-width: 0;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
   background: var(--fundo);
   color: var(--frente);
   font-family: var(--fonteSans);
+}
+
+.publicRouteLoading {
+  min-height: 100svh;
+  background: #07070b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }

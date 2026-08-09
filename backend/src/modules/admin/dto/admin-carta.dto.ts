@@ -65,6 +65,10 @@ export class CreateAdminCartaDto {
   moldura?: string;
 
   @IsOptional()
+  @IsObject()
+  configVisual?: Record<string, unknown>;
+
+  @IsOptional()
   @IsBoolean()
   ativo?: boolean;
 }
@@ -125,6 +129,10 @@ export class UpdateAdminCartaDto {
   @IsString()
   @MaxLength(500)
   moldura?: string;
+
+  @IsOptional()
+  @IsObject()
+  configVisual?: Record<string, unknown>;
 
   @IsOptional()
   @IsBoolean()

@@ -51,6 +51,7 @@ export class ColecaoService {
           passiva,
           foto: carta.foto,
           moldura: carta.moldura,
+          configVisual: carta.config_visual,
           quantidade,
           obtida: quantidade > 0,
         };

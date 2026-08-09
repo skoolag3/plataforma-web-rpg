@@ -106,6 +106,7 @@ export class AdminCartasService {
       passiva: this.buildPassiva(dto),
       foto: dto.foto,
       moldura: dto.moldura,
+      config_visual: dto.configVisual as Prisma.InputJsonValue | undefined,
       ativo: dto.ativo ?? true,
     };
   }
@@ -125,6 +126,9 @@ export class AdminCartasService {
         : {}),
       ...(dto.foto !== undefined ? { foto: dto.foto } : {}),
       ...(dto.moldura !== undefined ? { moldura: dto.moldura } : {}),
+      ...(dto.configVisual !== undefined
+        ? { config_visual: dto.configVisual as Prisma.InputJsonValue }
+        : {}),
       ...(dto.ativo !== undefined ? { ativo: dto.ativo } : {}),
     };
   }
@@ -162,6 +166,7 @@ export class AdminCartasService {
       passiva,
       foto: carta.foto,
       moldura: carta.moldura,
+      configVisual: carta.config_visual,
       ativo: Boolean(carta.ativo),
       criadoEm: carta.criado_em,
       atualizadoEm: carta.atualizado_em,

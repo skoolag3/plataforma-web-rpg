@@ -47,8 +47,11 @@
     var(--sombra);
   animation: subirModal 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   backdrop-filter: blur(1rem);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(167, 139, 250, 0.5) transparent;
+  scrollbar-width: none;
+}
+
+.modal::-webkit-scrollbar {
+  display: none;
 }
 
 .modal::before {
@@ -61,7 +64,24 @@
   content: "";
 }
 
-.modalCadastro { width: min(100%, 35rem); }
+.modalCadastro {
+  width: min(100%, 35rem);
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+.modalCadastro .seloModal {
+  margin-bottom: 0.55rem;
+}
+
+.modalCadastro .form {
+  gap: 0.72rem;
+  margin-top: 1rem;
+}
+
+.modalCadastro .rodape {
+  margin-top: 0.8rem;
+}
 
 .modal,
 .modal * {
@@ -117,6 +137,13 @@
   display: grid;
   gap: 0.9rem;
   margin-top: 1.35rem;
+}
+
+.btnFechar svg,
+.campoSenha button svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
 }
 
 .linhaCampos {
@@ -287,6 +314,19 @@
   opacity: 0.62;
 }
 
+.btnEnviar svg {
+  position: relative;
+  z-index: 1;
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.btnEnviar > :not(svg) {
+  position: relative;
+  z-index: 1;
+}
+
 .separador {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -312,6 +352,7 @@
   border-radius: 0.7rem;
   background: rgba(255, 255, 255, 0.045);
   color: var(--corTexto);
+  color-scheme: dark;
   cursor: pointer;
   font-size: 0.88rem;
   font-weight: 800;
@@ -340,6 +381,21 @@
   width: 1.1rem;
   height: 1.1rem;
   accent-color: var(--corRoxo);
+}
+
+.entrada:-webkit-autofill,
+.entrada:-webkit-autofill:hover,
+.entrada:-webkit-autofill:focus,
+.entrada:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--corTexto);
+  caret-color: var(--corTexto);
+  box-shadow: 0 0 0 1000px #0b0b13 inset;
+  transition: background-color 9999s ease-out 0s;
+}
+
+.entrada:-moz-autofill {
+  background: #0b0b13;
+  color: var(--corTexto);
 }
 
 .rotuloCheck strong { color: #c4b5fd; }
@@ -575,7 +631,11 @@
     backdrop-filter: blur(0.8rem);
   }
 
-  .modalCadastro { width: min(100%, 32rem); }
+  .modalCadastro {
+    width: min(100%, 32rem);
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
 
   .btnFechar {
     top: 0.75rem;

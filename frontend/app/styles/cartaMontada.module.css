@@ -1,0 +1,74 @@
+.carta {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: visible;
+}
+
+.canvasArte {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: linear-gradient(145deg, #27233e, #10131c);
+}
+
+.arte,
+.moldura {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.arte {
+  z-index: 1;
+  object-fit: cover;
+  object-position: center;
+  transform: translate(var(--arteX, 0), var(--arteY, 0)) rotate(var(--arteRotacao, 0deg)) scale(var(--arteEscala, 1));
+  transform-origin: center;
+}
+
+.sombra {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(180deg, transparent 52%, rgba(2, 6, 23, 0.28) 68%, rgba(2, 6, 23, 0.92) 94%);
+  pointer-events: none;
+}
+
+.conteudo {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: flex-end;
+  padding: 8%;
+}
+
+.camadaMoldura {
+  position: absolute;
+  top: calc(-1 * var(--molduraTopo, 0%));
+  right: calc(-1 * var(--molduraDireita, 0%));
+  bottom: calc(-1 * var(--molduraBase, 0%));
+  left: calc(-1 * var(--molduraEsquerda, 0%));
+  z-index: 5;
+  pointer-events: none;
+  transform: translate(var(--molduraX, 0), var(--molduraY, 0)) rotate(var(--molduraRotacao, 0deg)) scale(var(--molduraEscalaX, 1), var(--molduraEscalaY, 1));
+  transform-origin: center;
+}
+
+.moldura {
+  object-fit: fill;
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "./auth";
+import type { ConfigVisualCarta } from "../components/cartaMontada";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
@@ -17,6 +18,7 @@ export type CartaColecao = {
   passiva: Record<string, unknown>;
   foto: string | null;
   moldura: string | null;
+  configVisual: ConfigVisualCarta | null;
   quantidade: number;
   obtida: boolean;
 };
@@ -44,6 +46,8 @@ export type CartaDeck = {
   elemento: string;
   classe: string;
   foto: string | null;
+  moldura: string | null;
+  configVisual: ConfigVisualCarta | null;
   posicao: number;
 };
 
@@ -155,6 +159,8 @@ export type CartaGachaApi = {
   raridade: "UR" | "SSR" | "SR" | "R" | "N";
   elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
   foto: string | null;
+  moldura: string | null;
+  configVisual: ConfigVisualCarta | null;
   taxaDrop?: number;
   quantidade?: number;
   nova?: boolean;

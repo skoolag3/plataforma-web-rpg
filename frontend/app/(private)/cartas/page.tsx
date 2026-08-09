@@ -36,6 +36,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { buscarColecao, type CartaColecao } from "../../lib/jogo";
+import { CartaMontada, type ConfigVisualCarta } from "../../components/cartaMontada";
 import cardsStyles from "../../styles/inventario/cards.module.css";
 import controlsStyles from "../../styles/inventario/controls.module.css";
 import detailsStyles from "../../styles/inventario/details.module.css";
@@ -68,6 +69,8 @@ type Card = {
   quantidade?: number;
   obtida?: boolean;
   foto?: string | null;
+  moldura?: string | null;
+  configVisual?: ConfigVisualCarta | null;
   hpBase?: number;
   danoBase?: number;
   defesaBase?: number;
@@ -644,6 +647,37 @@ export default function CartasPage() {
                 {cartasVisiveis.map((card) => {
                   const IconeElemento = card.elementoIcone;
                   const selecionadaAgora = card.nome === selecionada;
+
+                  if (card.foto || card.moldura) {
+                    return (
+                      <button
+                        key={card.nome}
+                        type="button"
+                        className={[
+                          styles.cardArtefato,
+                          selecionadaAgora ? styles.cardArtefatoSelecionado : "",
+                        ].join(" ")}
+                        style={cardStyle(card)}
+                        onClick={() => {
+                          setSelecionada(card.nome);
+                          setDetalhesAbertos(false);
+                          setModalDeckAberto(false);
+                        }}
+                        aria-pressed={selecionadaAgora}
+                      >
+                        <CartaMontada arte={card.foto ?? undefined} moldura={card.moldura ?? undefined} config={card.configVisual ?? undefined}>
+                          <span className={styles.cardMontadaInfo}>
+                            <span className={styles.cardMontadaTopo}>
+                              <span>{card.raridade}</span>
+                              <IconeElemento aria-label={card.elemento} />
+                            </span>
+                            <strong>{card.nome}</strong>
+                            <small><PackagePlus aria-hidden="true" /> {card.copias}</small>
+                          </span>
+                        </CartaMontada>
+                      </button>
+                    );
+                  }
 
                   return (
                 <button

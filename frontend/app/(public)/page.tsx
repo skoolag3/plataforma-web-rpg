@@ -1,5 +1,5 @@
-import { LandingContent } from "./landingContent";
+import { HomeContent } from "./homeContent";
 
 export default function Home() {
-  return <LandingContent />;
+  return <HomeContent />;
 }

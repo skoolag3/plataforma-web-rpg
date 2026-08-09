@@ -1,40 +1,54 @@
 "use client";
 
-import { faRightFromBracket, faRightToBracket, faUserPlus } from "@fortawesome/free-solid-svg-icons";
+import { faGaugeHigh, faRightToBracket, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useSyncExternalStore } from "react";
-import { clearSession, isAuthenticated, subscribeAuthChange } from "../lib/auth";
+import { usePathname } from "next/navigation";
+import type { MouseEvent } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { isAuthenticated, subscribeAuthChange } from "../lib/auth";
 import styles from "../styles/navbar.module.css";
 
 const linksNav = [
-  { href: "/", label: "Home", private: false },
-  { href: "/#noticias", label: "Notícias", private: false },
+  { href: "/#home", label: "Home", secao: "home" },
+  { href: "/#noticias", label: "Notícias", secao: "noticias" },
 ];
 
 export function Navbar() {
-  const router = useRouter();
   const caminho = usePathname();
+  const [secaoAtiva, setSecaoAtiva] = useState("home");
   const estaAutenticado = useSyncExternalStore(
     subscribeAuthChange,
     isAuthenticated,
     () => false,
   );
 
-  function sair() {
-    clearSession();
-    router.push("/");
-    router.refresh();
-  }
+  useEffect(() => {
+    if (caminho !== "/") return;
 
-  const linksVisiveis = linksNav.filter((link) => {
-    if (estaAutenticado) {
-      return true;
+    function atualizarSecaoAtiva() {
+      const secaoNoticias = document.getElementById("noticias");
+      const inicioNoticias = secaoNoticias?.offsetTop ?? Number.POSITIVE_INFINITY;
+      setSecaoAtiva(window.scrollY >= inicioNoticias - window.innerHeight * 0.38 ? "noticias" : "home");
     }
 
-    return !link.private;
-  });
+    atualizarSecaoAtiva();
+    window.addEventListener("scroll", atualizarSecaoAtiva, { passive: true });
+    return () => window.removeEventListener("scroll", atualizarSecaoAtiva);
+  }, [caminho]);
+
+  function navegarParaSecao(evento: MouseEvent<HTMLAnchorElement>, secao: string) {
+    if (caminho !== "/") return;
+
+    const destino = document.getElementById(secao);
+    if (!destino) return;
+
+    evento.preventDefault();
+    const reduzirMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    destino.scrollIntoView({ behavior: reduzirMovimento ? "auto" : "smooth", block: "start" });
+    window.history.replaceState(null, "", "/");
+    setSecaoAtiva(secao);
+  }
 
   if (
     ["/dashboard", "/perfil", "/cartas", "/decks", "/gacha", "/partida"].some(
@@ -58,16 +72,14 @@ export function Navbar() {
         </Link>
 
         <div className={styles.linksNav}>
-          {linksVisiveis.map((link) => {
-            const estaAtivo =
-              link.href === "/"
-                ? caminho === "/"
-                : !link.href.includes("#") && caminho === link.href;
+          {linksNav.map((link) => {
+            const estaAtivo = caminho === "/" && secaoAtiva === link.secao;
 
             return (
             <Link
               key={`${link.href}-${link.label}`}
               href={link.href}
+              onClick={(evento) => navegarParaSecao(evento, link.secao)}
               className={[styles.link, estaAtivo ? styles.linkAtivo : ""].join(" ")}
               aria-current={estaAtivo ? "page" : undefined}
             >
@@ -79,14 +91,13 @@ export function Navbar() {
 
         <div className={styles.acoes}>
           {estaAutenticado ? (
-            <button
-              type="button"
-              onClick={sair}
+            <Link
+              href="/dashboard"
               className={styles.btn}
             >
-              <FontAwesomeIcon icon={faRightFromBracket} aria-hidden="true" />
-              <span className={styles.textoAcao}>Sair</span>
-            </button>
+              <FontAwesomeIcon icon={faGaugeHigh} aria-hidden="true" />
+              <span className={styles.textoAcao}>Meu painel</span>
+            </Link>
           ) : (
             <>
               <Link

@@ -37,7 +37,10 @@ export class GachaService {
     ]);
 
     const logs = await this.prisma.logGacha.findMany({
-      where: { id_usuario: idUsuario, id_banner: { in: banners.map((b) => b.id) } },
+      where: {
+        id_usuario: idUsuario,
+        id_banner: { in: banners.map((b) => b.id) },
+      },
       orderBy: { timestamp_pull: 'desc' },
       distinct: ['id_banner'],
       select: { id_banner: true, pity_contador: true },
@@ -55,17 +58,21 @@ export class GachaService {
         nome: banner.nome,
         custoGiro: banner.custo_giro,
         custoDez: banner.custo_giro * 9,
-        pity: logs.find((log) => log.id_banner === banner.id)?.pity_contador ?? 0,
+        pity:
+          logs.find((log) => log.id_banner === banner.id)?.pity_contador ?? 0,
         limitePity: LIMITE_PITY,
         diarioDisponivel:
           !banner.usuarioColetas[0]?.ultima_coleta ||
-          agora - banner.usuarioColetas[0].ultima_coleta.getTime() >= 86_400_000,
+          agora - banner.usuarioColetas[0].ultima_coleta.getTime() >=
+            86_400_000,
         cartas: banner.cartas.map(({ carta, taxa_drop }) => ({
           id: carta.id,
           nome: carta.nome,
           raridade: carta.raridade,
           elemento: carta.elemento,
           foto: carta.foto,
+          moldura: carta.moldura,
+          configVisual: carta.config_visual,
           taxaDrop: Number(taxa_drop),
         })),
       })),
@@ -73,123 +80,157 @@ export class GachaService {
   }
 
   async girar(idUsuario: string, idBanner: string, quantidade: 1 | 10) {
-    return this.prisma.$transaction(async (tx) => {
-      const [usuario, banner, ultimo] = await Promise.all([
-        tx.usuario.findUnique({ where: { id: idUsuario } }),
-        tx.banner.findFirst({
-          where: { id: idBanner, ativo: true },
-          include: { cartas: { include: { carta: true } } },
-        }),
-        tx.logGacha.findFirst({
-          where: { id_usuario: idUsuario, id_banner: idBanner },
-          orderBy: { timestamp_pull: 'desc' },
-        }),
-      ]);
-      if (!usuario) throw new NotFoundException('Usuario nao encontrado.');
-      if (!banner || !banner.cartas.length) throw new NotFoundException('Banner indisponivel.');
-      const custo = banner.custo_giro * (quantidade === 10 ? 9 : 1);
-      if ((usuario.saldo_rubys_cache ?? 0) < custo) {
-        throw new BadRequestException('Rubys insuficientes.');
-      }
+    return this.prisma.$transaction(
+      async (tx) => {
+        const [usuario, banner, ultimo] = await Promise.all([
+          tx.usuario.findUnique({ where: { id: idUsuario } }),
+          tx.banner.findFirst({
+            where: { id: idBanner, ativo: true },
+            include: { cartas: { include: { carta: true } } },
+          }),
+          tx.logGacha.findFirst({
+            where: { id_usuario: idUsuario, id_banner: idBanner },
+            orderBy: { timestamp_pull: 'desc' },
+          }),
+        ]);
+        if (!usuario) throw new NotFoundException('Usuario nao encontrado.');
+        if (!banner || !banner.cartas.length)
+          throw new NotFoundException('Banner indisponivel.');
+        const custo = banner.custo_giro * (quantidade === 10 ? 9 : 1);
+        if ((usuario.saldo_rubys_cache ?? 0) < custo) {
+          throw new BadRequestException('Rubys insuficientes.');
+        }
 
-      await tx.ledgerRuby.create({
-        data: {
-          id_usuario: idUsuario,
-          quantidade: -custo,
-          motivo: 'GACHA',
-          id_referencia: idBanner,
-          descricao: `${quantidade} giro(s) em ${banner.nome}`,
-        },
-      });
-
-      let pity = ultimo?.pity_contador ?? 0;
-      const obtidas: Array<{
-        id: string;
-        nome: string;
-        raridade: string;
-        elemento: string;
-        foto: string | null;
-        quantidade: number | null;
-        nova: boolean;
-      }> = [];
-      for (let index = 0; index < quantidade; index += 1) {
-        pity += 1;
-        const forcarUr = pity >= LIMITE_PITY;
-        const poolUr = banner.cartas.filter(({ carta }) => carta.raridade === 'UR');
-        const pool = forcarUr && poolUr.length ? poolUr : banner.cartas;
-        const sorteada = this.sortear(pool);
-        pity = sorteada.carta.raridade === 'UR' ? 0 : pity;
-
-        const inventario = await tx.inventario.upsert({
-          where: {
-            id_usuario_id_carta: { id_usuario: idUsuario, id_carta: sorteada.id_carta },
-          },
-          create: { id_usuario: idUsuario, id_carta: sorteada.id_carta, quantidade: 1 },
-          update: { quantidade: { increment: 1 } },
-        });
-        await tx.logGacha.create({
+        await tx.ledgerRuby.create({
           data: {
             id_usuario: idUsuario,
-            id_banner: idBanner,
-            id_carta_obtida: sorteada.id_carta,
-            rubys_gastos: Math.max(1, Math.floor(custo / quantidade)),
-            pity_contador: pity,
+            quantidade: -custo,
+            motivo: 'GACHA',
+            id_referencia: idBanner,
+            descricao: `${quantidade} giro(s) em ${banner.nome}`,
           },
         });
-        obtidas.push({
-          id: sorteada.carta.id,
-          nome: sorteada.carta.nome,
-          raridade: sorteada.carta.raridade,
-          elemento: sorteada.carta.elemento,
-          foto: sorteada.carta.foto,
-          quantidade: inventario.quantidade,
-          nova: inventario.quantidade === 1,
-        });
-      }
 
-      return {
-        cartas: obtidas,
-        pity,
-        rubys: (usuario.saldo_rubys_cache ?? 0) - custo,
-        custo,
-      };
-    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+        let pity = ultimo?.pity_contador ?? 0;
+        const obtidas: Array<{
+          id: string;
+          nome: string;
+          raridade: string;
+          elemento: string;
+          foto: string | null;
+          moldura: string | null;
+          configVisual: unknown;
+          quantidade: number | null;
+          nova: boolean;
+        }> = [];
+        for (let index = 0; index < quantidade; index += 1) {
+          pity += 1;
+          const forcarUr = pity >= LIMITE_PITY;
+          const poolUr = banner.cartas.filter(
+            ({ carta }) => carta.raridade === 'UR',
+          );
+          const pool = forcarUr && poolUr.length ? poolUr : banner.cartas;
+          const sorteada = this.sortear(pool);
+          pity = sorteada.carta.raridade === 'UR' ? 0 : pity;
+
+          const inventario = await tx.inventario.upsert({
+            where: {
+              id_usuario_id_carta: {
+                id_usuario: idUsuario,
+                id_carta: sorteada.id_carta,
+              },
+            },
+            create: {
+              id_usuario: idUsuario,
+              id_carta: sorteada.id_carta,
+              quantidade: 1,
+            },
+            update: { quantidade: { increment: 1 } },
+          });
+          await tx.logGacha.create({
+            data: {
+              id_usuario: idUsuario,
+              id_banner: idBanner,
+              id_carta_obtida: sorteada.id_carta,
+              rubys_gastos: Math.max(1, Math.floor(custo / quantidade)),
+              pity_contador: pity,
+            },
+          });
+          obtidas.push({
+            id: sorteada.carta.id,
+            nome: sorteada.carta.nome,
+            raridade: sorteada.carta.raridade,
+            elemento: sorteada.carta.elemento,
+            foto: sorteada.carta.foto,
+            moldura: sorteada.carta.moldura,
+            configVisual: sorteada.carta.config_visual,
+            quantidade: inventario.quantidade,
+            nova: inventario.quantidade === 1,
+          });
+        }
+
+        return {
+          cartas: obtidas,
+          pity,
+          rubys: (usuario.saldo_rubys_cache ?? 0) - custo,
+          custo,
+        };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
   }
 
   async resgatarDiario(idUsuario: string, idBanner: string) {
-    return this.prisma.$transaction(async (tx) => {
-      const [banner, coleta] = await Promise.all([
-        tx.banner.findFirst({ where: { id: idBanner, ativo: true } }),
-        tx.usuarioBannerColeta.findUnique({
-          where: { id_usuario_id_banner: { id_usuario: idUsuario, id_banner: idBanner } },
-        }),
-      ]);
-      if (!banner) throw new NotFoundException('Banner indisponivel.');
-      if (
-        coleta?.ultima_coleta &&
-        Date.now() - coleta.ultima_coleta.getTime() < 86_400_000
-      ) {
-        throw new ConflictException('A recompensa diaria ja foi resgatada.');
-      }
-      await tx.usuarioBannerColeta.upsert({
-        where: { id_usuario_id_banner: { id_usuario: idUsuario, id_banner: idBanner } },
-        create: { id_usuario: idUsuario, id_banner: idBanner, ultima_coleta: new Date() },
-        update: { ultima_coleta: new Date() },
-      });
-      await tx.ledgerRuby.create({
-        data: {
-          id_usuario: idUsuario,
-          quantidade: banner.custo_giro,
-          motivo: 'RECOMPENSA_DIARIA',
-          id_referencia: idBanner,
-          descricao: 'Giro diario',
-        },
-      });
-      return {
-        message: 'Recompensa diaria resgatada.',
-        rubysRecebidos: banner.custo_giro,
-      };
-    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    return this.prisma.$transaction(
+      async (tx) => {
+        const [banner, coleta] = await Promise.all([
+          tx.banner.findFirst({ where: { id: idBanner, ativo: true } }),
+          tx.usuarioBannerColeta.findUnique({
+            where: {
+              id_usuario_id_banner: {
+                id_usuario: idUsuario,
+                id_banner: idBanner,
+              },
+            },
+          }),
+        ]);
+        if (!banner) throw new NotFoundException('Banner indisponivel.');
+        if (
+          coleta?.ultima_coleta &&
+          Date.now() - coleta.ultima_coleta.getTime() < 86_400_000
+        ) {
+          throw new ConflictException('A recompensa diaria ja foi resgatada.');
+        }
+        await tx.usuarioBannerColeta.upsert({
+          where: {
+            id_usuario_id_banner: {
+              id_usuario: idUsuario,
+              id_banner: idBanner,
+            },
+          },
+          create: {
+            id_usuario: idUsuario,
+            id_banner: idBanner,
+            ultima_coleta: new Date(),
+          },
+          update: { ultima_coleta: new Date() },
+        });
+        await tx.ledgerRuby.create({
+          data: {
+            id_usuario: idUsuario,
+            quantidade: banner.custo_giro,
+            motivo: 'RECOMPENSA_DIARIA',
+            id_referencia: idBanner,
+            descricao: 'Giro diario',
+          },
+        });
+        return {
+          message: 'Recompensa diaria resgatada.',
+          rubysRecebidos: banner.custo_giro,
+        };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
   }
 
   private sortear<T extends { taxa_drop: Prisma.Decimal }>(pool: T[]): T {
@@ -208,7 +249,10 @@ export class GachaService {
       where: { ativo: true, excluido_em: null },
     });
     if (!cartas.length) return;
-    const total = cartas.reduce((soma, carta) => soma + (PESOS[carta.raridade] ?? 10), 0);
+    const total = cartas.reduce(
+      (soma, carta) => soma + (PESOS[carta.raridade] ?? 10),
+      0,
+    );
     await this.prisma.banner.create({
       data: {
         nome: 'Eclipse Roxo',
@@ -216,7 +260,10 @@ export class GachaService {
         cartas: {
           create: cartas.map((carta) => ({
             id_carta: carta.id,
-            taxa_drop: Math.max(0.01, Math.floor(((PESOS[carta.raridade] ?? 10) / total) * 9900) / 100),
+            taxa_drop: Math.max(
+              0.01,
+              Math.floor(((PESOS[carta.raridade] ?? 10) / total) * 9900) / 100,
+            ),
           })),
         },
       },

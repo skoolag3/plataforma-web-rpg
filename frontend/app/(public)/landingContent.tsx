@@ -21,6 +21,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import type { CSSProperties, PointerEvent } from "react";
 import { useEffect, useState } from "react";
+import { CartaMontada } from "../components/cartaMontada";
 import { ModalEsqueciSenha, ModalLogin, ModalCadastro } from "./authModal";
 import estilosBase from "../styles/landingBase.module.css";
 import estilosHero from "../styles/landingHero.module.css";
@@ -89,13 +90,19 @@ const metricas = [
   { icone: faRankingStar, valor: "Progressão", texto: "Sem pay-to-win" },
 ] satisfies MetricaLanding[];
 
-const imagemCarta =
+const imagemCartaBase =
   "https://res.cloudinary.com/djqmayaj1/image/upload/v1778560369/cbec6afb-0b8e-417b-951c-be06c253287b_ebvc4k.png";
+const molduraCartaBase =
+  "https://res.cloudinary.com/djqmayaj1/image/upload/v1778560544/e8a6e78e-4d0c-40b9-9912-043fc5eaae6f_yvbn20.png";
+const imagemFlare =
+  "https://res.cloudinary.com/djqmayaj1/image/upload/v1786235712/moderation/cartas/fotos/file_la63u8.png";
+const molduraFlare =
+  "https://res.cloudinary.com/djqmayaj1/image/upload/v1786237975/moderation/cartas/molduras/file_pav0ss.png";
 
 const cartas = [
-  { nome: "Kael", funcao: "Arcano", imagem: imagemCarta, classe: styles.cartaUm },
-  { nome: "Riven", funcao: "Duelista", imagem: imagemCarta, classe: styles.cartaDois },
-  { nome: "Nyra", funcao: "Suporte", imagem: imagemCarta, classe: styles.cartaTres },
+  { nome: "Kael", funcao: "Arcano", imagem: imagemCartaBase, moldura: molduraCartaBase, classe: styles.cartaUm },
+  { nome: "Flare", funcao: "UR", imagem: imagemFlare, moldura: molduraFlare, classe: styles.cartaDois },
+  { nome: "Nyra", funcao: "Suporte", imagem: imagemCartaBase, moldura: molduraCartaBase, classe: styles.cartaTres },
 ];
 
 const noticias = [
@@ -197,12 +204,12 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
                   onPointerMove={aoMoverPonteiroCarta}
                   onPointerLeave={aoSairPonteiroCarta}
                 >
-                  <div className={styles.fundoCarta} />
-                  <div className={styles.molduraCarta} />
-                  <div className={styles.infoCarta}>
-                    <strong>{carta.nome}</strong>
-                    <span>{carta.funcao}</span>
-                  </div>
+                  <CartaMontada arte={carta.imagem} moldura={carta.moldura}>
+                    <span className={styles.infoCarta}>
+                      <strong>{carta.nome}</strong>
+                      <span>{carta.funcao}</span>
+                    </span>
+                  </CartaMontada>
                 </article>
               ))}
             </div>

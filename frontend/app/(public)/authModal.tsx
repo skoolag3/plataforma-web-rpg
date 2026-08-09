@@ -290,7 +290,7 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
       </header>
 
       <form className={styles.form} onSubmit={aoEnviar}>
-        <Campo rotulo="Nome de usuário">
+        <Campo rotulo="Nome no jogo">
           <span className={styles.campoIcone}>
             <FontAwesomeIcon
               icon={faUser}
@@ -300,10 +300,11 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
             <input
               className={[styles.entrada, styles.entradaComIcone].join(" ")}
               type="text"
+              name="nomeExibicao"
               value={nome}
               onChange={(event) => setNome(event.target.value)}
-              placeholder="Seu nome"
-              autoComplete="username"
+              placeholder="Como quer ser chamado?"
+              autoComplete="nickname"
               minLength={3}
               required
             />

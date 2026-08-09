@@ -202,6 +202,7 @@ model Carta {
   passiva       Json?
   foto          String?   @db.VarChar(500)
   moldura       String?   @db.VarChar(500)
+  config_visual Json?
   ativo         Boolean?  @default(true)
   criado_em     DateTime? @default(now()) @db.Timestamptz(0)
   atualizado_em DateTime? @default(now()) @db.Timestamptz(0)
