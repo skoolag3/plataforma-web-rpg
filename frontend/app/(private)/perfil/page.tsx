@@ -121,9 +121,11 @@ export default function PerfilPage() {
             ...atual,
             moldura: resposta.moldura,
             molduraClasse: resposta.molduraClasse,
+            molduraUrl: resposta.molduraUrl ?? null,
           }
         : atual,
     );
+    window.dispatchEvent(new Event("perfil-atualizado"));
     return resposta.message;
   }
 
@@ -141,6 +143,9 @@ export default function PerfilPage() {
           }
         : atual,
     );
+    if (tipo === "avatar") {
+      window.dispatchEvent(new Event("perfil-atualizado"));
+    }
     return resposta.message;
   }
 

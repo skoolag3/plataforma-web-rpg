@@ -76,7 +76,7 @@ function Dashboard() {
     try {
       setResumo(await obterAdminDashboard());
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Nao foi possivel carregar o dashboard.");
+      setErro(error instanceof Error ? error.message : "Não foi possível carregar o painel.");
     } finally {
       setCarregando(false);
     }
@@ -91,15 +91,15 @@ function Dashboard() {
   const totalRaridades = raridadesResumo.reduce((total, item) => total + item.total, 0);
 
   return (
-    <AdminLayout title="Dashboard" subtitle="Visao geral da plataforma">
+    <AdminLayout title="Dashboard" subtitle="Visão geral da plataforma">
       {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
       {carregando ? <p className={styles.feedbackInfo}>Carregando dashboard...</p> : null}
       <section className={styles.metrics}>
         {[
-          ["Usuarios", formatNumber(metricas?.usuarios ?? 0), `${formatNumber(metricas?.usuariosAtivos ?? 0)} ativos`],
+          ["Usuários", formatNumber(metricas?.usuarios ?? 0), `${formatNumber(metricas?.usuariosAtivos ?? 0)} ativos`],
           ["Cartas", formatNumber(metricas?.cartas ?? 0), `${formatNumber(metricas?.cartasAtivas ?? 0)} ativas`],
           ["Partidas Jogadas", formatNumber(metricas?.partidas ?? 0), "total registrado"],
-          ["Rubys em Circulacao", formatNumber(metricas?.rubysEmCirculacao ?? 0), "saldo em usuarios"],
+          ["Rubys em circulação", formatNumber(metricas?.rubysEmCirculacao ?? 0), "saldo em usuários"],
         ].map(([label, value, detail]) => (
           <article className={styles.metricCard} key={label}>
             <span>{label}</span>

@@ -862,6 +862,39 @@
   padding: 1.1rem;
 }
 
+.sectionResetRow {
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  margin-bottom: -0.2rem;
+}
+
+.sectionResetRow button {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  gap: 0.42rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.45rem;
+  background: rgba(15, 23, 42, 0.62);
+  color: #aeb8ca;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 750;
+  padding: 0.35rem 0.62rem;
+}
+
+.sectionResetRow button:hover {
+  border-color: rgba(167, 139, 250, 0.42);
+  color: #f8fafc;
+}
+
+.sectionResetRow svg {
+  width: 0.76rem;
+  height: 0.76rem;
+}
+
 .editorSectionContent > .toggleRow,
 .editorSectionContent > .controleVisual,
 .editorSectionContent > .fullField {

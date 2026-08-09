@@ -84,7 +84,7 @@ async function jogoRequest<T>(path: string, options: RequestInit = {}) {
     throw new Error(
       details?.join(" ") ||
         (Array.isArray(data?.message) ? data.message.join(" ") : data?.message) ||
-        "Nao foi possivel concluir a solicitacao.",
+        "Não foi possível concluir a solicitação.",
     );
   }
 

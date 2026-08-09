@@ -63,7 +63,7 @@ export class AdminUsuariosService {
       select: usuarioSelect,
     });
 
-    if (!usuario) throw new NotFoundException('Usuario nao encontrado.');
+    if (!usuario) throw new NotFoundException('Usuário não encontrado.');
     return this.toResponse(usuario);
   }
 
@@ -71,7 +71,7 @@ export class AdminUsuariosService {
     const atual = await this.buscar(id);
     if (atual.admin && (dto.bloqueado === true || dto.ativo === false)) {
       throw new BadRequestException(
-        'Contas administrativas nao podem ser bloqueadas ou inativadas.',
+        'Contas administrativas não podem ser bloqueadas ou inativadas.',
       );
     }
     const usuario = await this.prisma.usuario.update({

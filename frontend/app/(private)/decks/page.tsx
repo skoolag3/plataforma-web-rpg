@@ -205,7 +205,7 @@ export default function DecksPage() {
       <header className={styles.topo}>
         <div>
           <Link href="/cartas" className={styles.voltar}>
-            <ArrowLeft aria-hidden="true" /> Voltar para a colecao
+            <ArrowLeft aria-hidden="true" /> Voltar para a coleção
           </Link>
           <h1>Construtor de decks</h1>
           <p>Monte, valide e escolha o deck que sera usado nas partidas.</p>
@@ -258,7 +258,7 @@ export default function DecksPage() {
                   onClick={() => void removerDeck(deck)}
                   disabled={deck.ativo}
                   aria-label={`Excluir ${deck.nome}`}
-                  title={deck.ativo ? "O deck ativo nao pode ser excluido" : "Excluir deck"}
+                  title={deck.ativo ? "O deck ativo não pode ser excluído" : "Excluir deck"}
                 >
                   <Trash2 aria-hidden="true" />
                 </button>
@@ -353,7 +353,7 @@ export default function DecksPage() {
         </section>
 
         <aside className={styles.colecao}>
-          <h2>Sua colecao</h2>
+          <h2>Sua coleção</h2>
           <label className={styles.busca}>
             <Search aria-hidden="true" />
             <input

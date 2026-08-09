@@ -18,7 +18,7 @@ export class PerfilStorageService {
 
     if (!url || !chave) {
       throw new ServiceUnavailableException(
-        'Storage indisponivel. Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY.',
+        'Armazenamento indisponível. Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY.',
       );
     }
 
@@ -55,7 +55,7 @@ export class PerfilStorageService {
 
     if (!resposta.ok) {
       throw new ServiceUnavailableException(
-        'Nao foi possivel enviar a imagem para o Storage.',
+        'Não foi possível enviar a imagem para o armazenamento.',
       );
     }
 

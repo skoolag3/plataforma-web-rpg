@@ -90,23 +90,19 @@ const metricas = [
   { icone: faRankingStar, valor: "Progressão", texto: "Sem pay-to-win" },
 ] satisfies MetricaLanding[];
 
-const imagemCartaBase =
-  "https://res.cloudinary.com/djqmayaj1/image/upload/v1778560369/cbec6afb-0b8e-417b-951c-be06c253287b_ebvc4k.png";
-const molduraCartaBase =
-  "https://res.cloudinary.com/djqmayaj1/image/upload/v1778560544/e8a6e78e-4d0c-40b9-9912-043fc5eaae6f_yvbn20.png";
 const imagemFlare =
   "https://res.cloudinary.com/djqmayaj1/image/upload/v1786235712/moderation/cartas/fotos/file_la63u8.png";
 const molduraFlare =
   "https://res.cloudinary.com/djqmayaj1/image/upload/v1786237975/moderation/cartas/molduras/file_pav0ss.png";
 
 const cartas = [
-  { nome: "Kael", funcao: "Arcano", imagem: imagemCartaBase, moldura: molduraCartaBase, classe: styles.cartaUm },
-  { nome: "Flare", funcao: "UR", imagem: imagemFlare, moldura: molduraFlare, classe: styles.cartaDois },
-  { nome: "Nyra", funcao: "Suporte", imagem: imagemCartaBase, moldura: molduraCartaBase, classe: styles.cartaTres },
+  { id: "flare-esquerda", nome: "Flare", funcao: "UR", imagem: imagemFlare, moldura: molduraFlare, classe: styles.cartaUm },
+  { id: "flare-centro", nome: "Flare", funcao: "UR", imagem: imagemFlare, moldura: molduraFlare, classe: styles.cartaDois },
+  { id: "flare-direita", nome: "Flare", funcao: "UR", imagem: imagemFlare, moldura: molduraFlare, classe: styles.cartaTres },
 ];
 
 const noticias = [
-  { icone: faTrophy, tag: "Temporada", tagClasse: styles.tagTemporada, titulo: "Eclipse Roxo inicia a liga", resumo: "Uma nova escalada competitiva, recompensas exclusivas e ranking renovado.", data: "12 MAI 2026" },
+  { icone: faTrophy, tag: "Novidade", tagClasse: styles.tagTemporada, titulo: "Novas cartas chegam à arena", resumo: "Amplie sua coleção, teste novas combinações e evolua seus decks.", data: "12 MAI 2026" },
   { icone: faBolt, tag: "Balance", tagClasse: styles.tagBalanceamento, titulo: "Ajustes no custo de energia", resumo: "Mudanças pontuais deixam os duelos mais dinâmicos e abrem novas estratégias.", data: "10 MAI 2026" },
   { icone: faWandMagicSparkles, tag: "Evento", tagClasse: styles.tagEvento, titulo: "Registro antecipado libera carta rara", resumo: "Crie sua conta antes da estreia e comece a jornada com uma carta especial.", data: "08 MAI 2026" },
 ] satisfies NoticiaLanding[];
@@ -160,10 +156,6 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
         </div>
         <div className={styles.gradeHero}>
           <div className={styles.conteudoHero}>
-            <span className={styles.kicker}>
-              <FontAwesomeIcon icon={faBolt} aria-hidden="true" />
-              Temporada Eclipse Roxo
-            </span>
             <h1 className={styles.tituloHero}>
               Sua estratégia.
               <br />Seu deck.
@@ -200,7 +192,7 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
               {cartas.map((carta) => (
                 <article
                   className={`${styles.cartaAnime} ${carta.classe}`}
-                  key={carta.nome}
+                  key={carta.id}
                   onPointerMove={aoMoverPonteiroCarta}
                   onPointerLeave={aoSairPonteiroCarta}
                 >

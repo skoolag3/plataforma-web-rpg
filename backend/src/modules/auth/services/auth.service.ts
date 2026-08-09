@@ -24,7 +24,7 @@ const maxTentativasLogin = 5;
 const tokenVerificacaoHoras = 24;
 const tokenRedefinicaoSenhaHoras = 1;
 const mensagemVerificacaoPendente =
-  'Cadastro pendente de verificacao. Tentamos enviar o e-mail; se o endereco existir, ele chegara em instantes.';
+  'Cadastro pendente de verificação. Tentamos enviar o e-mail; se o endereço existir, ele chegará em instantes.';
 
 @Injectable()
 export class AuthService {
@@ -58,7 +58,7 @@ export class AuthService {
         };
       }
 
-      throw new ConflictException('Ja existe um usuario com este e-mail.');
+      throw new ConflictException('Já existe um usuário com este e-mail.');
     }
 
     const tokenVerificacao = this.gerarTokenVerificacao();
@@ -94,11 +94,11 @@ export class AuthService {
     });
 
     if (!usuario || !usuario.token_verificacao_expira_em) {
-      throw new BadRequestException('Link de verificacao invalido.');
+      throw new BadRequestException('Link de verificação inválido.');
     }
 
     if (usuario.token_verificacao_expira_em.getTime() < Date.now()) {
-      throw new BadRequestException('Link de verificacao expirado.');
+      throw new BadRequestException('Link de verificação expirado.');
     }
 
     const usuarioVerificado = await this.prisma.usuario.update({
@@ -128,13 +128,13 @@ export class AuthService {
 
     if (!usuarioExistente) {
       return {
-        message: 'Se o e-mail existir, enviaremos uma nova verificacao.',
+        message: 'Se o e-mail existir, enviaremos uma nova verificação.',
       };
     }
 
     if (usuarioExistente.email_verificado) {
       return {
-        message: 'Este e-mail ja esta verificado.',
+        message: 'Este e-mail já está verificado.',
       };
     }
 
@@ -146,7 +146,7 @@ export class AuthService {
     });
 
     return {
-      message: 'Enviamos um novo e-mail de verificacao.',
+      message: 'Enviamos um novo e-mail de verificação.',
     };
   }
 
@@ -160,7 +160,7 @@ export class AuthService {
     });
 
     if (!usuario || usuario.excluido_em) {
-      throw new BadRequestException('E-mail nao encontrado.');
+      throw new BadRequestException('E-mail não encontrado.');
     }
 
     const usuarioComToken = await this.atualizarTokenRedefinicaoSenha(
@@ -184,11 +184,11 @@ export class AuthService {
     });
 
     if (!usuario || !usuario.token_redefinicao_expira_em) {
-      throw new BadRequestException('Link de redefinicao invalido.');
+      throw new BadRequestException('Link de redefinição inválido.');
     }
 
     if (usuario.token_redefinicao_expira_em.getTime() < Date.now()) {
-      throw new BadRequestException('Link de redefinicao expirado.');
+      throw new BadRequestException('Link de redefinição expirado.');
     }
 
     const senhaHash = await bcrypt.hash(data.senha, 10);
@@ -208,7 +208,7 @@ export class AuthService {
     });
 
     return {
-      message: 'Senha alterada com sucesso. Voce ja pode entrar.',
+      message: 'Senha alterada com sucesso. Você já pode entrar.',
     };
   }
 
@@ -221,7 +221,7 @@ export class AuthService {
     });
 
     if (!usuario) {
-      throw new UnauthorizedException('Credenciais invalidas.');
+      throw new UnauthorizedException('Credenciais inválidas.');
     }
 
     if (usuario.excluido_em || usuario.ativo === false) {
@@ -258,7 +258,7 @@ export class AuthService {
         );
       }
 
-      throw new UnauthorizedException('Credenciais invalidas.');
+      throw new UnauthorizedException('Credenciais inválidas.');
     }
 
     const usuarioAtualizado =
@@ -322,7 +322,7 @@ export class AuthService {
       return;
     }
 
-    throw new BadRequestException('O dominio do e-mail nao existe.');
+    throw new BadRequestException('O domínio do e-mail não existe.');
   }
 
   private extrairDominioEmail(email: string) {

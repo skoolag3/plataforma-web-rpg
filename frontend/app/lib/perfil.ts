@@ -12,6 +12,7 @@ export type PerfilConta = {
   biografia: string;
   moldura: string;
   molduraClasse: string;
+  molduraUrl?: string | null;
   avatarUrl?: string | null;
   bannerUrl?: string | null;
   googleVinculado: boolean;
@@ -36,6 +37,8 @@ export type MolduraConta = {
   nome: string;
   descricao?: string | null;
   classeCss: string;
+  imagemUrl?: string | null;
+  requisito?: string | null;
   precoMoedas: number;
   obtida: boolean;
 };
@@ -141,7 +144,11 @@ export function listarMoldurasApi(token: string) {
 
 export function selecionarMolduraApi(token: string, idMoldura: string) {
   return requisicaoPerfil<
-    RespostaMensagem & { moldura: string; molduraClasse: string }
+    RespostaMensagem & {
+      moldura: string;
+      molduraClasse: string;
+      molduraUrl?: string | null;
+    }
   >(token, "/perfil/moldura", {
     method: "PATCH",
     body: JSON.stringify({ idMoldura }),

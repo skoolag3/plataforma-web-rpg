@@ -54,6 +54,22 @@ type CartaFormState = {
   configVisual: ConfigVisualCarta;
 };
 
+function criarFormularioNovaCarta(): CartaFormState {
+  return {
+    nome: "",
+    raridade: "N",
+    elemento: "natureza",
+    classe: "",
+    custo: "1",
+    hpBase: "100",
+    danoBase: "20",
+    defesaBase: "10",
+    passiva: "{}",
+    ativo: true,
+    configVisual: criarConfigVisualPadrao(),
+  };
+}
+
 function Status({ value }: { value: string }) {
   const ativo = value === "Ativo" || value === "Ativa";
   return <span className={ativo ? styles.statusAtivo : styles.statusInativo}>{value}</span>;
@@ -89,7 +105,7 @@ export function Cartas() {
         return cartas.find((carta) => carta.id === current.id) ?? null;
       });
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Nao foi possivel carregar as cartas.");
+      setErro(error instanceof Error ? error.message : "Não foi possível carregar as cartas.");
     } finally {
       setCarregando(false);
     }
@@ -105,7 +121,7 @@ export function Cartas() {
       setSelecionada((current) => (current?.id === atualizada.id ? atualizada : current));
       setFeedback(`Carta ${atualizada.ativo ? "ativada" : "inativada"}.`);
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Nao foi possivel atualizar a carta.");
+      setErro(error instanceof Error ? error.message : "Não foi possível atualizar a carta.");
     } finally {
       setSalvando(false);
     }
@@ -125,7 +141,7 @@ export function Cartas() {
       setSelecionada((current) => (current?.id === carta.id ? null : current));
       setFeedback("Carta removida.");
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Nao foi possivel remover a carta.");
+      setErro(error instanceof Error ? error.message : "Não foi possível remover a carta.");
     } finally {
       setSalvando(false);
     }
@@ -142,7 +158,7 @@ export function Cartas() {
       setSelecionada(atualizada);
       setFeedback("Carta atualizada.");
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Nao foi possivel salvar a edicao.");
+      setErro(error instanceof Error ? error.message : "Não foi possível salvar a edição.");
     } finally {
       setSalvando(false);
     }
@@ -207,7 +223,7 @@ export function Cartas() {
               <th>Classe</th>
               <th>Custo</th>
               <th>Status</th>
-              <th>Acoes</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -262,19 +278,7 @@ export function Cartas() {
 }
 
 export function NovaCarta() {
-  const [form, setForm] = useState<CartaFormState>({
-    nome: "",
-    raridade: "N",
-    elemento: "natureza",
-    classe: "",
-    custo: "1",
-    hpBase: "100",
-    danoBase: "20",
-    defesaBase: "10",
-    passiva: "{}",
-    ativo: true,
-    configVisual: criarConfigVisualPadrao(),
-  });
+  const [form, setForm] = useState<CartaFormState>(criarFormularioNovaCarta);
   const [foto, setFoto] = useState<File | null>(null);
   const [moldura, setMoldura] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -284,6 +288,30 @@ export function NovaCarta() {
 
   function updateField<K extends keyof CartaFormState>(field: K, value: CartaFormState[K]) {
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function resetarInformacoes() {
+    const padrao = criarFormularioNovaCarta();
+    setForm((atual) => ({
+      ...atual,
+      nome: padrao.nome,
+      raridade: padrao.raridade,
+      elemento: padrao.elemento,
+      classe: padrao.classe,
+      passiva: padrao.passiva,
+      ativo: padrao.ativo,
+    }));
+  }
+
+  function resetarEstatisticas() {
+    const padrao = criarFormularioNovaCarta();
+    setForm((atual) => ({
+      ...atual,
+      custo: padrao.custo,
+      hpBase: padrao.hpBase,
+      danoBase: padrao.danoBase,
+      defesaBase: padrao.defesaBase,
+    }));
   }
 
   function handleFotoChange(event: ChangeEvent<HTMLInputElement>) {
@@ -340,7 +368,7 @@ export function NovaCarta() {
     } catch (error) {
       setFeedback({
         type: "error",
-        text: error instanceof Error ? error.message : "Nao foi possivel salvar a carta.",
+        text: error instanceof Error ? error.message : "Não foi possível salvar a carta.",
       });
     } finally {
       setSalvando(false);
@@ -355,8 +383,9 @@ export function NovaCarta() {
       <form className={styles.editorGrid} onSubmit={handleSubmit}>
         <section className={styles.formPanel}>
           <details className={styles.editorSection} open>
-            <summary><span><strong>Informacoes</strong><small>Identidade, classificacao e efeitos da carta</small></span><ChevronDown aria-hidden="true" /></summary>
+            <summary><span><strong>Informações</strong><small>Identidade, classificação e efeitos da carta</small></span><ChevronDown aria-hidden="true" /></summary>
             <div className={styles.editorSectionContent}>
+              <div className={styles.sectionResetRow}><button type="button" onClick={resetarInformacoes}><RefreshCw aria-hidden="true" /> Restaurar informações</button></div>
               <label>Nome da carta<input value={form.nome} onChange={(event) => updateField("nome", event.target.value)} required /></label>
               <label>Raridade<select className={`${styles.selectRaridade} ${classeRaridade(form.raridade)}`} value={form.raridade} onChange={(event) => updateField("raridade", event.target.value as CartaFormState["raridade"])}>{raridades.map((raridade) => <option className={classeRaridade(raridade)} key={raridade}>{raridade}</option>)}</select></label>
               <label>Elemento<select value={form.elemento} onChange={(event) => updateField("elemento", event.target.value as CartaFormState["elemento"])}>{elementos.map((elemento) => <option key={elemento.value} value={elemento.value}>{elemento.label}</option>)}</select></label>
@@ -370,12 +399,13 @@ export function NovaCarta() {
                 };
                 updateField("passiva", JSON.stringify(modelos[event.target.value] ?? {}, null, 2));
               }}><option value="">Sem passiva</option><option value="entradaBuff">Buff ao entrar</option><option value="entradaDebuff">Debuff ao entrar</option><option value="ataqueBuff">Buff ao atacar</option></select></label>
-              <label className={styles.fullField}>Configuracao da passiva<textarea className={styles.codeArea} value={form.passiva} onChange={(event) => updateField("passiva", event.target.value)} /><small>O modelo preenche o JSON; ajuste os valores se necessario.</small></label>
+              <label className={styles.fullField}>Configuração da passiva<textarea className={styles.codeArea} value={form.passiva} onChange={(event) => updateField("passiva", event.target.value)} /><small>O modelo preenche o JSON; ajuste os valores se necessário.</small></label>
             </div>
           </details>
           <details className={styles.editorSection}>
-            <summary><span><strong>Estatisticas</strong><small>Custo, vida, ataque e defesa</small></span><ChevronDown aria-hidden="true" /></summary>
+            <summary><span><strong>Estatísticas</strong><small>Custo, vida, ataque e defesa</small></span><ChevronDown aria-hidden="true" /></summary>
             <div className={styles.editorSectionContent}>
+              <div className={styles.sectionResetRow}><button type="button" onClick={resetarEstatisticas}><RefreshCw aria-hidden="true" /> Restaurar estatísticas</button></div>
               <label>Custo<input inputMode="numeric" value={form.custo} onChange={(event) => updateField("custo", event.target.value)} /></label>
               <label>HP<input inputMode="numeric" value={form.hpBase} onChange={(event) => updateField("hpBase", event.target.value)} /></label>
               <label>ATK<input inputMode="numeric" value={form.danoBase} onChange={(event) => updateField("danoBase", event.target.value)} /></label>
@@ -385,14 +415,14 @@ export function NovaCarta() {
           <details className={styles.editorSection}>
             <summary><span><strong>Personalizar</strong><small>Arte, moldura e encaixe visual</small></span><ChevronDown aria-hidden="true" /></summary>
             <div className={styles.editorSectionContent}>
-              <CampoArquivo rotulo="Foto/personagem" accept="image/*" ajuda="PNG, JPG ou WEBP, ate 5 MB." onChange={handleFotoChange} />
-              <CampoArquivo rotulo="Moldura" accept="image/png,image/webp" ajuda="PNG ou WEBP transparente, proporcao 2:3." onChange={handleMolduraChange} />
+              <CampoArquivo rotulo="Foto/personagem" accept="image/*" ajuda="PNG, JPG ou WEBP, até 5 MB." onChange={handleFotoChange} />
+              <CampoArquivo rotulo="Moldura" accept="image/png,image/webp" ajuda="PNG ou WEBP transparente, proporção 2:3." onChange={handleMolduraChange} />
               <ControleVisualCarta value={form.configVisual} onChange={(configVisual) => updateField("configVisual", configVisual)} />
             </div>
           </details>
         </section>
         <aside className={styles.previewPanel}>
-          <h2>Pre-visualizacao</h2>
+          <h2>Pré-visualização</h2>
           <PreviewCarta arte={cardImage} moldura={cardFrame} nome={form.nome || "Nova Carta"} raridade={form.raridade} configVisual={form.configVisual} />
           {feedback ? (
             <p className={feedback.type === "success" ? styles.feedbackSuccess : styles.feedbackError}>
@@ -433,6 +463,30 @@ function CartaEditor({
 
   function updateField<K extends keyof CartaFormState>(field: K, value: CartaFormState[K]) {
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function restaurarInformacoesSalvas() {
+    const salvo = cartaToForm(carta);
+    setForm((atual) => ({
+      ...atual,
+      nome: salvo.nome,
+      raridade: salvo.raridade,
+      elemento: salvo.elemento,
+      classe: salvo.classe,
+      passiva: salvo.passiva,
+      ativo: salvo.ativo,
+    }));
+  }
+
+  function restaurarEstatisticasSalvas() {
+    const salvo = cartaToForm(carta);
+    setForm((atual) => ({
+      ...atual,
+      custo: salvo.custo,
+      hpBase: salvo.hpBase,
+      danoBase: salvo.danoBase,
+      defesaBase: salvo.defesaBase,
+    }));
   }
 
   function handleFotoChange(event: ChangeEvent<HTMLInputElement>) {
@@ -487,7 +541,7 @@ function CartaEditor({
 
       await onSave(payload);
     } catch (error) {
-      setErroLocal(error instanceof Error ? error.message : "Nao foi possivel salvar a carta.");
+      setErroLocal(error instanceof Error ? error.message : "Não foi possível salvar a carta.");
     }
   }
 
@@ -509,8 +563,9 @@ function CartaEditor({
       <section className={styles.editorGrid}>
         <div className={styles.formPanel}>
           <details className={styles.editorSection} open>
-            <summary><span><strong>Informacoes</strong><small>Identidade, classificacao e efeitos da carta</small></span><ChevronDown aria-hidden="true" /></summary>
+            <summary><span><strong>Informações</strong><small>Identidade, classificação e efeitos da carta</small></span><ChevronDown aria-hidden="true" /></summary>
             <div className={styles.editorSectionContent}>
+              <div className={styles.sectionResetRow}><button type="button" onClick={restaurarInformacoesSalvas}><RefreshCw aria-hidden="true" /> Restaurar informações</button></div>
               <label>Nome<input value={form.nome} onChange={(event) => updateField("nome", event.target.value)} /></label>
               <label>Raridade<select className={`${styles.selectRaridade} ${classeRaridade(form.raridade)}`} value={form.raridade} onChange={(event) => updateField("raridade", event.target.value as CartaFormState["raridade"])}>{raridades.map((raridade) => <option className={classeRaridade(raridade)} key={raridade}>{raridade}</option>)}</select></label>
               <label>Elemento<select value={form.elemento} onChange={(event) => updateField("elemento", event.target.value as CartaFormState["elemento"])}>{elementos.map((elemento) => <option key={elemento.value} value={elemento.value}>{elemento.label}</option>)}</select></label>
@@ -521,8 +576,9 @@ function CartaEditor({
             </div>
           </details>
           <details className={styles.editorSection}>
-            <summary><span><strong>Estatisticas</strong><small>Custo, vida, ataque e defesa</small></span><ChevronDown aria-hidden="true" /></summary>
+            <summary><span><strong>Estatísticas</strong><small>Custo, vida, ataque e defesa</small></span><ChevronDown aria-hidden="true" /></summary>
             <div className={styles.editorSectionContent}>
+              <div className={styles.sectionResetRow}><button type="button" onClick={restaurarEstatisticasSalvas}><RefreshCw aria-hidden="true" /> Restaurar estatísticas</button></div>
               <label>Custo<input inputMode="numeric" value={form.custo} onChange={(event) => updateField("custo", event.target.value)} /></label>
               <label>HP<input inputMode="numeric" value={form.hpBase} onChange={(event) => updateField("hpBase", event.target.value)} /></label>
               <label>ATK<input inputMode="numeric" value={form.danoBase} onChange={(event) => updateField("danoBase", event.target.value)} /></label>
@@ -532,14 +588,14 @@ function CartaEditor({
           <details className={styles.editorSection}>
             <summary><span><strong>Personalizar</strong><small>Arte, moldura e encaixe visual</small></span><ChevronDown aria-hidden="true" /></summary>
             <div className={styles.editorSectionContent}>
-              <CampoArquivo rotulo="Foto/personagem" accept="image/*" ajuda="PNG, JPG ou WEBP, ate 5 MB." onChange={handleFotoChange} />
-              <CampoArquivo rotulo="Moldura" accept="image/png,image/webp" ajuda="PNG ou WEBP transparente, proporcao 2:3." onChange={handleMolduraChange} />
+              <CampoArquivo rotulo="Foto/personagem" accept="image/*" ajuda="PNG, JPG ou WEBP, até 5 MB." onChange={handleFotoChange} />
+              <CampoArquivo rotulo="Moldura" accept="image/png,image/webp" ajuda="PNG ou WEBP transparente, proporção 2:3." onChange={handleMolduraChange} />
               <ControleVisualCarta value={form.configVisual} onChange={(configVisual) => updateField("configVisual", configVisual)} />
             </div>
           </details>
         </div>
         <aside className={styles.previewPanel}>
-          <h2>Pre-visualizacao</h2>
+          <h2>Pré-visualização</h2>
           <PreviewCarta arte={cardImage} moldura={cardFrame} nome={form.nome || "Carta"} raridade={form.raridade} configVisual={form.configVisual} />
           <div className={styles.editorActions}>
             <button type="button" onClick={onClose}>Cancelar</button>
@@ -591,7 +647,7 @@ function toNumber(value: string, label: string) {
   const number = Number(value);
 
   if (!Number.isInteger(number) || number < 0) {
-    throw new Error(`${label} precisa ser um numero inteiro positivo.`);
+    throw new Error(`${label} precisa ser um número inteiro positivo.`);
   }
 
   return number;

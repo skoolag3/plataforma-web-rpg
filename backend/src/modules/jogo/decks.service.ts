@@ -165,7 +165,7 @@ export class DecksService {
     }
 
     if (new Set(idsCartas).size !== idsCartas.length) {
-      throw new BadRequestException('Nao e permitido repetir cartas no deck.');
+      throw new BadRequestException('Não é permitido repetir cartas no deck.');
     }
 
     if (exigirCompleto && idsCartas.length !== 6) {
@@ -187,7 +187,7 @@ export class DecksService {
 
     if (cartasPossuidas !== idsCartas.length) {
       throw new BadRequestException(
-        'O deck contem cartas inativas ou que nao pertencem ao jogador.',
+        'O deck contém cartas inativas ou que não pertencem ao jogador.',
       );
     }
   }
@@ -203,7 +203,7 @@ export class DecksService {
       },
     });
 
-    if (!deck) throw new NotFoundException('Deck nao encontrado.');
+    if (!deck) throw new NotFoundException('Deck não encontrado.');
     return deck;
   }
 

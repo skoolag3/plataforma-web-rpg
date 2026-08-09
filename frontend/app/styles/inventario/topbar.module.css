@@ -1,8 +1,5 @@
 .topbar {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 1.2rem;
-  align-items: start;
+  display: block;
   margin-bottom: 1.5rem;
   border-bottom: 1px solid var(--member-border);
   padding-bottom: 1.25rem;
@@ -67,134 +64,8 @@
   background: linear-gradient(90deg, #a855f7, #8b5cf6);
 }
 
-.status {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  border: 1px solid var(--member-border);
-  border-radius: 999px;
-  background: rgba(255,255,255,.025);
-  padding: .25rem .4rem;
-  min-width: 0;
-}
-
-.moeda,
-.iconeTopo {
-  border: 0;
-  background: transparent;
-  color: #f8fafc;
-  cursor: pointer;
-  font: inherit;
-}
-
-.moeda {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  border-radius: 0.4rem;
-  font-size: 0.98rem;
-  font-weight: 900;
-  padding: 0.35rem;
-}
-
-.moeda svg {
-  width: 1.05rem;
-  height: 1.05rem;
-}
-
-.ouro {
-  color: #facc15;
-}
-
-.gema {
-  color: #a78bfa;
-}
-
-.divisor {
-  width: 1px;
-  height: 1.6rem;
-  background: rgba(148, 163, 184, 0.22);
-}
-
-.iconeTopo {
-  display: grid;
-  width: 2.35rem;
-  height: 2.35rem;
-  place-items: center;
-  border-radius: 999px;
-}
-
-.iconeTopo svg {
-  width: 1.18rem;
-  height: 1.18rem;
-}
-
-.avatar {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  min-width: 0;
-  border-radius: 999px;
-  color: inherit;
-  padding: 0.18rem;
-  text-decoration: none;
-}
-
-.avatarIcone {
-  display: grid;
-  flex: 0 0 auto;
-  width: 3rem;
-  height: 3rem;
-  place-items: center;
-  border: 2px solid rgba(167, 139, 250, 0.78);
-  border-radius: 999px;
-  background: rgba(88, 28, 135, 0.58);
-}
-
-.avatar strong {
-  display: block;
-  color: #fff;
-  font-size: 0.92rem;
-}
-
-.avatar span span {
-  color: #b794ff;
-  font-size: 0.76rem;
-  font-weight: 800;
-}
-
-.moeda:hover,
-.iconeTopo:hover,
-.avatar:hover {
-  background: rgba(148, 163, 184, 0.1);
-}
-
-.avatar:focus-visible,
-.moeda:focus-visible,
-.iconeTopo:focus-visible {
-  outline: 2px solid rgba(190, 242, 100, 0.78);
-  outline-offset: 0.2rem;
-}
-
-@media (max-width: 1040px) {
-  .topbar {
-    grid-template-columns: 1fr;
-  }
-
-  .status {
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 0.1rem;
-  }
-}
-
 @media (max-width: 760px) {
   .progressoLinha {
     grid-template-columns: 1fr;
-  }
-
-  .status .divisor {
-    display: none;
   }
 }

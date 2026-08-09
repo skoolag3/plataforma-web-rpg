@@ -200,7 +200,7 @@ export class EmailService {
     }
 
     if (Number.isNaN(port)) {
-      this.logger.warn('SMTP_PORT invalido.');
+      this.logger.warn('SMTP_PORT inválido.');
       return null;
     }
 

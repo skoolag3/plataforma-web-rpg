@@ -2,6 +2,7 @@
 
 import {
   Boxes,
+  Coins,
   Gem,
   Home,
   Layers,
@@ -15,13 +16,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useSyncExternalStore } from "react";
-import { clearSession, getStoredUser, subscribeAuthChange } from "../lib/auth";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { clearSession, getStoredUser, getToken, subscribeAuthChange } from "../lib/auth";
+import { buscarPerfilApi } from "../lib/perfil";
 import styles from "../styles/privateNavbar.module.css";
 
 const links = [
-  { href: "/dashboard", label: "Inicio", icon: Home },
-  { href: "/cartas", label: "Colecao", icon: Layers },
+  { href: "/dashboard", label: "Início", icon: Home },
+  { href: "/cartas", label: "Coleção", icon: Layers },
   { href: "/decks", label: "Decks", icon: Boxes },
   { href: "/gacha", label: "Gacha", icon: Sparkles },
   { href: "/partida", label: "Arena", icon: Swords },
@@ -32,11 +34,39 @@ export function PrivateNavbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [aberto, setAberto] = useState(false);
+  const [resumoPerfil, setResumoPerfil] = useState({
+    moedas: 0,
+    rubys: 0,
+    avatarUrl: null as string | null,
+    molduraUrl: null as string | null,
+    molduraClasse: "molduraPadrao",
+  });
   const usuario = useSyncExternalStore(
     subscribeAuthChange,
     getStoredUser,
     () => null,
   );
+
+  useEffect(() => {
+    function carregarResumoPerfil() {
+      const token = getToken();
+      if (!token) return;
+
+      void buscarPerfilApi(token)
+        .then((perfil) => setResumoPerfil({
+          moedas: perfil.moedas,
+          rubys: perfil.rubys,
+          avatarUrl: perfil.avatarUrl ?? null,
+          molduraUrl: perfil.molduraUrl ?? null,
+          molduraClasse: perfil.molduraClasse,
+        }))
+        .catch(() => undefined);
+    }
+
+    carregarResumoPerfil();
+    window.addEventListener("perfil-atualizado", carregarResumoPerfil);
+    return () => window.removeEventListener("perfil-atualizado", carregarResumoPerfil);
+  }, [usuario?.id]);
 
   function sair() {
     clearSession();
@@ -62,7 +92,28 @@ export function PrivateNavbar() {
           {usuario?.is_admin ? <Link href="/admin" onClick={() => setAberto(false)}><ShieldCheck /><span>Admin</span></Link> : null}
         </div>
         <div className={styles.usuario}>
-          <Link href="/perfil"><span><User /></span><div><strong>{usuario?.nome ?? "Jogador"}</strong><small>Nivel {usuario?.nivel ?? 1}</small></div></Link>
+          <div className={styles.saldos} aria-label="Saldos do jogador">
+            <span title="Moedas"><Coins aria-hidden="true" />{resumoPerfil.moedas.toLocaleString("pt-BR")}</span>
+            <span title="Rubys"><Gem aria-hidden="true" />{resumoPerfil.rubys.toLocaleString("pt-BR")}</span>
+          </div>
+          <Link href="/perfil">
+            <span className={`${styles.avatarVisual} ${styles[resumoPerfil.molduraClasse] ?? ""}`}>
+              <span
+                className={styles.fotoAvatar}
+                style={resumoPerfil.avatarUrl ? { backgroundImage: `url("${resumoPerfil.avatarUrl}")` } : undefined}
+              >
+                {!resumoPerfil.avatarUrl ? <User aria-hidden="true" /> : null}
+              </span>
+              {resumoPerfil.molduraUrl ? (
+                <i
+                  className={styles.molduraImagem}
+                  style={{ backgroundImage: `url("${resumoPerfil.molduraUrl}")` }}
+                  aria-hidden="true"
+                />
+              ) : null}
+            </span>
+            <div><strong>{usuario?.nome ?? "Jogador"}</strong><small>Nível {usuario?.nivel ?? 1}</small></div>
+          </Link>
           <button type="button" onClick={sair} title="Sair"><LogOut /></button>
         </div>
       </nav>

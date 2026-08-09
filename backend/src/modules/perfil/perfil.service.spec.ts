@@ -10,6 +10,9 @@ describe('PerfilService', () => {
     usuarioMoldura: {
       findUnique: jest.fn(),
     },
+    inventario: {
+      findFirst: jest.fn(),
+    },
     usuario: {
       findFirstOrThrow: jest.fn(),
       findFirst: jest.fn(),
@@ -51,12 +54,56 @@ describe('PerfilService', () => {
     expect(resultado.biografia).toBe('Nova biografia');
   });
 
-  it('impede selecionar moldura que o jogador nao possui', async () => {
+  it('impede selecionar moldura que o jogador não possui', async () => {
     prisma.usuarioMoldura.findUnique.mockResolvedValue(null);
 
     await expect(
       service.selecionarMoldura('usuario-id', {
         idMoldura: 'd42bc48e-406f-4cb6-9786-66f5573d505a',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('libera a moldura da carta presente no inventário', async () => {
+    prisma.inventario.findFirst.mockResolvedValue({
+      carta: {
+        id: '81ca9b78-93ca-46eb-bc41-e29327724f2f',
+        nome: 'Flare',
+        moldura: 'https://cdn.exemplo.com/flare.png',
+      },
+    });
+    prisma.perfilUsuario.upsert.mockResolvedValue({});
+
+    const resposta = await service.selecionarMoldura('usuario-id', {
+      idMoldura: 'carta:81ca9b78-93ca-46eb-bc41-e29327724f2f',
+    });
+
+    expect(prisma.perfilUsuario.upsert).toHaveBeenCalledWith({
+      where: { id_usuario: 'usuario-id' },
+      create: {
+        id_usuario: 'usuario-id',
+        id_moldura: null,
+        id_carta_moldura: '81ca9b78-93ca-46eb-bc41-e29327724f2f',
+      },
+      update: {
+        id_moldura: null,
+        id_carta_moldura: '81ca9b78-93ca-46eb-bc41-e29327724f2f',
+      },
+    });
+    expect(resposta).toEqual(
+      expect.objectContaining({
+        moldura: 'Moldura de Flare',
+        molduraUrl: 'https://cdn.exemplo.com/flare.png',
+      }),
+    );
+  });
+
+  it('mantém bloqueada a moldura de carta não obtida', async () => {
+    prisma.inventario.findFirst.mockResolvedValue(null);
+
+    await expect(
+      service.selecionarMoldura('usuario-id', {
+        idMoldura: 'carta:81ca9b78-93ca-46eb-bc41-e29327724f2f',
       }),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
@@ -76,15 +123,15 @@ describe('PerfilService', () => {
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
-  it('rejeita token invalido de troca de e-mail', async () => {
+  it('rejeita token inválido de troca de e-mail', async () => {
     prisma.usuario.findUnique.mockResolvedValue(null);
 
     await expect(service.confirmarTrocaEmail('a'.repeat(64))).rejects.toThrow(
-      'Link de confirmacao invalido.',
+      'Link de confirmação inválido.',
     );
   });
 
-  it('primeira confirmacao preserva o e-mail atual', async () => {
+  it('primeira confirmação preserva o e-mail atual', async () => {
     prisma.usuario.findUnique
       .mockResolvedValueOnce({
         id: 'usuario-id',
@@ -109,10 +156,10 @@ describe('PerfilService', () => {
         emailAtual: 'atual@email.com',
       }),
     );
-    expect(resposta.message).toContain('confirmacao final');
+    expect(resposta.message).toContain('confirmação final');
   });
 
-  it('segunda confirmacao efetiva o novo e-mail', async () => {
+  it('segunda confirmação efetiva o novo e-mail', async () => {
     prisma.usuario.findUnique
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({

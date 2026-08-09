@@ -1,15 +1,15 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
-  Bell,
   BookOpen,
   Boxes,
+  Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Coins,
   Flame,
   Gem,
   Gift,
@@ -43,6 +43,74 @@ import detailsStyles from "../../styles/inventario/details.module.css";
 import layoutStyles from "../../styles/inventario/layout.module.css";
 import sidebarStyles from "../../styles/inventario/sidebar.module.css";
 import topbarStyles from "../../styles/inventario/topbar.module.css";
+
+function FiltroSelect({
+  rotulo,
+  valor,
+  opcoes,
+  aoAlterar,
+}: {
+  rotulo: string;
+  valor: string;
+  opcoes: string[];
+  aoAlterar: (valor: string) => void;
+}) {
+  const [aberto, setAberto] = useState(false);
+  const raiz = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function fecharAoClicarFora(evento: PointerEvent) {
+      if (!raiz.current?.contains(evento.target as Node)) setAberto(false);
+    }
+
+    function fecharComEscape(evento: KeyboardEvent) {
+      if (evento.key === "Escape") setAberto(false);
+    }
+
+    document.addEventListener("pointerdown", fecharAoClicarFora);
+    document.addEventListener("keydown", fecharComEscape);
+    return () => {
+      document.removeEventListener("pointerdown", fecharAoClicarFora);
+      document.removeEventListener("keydown", fecharComEscape);
+    };
+  }, []);
+
+  return (
+    <div className={controlsStyles.selectVisual} ref={raiz} data-open={aberto || undefined}>
+      <span>{rotulo}</span>
+      <button
+        type="button"
+        className={controlsStyles.selectTrigger}
+        aria-haspopup="listbox"
+        aria-expanded={aberto}
+        onClick={() => setAberto((atual) => !atual)}
+      >
+        <strong>{valor}</strong>
+        <ChevronDown aria-hidden="true" />
+      </button>
+      {aberto ? (
+        <div className={controlsStyles.selectMenu} role="listbox" aria-label={rotulo}>
+          {opcoes.map((opcao) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={opcao === valor}
+              className={opcao === valor ? controlsStyles.selectOpcaoAtiva : undefined}
+              key={opcao}
+              onClick={() => {
+                aoAlterar(opcao);
+                setAberto(false);
+              }}
+            >
+              {opcao}
+              {opcao === valor ? <Check aria-hidden="true" /> : null}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 const styles = {
   ...layoutStyles,
@@ -83,7 +151,7 @@ const navItems = [
   { href: "/decks", label: "Decks", icon: Boxes },
   { href: "#", label: "Loja", icon: Shirt },
   { href: "/gacha", label: "Gacha", icon: Sparkles },
-  { href: "#", label: "Historico", icon: BookOpen },
+  { href: "#", label: "Histórico", icon: BookOpen },
   { href: "#", label: "Ranking", icon: Trophy },
   { href: "/perfil", label: "Perfil", icon: User },
   { href: "#", label: "Sair", icon: LogOut },
@@ -347,12 +415,6 @@ export default function CartasPage() {
     cartasObtidas: 0,
     percentual: 0,
   });
-  const [jogador, setJogador] = useState({
-    nome: "Jogador",
-    nivel: 1,
-    moedas: 0,
-    rubys: 0,
-  });
   const [raridade, setRaridade] = useState("Todas");
   const [elemento, setElemento] = useState("Todos");
   const [classe, setClasse] = useState("Todas");
@@ -373,13 +435,12 @@ export default function CartasPage() {
       .then((dados) => {
         setCards(dados.itens.map(mapearCarta));
         setResumo(dados.resumo);
-        setJogador(dados.jogador);
       })
       .catch((error) =>
         setErro(
           error instanceof Error
             ? error.message
-            : "Nao foi possivel carregar a colecao.",
+            : "Não foi possível carregar a coleção.",
         ),
       )
       .finally(() => setCarregando(false));
@@ -470,7 +531,7 @@ export default function CartasPage() {
   if (carregando) {
     return (
       <main className={styles.pagina}>
-        <p className={styles.semResultados}>Carregando sua colecao...</p>
+        <p className={styles.semResultados}>Carregando sua coleção...</p>
       </main>
     );
   }
@@ -503,12 +564,12 @@ export default function CartasPage() {
             })}
           </nav>
 
-          <section className={styles.presente} aria-label="Giro diario">
+          <section className={styles.presente} aria-label="Giro diário">
             <span className={styles.presenteIcone}>
               <Gift aria-hidden="true" />
             </span>
             <strong>
-              {recompensaResgatada ? "Giro diario resgatado" : "Giro diario disponivel!"}
+              {recompensaResgatada ? "Giro diário resgatado" : "Giro diário disponível!"}
             </strong>
             <p>
               {recompensaResgatada
@@ -543,78 +604,32 @@ export default function CartasPage() {
               </div>
             </div>
 
-            <div className={styles.status}>
-              <button type="button" className={styles.moeda} title="Moedas">
-                <Coins className={styles.ouro} aria-hidden="true" />
-                {jogador.moedas.toLocaleString("pt-BR")}
-              </button>
-              <span className={styles.divisor} aria-hidden="true" />
-              <button type="button" className={styles.moeda} title="Gemas">
-                <Gem className={styles.gema} aria-hidden="true" />
-                {jogador.rubys.toLocaleString("pt-BR")}
-              </button>
-              <span className={styles.divisor} aria-hidden="true" />
-              <button type="button" className={styles.iconeTopo} aria-label="Notificacoes">
-                <Bell aria-hidden="true" />
-              </button>
-              <span className={styles.divisor} aria-hidden="true" />
-              <Link href="/perfil" className={styles.avatar}>
-                <span className={styles.avatarIcone}>
-                  <User aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>{jogador.nome}</strong>
-                  <span>Nivel {jogador.nivel}</span>
-                </span>
-              </Link>
-            </div>
           </header>
 
           <div className={styles.workspace}>
             <section className={styles.lista} aria-label="Lista de cartas">
               {erro ? <p className={styles.semResultados} role="alert">{erro}</p> : null}
               <div className={styles.filtros}>
-                <label className={styles.selectVisual}>
-                  <span>Raridade</span>
-                  <select
-                    value={raridade}
-                    onChange={(event) => atualizarFiltro(setRaridade, event.target.value)}
-                  >
-                    {raridades.map((opcao) => (
-                      <option key={opcao} value={opcao}>
-                        {opcao}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <FiltroSelect
+                  rotulo="Raridade"
+                  valor={raridade}
+                  opcoes={raridades}
+                  aoAlterar={(valor) => atualizarFiltro(setRaridade, valor)}
+                />
 
-                <label className={styles.selectVisual}>
-                  <span>Elemento</span>
-                  <select
-                    value={elemento}
-                    onChange={(event) => atualizarFiltro(setElemento, event.target.value)}
-                  >
-                    {elementos.map((opcao) => (
-                      <option key={opcao} value={opcao}>
-                        {opcao === "Todos" ? "Todos" : opcao}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <FiltroSelect
+                  rotulo="Elemento"
+                  valor={elemento}
+                  opcoes={elementos}
+                  aoAlterar={(valor) => atualizarFiltro(setElemento, valor)}
+                />
 
-                <label className={styles.selectVisual}>
-                  <span>Classe</span>
-                  <select
-                    value={classe}
-                    onChange={(event) => atualizarFiltro(setClasse, event.target.value)}
-                  >
-                    {classes.map((opcao) => (
-                      <option key={opcao} value={opcao}>
-                        {opcao}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <FiltroSelect
+                  rotulo="Classe"
+                  valor={classe}
+                  opcoes={classes}
+                  aoAlterar={(valor) => atualizarFiltro(setClasse, valor)}
+                />
 
                 <label className={styles.busca}>
                   <input
@@ -798,7 +813,7 @@ export default function CartasPage() {
                       </div>
 
                       <div className={styles.nivel}>
-                        <strong>Nivel 1 / 60</strong>
+                        <strong>Nível 1 / 60</strong>
                         <div className={styles.nivelLinha}>
                           <span className={styles.barra} aria-hidden="true">
                             <span />
@@ -841,7 +856,7 @@ export default function CartasPage() {
                         </strong>
                         {typeof cartaSelecionada.passiva?.descricao === "string"
                           ? cartaSelecionada.passiva.descricao
-                          : "Esta carta ainda nao possui uma descricao de passiva."}
+                          : "Esta carta ainda não possui uma descrição de passiva."}
                       </p>
                     </div>
                   </section>
@@ -862,9 +877,9 @@ export default function CartasPage() {
                   {detalhesAbertos ? (
                     <section className={styles.detalhesExtras}>
                       <strong>Detalhes completos</strong>
-                      <span>Copias: {cartaSelecionada.copias}</span>
+                      <span>Cópias: {cartaSelecionada.copias}</span>
                       <span>Classe: {cartaSelecionada.classe}</span>
-                      <span>Status: {cartaSelecionada.obtida ? "Obtida" : "Nao obtida"}</span>
+                      <span>Status: {cartaSelecionada.obtida ? "Obtida" : "Não obtida"}</span>
                     </section>
                   ) : null}
 
@@ -880,7 +895,7 @@ export default function CartasPage() {
                       disabled={!cartaSelecionada.obtida}
                     >
                       <PackagePlus aria-hidden="true" />
-                      {cartaSelecionada.obtida ? "Adicionar a um deck" : "Carta nao obtida"}
+                      {cartaSelecionada.obtida ? "Adicionar a um deck" : "Carta não obtida"}
                     </button>
                     <button
                       className={styles.botaoSecundario}

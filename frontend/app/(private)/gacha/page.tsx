@@ -4,11 +4,8 @@ import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
-  Bell,
   BookOpen,
   Boxes,
-  ChevronDown,
-  Coins,
   Flame,
   Gem,
   Gift,
@@ -73,12 +70,12 @@ type CartaGacha = {
 };
 
 const navItems = [
-  { href: "/dashboard", label: "Inicio", icon: Home },
-  { href: "/cartas", label: "Colecao", icon: Layers },
+  { href: "/dashboard", label: "Início", icon: Home },
+  { href: "/cartas", label: "Coleção", icon: Layers },
   { href: "/decks", label: "Decks", icon: Boxes },
   { href: "#", label: "Loja", icon: Shirt },
   { href: "/gacha", label: "Gacha", icon: Sparkles, ativo: true },
-  { href: "#", label: "Historico", icon: BookOpen },
+  { href: "#", label: "Histórico", icon: BookOpen },
   { href: "#", label: "Ranking", icon: Trophy },
   { href: "/perfil", label: "Perfil", icon: User },
   { href: "#", label: "Sair", icon: LogOut },
@@ -87,7 +84,7 @@ const navItems = [
 const cartasPool: CartaGacha[] = [
   {
     nome: "Kael Arcano",
-    subtitulo: "Guardiao da Floresta",
+    subtitulo: "Guardião da Floresta",
     raridade: "UR",
     elemento: "natureza",
     icon: Leaf,
@@ -100,7 +97,7 @@ const cartasPool: CartaGacha[] = [
   },
   {
     nome: "Lyria da Luz",
-    subtitulo: "Oraculo Azul",
+    subtitulo: "Oráculo Azul",
     raridade: "SR",
     elemento: "agua",
     icon: Waves,
@@ -174,7 +171,7 @@ function mapearCarta(carta: CartaGachaApi): CartaGacha {
   return {
     ...base,
     ...carta,
-    subtitulo: carta.nova ? "Nova na colecao" : "Copia adicional",
+    subtitulo: carta.nova ? "Nova na coleção" : "Cópia adicional",
     icon:
       carta.elemento === "natureza" ? Leaf :
       carta.elemento === "agua" ? Waves :
@@ -187,7 +184,6 @@ function mapearCarta(carta: CartaGachaApi): CartaGacha {
 export default function GachaPage() {
   const [banners, setBanners] = useState<BannerGacha[]>([]);
   const [aba, setAba] = useState("");
-  const [jogador, setJogador] = useState({ nome: "Jogador", nivel: 1, moedas: 0 });
   const [rubys, setRubys] = useState(0);
   const [pity, setPity] = useState(0);
   const [invocando, setInvocando] = useState(false);
@@ -203,7 +199,6 @@ export default function GachaPage() {
         setBanners(dados.banners);
         setAba(dados.banners[0]?.id ?? "");
         setRubys(dados.jogador.rubys);
-        setJogador(dados.jogador);
         setPity(dados.banners[0]?.pity ?? 0);
         setResgatado(!dados.banners[0]?.diarioDisponivel);
       })
@@ -231,6 +226,7 @@ export default function GachaPage() {
       setResultado(resposta.cartas.map(mapearCarta));
       setPity(resposta.pity);
       setRubys(resposta.rubys);
+      window.dispatchEvent(new Event("perfil-atualizado"));
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro ao realizar giro.");
     } finally {
@@ -249,6 +245,7 @@ export default function GachaPage() {
     try {
       const resposta = await resgatarGiroDiario(bannerAtivo.id);
       setRubys((atual) => atual + resposta.rubysRecebidos);
+      window.dispatchEvent(new Event("perfil-atualizado"));
       setResgatado(true);
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro ao resgatar recompensa.");
@@ -285,12 +282,12 @@ export default function GachaPage() {
             })}
           </nav>
 
-          <section className={styles.presente} aria-label="Giro diario">
+          <section className={styles.presente} aria-label="Giro diário">
             <span className={styles.presenteIcone}>
               <Gift aria-hidden="true" />
             </span>
-            <strong>{resgatado ? "Giro diario resgatado" : "Giro diario disponivel!"}</strong>
-            <p>{resgatado ? "Volte amanha para novas recompensas." : "Resgate agora suas recompensas gratuitas."}</p>
+            <strong>{resgatado ? "Giro diário resgatado" : "Giro diário disponível!"}</strong>
+            <p>{resgatado ? "Volte amanhã para novas recompensas." : "Resgate agora suas recompensas gratuitas."}</p>
             <button type="button" onClick={() => void resgatarDiario()} disabled={resgatado || !bannerAtivo}>
               {resgatado ? "Resgatado" : "Resgatar"}
             </button>
@@ -308,32 +305,6 @@ export default function GachaPage() {
               </h1>
             </div>
 
-            <div className={styles.status}>
-              <button type="button" className={styles.moeda} title="Moedas">
-                <Coins className={styles.ouro} aria-hidden="true" />
-                {jogador.moedas.toLocaleString("pt-BR")}
-              </button>
-              <span className={styles.divisor} aria-hidden="true" />
-              <button type="button" className={styles.moeda} title="Rubys">
-                <Gem className={styles.gema} aria-hidden="true" />
-                {rubys}
-              </button>
-              <span className={styles.divisor} aria-hidden="true" />
-              <button type="button" className={styles.iconeTopo} aria-label="Notificacoes">
-                <Bell aria-hidden="true" />
-              </button>
-              <span className={styles.divisor} aria-hidden="true" />
-              <Link href="/perfil" className={styles.avatar}>
-                <span className={styles.avatarIcone}>
-                  <User aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>{jogador.nome}</strong>
-                  <span>Nivel {jogador.nivel}</span>
-                </span>
-                <ChevronDown aria-hidden="true" />
-              </Link>
-            </div>
           </header>
 
           <section className={styles.gachaPainel} data-estado={statusResultado}>
@@ -401,7 +372,7 @@ export default function GachaPage() {
                         <span>{"★".repeat(estrelas(destaque.raridade))}</span>
                       </span>
                     </article>
-                    <p>Novo heroi adicionado a sua colecao!</p>
+                    <p>Novo herói adicionado à sua coleção!</p>
                     <div className={styles.resultadoBotoes}>
                       <button type="button" className={styles.btnPrimario}>
                         Ver detalhes

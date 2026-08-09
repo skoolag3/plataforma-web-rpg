@@ -205,7 +205,7 @@ export function atualizarAdminUsuario(id: string, payload: UpdateAdminUsuarioPay
 }
 
 function formatApiError(data: ApiErrorResponse | null) {
-  const fallback = "Nao foi possivel concluir a solicitacao.";
+  const fallback = "Não foi possível concluir a solicitação.";
 
   if (!data) {
     return fallback;

@@ -7,6 +7,7 @@
 
 .selectVisual,
 .busca {
+  position: relative;
   display: grid;
   min-width: 0;
   min-height: 3.45rem;
@@ -19,10 +20,9 @@
 
 .selectVisual:focus-within,
 .busca:focus-within {
-  border-color: rgba(168, 85, 247, 0.78);
-  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.22);
-  outline: 2px solid rgba(190, 242, 100, 0.78);
-  outline-offset: 0.2rem;
+  border-color: rgba(167, 139, 250, 0.52);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+  outline: none;
 }
 
 .selectVisual span {
@@ -30,7 +30,6 @@
   font-size: 0.76rem;
 }
 
-.selectVisual select,
 .busca input {
   width: 100%;
   min-width: 0;
@@ -43,9 +42,98 @@
   outline: 0;
 }
 
-.selectVisual option {
-  background: #0f172a;
+.selectTrigger {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  border: 0;
+  background: transparent;
+  color: #f8fafc;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0;
+  text-align: left;
+}
+
+.selectTrigger strong {
+  overflow: hidden;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selectTrigger svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex: 0 0 auto;
+  color: #94a3b8;
+  transition: transform 160ms ease;
+}
+
+.selectVisual[data-open] {
+  z-index: 30;
+}
+
+.selectVisual[data-open] .selectTrigger svg {
+  transform: rotate(180deg);
+}
+
+.selectTrigger:focus-visible {
+  outline: none;
+}
+
+.selectMenu {
+  position: absolute;
+  top: calc(100% + 0.42rem);
+  right: 0;
+  left: 0;
+  z-index: 40;
+  display: grid;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 0.65rem;
+  background: #0c101a;
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.44);
+  padding: 0.3rem;
+}
+
+.selectMenu button {
+  display: flex;
+  min-height: 2.25rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border: 0;
+  border-radius: 0.42rem;
+  background: transparent;
+  color: #d5dbea;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.84rem;
+  padding: 0.48rem 0.58rem;
+  text-align: left;
+}
+
+.selectMenu button:hover,
+.selectMenu button:focus-visible {
+  background: rgba(148, 163, 184, 0.1);
   color: #fff;
+  outline: none;
+}
+
+.selectMenu .selectOpcaoAtiva {
+  background: rgba(124, 58, 237, 0.18);
+  color: #ddd6fe;
+}
+
+.selectMenu svg {
+  width: 0.82rem;
+  height: 0.82rem;
+  color: #a78bfa;
 }
 
 .busca {
@@ -56,6 +144,13 @@
 
 .busca input::placeholder {
   color: #aebbd0;
+}
+
+.busca input:focus,
+.busca input:focus-visible {
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .busca svg {

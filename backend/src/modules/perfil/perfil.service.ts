@@ -52,13 +52,18 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
         excluido_em: null,
       },
       include: {
-        perfil: { include: { molduraSelecionada: true } },
+        perfil: {
+          include: {
+            molduraSelecionada: true,
+            cartaMolduraSelecionada: true,
+          },
+        },
         provedores: { where: { provedor: 'GOOGLE' } },
       },
     });
 
     if (!usuario) {
-      throw new NotFoundException('Usuario nao encontrado.');
+      throw new NotFoundException('Usuário não encontrado.');
     }
 
     const [cartasObtidas, totalCartas, decksCriados, partidas, ranking] =
@@ -96,7 +101,10 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       usuario.perfil ??
       (await this.prisma.perfilUsuario.create({
         data: { id_usuario: idUsuario },
-        include: { molduraSelecionada: true },
+        include: {
+          molduraSelecionada: true,
+          cartaMolduraSelecionada: true,
+        },
       }));
 
     const quantidadePartidas = (resultado: string) =>
@@ -109,8 +117,14 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       nivel: usuario.nivel ?? 1,
       idUser: this.formatarIdUsuario(usuario.id),
       biografia: perfil.biografia,
-      moldura: perfil.molduraSelecionada?.nome ?? 'Padrão',
-      molduraClasse: perfil.molduraSelecionada?.classe_css ?? 'molduraPadrao',
+      moldura:
+        perfil.cartaMolduraSelecionada?.nome
+          ? `Moldura de ${perfil.cartaMolduraSelecionada.nome}`
+          : perfil.molduraSelecionada?.nome ?? 'Padrão',
+      molduraClasse: perfil.cartaMolduraSelecionada
+        ? 'molduraCarta'
+        : perfil.molduraSelecionada?.classe_css ?? 'molduraPadrao',
+      molduraUrl: perfil.cartaMolduraSelecionada?.moldura ?? null,
       avatarUrl: perfil.avatar_url,
       bannerUrl: perfil.banner_url,
       googleVinculado: usuario.provedores.length > 0,
@@ -183,7 +197,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     });
 
     if (emailEmUso) {
-      throw new ConflictException('Este e-mail ja esta em uso.');
+      throw new ConflictException('Este e-mail já está em uso.');
     }
 
     const token = randomBytes(32).toString('hex');
@@ -206,7 +220,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     });
 
     return {
-      message: 'Enviamos uma confirmacao para o seu e-mail atual.',
+      message: 'Enviamos uma confirmação para o seu e-mail atual.',
       emailPendente: email,
     };
   }
@@ -228,16 +242,16 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       return this.confirmarEmailNovo(usuarioNovo);
     }
 
-    throw new BadRequestException('Link de confirmacao invalido.');
+    throw new BadRequestException('Link de confirmação inválido.');
   }
 
   private async confirmarEmailAtual(usuario: Usuario) {
     if (!usuario.email_pendente || !usuario.token_troca_email_expira_em) {
-      throw new BadRequestException('Solicitacao de troca invalida.');
+      throw new BadRequestException('Solicitação de troca inválida.');
     }
 
     if (usuario.token_troca_email_expira_em.getTime() < Date.now()) {
-      throw new BadRequestException('Link de autorizacao expirado.');
+      throw new BadRequestException('Link de autorização expirado.');
     }
 
     const emailEmUso = await this.prisma.usuario.findFirst({
@@ -249,7 +263,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     });
 
     if (emailEmUso) {
-      throw new ConflictException('O novo e-mail ja esta em uso.');
+      throw new ConflictException('O novo e-mail já está em uso.');
     }
 
     const tokenNovoEmail = randomBytes(32).toString('hex');
@@ -273,13 +287,13 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
 
     return {
       message:
-        'Troca autorizada. Enviamos a confirmacao final para o novo e-mail.',
+        'Troca autorizada. Enviamos a confirmação final para o novo e-mail.',
     };
   }
 
   private async confirmarEmailNovo(usuario: Usuario) {
     if (!usuario.email_pendente || !usuario.token_email_pendente_expira_em) {
-      throw new BadRequestException('Verificacao do novo e-mail invalida.');
+      throw new BadRequestException('Verificação do novo e-mail inválida.');
     }
 
     if (usuario.token_email_pendente_expira_em.getTime() < Date.now()) {
@@ -295,7 +309,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     });
 
     if (emailEmUso) {
-      throw new ConflictException('O novo e-mail ja esta em uso.');
+      throw new ConflictException('O novo e-mail já está em uso.');
     }
 
     const novoEmail = usuario.email_pendente;
@@ -319,7 +333,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
 
   async atualizarSenha(idUsuario: string, dto: AtualizarSenhaDto) {
     if (dto.novaSenha !== dto.confirmarSenha) {
-      throw new BadRequestException('As novas senhas nao conferem.');
+      throw new BadRequestException('As novas senhas não conferem.');
     }
 
     const usuario = await this.buscarUsuarioComSenha(idUsuario);
@@ -365,7 +379,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     });
 
     return {
-      message: 'Preferencias atualizadas.',
+      message: 'Preferências atualizadas.',
       preferencias: {
         receberNotificacoes: preferencias.receber_notificacoes,
         mostrarNoRanking: preferencias.mostrar_no_ranking,
@@ -388,28 +402,73 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
   }
 
   async listarMolduras(idUsuario: string) {
-    const molduras = await this.prisma.moldura.findMany({
-      where: { ativo: true },
-      include: {
-        usuarios: {
-          where: { id_usuario: idUsuario },
-          select: { id_usuario: true },
+    const [molduras, cartasComMoldura] = await Promise.all([
+      this.prisma.moldura.findMany({
+        where: { ativo: true },
+        include: {
+          usuarios: {
+            where: { id_usuario: idUsuario },
+            select: { id_usuario: true },
+          },
         },
-      },
-      orderBy: [{ preco_moedas: 'asc' }, { nome: 'asc' }],
-    });
+        orderBy: [{ preco_moedas: 'asc' }, { nome: 'asc' }],
+      }),
+      this.prisma.carta.findMany({
+        where: {
+          ativo: true,
+          excluido_em: null,
+          moldura: { not: null },
+        },
+        include: {
+          inventarios: {
+            where: {
+              id_usuario: idUsuario,
+              quantidade: { gt: 0 },
+            },
+            select: { id: true },
+          },
+        },
+        orderBy: { nome: 'asc' },
+      }),
+    ]);
 
-    return molduras.map((moldura) => ({
-      id: moldura.id,
-      nome: moldura.nome,
-      descricao: moldura.descricao,
-      classeCss: moldura.classe_css,
-      precoMoedas: moldura.preco_moedas,
-      obtida: moldura.usuarios.length > 0,
-    }));
+    return [
+      ...molduras.map((moldura) => ({
+        id: moldura.id,
+        nome: moldura.nome,
+        descricao: moldura.descricao,
+        classeCss: moldura.classe_css,
+        imagemUrl: null,
+        precoMoedas: moldura.preco_moedas,
+        obtida: moldura.usuarios.length > 0,
+      })),
+      ...cartasComMoldura.flatMap((carta) =>
+        carta.moldura
+          ? [
+              {
+                id: `carta:${carta.id}`,
+                nome: `Moldura de ${carta.nome}`,
+                descricao: `Obtida com a carta ${carta.nome}.`,
+                classeCss: 'molduraCarta',
+                imagemUrl: carta.moldura,
+                requisito: `Obtenha a carta ${carta.nome}.`,
+                precoMoedas: 0,
+                obtida: carta.inventarios.length > 0,
+              },
+            ]
+          : [],
+      ),
+    ];
   }
 
   async selecionarMoldura(idUsuario: string, dto: SelecionarMolduraDto) {
+    if (dto.idMoldura.startsWith('carta:')) {
+      return this.selecionarMolduraDeCarta(
+        idUsuario,
+        dto.idMoldura.slice('carta:'.length),
+      );
+    }
+
     const posse = await this.prisma.usuarioMoldura.findUnique({
       where: {
         id_usuario_id_moldura: {
@@ -421,19 +480,68 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     });
 
     if (!posse) {
-      throw new ForbiddenException('Esta moldura nao pertence ao jogador.');
+      throw new ForbiddenException('Esta moldura não pertence ao jogador.');
     }
 
     await this.prisma.perfilUsuario.upsert({
       where: { id_usuario: idUsuario },
-      create: { id_usuario: idUsuario, id_moldura: dto.idMoldura },
-      update: { id_moldura: dto.idMoldura },
+      create: {
+        id_usuario: idUsuario,
+        id_moldura: dto.idMoldura,
+        id_carta_moldura: null,
+      },
+      update: { id_moldura: dto.idMoldura, id_carta_moldura: null },
     });
 
     return {
       message: 'Moldura selecionada.',
       moldura: posse.moldura.nome,
       molduraClasse: posse.moldura.classe_css,
+      molduraUrl: null,
+    };
+  }
+
+  private async selecionarMolduraDeCarta(
+    idUsuario: string,
+    idCarta: string,
+  ) {
+    const item = await this.prisma.inventario.findFirst({
+      where: {
+        id_usuario: idUsuario,
+        id_carta: idCarta,
+        quantidade: { gt: 0 },
+        carta: {
+          is: {
+            ativo: true,
+            excluido_em: null,
+            moldura: { not: null },
+          },
+        },
+      },
+      include: { carta: true },
+    });
+
+    if (!item?.carta?.moldura) {
+      throw new ForbiddenException(
+        'Obtenha esta carta antes de usar a moldura dela.',
+      );
+    }
+
+    await this.prisma.perfilUsuario.upsert({
+      where: { id_usuario: idUsuario },
+      create: {
+        id_usuario: idUsuario,
+        id_moldura: null,
+        id_carta_moldura: idCarta,
+      },
+      update: { id_moldura: null, id_carta_moldura: idCarta },
+    });
+
+    return {
+      message: 'Moldura da carta selecionada.',
+      moldura: `Moldura de ${item.carta.nome}`,
+      molduraClasse: 'molduraCarta',
+      molduraUrl: item.carta.moldura,
     };
   }
 
@@ -495,7 +603,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     ]);
 
     return {
-      message: 'Exclusao agendada. Voce tem 30 dias para cancelar.',
+      message: 'Exclusão agendada. Você tem 30 dias para cancelar.',
       executarApos: this.formatarDataBrasil(executarApos),
     };
   }
@@ -507,7 +615,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     });
 
     if (!resultado.count) {
-      throw new BadRequestException('Nao existe exclusao agendada.');
+      throw new BadRequestException('Não existe exclusão agendada.');
     }
 
     await this.prisma.usuario.update({
@@ -515,7 +623,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       data: { exclusao_agendada_em: null },
     });
 
-    return { message: 'Exclusao cancelada.' };
+    return { message: 'Exclusão cancelada.' };
   }
 
   private async processarExclusoesPendentes() {
@@ -553,7 +661,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
         this.prisma.usuario.update({
           where: { id: solicitacao.id_usuario },
           data: {
-            nome: 'Usuario excluido',
+            nome: 'Usuário excluído',
             email: `excluido-${identificador}@anon.invalid`,
             senha_hash: senhaAleatoria,
             email_verificado: false,
@@ -594,7 +702,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
         },
       })
       .catch(() => {
-        throw new NotFoundException('Usuario nao encontrado.');
+        throw new NotFoundException('Usuário não encontrado.');
       });
   }
 

@@ -27,7 +27,7 @@ export default function EsqueciSenhaPage() {
       setErro(
         erroCapturado instanceof Error
           ? erroCapturado.message
-          : "Nao foi possivel solicitar a alteracao de senha.",
+          : "Não foi possível solicitar a alteração de senha.",
       );
     } finally {
       setCarregando(false);

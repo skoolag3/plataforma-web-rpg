@@ -36,7 +36,7 @@ function ConteudoAlterarSenha() {
     }
 
     if (senha !== confirmarSenha) {
-      setErro("As senhas nao conferem.");
+      setErro("As senhas não conferem.");
       return;
     }
 
@@ -51,7 +51,7 @@ function ConteudoAlterarSenha() {
       setErro(
         erroCapturado instanceof Error
           ? erroCapturado.message
-          : "Nao foi possivel alterar a senha.",
+          : "Não foi possível alterar a senha.",
       );
     } finally {
       setCarregando(false);

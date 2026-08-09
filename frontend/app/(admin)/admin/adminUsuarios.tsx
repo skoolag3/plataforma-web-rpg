@@ -41,7 +41,7 @@ export function Usuarios() {
     try {
       setUsuariosApi(await listarAdminUsuarios({ busca, status: filtroStatus }));
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Nao foi possivel carregar os usuarios.");
+      setErro(error instanceof Error ? error.message : "Não foi possível carregar os usuários.");
     } finally {
       setCarregando(false);
     }
@@ -75,9 +75,9 @@ export function Usuarios() {
       });
       sincronizarUsuario(atualizado);
       setEditando(null);
-      setFeedback("Usuario atualizado.");
+      setFeedback("Usuário atualizado.");
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Nao foi possivel atualizar o usuario.");
+      setErro(error instanceof Error ? error.message : "Não foi possível atualizar o usuário.");
     } finally {
       setSalvando(false);
     }
@@ -91,9 +91,9 @@ export function Usuarios() {
     try {
       const atualizado = await atualizarAdminUsuario(usuario.id, { bloqueado: !usuario.bloqueado });
       sincronizarUsuario(atualizado);
-      setFeedback(`Usuario ${usuario.bloqueado ? "desbloqueado" : "bloqueado"}.`);
+      setFeedback(`Usuário ${usuario.bloqueado ? "desbloqueado" : "bloqueado"}.`);
     } catch (error) {
-      setErro(error instanceof Error ? error.message : `Nao foi possivel ${acao} o usuario.`);
+      setErro(error instanceof Error ? error.message : `Não foi possível ${acao} o usuário.`);
     } finally {
       setSalvando(false);
     }
@@ -105,10 +105,10 @@ export function Usuarios() {
   }, []);
 
   return (
-    <AdminLayout title="Usuarios" subtitle="Gerencie os usuarios da plataforma.">
+    <AdminLayout title="Usuários" subtitle="Gerencie os usuários da plataforma.">
       <form className={`${styles.toolbar} ${styles.usuariosToolbar}`} onSubmit={(event) => { event.preventDefault(); void carregarUsuarios(); }}>
         <label><Search aria-hidden="true" /><input placeholder="Buscar por nome ou email..." value={busca} onChange={(event) => setBusca(event.target.value)} /></label>
-        <select value={filtroStatus} onChange={(event) => setFiltroStatus(event.target.value)} aria-label="Filtrar usuarios por status">
+        <select value={filtroStatus} onChange={(event) => setFiltroStatus(event.target.value)} aria-label="Filtrar usuários por status">
           <option value="">Todos os status</option>
           <option value="ativos">Ativos</option>
           <option value="bloqueados">Bloqueados</option>
@@ -119,11 +119,11 @@ export function Usuarios() {
       </form>
       {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
       {feedback ? <p className={styles.feedbackSuccess}>{feedback}</p> : null}
-      {carregando ? <p className={styles.feedbackInfo}>Carregando usuarios...</p> : null}
-      {!carregando && !erro && usuariosApi.length === 0 ? <p className={styles.feedbackInfo}>Nenhum usuario encontrado.</p> : null}
+      {carregando ? <p className={styles.feedbackInfo}>Carregando usuários...</p> : null}
+      {!carregando && !erro && usuariosApi.length === 0 ? <p className={styles.feedbackInfo}>Nenhum usuário encontrado.</p> : null}
       <div className={styles.tableWrap}>
         <table>
-          <thead><tr><th>Usuario</th><th>Nivel</th><th>Partidas</th><th>Rubys</th><th>Cadastro</th><th>Status</th><th>Acoes</th></tr></thead>
+          <thead><tr><th>Usuário</th><th>Nível</th><th>Partidas</th><th>Rubys</th><th>Cadastro</th><th>Status</th><th>Ações</th></tr></thead>
           <tbody>
             {usuariosApi.map((usuario) => (
               <tr key={usuario.id}>
@@ -135,9 +135,9 @@ export function Usuarios() {
                 <td><Status value={usuario.bloqueado ? "Bloqueado" : usuario.ativo ? "Ativo" : "Inativo"} /></td>
                 <td>
                   <span className={styles.rowActions}>
-                    <button type="button" onClick={() => setSelecionado(selecionado?.id === usuario.id ? null : usuario)} title="Visualizar usuario" aria-label={`Visualizar ${usuario.nome}`}><Eye aria-hidden="true" /></button>
-                    <button type="button" onClick={() => abrirEdicao(usuario)} title="Editar usuario" aria-label={`Editar ${usuario.nome}`}><Edit3 aria-hidden="true" /></button>
-                    <button type="button" onClick={() => void alternarBloqueio(usuario)} disabled={salvando || usuario.admin} title={usuario.admin ? "Conta administrativa protegida" : usuario.bloqueado ? "Desbloquear usuario" : "Bloquear usuario"} aria-label={`${usuario.bloqueado ? "Desbloquear" : "Bloquear"} ${usuario.nome}`}><MoreHorizontal aria-hidden="true" /></button>
+                    <button type="button" onClick={() => setSelecionado(selecionado?.id === usuario.id ? null : usuario)} title="Visualizar usuário" aria-label={`Visualizar ${usuario.nome}`}><Eye aria-hidden="true" /></button>
+                    <button type="button" onClick={() => abrirEdicao(usuario)} title="Editar usuário" aria-label={`Editar ${usuario.nome}`}><Edit3 aria-hidden="true" /></button>
+                    <button type="button" onClick={() => void alternarBloqueio(usuario)} disabled={salvando || usuario.admin} title={usuario.admin ? "Conta administrativa protegida" : usuario.bloqueado ? "Desbloquear usuário" : "Bloquear usuário"} aria-label={`${usuario.bloqueado ? "Desbloquear" : "Bloquear"} ${usuario.nome}`}><MoreHorizontal aria-hidden="true" /></button>
                   </span>
                 </td>
               </tr>
@@ -149,22 +149,22 @@ export function Usuarios() {
         <section className={styles.usuarioDetalhes}>
           <header><div><h2>{selecionado.nome}</h2><p>{selecionado.email}</p></div><button type="button" onClick={() => setSelecionado(null)} aria-label="Fechar detalhes"><X aria-hidden="true" /></button></header>
           <div className={styles.usuarioResumo}>
-            <span><small>Nivel</small><strong>{selecionado.nivel}</strong></span>
+            <span><small>Nível</small><strong>{selecionado.nivel}</strong></span>
             <span><small>Partidas</small><strong>{formatNumber(selecionado.partidas)}</strong></span>
             <span><small>Rubys</small><strong>{formatNumber(selecionado.rubys)}</strong></span>
             <span><small>Moedas</small><strong>{formatNumber(selecionado.moedas)}</strong></span>
             <span><small>Email</small><strong>{selecionado.emailVerificado ? "Verificado" : "Pendente"}</strong></span>
-            <span><small>Ultimo login</small><strong>{formatAdminDate(selecionado.ultimoLoginEm)}</strong></span>
+            <span><small>Último login</small><strong>{formatAdminDate(selecionado.ultimoLoginEm)}</strong></span>
           </div>
         </section>
       ) : null}
       {editando ? (
         <form className={styles.usuarioEditor} onSubmit={salvarUsuario}>
-          <header><div><h2>Editar usuario</h2><p>{editando.email}</p></div><button type="button" onClick={() => setEditando(null)} aria-label="Fechar editor"><X aria-hidden="true" /></button></header>
+          <header><div><h2>Editar usuário</h2><p>{editando.email}</p></div><button type="button" onClick={() => setEditando(null)} aria-label="Fechar editor"><X aria-hidden="true" /></button></header>
           <label>Nome<input value={nomeEdicao} onChange={(event) => setNomeEdicao(event.target.value)} required minLength={2} maxLength={100} /></label>
-          <label>Nivel<input type="number" min={1} max={9999} value={nivelEdicao} onChange={(event) => setNivelEdicao(event.target.value)} required /></label>
-          <label className={styles.usuarioToggle}><input type="checkbox" checked={ativoEdicao} disabled={editando.admin} onChange={(event) => setAtivoEdicao(event.target.checked)} /><span><strong>Conta ativa</strong><small>{editando.admin ? "Contas administrativas permanecem ativas." : "Permite que o usuario acesse a plataforma."}</small></span></label>
-          <label className={styles.usuarioToggle}><input type="checkbox" checked={emailVerificadoEdicao} onChange={(event) => setEmailVerificadoEdicao(event.target.checked)} /><span><strong>Email verificado</strong><small>Confirma manualmente que o endereco pertence ao usuario.</small></span></label>
+          <label>Nível<input type="number" min={1} max={9999} value={nivelEdicao} onChange={(event) => setNivelEdicao(event.target.value)} required /></label>
+          <label className={styles.usuarioToggle}><input type="checkbox" checked={ativoEdicao} disabled={editando.admin} onChange={(event) => setAtivoEdicao(event.target.checked)} /><span><strong>Conta ativa</strong><small>{editando.admin ? "Contas administrativas permanecem ativas." : "Permite que o usuário acesse a plataforma."}</small></span></label>
+          <label className={styles.usuarioToggle}><input type="checkbox" checked={emailVerificadoEdicao} onChange={(event) => setEmailVerificadoEdicao(event.target.checked)} /><span><strong>E-mail verificado</strong><small>Confirma manualmente que o endereço pertence ao usuário.</small></span></label>
           <div className={styles.editorActions}><button type="button" onClick={() => setEditando(null)}>Cancelar</button><button type="submit" className={styles.primaryBtn} disabled={salvando}><Save aria-hidden="true" /> {salvando ? "Salvando..." : "Salvar"}</button></div>
         </form>
       ) : null}

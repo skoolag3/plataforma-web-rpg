@@ -25,7 +25,7 @@ function ConteudoVerificarEmail() {
         setErro(
           erroCapturado instanceof Error
             ? erroCapturado.message
-            : "Nao foi possivel verificar o e-mail.",
+            : "Não foi possível verificar o e-mail.",
         );
         setMensagem("");
       });

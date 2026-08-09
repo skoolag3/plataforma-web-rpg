@@ -49,7 +49,7 @@ export class AdminCartasService {
     });
 
     if (!carta) {
-      throw new NotFoundException('Carta nao encontrada.');
+      throw new NotFoundException('Carta não encontrada.');
     }
 
     return this.toResponse(carta);

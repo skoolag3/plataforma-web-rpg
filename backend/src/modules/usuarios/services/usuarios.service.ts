@@ -19,7 +19,7 @@ export class UsuariosService {
     });
 
     if (usuarioExistente) {
-      throw new ConflictException('E-mail ja cadastrado.');
+      throw new ConflictException('E-mail já cadastrado.');
     }
 
     const senhaHash = await bcrypt.hash(senha, 10);

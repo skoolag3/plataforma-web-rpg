@@ -78,6 +78,7 @@
   position: relative;
   width: 8.2rem;
   height: 8.2rem;
+  aspect-ratio: 1 / 1;
   margin-top: -3.4rem;
 }
 
@@ -89,7 +90,7 @@
   overflow: hidden;
   place-items: center;
   border: 1px solid #a78bfad9;
-  border-radius: 50%;
+  border-radius: 1rem;
   background:
     radial-gradient(circle, #0f17211a, #030712d9 51%),
     conic-gradient(from 210deg, #4c1d95, #111827, #7c3aed, #172554);
@@ -121,9 +122,32 @@
 .brilhoAvatar {
   position: absolute;
   inset: 20%;
-  border-radius: 50%;
+  border-radius: 0.8rem;
   background: #8b5cf657;
   filter: blur(1.2rem);
+}
+
+.molduraCartaAvatar {
+  position: absolute;
+  inset: -0.32rem;
+  z-index: 3;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+  transform: translateY(0.1rem) scaleY(1.045);
+}
+
+.molduraCartaAvatar::before {
+  position: absolute;
+  inset: 0;
+  background-image: inherit;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  content: "";
+  opacity: 0.86;
+  transform: scale(0.94);
 }
 
 .btnEditarAvatar {
@@ -329,10 +353,13 @@
   opacity: 0.45;
 }
 
-.listaMolduras button > span {
+.amostraMoldura {
   width: 2.1rem;
   height: 2.1rem;
-  border-radius: 50%;
+  border-radius: 0.35rem;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .listaMolduras small {
@@ -349,6 +376,10 @@
 
 .molduraRubi {
   box-shadow: 0 0 0 2px #ef4444, 0 0 1rem #ef4444b3;
+}
+
+.molduraCarta {
+  box-shadow: 0 0 0 1px #a78bfa80;
 }
 
 @media (max-width: 650px) {

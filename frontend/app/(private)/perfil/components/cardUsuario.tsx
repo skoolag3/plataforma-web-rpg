@@ -93,6 +93,13 @@ export function CardUsuario({
             <span className={styles.brilhoAvatar} />
             <UserRound aria-hidden="true" />
           </div>
+          {perfil.molduraUrl ? (
+            <span
+              className={styles.molduraCartaAvatar}
+              style={{ backgroundImage: `url("${perfil.molduraUrl}")` }}
+              aria-hidden="true"
+            />
+          ) : null}
           <button
             type="button"
             className={styles.btnEditarAvatar}
@@ -316,12 +323,23 @@ export function CardUsuario({
                   )
                 }
               >
-                <span className={styles[moldura.classeCss] ?? ""} />
+                <span
+                  className={[
+                    styles.amostraMoldura,
+                    styles[moldura.classeCss] ?? "",
+                  ].join(" ")}
+                  style={
+                    moldura.imagemUrl
+                      ? { backgroundImage: `url("${moldura.imagemUrl}")` }
+                      : undefined
+                  }
+                />
                 <strong>{moldura.nome}</strong>
                 <small>
                   {moldura.obtida
                     ? "Disponível"
-                    : `${moldura.precoMoedas.toLocaleString("pt-BR")} moedas`}
+                    : moldura.requisito ??
+                      `${moldura.precoMoedas.toLocaleString("pt-BR")} moedas`}
                 </small>
               </button>
             ))}

@@ -53,7 +53,7 @@ export class AdminCloudinaryService {
     });
 
     if (!carta) {
-      throw new NotFoundException('Carta nao encontrada.');
+      throw new NotFoundException('Carta não encontrada.');
     }
 
     const assets = await this.uploadCartaAssets(files);
@@ -102,7 +102,7 @@ export class AdminCloudinaryService {
           if (error || !result) {
             reject(
               new InternalServerErrorException(
-                'Nao foi possivel enviar imagem ao Cloudinary.',
+                'Não foi possível enviar a imagem ao Cloudinary.',
               ),
             );
             return;
@@ -175,7 +175,7 @@ export class AdminCloudinaryService {
         apiSecret: decodeURIComponent(url.password),
       };
     } catch {
-      throw new InternalServerErrorException('CLOUDINARY_URL invalida.');
+      throw new InternalServerErrorException('CLOUDINARY_URL inválida.');
     }
   }
 

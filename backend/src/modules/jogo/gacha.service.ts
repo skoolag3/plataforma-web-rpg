@@ -93,9 +93,9 @@ export class GachaService {
             orderBy: { timestamp_pull: 'desc' },
           }),
         ]);
-        if (!usuario) throw new NotFoundException('Usuario nao encontrado.');
+        if (!usuario) throw new NotFoundException('Usuário não encontrado.');
         if (!banner || !banner.cartas.length)
-          throw new NotFoundException('Banner indisponivel.');
+          throw new NotFoundException('Banner indisponível.');
         const custo = banner.custo_giro * (quantidade === 10 ? 9 : 1);
         if ((usuario.saldo_rubys_cache ?? 0) < custo) {
           throw new BadRequestException('Rubys insuficientes.');
@@ -194,12 +194,12 @@ export class GachaService {
             },
           }),
         ]);
-        if (!banner) throw new NotFoundException('Banner indisponivel.');
+        if (!banner) throw new NotFoundException('Banner indisponível.');
         if (
           coleta?.ultima_coleta &&
           Date.now() - coleta.ultima_coleta.getTime() < 86_400_000
         ) {
-          throw new ConflictException('A recompensa diaria ja foi resgatada.');
+          throw new ConflictException('A recompensa diária já foi resgatada.');
         }
         await tx.usuarioBannerColeta.upsert({
           where: {

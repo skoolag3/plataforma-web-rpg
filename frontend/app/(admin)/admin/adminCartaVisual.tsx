@@ -131,7 +131,7 @@ export function PreviewCarta({
       </div>
       {proporcoesDiferentes ? (
         <small className={styles.avisoProporcao}>
-          O padrao da carta e 2:3 (ex.: 1024x1536). Arte: {dimensoesArte ? `${dimensoesArte.largura}x${dimensoesArte.altura}` : "nao selecionada"}; moldura: {dimensoesMoldura ? `${dimensoesMoldura.largura}x${dimensoesMoldura.altura}` : "nao selecionada"}.
+          O padrão da carta é 2:3 (ex.: 1024x1536). Arte: {dimensoesArte ? `${dimensoesArte.largura}x${dimensoesArte.altura}` : "não selecionada"}; moldura: {dimensoesMoldura ? `${dimensoesMoldura.largura}x${dimensoesMoldura.altura}` : "não selecionada"}.
         </small>
       ) : null}
     </div>
@@ -167,7 +167,7 @@ export function ControleVisualCarta({
         <ControleFaixa rotulo="Zoom" value={value.arte.escala} min={0.7} max={2} step={0.01} onChange={(valor) => atualizarArte("escala", valor)} />
         <ControleFaixa rotulo="Horizontal" value={value.arte.x} min={-50} max={50} step={1} sufixo="%" onChange={(valor) => atualizarArte("x", valor)} />
         <ControleFaixa rotulo="Vertical" value={value.arte.y} min={-50} max={50} step={1} sufixo="%" onChange={(valor) => atualizarArte("y", valor)} />
-        <ControleFaixa rotulo="Rotacao" value={value.arte.rotacao} min={-15} max={15} step={0.5} sufixo="°" onChange={(valor) => atualizarArte("rotacao", valor)} />
+        <ControleFaixa rotulo="Rotação" value={value.arte.rotacao} min={-15} max={15} step={0.5} sufixo="°" onChange={(valor) => atualizarArte("rotacao", valor)} />
       </div>
       <div className={styles.grupoControles}>
         <strong>Moldura</strong>
@@ -175,7 +175,7 @@ export function ControleVisualCarta({
         <ControleFaixa rotulo="Altura" value={value.moldura.escalaY} min={0.6} max={1.7} step={0.01} onChange={(valor) => atualizarMoldura("escalaY", valor)} />
         <ControleFaixa rotulo="Horizontal" value={value.moldura.x} min={-35} max={35} step={0.5} sufixo="%" onChange={(valor) => atualizarMoldura("x", valor)} />
         <ControleFaixa rotulo="Vertical" value={value.moldura.y} min={-35} max={35} step={0.5} sufixo="%" onChange={(valor) => atualizarMoldura("y", valor)} />
-        <ControleFaixa rotulo="Rotacao" value={value.moldura.rotacao} min={-10} max={10} step={0.5} sufixo="°" onChange={(valor) => atualizarMoldura("rotacao", valor)} />
+        <ControleFaixa rotulo="Rotação" value={value.moldura.rotacao} min={-10} max={10} step={0.5} sufixo="°" onChange={(valor) => atualizarMoldura("rotacao", valor)} />
         <span className={styles.subtituloControle}>Bordas independentes</span>
         <ControleFaixa rotulo="Lado esquerdo" value={value.moldura.esquerda} min={-25} max={50} step={0.5} sufixo="%" onChange={(valor) => atualizarMoldura("esquerda", valor)} />
         <ControleFaixa rotulo="Lado direito" value={value.moldura.direita} min={-25} max={50} step={0.5} sufixo="%" onChange={(valor) => atualizarMoldura("direita", valor)} />

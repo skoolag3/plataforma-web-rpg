@@ -58,11 +58,11 @@ export class GoogleOAuthService {
     try {
       payload = this.jwtService.verify<GoogleState>(state);
     } catch {
-      throw new BadRequestException('Estado OAuth invalido ou expirado.');
+      throw new BadRequestException('Estado OAuth inválido ou expirado.');
     }
 
     if (payload.finalidade !== 'VINCULAR_GOOGLE') {
-      throw new BadRequestException('Finalidade OAuth invalida.');
+      throw new BadRequestException('Finalidade OAuth inválida.');
     }
 
     const respostaToken = await fetch('https://oauth2.googleapis.com/token', {
@@ -80,7 +80,7 @@ export class GoogleOAuthService {
 
     if (!respostaToken.ok || !tokens.id_token) {
       throw new ServiceUnavailableException(
-        'Google nao concluiu a autorizacao.',
+        'O Google não concluiu a autorização.',
       );
     }
 
@@ -95,7 +95,7 @@ export class GoogleOAuthService {
       info.aud !== config.clientId ||
       info.email_verified !== 'true'
     ) {
-      throw new BadRequestException('Identidade Google invalida.');
+      throw new BadRequestException('Identidade Google inválida.');
     }
 
     const vinculoExistente = await this.prisma.provedorUsuario.findUnique({
@@ -109,7 +109,7 @@ export class GoogleOAuthService {
 
     if (vinculoExistente && vinculoExistente.id_usuario !== payload.sub) {
       throw new ConflictException(
-        'Esta conta Google ja esta vinculada a outro usuario.',
+        'Esta conta Google já está vinculada a outro usuário.',
       );
     }
 
@@ -140,7 +140,7 @@ export class GoogleOAuthService {
 
     if (!clientId || !clientSecret || !callbackUrl) {
       throw new ServiceUnavailableException(
-        'OAuth Google nao configurado no servidor.',
+        'OAuth do Google não configurado no servidor.',
       );
     }
 

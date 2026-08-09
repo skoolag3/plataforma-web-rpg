@@ -11,7 +11,7 @@ const nav = [
   { href: "/admin/cartas", label: "Cartas", icon: Layers },
   { href: "/admin/habilidades", label: "Habilidades", icon: Sparkles },
   { href: "/admin/decks-npc", label: "Decks NPC", icon: Bot },
-  { href: "/admin/usuarios", label: "Usuarios", icon: Users },
+  { href: "/admin/usuarios", label: "Usuários", icon: Users },
   { href: "/admin/banners", label: "Gacha (Banners)", icon: ImagePlus },
 ];
 
@@ -91,7 +91,7 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: string[]
             {headers.map((header) => (
               <th key={header}>{header}</th>
             ))}
-            <th>Acoes</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
