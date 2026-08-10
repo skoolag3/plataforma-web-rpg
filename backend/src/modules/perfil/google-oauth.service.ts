@@ -28,7 +28,7 @@ export class GoogleOAuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   gerarUrlVinculo(idUsuario: string) {
     const config = this.getConfig();

@@ -6,7 +6,7 @@ import { AdminDashboardService } from '../services/admin-dashboard.service';
 @Controller('admin/dashboard')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminDashboardController {
-  constructor(private readonly dashboardService: AdminDashboardService) {}
+  constructor(private readonly dashboardService: AdminDashboardService) { }
 
   @Get()
   resumo() {

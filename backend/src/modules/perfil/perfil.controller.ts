@@ -28,7 +28,7 @@ export class PerfilController {
   constructor(
     private readonly perfilService: PerfilService,
     private readonly storageService: PerfilStorageService,
-  ) {}
+  ) { }
 
   @Get()
   buscarPerfil(@CurrentUser() usuario: AuthenticatedUser) {

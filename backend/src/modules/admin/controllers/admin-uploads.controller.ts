@@ -52,7 +52,7 @@ const cartaAssetInterceptor = FileFieldsInterceptor(
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminUploadsController {
-  constructor(private readonly cloudinaryService: AdminCloudinaryService) {}
+  constructor(private readonly cloudinaryService: AdminCloudinaryService) { }
 
   @Post('uploads/cartas')
   @UseInterceptors(cartaAssetInterceptor)

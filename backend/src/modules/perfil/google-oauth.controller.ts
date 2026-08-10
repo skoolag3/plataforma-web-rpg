@@ -14,7 +14,7 @@ import { GoogleOAuthService } from './google-oauth.service';
 
 @Controller('perfil/google')
 export class GoogleOAuthController {
-  constructor(private readonly googleOAuthService: GoogleOAuthService) {}
+  constructor(private readonly googleOAuthService: GoogleOAuthService) { }
 
   @UseGuards(JwtAuthGuard)
   @Get('url')

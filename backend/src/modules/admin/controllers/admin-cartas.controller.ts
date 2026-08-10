@@ -20,7 +20,7 @@ import { AdminCartasService } from '../services/admin-cartas.service';
 @Controller('admin/cartas')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminCartasController {
-  constructor(private readonly cartasService: AdminCartasService) {}
+  constructor(private readonly cartasService: AdminCartasService) { }
 
   @Get()
   listar(

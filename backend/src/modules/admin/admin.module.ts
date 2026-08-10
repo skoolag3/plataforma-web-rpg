@@ -24,4 +24,4 @@ import { AdminUsuariosService } from './services/admin-usuarios.service';
     AdminUsuariosService,
   ],
 })
-export class AdminModule {}
+export class AdminModule { }

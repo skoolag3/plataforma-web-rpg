@@ -15,7 +15,7 @@ import { AdminUsuariosService } from '../services/admin-usuarios.service';
 @Controller('admin/usuarios')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminUsuariosController {
-  constructor(private readonly usuariosService: AdminUsuariosService) {}
+  constructor(private readonly usuariosService: AdminUsuariosService) { }
 
   @Get()
   listar(@Query('q') busca?: string, @Query('status') status?: string) {

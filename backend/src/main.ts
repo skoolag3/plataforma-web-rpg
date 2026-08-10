@@ -39,19 +39,19 @@ function formatValidationErrors(
     const messages = Object.values(error.constraints ?? {});
     const children = error.children?.length
       ? formatValidationErrors(error.children).map((child) => ({
-          ...child,
-          field: `${error.property}.${child.field}`,
-        }))
+        ...child,
+        field: `${error.property}.${child.field}`,
+      }))
       : [];
 
     return [
       ...(messages.length
         ? [
-            {
-              field: error.property,
-              messages,
-            },
-          ]
+          {
+            field: error.property,
+            messages,
+          },
+        ]
         : []),
       ...children,
     ];

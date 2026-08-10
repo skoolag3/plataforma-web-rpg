@@ -3,7 +3,7 @@ import { PrismaService } from '../../../database/prisma.service';
 
 @Injectable()
 export class AdminDashboardService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async resumo() {
     const [
@@ -61,9 +61,9 @@ export class AdminDashboardService {
 
     const cartasTop = cartaIds.length
       ? await this.prisma.carta.findMany({
-          where: { id: { in: cartaIds } },
-          select: { id: true, nome: true, raridade: true },
-        })
+        where: { id: { in: cartaIds } },
+        select: { id: true, nome: true, raridade: true },
+      })
       : [];
 
     return {

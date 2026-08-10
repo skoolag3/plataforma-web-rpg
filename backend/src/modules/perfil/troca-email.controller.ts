@@ -4,7 +4,7 @@ import { PerfilService } from './perfil.service';
 
 @Controller('perfil')
 export class TrocaEmailController {
-  constructor(private readonly perfilService: PerfilService) {}
+  constructor(private readonly perfilService: PerfilService) { }
 
   @Post('confirmar-troca-email')
   confirmar(@Body() dto: ConfirmarTrocaEmailDto) {

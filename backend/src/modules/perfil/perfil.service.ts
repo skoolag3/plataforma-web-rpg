@@ -28,7 +28,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   onModuleInit() {
     void this.processarExclusoesPendentes();
@@ -445,17 +445,17 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       ...cartasComMoldura.flatMap((carta) =>
         carta.moldura
           ? [
-              {
-                id: `carta:${carta.id}`,
-                nome: `Moldura de ${carta.nome}`,
-                descricao: `Obtida com a carta ${carta.nome}.`,
-                classeCss: 'molduraCarta',
-                imagemUrl: carta.moldura,
-                requisito: `Obtenha a carta ${carta.nome}.`,
-                precoMoedas: 0,
-                obtida: carta.inventarios.length > 0,
-              },
-            ]
+            {
+              id: `carta:${carta.id}`,
+              nome: `Moldura de ${carta.nome}`,
+              descricao: `Obtida com a carta ${carta.nome}.`,
+              classeCss: 'molduraCarta',
+              imagemUrl: carta.moldura,
+              requisito: `Obtenha a carta ${carta.nome}.`,
+              precoMoedas: 0,
+              obtida: carta.inventarios.length > 0,
+            },
+          ]
           : [],
       ),
     ];

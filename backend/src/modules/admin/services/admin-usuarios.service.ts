@@ -29,7 +29,7 @@ type UsuarioSelecionado = Prisma.UsuarioGetPayload<{
 
 @Injectable()
 export class AdminUsuariosService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async listar(filtros: { busca?: string; status?: string }) {
     const q = filtros.busca?.trim();
@@ -43,11 +43,11 @@ export class AdminUsuariosService {
         ...(status === 'admins' ? { is_admin: true } : {}),
         ...(q
           ? {
-              OR: [
-                { nome: { contains: q, mode: 'insensitive' } },
-                { email: { contains: q, mode: 'insensitive' } },
-              ],
-            }
+            OR: [
+              { nome: { contains: q, mode: 'insensitive' } },
+              { email: { contains: q, mode: 'insensitive' } },
+            ],
+          }
           : {}),
       },
       select: usuarioSelect,
@@ -82,20 +82,20 @@ export class AdminUsuariosService {
         ...(dto.ativo !== undefined ? { ativo: dto.ativo } : {}),
         ...(dto.bloqueado !== undefined
           ? {
-              bloqueado: dto.bloqueado,
-              tentativas_login: dto.bloqueado ? undefined : 0,
-            }
+            bloqueado: dto.bloqueado,
+            tentativas_login: dto.bloqueado ? undefined : 0,
+          }
           : {}),
         ...(dto.emailVerificado !== undefined
           ? {
-              email_verificado: dto.emailVerificado,
-              ...(dto.emailVerificado
-                ? {
-                    token_verificacao_email: null,
-                    token_verificacao_expira_em: null,
-                  }
-                : {}),
-            }
+            email_verificado: dto.emailVerificado,
+            ...(dto.emailVerificado
+              ? {
+                token_verificacao_email: null,
+                token_verificacao_expira_em: null,
+              }
+              : {}),
+          }
           : {}),
         atualizado_em: new Date(),
       },

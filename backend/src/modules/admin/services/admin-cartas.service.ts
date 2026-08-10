@@ -8,7 +8,7 @@ import {
 
 @Injectable()
 export class AdminCartasService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async listar(filtros: {
     busca?: string;
@@ -29,12 +29,12 @@ export class AdminCartasService {
         ...(status === 'inativas' ? { ativo: false } : {}),
         ...(q
           ? {
-              OR: [
-                { nome: { contains: q, mode: 'insensitive' } },
-                { elemento: { contains: q, mode: 'insensitive' } },
-                { raridade: { contains: q, mode: 'insensitive' } },
-              ],
-            }
+            OR: [
+              { nome: { contains: q, mode: 'insensitive' } },
+              { elemento: { contains: q, mode: 'insensitive' } },
+              { raridade: { contains: q, mode: 'insensitive' } },
+            ],
+          }
           : {}),
       },
       orderBy: [{ criado_em: 'desc' }, { nome: 'asc' }],
@@ -120,8 +120,8 @@ export class AdminCartasService {
       ...(dto.danoBase !== undefined ? { dano_base: dto.danoBase } : {}),
       ...(dto.defesaBase !== undefined ? { defesa_base: dto.defesaBase } : {}),
       ...(dto.passiva !== undefined ||
-      dto.classe !== undefined ||
-      dto.custo !== undefined
+        dto.classe !== undefined ||
+        dto.custo !== undefined
         ? { passiva: this.buildPassiva(dto) }
         : {}),
       ...(dto.foto !== undefined ? { foto: dto.foto } : {}),
@@ -148,8 +148,8 @@ export class AdminCartasService {
   private toResponse(carta: Prisma.CartaGetPayload<Record<string, never>>) {
     const passiva =
       carta.passiva &&
-      typeof carta.passiva === 'object' &&
-      !Array.isArray(carta.passiva)
+        typeof carta.passiva === 'object' &&
+        !Array.isArray(carta.passiva)
         ? (carta.passiva as Record<string, unknown>)
         : {};
 
