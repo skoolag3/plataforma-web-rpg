@@ -86,7 +86,7 @@
 .formModal input:focus,
 .formModal textarea:focus {
   border-color: #8b5cf6;
-  box-shadow: 0 0 0 2px #8b5cf621;
+  box-shadow: none;
 }
 
 .formModal input:disabled {

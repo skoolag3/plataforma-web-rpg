@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
 import {
@@ -15,9 +19,15 @@ export class AdminCartasService {
     raridade?: string;
     elemento?: string;
     status?: string;
+    classe?: string;
+    periodo?: string;
+    ordem?: string;
   }) {
     const q = filtros.busca?.trim();
     const status = filtros.status?.trim();
+    const classe = filtros.classe?.trim();
+    const criadoDepoisDe = this.obterInicioPeriodo(filtros.periodo);
+    const orderBy = this.obterOrdenacao(filtros.ordem);
     const cartas = await this.prisma.carta.findMany({
       where: {
         ...(status === 'removidas'
@@ -25,6 +35,10 @@ export class AdminCartasService {
           : { excluido_em: null }),
         ...(filtros.raridade ? { raridade: filtros.raridade } : {}),
         ...(filtros.elemento ? { elemento: filtros.elemento } : {}),
+        ...(classe
+          ? { passiva: { path: ['classe'], equals: classe } }
+          : {}),
+        ...(criadoDepoisDe ? { criado_em: { gte: criadoDepoisDe } } : {}),
         ...(status === 'ativas' ? { ativo: true } : {}),
         ...(status === 'inativas' ? { ativo: false } : {}),
         ...(q
@@ -37,10 +51,47 @@ export class AdminCartasService {
           }
           : {}),
       },
-      orderBy: [{ criado_em: 'desc' }, { nome: 'asc' }],
+      orderBy,
     });
 
     return cartas.map((carta) => this.toResponse(carta));
+  }
+
+  private obterInicioPeriodo(periodo?: string) {
+    const agora = new Date();
+
+    switch (periodo) {
+      case '1a':
+        agora.setFullYear(agora.getFullYear() - 1);
+        return agora;
+      case '6m':
+        agora.setMonth(agora.getMonth() - 6);
+        return agora;
+      case '1m':
+        agora.setMonth(agora.getMonth() - 1);
+        return agora;
+      case '1s':
+        agora.setDate(agora.getDate() - 7);
+        return agora;
+      case '24h':
+        agora.setHours(agora.getHours() - 24);
+        return agora;
+      default:
+        return undefined;
+    }
+  }
+
+  private obterOrdenacao(ordem?: string): Prisma.CartaOrderByWithRelationInput[] {
+    switch (ordem) {
+      case 'antigas':
+        return [{ criado_em: 'asc' }, { nome: 'asc' }];
+      case 'az':
+        return [{ nome: 'asc' }];
+      case 'za':
+        return [{ nome: 'desc' }];
+      default:
+        return [{ criado_em: 'desc' }, { nome: 'asc' }];
+    }
   }
 
   async buscar(id: string) {
@@ -55,6 +106,20 @@ export class AdminCartasService {
     return this.toResponse(carta);
   }
 
+  async buscarImpacto(id: string) {
+    await this.buscar(id);
+
+    const usuariosComCarta = await this.prisma.inventario.count({
+      where: {
+        id_carta: id,
+        id_usuario: { not: null },
+        quantidade: { gt: 0 },
+      },
+    });
+
+    return { usuariosComCarta };
+  }
+
   async criar(dto: CreateAdminCartaDto) {
     const carta = await this.prisma.carta.create({
       data: this.toCreateData(dto),
@@ -64,7 +129,13 @@ export class AdminCartasService {
   }
 
   async atualizar(id: string, dto: UpdateAdminCartaDto) {
-    await this.buscar(id);
+    const atual = await this.buscar(id);
+
+    if (atual.ativo && dto.ativo === false && !dto.confirmarImpacto) {
+      throw new BadRequestException(
+        'Confirme o impacto nos usuários antes de desativar a carta.',
+      );
+    }
 
     const carta = await this.prisma.carta.update({
       where: { id },
@@ -77,8 +148,24 @@ export class AdminCartasService {
     return this.toResponse(carta);
   }
 
-  async remover(id: string) {
-    await this.buscar(id);
+  async remover(
+    id: string,
+    confirmarNome: string,
+    confirmarImpacto: boolean,
+  ) {
+    const atual = await this.buscar(id);
+
+    if (confirmarNome !== atual.nome) {
+      throw new BadRequestException(
+        'O nome informado não corresponde à carta que será removida.',
+      );
+    }
+
+    if (!confirmarImpacto) {
+      throw new BadRequestException(
+        'Confirme o impacto nos usuários antes de remover a carta.',
+      );
+    }
 
     const carta = await this.prisma.carta.update({
       where: { id },
@@ -168,6 +255,7 @@ export class AdminCartasService {
       moldura: carta.moldura,
       configVisual: carta.config_visual,
       ativo: Boolean(carta.ativo),
+      excluidoEm: carta.excluido_em,
       criadoEm: carta.criado_em,
       atualizadoEm: carta.atualizado_em,
     };

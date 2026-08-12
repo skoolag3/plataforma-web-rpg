@@ -2,9 +2,7 @@
   min-height: calc(100vh - 8rem);
   border: 1px solid var(--member-border);
   border-radius: calc(var(--member-radius) + .15rem);
-  background:
-    radial-gradient(circle at 72% 18%, rgba(124, 58, 237, 0.18), transparent 22rem),
-    var(--member-surface);
+  background: var(--member-surface);
   overflow: hidden;
 }
 

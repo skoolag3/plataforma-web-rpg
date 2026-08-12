@@ -24,8 +24,8 @@
   place-items: center;
   border: 1px solid rgba(216, 180, 254, 0.54);
   border-radius: 0.55rem;
-  background: linear-gradient(145deg, #8b5cf6, #4c1d95);
-  box-shadow: 0 0 1.6rem rgba(124, 58, 237, 0.38);
+  background: #6841bd;
+  box-shadow: none;
 }
 
 .marcaIcone svg {
@@ -103,7 +103,7 @@
 
 .navLinkAtivo {
   border-color: rgba(168, 85, 247, 0.68);
-  background: linear-gradient(135deg, rgba(126, 34, 206, 0.92), rgba(88, 28, 135, 0.9));
+  background: rgba(103, 38, 176, 0.92);
   color: #fff;
 }
 
@@ -111,9 +111,7 @@
   margin-top: auto;
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 0.55rem;
-  background:
-    radial-gradient(circle at 24% 16%, rgba(168, 85, 247, 0.42), transparent 4.8rem),
-    rgba(15, 23, 42, 0.72);
+  background: rgba(15, 23, 42, 0.72);
   padding: 1rem;
 }
 
@@ -128,7 +126,7 @@
 .presenteIcone svg {
   width: 2.1rem;
   height: 2.1rem;
-  filter: drop-shadow(0 0 0.9rem rgba(217, 70, 239, 0.72));
+  filter: none;
 }
 
 .presente strong {
@@ -153,7 +151,7 @@
   margin-top: 0.9rem;
   border: 1px solid rgba(216, 180, 254, 0.34);
   border-radius: 0.42rem;
-  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  background: #6d35c9;
   color: #fff;
   cursor: pointer;
   font: inherit;

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { obterAdminDashboard, type AdminDashboardResumo } from "../../lib/admin";
 import styles from "../../styles/admin/admin.module.css";
 import { Cartas, NovaCarta } from "./adminCartas";
+import { Habilidades } from "./adminHabilidades";
 import { AdminLayout, DataTable } from "./adminShared";
 import { Usuarios } from "./adminUsuarios";
 
@@ -16,15 +17,6 @@ type AdminView =
   | "decks"
   | "usuarios"
   | "banners";
-
-const habilidades = [
-  ["Vontade da Floresta", "buff", "on_attack", "self", "Ativa"],
-  ["Luz Purificadora", "heal", "on_turn_start", "ally", "Ativa"],
-  ["Explosao Ignea", "damage", "on_attack", "enemy", "Ativa"],
-  ["Escudo Sagrado", "shield", "on_turn_start", "self", "Ativa"],
-  ["Drenar Vida", "lifesteal", "on_damage", "self", "Ativa"],
-  ["Passo Sombrio", "evasion", "on_turn_start", "self", "Inativa"],
-];
 
 const decks = [
   ["Aprendiz da Luz", "Facil", "Controle", "6/6", "Ativo"],
@@ -153,15 +145,6 @@ function Dashboard() {
           {!resumo?.topCartas.length ? <p>Nenhum inventario registrado</p> : null}
         </article>
       </section>
-    </AdminLayout>
-  );
-}
-
-function Habilidades() {
-  return (
-    <AdminLayout title="Habilidades" subtitle="Gerencie todas as habilidades do jogo.">
-      <div className={styles.toolbar}><label><Search aria-hidden="true" /><input placeholder="Buscar habilidade..." /></label><button className={styles.primaryBtn}><Plus aria-hidden="true" /> Nova Habilidade</button></div>
-      <DataTable headers={["Habilidade", "Tipo", "Gatilho", "Alvo", "Status"]} rows={habilidades} />
     </AdminLayout>
   );
 }

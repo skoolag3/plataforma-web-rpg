@@ -63,7 +63,6 @@ type CartaGacha = {
   elementoCor: string;
   artA: string;
   artB: string;
-  glow: string;
   destaque?: boolean;
   foto?: string | null;
   nova?: boolean;
@@ -92,7 +91,6 @@ const cartasPool: CartaGacha[] = [
     elementoCor: "#7ee757",
     artA: "#0f2d1f",
     artB: "#172554",
-    glow: "rgba(74, 222, 128, 0.62)",
     destaque: true,
   },
   {
@@ -105,7 +103,6 @@ const cartasPool: CartaGacha[] = [
     elementoCor: "#38bdf8",
     artA: "#1e3a8a",
     artB: "#0f172a",
-    glow: "rgba(125, 211, 252, 0.58)",
   },
   {
     nome: "Mira Sombria",
@@ -117,7 +114,6 @@ const cartasPool: CartaGacha[] = [
     elementoCor: "#a855f7",
     artA: "#312e81",
     artB: "#0f172a",
-    glow: "rgba(168, 85, 247, 0.56)",
   },
   {
     nome: "Zed Pirotecnico",
@@ -129,7 +125,6 @@ const cartasPool: CartaGacha[] = [
     elementoCor: "#ef4444",
     artA: "#7f1d1d",
     artB: "#111827",
-    glow: "rgba(239, 68, 68, 0.5)",
   },
   {
     nome: "Soldado Real",
@@ -141,7 +136,6 @@ const cartasPool: CartaGacha[] = [
     elementoCor: "#facc15",
     artA: "#57534e",
     artB: "#111827",
-    glow: "rgba(250, 204, 21, 0.42)",
   },
 ];
 
@@ -151,7 +145,6 @@ function cardStyle(card: CartaGacha): CSSProperties {
     "--elemento": card.elementoCor,
     "--artA": card.artA,
     "--artB": card.artB,
-    "--glow": card.glow,
     ...(card.foto
       ? {
           backgroundImage: `linear-gradient(180deg, transparent 38%, rgba(2, 6, 23, 0.92) 86%), url("${card.foto}")`,

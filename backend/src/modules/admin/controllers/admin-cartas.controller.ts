@@ -13,6 +13,7 @@ import { AdminGuard } from '../../../common/guards/admin.guard';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import {
   CreateAdminCartaDto,
+  RemoveAdminCartaDto,
   UpdateAdminCartaDto,
 } from '../dto/admin-carta.dto';
 import { AdminCartasService } from '../services/admin-cartas.service';
@@ -28,13 +29,29 @@ export class AdminCartasController {
     @Query('raridade') raridade?: string,
     @Query('elemento') elemento?: string,
     @Query('status') status?: string,
+    @Query('classe') classe?: string,
+    @Query('periodo') periodo?: string,
+    @Query('ordem') ordem?: string,
   ) {
-    return this.cartasService.listar({ busca, raridade, elemento, status });
+    return this.cartasService.listar({
+      busca,
+      raridade,
+      elemento,
+      status,
+      classe,
+      periodo,
+      ordem,
+    });
   }
 
   @Get(':id')
   buscar(@Param('id') id: string) {
     return this.cartasService.buscar(id);
+  }
+
+  @Get(':id/impacto')
+  buscarImpacto(@Param('id') id: string) {
+    return this.cartasService.buscarImpacto(id);
   }
 
   @Post()
@@ -48,7 +65,11 @@ export class AdminCartasController {
   }
 
   @Delete(':id')
-  remover(@Param('id') id: string) {
-    return this.cartasService.remover(id);
+  remover(@Param('id') id: string, @Body() dto: RemoveAdminCartaDto) {
+    return this.cartasService.remover(
+      id,
+      dto.confirmarNome,
+      dto.confirmarImpacto,
+    );
   }
 }

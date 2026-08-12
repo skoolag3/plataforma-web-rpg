@@ -2,9 +2,7 @@
   --roxo: #8b5cf6;
   --roxoClaro: #b794f6;
   min-height: calc(100vh - 4.7rem);
-  background:
-    radial-gradient(circle at 74% 0%, rgba(82, 45, 145, 0.13), transparent 25rem),
-    transparent;
+  background: transparent;
   color: #f7f7fb;
 }
 
@@ -35,7 +33,7 @@
   width: 13.25rem;
   flex-direction: column;
   border-right: 1px solid rgba(84, 96, 133, 0.3);
-  background: linear-gradient(180deg, #030712fa, #050411fa);
+  background: #050711fa;
 }
 
 .marcaPerfil {
@@ -75,8 +73,8 @@
   place-items: center;
   border: 1px solid rgba(167, 139, 250, 0.65);
   border-radius: 0.75rem 0.25rem;
-  background: linear-gradient(145deg, #8b5cf6, #312e81);
-  box-shadow: 0 0 1.5rem rgba(124, 58, 237, 0.55);
+  background: #6841bd;
+  box-shadow: none;
 }
 
 .simboloMarca svg {
@@ -119,7 +117,7 @@
 
 .linkMenuAtivo {
   border-color: rgba(139, 92, 246, 0.38);
-  background: linear-gradient(90deg, #5b21b6e0, #4c1d95b8);
+  background: #5423a3d9;
   color: #fff;
 }
 
@@ -130,15 +128,13 @@
   margin-top: auto;
   overflow: hidden;
   place-items: center;
-  background:
-    radial-gradient(circle at 50% 78%, rgba(167, 139, 250, 0.58), transparent 20%),
-    linear-gradient(160deg, transparent, rgba(76, 29, 149, 0.4));
+  background: rgba(76, 29, 149, 0.16);
   color: #ddd6feb3;
 }
 
 .arteSidebar svg {
   width: 3.5rem;
-  filter: drop-shadow(0 0 1rem #7c3aed);
+  filter: none;
 }
 
 .arteSidebar span {
@@ -243,7 +239,7 @@
   place-items: center;
   border: 1px solid #a78bfa9e;
   border-radius: 50%;
-  background: linear-gradient(145deg, #1f2937, #4c1d95);
+  background: #29243b;
 }
 
 .conteudoPerfil {

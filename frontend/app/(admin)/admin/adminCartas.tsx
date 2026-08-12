@@ -1,10 +1,11 @@
 "use client";
 
 import {
+  ArrowUpDown,
   ChevronDown,
   Edit3,
-  Eye,
   ImagePlus,
+  Power,
   Plus,
   RefreshCw,
   Save,
@@ -13,15 +14,18 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, type ChangeEvent, type CSSProperties, type FormEvent } from "react";
 import {
   atualizarAdminCarta,
   criarAdminCarta,
   listarAdminCartas,
+  obterImpactoAdminCarta,
   removerAdminCarta,
   uploadCartaAssets,
   type AdminCarta,
   type CreateAdminCartaPayload,
+  type UpdateAdminCartaPayload,
 } from "../../lib/admin";
 import {
   criarConfigVisualPadrao,
@@ -32,10 +36,14 @@ import styles from "../../styles/admin/admin.module.css";
 import {
   CampoArquivo,
   ControleVisualCarta,
+  ElementoSelect,
+  ElementoVisual,
   PreviewCarta,
   Raridade,
+  StatusSelect,
+  classesCarta,
   classeRaridade,
-  elementos,
+  obterElementoVisual,
   raridades,
 } from "./adminCartaVisual";
 import { AdminLayout } from "./adminShared";
@@ -53,6 +61,15 @@ type CartaFormState = {
   ativo: boolean;
   configVisual: ConfigVisualCarta;
 };
+
+const periodosFiltro = [
+  { value: "", label: "Todos" },
+  { value: "1a", label: "1 ano" },
+  { value: "6m", label: "6 meses" },
+  { value: "1m", label: "1 mês" },
+  { value: "1s", label: "1 semana" },
+  { value: "24h", label: "24h" },
+] as const;
 
 function criarFormularioNovaCarta(): CartaFormState {
   return {
@@ -77,16 +94,51 @@ function Status({ value }: { value: string }) {
 
 
 export function Cartas() {
+  const router = useRouter();
   const [busca, setBusca] = useState("");
+  const [buscaAplicada, setBuscaAplicada] = useState("");
   const [filtroRaridade, setFiltroRaridade] = useState("");
   const [filtroElemento, setFiltroElemento] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
+  const [filtroClasse, setFiltroClasse] = useState("");
+  const [filtroPeriodo, setFiltroPeriodo] = useState("");
+  const [ordem, setOrdem] = useState("recentes");
   const [cartasApi, setCartasApi] = useState<AdminCarta[]>([]);
   const [selecionada, setSelecionada] = useState<AdminCarta | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [editorAlterado, setEditorAlterado] = useState(false);
+
+  function selecionarCarta(carta: AdminCarta | null) {
+    if (editorAlterado && !window.confirm("Existem alterações não salvas. Deseja mesmo descartá-las?")) {
+      return;
+    }
+
+    setEditorAlterado(false);
+    setSelecionada(carta);
+  }
+
+  useEffect(() => {
+    function confirmarNavegacao(event: MouseEvent) {
+      if (!editorAlterado || event.defaultPrevented || event.button !== 0) return;
+      const link = (event.target as Element | null)?.closest("a[href]") as HTMLAnchorElement | null;
+      if (!link || link.target === "_blank" || link.hasAttribute("download")) return;
+
+      const destino = new URL(link.href, window.location.href);
+      if (destino.origin !== window.location.origin) return;
+
+      event.preventDefault();
+      if (!window.confirm("Existem alterações não salvas. Deseja mesmo descartá-las?")) return;
+
+      setEditorAlterado(false);
+      router.push(`${destino.pathname}${destino.search}${destino.hash}`);
+    }
+
+    document.addEventListener("click", confirmarNavegacao, true);
+    return () => document.removeEventListener("click", confirmarNavegacao, true);
+  }, [editorAlterado, router]);
 
   async function carregarCartas() {
     setCarregando(true);
@@ -94,15 +146,18 @@ export function Cartas() {
 
     try {
       const cartas = await listarAdminCartas({
-        busca,
+        busca: buscaAplicada,
         raridade: filtroRaridade,
         elemento: filtroElemento,
         status: filtroStatus,
+        classe: filtroClasse,
+        periodo: filtroPeriodo,
+        ordem,
       });
       setCartasApi(cartas);
       setSelecionada((current) => {
         if (!current) return null;
-        return cartas.find((carta) => carta.id === current.id) ?? null;
+        return cartas.find((carta) => carta.id === current.id) ?? (editorAlterado ? current : null);
       });
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Não foi possível carregar as cartas.");
@@ -111,35 +166,15 @@ export function Cartas() {
     }
   }
 
-  async function alternarStatus(carta: AdminCarta) {
-    setSalvando(true);
-    setFeedback(null);
-
-    try {
-      const atualizada = await atualizarAdminCarta(carta.id, { ativo: !carta.ativo });
-      setCartasApi((current) => current.map((item) => (item.id === atualizada.id ? atualizada : item)));
-      setSelecionada((current) => (current?.id === atualizada.id ? atualizada : current));
-      setFeedback(`Carta ${atualizada.ativo ? "ativada" : "inativada"}.`);
-    } catch (error) {
-      setErro(error instanceof Error ? error.message : "Não foi possível atualizar a carta.");
-    } finally {
-      setSalvando(false);
-    }
-  }
-
   async function removerCarta(carta: AdminCarta) {
-    if (!window.confirm(`Remover ${carta.nome}?`)) {
-      return;
-    }
-
     setSalvando(true);
     setFeedback(null);
 
     try {
-      await removerAdminCarta(carta.id);
+      await removerAdminCarta(carta.id, carta.nome, true);
       setCartasApi((current) => current.filter((item) => item.id !== carta.id));
       setSelecionada((current) => (current?.id === carta.id ? null : current));
-      setFeedback("Carta removida.");
+      setFeedback("Carta removida com segurança. O registro foi preservado no histórico.");
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Não foi possível remover a carta.");
     } finally {
@@ -147,7 +182,7 @@ export function Cartas() {
     }
   }
 
-  async function salvarEdicao(carta: AdminCarta, payload: CreateAdminCartaPayload) {
+  async function salvarEdicao(carta: AdminCarta, payload: UpdateAdminCartaPayload) {
     setSalvando(true);
     setErro(null);
     setFeedback(null);
@@ -165,55 +200,44 @@ export function Cartas() {
   }
 
   useEffect(() => {
+    const timer = window.setTimeout(() => setBuscaAplicada(busca.trim()), 280);
+    return () => window.clearTimeout(timer);
+  }, [busca]);
+
+  useEffect(() => {
     void carregarCartas();
+    // A busca ja chega estabilizada; selects disparam esta atualizacao imediatamente.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [buscaAplicada, filtroClasse, filtroElemento, filtroPeriodo, filtroRaridade, filtroStatus, ordem]);
 
   return (
     <AdminLayout title="Cartas" subtitle="Gerencie todas as cartas do jogo.">
-      <form
-        className={`${styles.toolbar} ${styles.cartasToolbar}`}
-        onSubmit={(event) => {
-          event.preventDefault();
-          void carregarCartas();
-        }}
-      >
-        <label>
-          <Search aria-hidden="true" />
-          <input
-            placeholder="Buscar cartas..."
-            value={busca}
-            onChange={(event) => setBusca(event.target.value)}
-          />
-        </label>
-        <select className={`${styles.selectRaridade} ${classeRaridade(filtroRaridade)}`} value={filtroRaridade} onChange={(event) => setFiltroRaridade(event.target.value)}>
-          <option value="">Raridade</option>
-          {raridades.map((raridade) => <option className={classeRaridade(raridade)} key={raridade}>{raridade}</option>)}
-        </select>
-        <select value={filtroElemento} onChange={(event) => setFiltroElemento(event.target.value)}>
-          <option value="">Elemento</option>
-          {elementos.map((elemento) => (
-            <option key={elemento.value} value={elemento.value}>{elemento.label}</option>
-          ))}
-        </select>
-        <select value={filtroStatus} onChange={(event) => setFiltroStatus(event.target.value)}>
-          <option value="">Status</option>
-          <option value="ativas">Ativas</option>
-          <option value="inativas">Inativas</option>
-          <option value="removidas">Removidas</option>
-        </select>
-        <button type="submit"><RefreshCw aria-hidden="true" /> Filtrar</button>
-        <Link href="/admin/cartas/nova" className={styles.primaryBtn}><Plus aria-hidden="true" /> Nova Carta</Link>
-      </form>
+      <div className={styles.cartasWorkspace}>
+        <section className={styles.cartasListaPanel}>
+          <header className={styles.cartasListaTopo}>
+            <div>
+              <strong>Cartas cadastradas</strong>
+              <small>{cartasApi.length} {cartasApi.length === 1 ? "resultado" : "resultados"}</small>
+            </div>
+            <div className={styles.cartasListaAcoes}>
+              <label className={styles.ordenacaoCartas}>
+                <ArrowUpDown aria-hidden="true" />
+                <span className={styles.srOnly}>Ordenar cartas</span>
+                <select value={ordem} onChange={(event) => setOrdem(event.target.value)}>
+                  <option value="recentes">Mais recentes</option>
+                  <option value="antigas">Mais antigas</option>
+                  <option value="az">Nome A–Z</option>
+                  <option value="za">Nome Z–A</option>
+                </select>
+              </label>
+              <Link href="/admin/cartas/nova" className={styles.primaryBtn}><Plus aria-hidden="true" /> Nova Carta</Link>
+            </div>
+          </header>
 
-      {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
-      {feedback ? <p className={styles.feedbackSuccess}>{feedback}</p> : null}
-      {carregando ? <p className={styles.feedbackInfo}>Carregando cartas...</p> : null}
-      {!carregando && !erro && cartasApi.length === 0 ? (
-        <p className={styles.feedbackInfo}>Nenhuma carta encontrada.</p>
-      ) : null}
-
-      <div className={styles.tableWrap}>
+          {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
+          {feedback ? <p className={styles.feedbackSuccess}>{feedback}</p> : null}
+          {carregando ? <p className={styles.feedbackInfo}>Carregando cartas...</p> : null}
+          <div className={styles.tableWrap}>
         <table>
           <thead>
             <tr>
@@ -227,6 +251,11 @@ export function Cartas() {
             </tr>
           </thead>
           <tbody>
+            {!carregando && !erro && cartasApi.length === 0 ? (
+              <tr className={styles.emptyTableRow}>
+                <td colSpan={7}>Nenhuma carta encontrada.</td>
+              </tr>
+            ) : null}
             {cartasApi.map((carta) => (
               <tr key={carta.id}>
                 <td>
@@ -235,25 +264,35 @@ export function Cartas() {
                       className={styles.cardThumb}
                       style={carta.foto ? { backgroundImage: `url("${carta.foto}")` } : undefined}
                     >{!carta.foto ? <ImagePlus aria-label="Sem imagem" /> : null}</span>
-                    {carta.nome}
+                    <strong
+                      className={styles.nomeCartaElemento}
+                      style={{ "--elemento-cor": obterElementoVisual(carta.elemento).cor } as CSSProperties}
+                    >
+                      {carta.nome}
+                    </strong>
                   </span>
                 </td>
                 <td><Raridade value={carta.raridade} /></td>
-                <td>{formatElemento(carta.elemento)}</td>
+                <td><ElementoVisual value={carta.elemento} /></td>
                 <td>{carta.classe ?? "-"}</td>
                 <td>{carta.custo ?? "-"}</td>
-                <td><Status value={carta.ativo ? "Ativa" : "Inativa"} /></td>
+                <td>
+                  <Status
+                    value={carta.excluidoEm ? "Removida" : carta.ativo ? "Ativa" : "Inativa"}
+                  />
+                </td>
                 <td>
                   <span className={styles.rowActions}>
-                    <button type="button" onClick={() => setSelecionada(carta)} title="Editar">
+                    <button
+                      type="button"
+                      className={selecionada?.id === carta.id ? styles.rowActionSelected : undefined}
+                      onClick={() => selecionarCarta(selecionada?.id === carta.id ? null : carta)}
+                      disabled={Boolean(carta.excluidoEm)}
+                      title={carta.excluidoEm ? "Carta removida" : selecionada?.id === carta.id ? "Carta em edição" : "Editar"}
+                      aria-label={`Editar ${carta.nome}`}
+                      aria-pressed={selecionada?.id === carta.id}
+                    >
                       <Edit3 aria-hidden="true" />
-                    </button>
-                    <button type="button" onClick={() => void alternarStatus(carta)} disabled={salvando} title={carta.ativo ? "Inativar" : "Ativar"}>
-
-                      <Eye aria-hidden="true" />
-                    </button>
-                    <button type="button" onClick={() => void removerCarta(carta)} disabled={salvando} title="Remover">
-                      <Trash2 aria-hidden="true" />
                     </button>
                   </span>
                 </td>
@@ -261,15 +300,71 @@ export function Cartas() {
             ))}
 
           </tbody>
-        </table>
+            </table>
+          </div>
+        </section>
+
+        <aside className={`${styles.toolbar} ${styles.cartasToolbar}`} aria-label="Filtros de cartas">
+          <header className={styles.filtrosTopo}>
+            <strong>Filtros</strong>
+            <small>Atualização automática</small>
+          </header>
+          <label>
+            <Search aria-hidden="true" />
+            <input
+              placeholder="Buscar cartas..."
+              value={busca}
+              onChange={(event) => setBusca(event.target.value)}
+            />
+          </label>
+          <select className={`${styles.selectRaridade} ${classeRaridade(filtroRaridade)}`} value={filtroRaridade} onChange={(event) => setFiltroRaridade(event.target.value)}>
+            <option value="">Raridade</option>
+            {raridades.map((raridade) => <option className={classeRaridade(raridade)} key={raridade}>{raridade}</option>)}
+          </select>
+          <ElementoSelect
+            value={filtroElemento as CreateAdminCartaPayload["elemento"] | ""}
+            placeholder="Elemento"
+            onChange={setFiltroElemento}
+          />
+          <StatusSelect
+            value={filtroStatus as "" | "ativas" | "inativas" | "removidas"}
+            onChange={setFiltroStatus}
+          />
+          <select value={filtroClasse} onChange={(event) => setFiltroClasse(event.target.value)}>
+            <option value="">Classe</option>
+            {classesCarta.map((classe) => <option key={classe} value={classe}>{classe}</option>)}
+          </select>
+          <div className={styles.periodoFiltro}>
+            <div className={styles.periodoCabecalho}>
+              <span>Período de cadastro</span>
+              <strong>{periodosFiltro.find((periodo) => periodo.value === filtroPeriodo)?.label}</strong>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max={periodosFiltro.length - 1}
+              step="1"
+              value={periodosFiltro.findIndex((periodo) => periodo.value === filtroPeriodo)}
+              aria-label="Período de cadastro"
+              aria-valuetext={periodosFiltro.find((periodo) => periodo.value === filtroPeriodo)?.label}
+              style={{ "--periodo-progresso": `${(periodosFiltro.findIndex((periodo) => periodo.value === filtroPeriodo) / (periodosFiltro.length - 1)) * 100}%` } as CSSProperties}
+              onChange={(event) => setFiltroPeriodo(periodosFiltro[Number(event.target.value)].value)}
+            />
+            <div className={styles.periodoMetas} aria-hidden="true">
+              {periodosFiltro.map((periodo) => <span key={periodo.value || "todos"}>{periodo.label}</span>)}
+            </div>
+          </div>
+        </aside>
       </div>
 
       {selecionada ? (
         <CartaEditor
           key={selecionada.id}
           carta={selecionada}
-          onClose={() => setSelecionada(null)}
+          onClose={() => selecionarCarta(null)}
+          onDirtyChange={setEditorAlterado}
           onSave={(payload) => salvarEdicao(selecionada, payload)}
+          onDelete={() => removerCarta(selecionada)}
           salvando={salvando}
         />
       ) : null}
@@ -382,15 +477,21 @@ export function NovaCarta() {
     <AdminLayout title="Nova Carta" subtitle="Criar uma nova carta para o jogo.">
       <form className={styles.editorGrid} onSubmit={handleSubmit}>
         <section className={styles.formPanel}>
-          <details className={styles.editorSection} open>
+          <div className={styles.novaCartaStatus}>
+            <span><Power aria-hidden="true" /><strong>Status inicial</strong></span>
+            <div role="group" aria-label="Status inicial da carta">
+              <button type="button" className={form.ativo ? styles.statusInicialAtivo : undefined} aria-pressed={form.ativo} onClick={() => updateField("ativo", true)}>Ativa</button>
+              <button type="button" className={!form.ativo ? styles.statusInicialInativo : undefined} aria-pressed={!form.ativo} onClick={() => updateField("ativo", false)}>Inativa</button>
+            </div>
+          </div>
+          <details className={styles.editorSection}>
             <summary><span><strong>Informações</strong><small>Identidade, classificação e efeitos da carta</small></span><ChevronDown aria-hidden="true" /></summary>
             <div className={styles.editorSectionContent}>
               <div className={styles.sectionResetRow}><button type="button" onClick={resetarInformacoes}><RefreshCw aria-hidden="true" /> Restaurar informações</button></div>
-              <label>Nome da carta<input value={form.nome} onChange={(event) => updateField("nome", event.target.value)} required /></label>
+              <label>Nome da carta<input className={styles.nomePersonagemElemento} style={{ "--elemento-cor": obterElementoVisual(form.elemento).cor } as CSSProperties} value={form.nome} onChange={(event) => updateField("nome", event.target.value)} required /></label>
               <label>Raridade<select className={`${styles.selectRaridade} ${classeRaridade(form.raridade)}`} value={form.raridade} onChange={(event) => updateField("raridade", event.target.value as CartaFormState["raridade"])}>{raridades.map((raridade) => <option className={classeRaridade(raridade)} key={raridade}>{raridade}</option>)}</select></label>
-              <label>Elemento<select value={form.elemento} onChange={(event) => updateField("elemento", event.target.value as CartaFormState["elemento"])}>{elementos.map((elemento) => <option key={elemento.value} value={elemento.value}>{elemento.label}</option>)}</select></label>
-              <label>Classe<input value={form.classe} onChange={(event) => updateField("classe", event.target.value)} /></label>
-              <label className={styles.toggleRow}><input type="checkbox" checked={form.ativo} onChange={(event) => updateField("ativo", event.target.checked)} />Carta ativa</label>
+              <label>Elemento<ElementoSelect value={form.elemento} onChange={(value) => { if (value) updateField("elemento", value); }} /></label>
+              <label>Classe<select value={form.classe} onChange={(event) => updateField("classe", event.target.value)}><option value="">Selecione</option>{classesCarta.map((classe) => <option key={classe}>{classe}</option>)}</select></label>
               <label>Modelo da passiva<select defaultValue="" onChange={(event) => {
                 const modelos: Record<string, Record<string, unknown>> = {
                   entradaBuff: { nome: "Impulso inicial", gatilho: "on_enter", tipo: "buff", alvo: "self", atributo: "ataque", valor: 10, velocidade: 12 },
@@ -446,11 +547,15 @@ function CartaEditor({
   carta,
   onClose,
   onSave,
+  onDelete,
+  onDirtyChange,
   salvando,
 }: {
   carta: AdminCarta;
   onClose: () => void;
-  onSave: (payload: CreateAdminCartaPayload) => Promise<void>;
+  onSave: (payload: UpdateAdminCartaPayload) => Promise<void>;
+  onDelete: () => Promise<void>;
+  onDirtyChange: (alterado: boolean) => void;
   salvando: boolean;
 }) {
   const [form, setForm] = useState<CartaFormState>(() => cartaToForm(carta));
@@ -460,6 +565,29 @@ function CartaEditor({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [molduraPreviewUrl, setMolduraPreviewUrl] = useState<string | null>(null);
   const [erroLocal, setErroLocal] = useState<string | null>(null);
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [confirmacaoExclusao, setConfirmacaoExclusao] = useState("");
+  const [impactoExclusao, setImpactoExclusao] = useState<number | null>(null);
+  const [impactoStatus, setImpactoStatus] = useState<number | null>(null);
+  const [carregandoImpacto, setCarregandoImpacto] = useState(false);
+  const formAlterado = foto !== null
+    || moldura !== null
+    || JSON.stringify(form) !== JSON.stringify(cartaToForm(carta));
+
+  useEffect(() => {
+    onDirtyChange(formAlterado);
+    return () => onDirtyChange(false);
+  }, [formAlterado, onDirtyChange]);
+
+  useEffect(() => {
+    function confirmarSaida(event: BeforeUnloadEvent) {
+      if (!formAlterado) return;
+      event.preventDefault();
+    }
+
+    window.addEventListener("beforeunload", confirmarSaida);
+    return () => window.removeEventListener("beforeunload", confirmarSaida);
+  }, [formAlterado]);
 
   function updateField<K extends keyof CartaFormState>(field: K, value: CartaFormState[K]) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -512,7 +640,7 @@ function CartaEditor({
     setErroLocal(null);
 
     try {
-      const payload: CreateAdminCartaPayload = {
+      const payload: UpdateAdminCartaPayload = {
         nome: form.nome.trim(),
         raridade: form.raridade,
         elemento: form.elemento,
@@ -523,6 +651,7 @@ function CartaEditor({
         defesaBase: toNumber(form.defesaBase, "DEF"),
         passiva: parsePassiva(form.passiva),
         ativo: form.ativo,
+        confirmarImpacto: carta.ativo && !form.ativo,
         configVisual: form.configVisual,
       };
 
@@ -545,6 +674,64 @@ function CartaEditor({
     }
   }
 
+  async function verificarImpacto(
+    definirImpacto: (quantidade: number) => void,
+  ) {
+    setErroLocal(null);
+    setCarregandoImpacto(true);
+
+    try {
+      const impacto = await obterImpactoAdminCarta(carta.id);
+      definirImpacto(impacto.usuariosComCarta);
+    } catch (error) {
+      setErroLocal(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível verificar os usuários afetados.",
+      );
+    } finally {
+      setCarregandoImpacto(false);
+    }
+  }
+
+  async function prepararAlteracaoStatus() {
+    if (!form.ativo) {
+      updateField("ativo", true);
+      return;
+    }
+
+    await verificarImpacto(setImpactoStatus);
+  }
+
+  async function confirmarDesativacao() {
+    updateField("ativo", false);
+    setImpactoStatus(null);
+  }
+
+  async function continuarExclusao() {
+    if (confirmacaoExclusao !== carta.nome) {
+      setErroLocal("Digite exatamente o nome da carta para continuar.");
+      return;
+    }
+
+    await verificarImpacto(setImpactoExclusao);
+  }
+
+  async function handleDelete() {
+    if (confirmacaoExclusao !== carta.nome) {
+      setErroLocal("Digite exatamente o nome da carta para confirmar a remoção.");
+      return;
+    }
+
+    if (impactoExclusao === null) {
+      setErroLocal("Verifique o impacto nos usuários antes de remover a carta.");
+      return;
+    }
+
+    setErroLocal(null);
+    await onDelete();
+  }
+
   const cardImage = previewUrl ?? carta.foto ?? undefined;
   const cardFrame = molduraPreviewUrl ?? carta.moldura ?? undefined;
 
@@ -553,7 +740,7 @@ function CartaEditor({
       <header>
         <div>
           <h2>Editando carta</h2>
-          <p>{carta.nome}</p>
+          <p className={styles.nomeCartaElemento} style={{ "--elemento-cor": obterElementoVisual(form.elemento).cor } as CSSProperties}>{carta.nome}</p>
         </div>
         <button type="button" onClick={onClose} aria-label="Fechar editor">
           <X aria-hidden="true" />
@@ -562,15 +749,14 @@ function CartaEditor({
       {erroLocal ? <p className={styles.feedbackError}>{erroLocal}</p> : null}
       <section className={styles.editorGrid}>
         <div className={styles.formPanel}>
-          <details className={styles.editorSection} open>
+          <details className={styles.editorSection}>
             <summary><span><strong>Informações</strong><small>Identidade, classificação e efeitos da carta</small></span><ChevronDown aria-hidden="true" /></summary>
             <div className={styles.editorSectionContent}>
               <div className={styles.sectionResetRow}><button type="button" onClick={restaurarInformacoesSalvas}><RefreshCw aria-hidden="true" /> Restaurar informações</button></div>
-              <label>Nome<input value={form.nome} onChange={(event) => updateField("nome", event.target.value)} /></label>
+              <label>Nome<input className={styles.nomePersonagemElemento} style={{ "--elemento-cor": obterElementoVisual(form.elemento).cor } as CSSProperties} value={form.nome} onChange={(event) => updateField("nome", event.target.value)} /></label>
               <label>Raridade<select className={`${styles.selectRaridade} ${classeRaridade(form.raridade)}`} value={form.raridade} onChange={(event) => updateField("raridade", event.target.value as CartaFormState["raridade"])}>{raridades.map((raridade) => <option className={classeRaridade(raridade)} key={raridade}>{raridade}</option>)}</select></label>
-              <label>Elemento<select value={form.elemento} onChange={(event) => updateField("elemento", event.target.value as CartaFormState["elemento"])}>{elementos.map((elemento) => <option key={elemento.value} value={elemento.value}>{elemento.label}</option>)}</select></label>
-              <label>Classe<input value={form.classe} onChange={(event) => updateField("classe", event.target.value)} /></label>
-              <label className={styles.toggleRow}><input type="checkbox" checked={form.ativo} onChange={(event) => updateField("ativo", event.target.checked)} />Carta ativa</label>
+              <label>Elemento<ElementoSelect value={form.elemento} onChange={(value) => { if (value) updateField("elemento", value); }} /></label>
+              <label>Classe<select value={form.classe} onChange={(event) => updateField("classe", event.target.value)}><option value="">Selecione</option>{form.classe && !classesCarta.includes(form.classe as (typeof classesCarta)[number]) ? <option value={form.classe}>{form.classe} (legada)</option> : null}{classesCarta.map((classe) => <option key={classe}>{classe}</option>)}</select></label>
               <label className={styles.fullField}>Passiva<textarea className={styles.codeArea} value={form.passiva} onChange={(event) => updateField("passiva", event.target.value)} /></label>
 
             </div>
@@ -591,6 +777,112 @@ function CartaEditor({
               <CampoArquivo rotulo="Foto/personagem" accept="image/*" ajuda="PNG, JPG ou WEBP, até 5 MB." onChange={handleFotoChange} />
               <CampoArquivo rotulo="Moldura" accept="image/png,image/webp" ajuda="PNG ou WEBP transparente, proporção 2:3." onChange={handleMolduraChange} />
               <ControleVisualCarta value={form.configVisual} onChange={(configVisual) => updateField("configVisual", configVisual)} />
+            </div>
+          </details>
+          <details className={`${styles.editorSection} ${styles.advancedSection}`}>
+            <summary><span><strong>Avançado</strong><small>Status, desativação e remoção da carta</small></span><ChevronDown aria-hidden="true" /></summary>
+            <div className={`${styles.editorSectionContent} ${styles.advancedContent}`}>
+              <div className={styles.statusManagement}>
+                <div>
+                  <strong>{form.ativo ? "Carta ativa" : "Carta inativa"}</strong>
+                  <small>
+                    {form.ativo
+                      ? "A carta pode aparecer no jogo e nas coleções."
+                      : "A carta permanece cadastrada, mas não fica disponível no jogo."}
+                  </small>
+                </div>
+                {impactoStatus === null ? (
+                  <button
+                    type="button"
+                    onClick={() => void prepararAlteracaoStatus()}
+                    disabled={salvando || carregandoImpacto}
+                  >
+                    <Power aria-hidden="true" />
+                    {carregandoImpacto
+                      ? "Verificando..."
+                      : form.ativo
+                        ? "Desativar carta"
+                        : "Ativar carta"}
+                  </button>
+                ) : (
+                  <div className={styles.impactConfirmation}>
+                    <strong>{mensagemImpacto(impactoStatus)}</strong>
+                    <span>Deseja mesmo desativar esta carta?</span>
+                    <div>
+                      <button type="button" onClick={() => setImpactoStatus(null)}>Cancelar</button>
+                      <button type="button" onClick={() => void confirmarDesativacao()} disabled={salvando}>
+                        Confirmar desativação
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.dangerZone}>
+                <div>
+                  <strong>Remover carta</strong>
+                  <small>
+                    Faz uma exclusão lógica: a carta deixa de ser exibida, mas o registro continua preservado.
+                  </small>
+                </div>
+                {!confirmandoExclusao ? (
+                  <button
+                    type="button"
+                    className={styles.dangerButton}
+                    onClick={() => setConfirmandoExclusao(true)}
+                    disabled={salvando}
+                  >
+                    <Trash2 aria-hidden="true" /> Remover carta
+                  </button>
+                ) : impactoExclusao === null ? (
+                  <div className={styles.deleteConfirmation}>
+                    <label>
+                      Digite <strong>{carta.nome}</strong> para confirmar
+                      <input
+                        value={confirmacaoExclusao}
+                        onChange={(event) => setConfirmacaoExclusao(event.target.value)}
+                        autoComplete="off"
+                      />
+                    </label>
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setConfirmandoExclusao(false);
+                          setConfirmacaoExclusao("");
+                          setImpactoExclusao(null);
+                        }}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.dangerButton}
+                        onClick={() => void continuarExclusao()}
+                        disabled={carregandoImpacto || confirmacaoExclusao !== carta.nome}
+                      >
+                        {carregandoImpacto ? "Verificando usuários..." : "Continuar"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`${styles.deleteConfirmation} ${styles.impactConfirmation}`}>
+                    <strong>{mensagemImpacto(impactoExclusao)}</strong>
+                    <span>Deseja mesmo remover esta carta?</span>
+                    <div>
+                      <button type="button" onClick={() => setImpactoExclusao(null)}>Voltar</button>
+                      <button
+                        type="button"
+                        className={styles.dangerButton}
+                        onClick={() => void handleDelete()}
+                        disabled={salvando}
+                      >
+                        <Trash2 aria-hidden="true" /> Sim, remover carta
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </details>
         </div>
@@ -625,8 +917,16 @@ function cartaToForm(carta: AdminCarta): CartaFormState {
   };
 }
 
-function formatElemento(elemento: AdminCarta["elemento"]) {
-  return elementos.find((item) => item.value === elemento)?.label ?? elemento;
+function mensagemImpacto(usuariosComCarta: number) {
+  if (usuariosComCarta === 0) {
+    return "Nenhum usuário possui esta carta atualmente.";
+  }
+
+  if (usuariosComCarta === 1) {
+    return "Há 1 usuário com esta carta.";
+  }
+
+  return `Há ${usuariosComCarta} usuários com esta carta.`;
 }
 
 function parsePassiva(value: string) {

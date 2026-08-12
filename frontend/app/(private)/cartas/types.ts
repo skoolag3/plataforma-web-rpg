@@ -15,7 +15,6 @@ export type Card = {
   elementoCor: string;
   artA: string;
   artB: string;
-  glow: string;
   quantidade?: number;
   obtida?: boolean;
   foto?: string | null;
@@ -32,7 +31,6 @@ export type CardStyle = CSSProperties & {
   "--elemento": string;
   "--artA": string;
   "--artB": string;
-  "--glow": string;
 };
 
 export type ResumoColecao = {

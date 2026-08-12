@@ -5,9 +5,7 @@
   place-items: center;
   align-content: center;
   gap: 1rem;
-  background:
-    radial-gradient(circle at 50% 46%, rgba(124, 58, 237, 0.48), transparent 20rem),
-    #050814;
+  background: #050814;
   text-align: center;
 }
 
@@ -17,10 +15,8 @@
   aspect-ratio: 1.3;
   place-items: center;
   border-radius: 999px;
-  background:
-    radial-gradient(ellipse, rgba(168, 85, 247, 0.36), transparent 58%),
-    conic-gradient(from 30deg, transparent, rgba(168, 85, 247, 0.6), transparent);
-  filter: drop-shadow(0 0 2rem rgba(168, 85, 247, 0.55));
+  background: rgba(168, 85, 247, 0.12);
+  filter: none;
 }
 
 .cartaPortal {
@@ -30,8 +26,8 @@
   place-items: center;
   border: 2px solid #a855f7;
   border-radius: 0.65rem;
-  background: linear-gradient(180deg, #160b2f, #090815);
-  box-shadow: 0 0 2rem rgba(168, 85, 247, 0.72);
+  background: #0d0c17;
+  box-shadow: none;
 }
 
 .cartaPortal svg {
@@ -48,7 +44,7 @@
   color: #a855f7;
   font-size: clamp(3rem, 8vw, 5rem);
   line-height: 1;
-  text-shadow: 0 0 1.2rem rgba(168, 85, 247, 0.62);
+  text-shadow: none;
 }
 
 .resultadoBotoes {

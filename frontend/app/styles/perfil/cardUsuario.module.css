@@ -14,10 +14,7 @@
   overflow: hidden;
   place-items: center;
   border-bottom: 1px solid #8b5cf64d;
-  background:
-    radial-gradient(circle at 72% 24%, rgba(190,242,100,.18), transparent 18%),
-    radial-gradient(circle at 42% 10%, #8b5cf68c, transparent 32%),
-    linear-gradient(135deg, #111827, #27124f 52%, #0b1634);
+  background-color: #141725;
   background-position: center;
   background-size: cover;
   color: #c4b5fd6b;
@@ -29,7 +26,7 @@
   width: 55%;
   height: 1px;
   background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
-  box-shadow: 0 0 0.8rem #7c3aed;
+  box-shadow: none;
   content: "";
   transform: rotate(-12deg);
 }
@@ -91,9 +88,7 @@
   place-items: center;
   border: 1px solid #a78bfad9;
   border-radius: 1rem;
-  background:
-    radial-gradient(circle, #0f17211a, #030712d9 51%),
-    conic-gradient(from 210deg, #4c1d95, #111827, #7c3aed, #172554);
+  background-color: #211d31;
   background-position: center;
   background-size: cover;
 }
@@ -116,15 +111,11 @@
   z-index: 2;
   width: 4.6rem;
   color: #d8d2e8;
-  filter: drop-shadow(0 0 0.8rem #7c3aed);
+  filter: none;
 }
 
 .brilhoAvatar {
-  position: absolute;
-  inset: 20%;
-  border-radius: 0.8rem;
-  background: #8b5cf657;
-  filter: blur(1.2rem);
+  display: none;
 }
 
 .molduraCartaAvatar {
@@ -371,11 +362,11 @@
 }
 
 .molduraVioleta {
-  box-shadow: 0 0 0 2px #8b5cf6, 0 0 1rem #8b5cf6bf;
+  box-shadow: 0 0 0 2px #8b5cf6;
 }
 
 .molduraRubi {
-  box-shadow: 0 0 0 2px #ef4444, 0 0 1rem #ef4444b3;
+  box-shadow: 0 0 0 2px #ef4444;
 }
 
 .molduraCarta {

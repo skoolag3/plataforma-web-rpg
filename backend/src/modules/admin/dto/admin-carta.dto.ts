@@ -137,4 +137,17 @@ export class UpdateAdminCartaDto {
   @IsOptional()
   @IsBoolean()
   ativo?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  confirmarImpacto?: boolean;
+}
+
+export class RemoveAdminCartaDto {
+  @IsString()
+  @MaxLength(150)
+  confirmarNome: string;
+
+  @IsBoolean()
+  confirmarImpacto: boolean;
 }

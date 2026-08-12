@@ -10,42 +10,37 @@ export const CLASSES = ["Todas", "Mago", "Guerreiro", "Cacador", "Guardiao", "Vi
 
 const elementoVisual: Record<
   CartaColecao["elemento"],
-  Pick<Card, "elementoIcone" | "elementoCor" | "artA" | "artB" | "glow">
+  Pick<Card, "elementoIcone" | "elementoCor" | "artA" | "artB">
 > = {
   natureza: {
     elementoIcone: Leaf,
     elementoCor: "#7ee757",
     artA: "#0f2d1f",
     artB: "#172554",
-    glow: "rgba(74, 222, 128, .55)",
   },
   agua: {
     elementoIcone: Waves,
     elementoCor: "#38bdf8",
     artA: "#0c4a6e",
     artB: "#172554",
-    glow: "rgba(56, 189, 248, .55)",
   },
   fogo: {
     elementoIcone: Flame,
     elementoCor: "#ef4444",
     artA: "#7f1d1d",
     artB: "#111827",
-    glow: "rgba(248, 113, 113, .52)",
   },
   sombra: {
     elementoIcone: Moon,
     elementoCor: "#a855f7",
     artA: "#3b0764",
     artB: "#020617",
-    glow: "rgba(168, 85, 247, .52)",
   },
   luz: {
     elementoIcone: Zap,
     elementoCor: "#facc15",
     artA: "#713f12",
     artB: "#1f2937",
-    glow: "rgba(250, 204, 21, .48)",
   },
 };
 
@@ -98,7 +93,6 @@ export function cardStyle(card: Card): CardStyle {
     "--elemento": card.elementoCor,
     "--artA": card.artA,
     "--artB": card.artB,
-    "--glow": card.glow,
     ...(card.foto
       ? {
           backgroundImage: `linear-gradient(180deg, transparent 38%, rgba(2, 6, 23, 0.92) 86%), url("${card.foto}")`,

@@ -18,3 +18,6 @@ node_modules/
 .env
 .env.local
 .env.*.local
+
+# Anotações privadas de desenvolvimento (não versionar)
+NOTAS_PRIVADAS_DESENVOLVIMENTO.md

@@ -10,10 +10,7 @@
   --member-lime: #c8f77a;
   --member-radius: 1.15rem;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 82% 4%, rgba(124, 58, 237, 0.15), transparent 30rem),
-    radial-gradient(circle at 8% 70%, rgba(190, 242, 100, 0.045), transparent 28rem),
-    var(--member-bg);
+  background: var(--member-bg);
   color: var(--member-text);
 }
 
@@ -27,7 +24,7 @@
 .privateContent :global(aside[aria-label="Menu do inventario"]) + section,
 .privateContent :global(aside[aria-label="Menu do gacha"]) + section { min-width: 0; }
 
-.loadingPage { display:grid; min-height:100vh; place-items:center; background:radial-gradient(circle at 50% 42%,rgba(124,58,237,.2),transparent 22rem),#070910;color:#f5f3fa;padding:1rem; }
+.loadingPage { display:grid; min-height:100vh; place-items:center; background:#070910;color:#f5f3fa;padding:1rem; }
 .loadingCard { display:grid; justify-items:center; text-align:center; }
 .loadingCard > span { width:2.4rem;height:2.4rem;margin-bottom:1rem;border:2px solid rgba(167,139,250,.16);border-top-color:#bef264;border-radius:50%;animation:girar .8s linear infinite; }
 .loadingCard strong { font-size:1rem; }.loadingCard p{margin:.4rem 0 0;color:#8f97a8;font-size:.8rem}

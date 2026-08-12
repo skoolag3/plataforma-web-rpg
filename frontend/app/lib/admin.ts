@@ -25,6 +25,7 @@ export type AdminCarta = {
   moldura: string | null;
   configVisual: ConfigVisualCarta | null;
   ativo: boolean;
+  excluidoEm?: string | null;
   criadoEm?: string;
   atualizadoEm?: string;
 };
@@ -45,7 +46,13 @@ export type CreateAdminCartaPayload = {
   ativo?: boolean;
 };
 
-export type UpdateAdminCartaPayload = Partial<CreateAdminCartaPayload>;
+export type UpdateAdminCartaPayload = Partial<CreateAdminCartaPayload> & {
+  confirmarImpacto?: boolean;
+};
+
+export type AdminCartaImpacto = {
+  usuariosComCarta: number;
+};
 
 export type AdminUsuario = {
   id: string;
@@ -139,6 +146,9 @@ export function listarAdminCartas(filtros: {
   raridade?: string;
   elemento?: string;
   status?: string;
+  classe?: string;
+  periodo?: string;
+  ordem?: string;
 } = {}) {
   const params = new URLSearchParams();
 
@@ -156,6 +166,18 @@ export function listarAdminCartas(filtros: {
 
   if (filtros.status) {
     params.set("status", filtros.status);
+  }
+
+  if (filtros.classe) {
+    params.set("classe", filtros.classe);
+  }
+
+  if (filtros.periodo) {
+    params.set("periodo", filtros.periodo);
+  }
+
+  if (filtros.ordem) {
+    params.set("ordem", filtros.ordem);
   }
 
   const query = params.toString();
@@ -176,9 +198,18 @@ export function atualizarAdminCarta(id: string, payload: UpdateAdminCartaPayload
   });
 }
 
-export function removerAdminCarta(id: string) {
+export function obterImpactoAdminCarta(id: string) {
+  return adminRequest<AdminCartaImpacto>(`/admin/cartas/${id}/impacto`);
+}
+
+export function removerAdminCarta(
+  id: string,
+  confirmarNome: string,
+  confirmarImpacto: boolean,
+) {
   return adminRequest<{ message: string; carta: AdminCarta }>(`/admin/cartas/${id}`, {
     method: "DELETE",
+    body: JSON.stringify({ confirmarNome, confirmarImpacto }),
   });
 }
 
