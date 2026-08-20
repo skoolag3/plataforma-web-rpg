@@ -217,10 +217,56 @@ model Carta {
   gachaLogs        LogGacha[]
   inventarios      Inventario[]
   deckCartas       DeckCarta[]
+  habilidades      CartaHabilidade[]
   partidasCartas   PartidaCarta[]
-  perfisComMoldura PerfilUsuario[] @relation("CartaMolduraPerfil")
+  perfisComMoldura PerfilUsuario[]   @relation("CartaMolduraPerfil")
 
   @@map("carta")
+}
+
+model Habilidade {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome            String    @unique @db.VarChar(100)
+  descricao       String?   @db.VarChar(500)
+  modo_execucao   String    @default("AUTOMATICA") @db.VarChar(20)
+  tipo_efeito     String    @db.VarChar(30)
+  gatilho         String    @db.VarChar(30)
+  alvo            String    @db.VarChar(30)
+  atributo        String?   @db.VarChar(20)
+  unidade         String    @db.VarChar(20)
+  valor_base      Int
+  forma_aplicacao String    @db.VarChar(30)
+  requisito_tipo  String    @default("NENHUM") @db.VarChar(30)
+  requisito_valor Int?
+  escala_tipo     String    @default("NENHUMA") @db.VarChar(20)
+  escala_valor    Int?
+  escala_limite   Int?
+  duracao_turnos  Int?
+  status          String    @default("RASCUNHO") @db.VarChar(20)
+  versao          Int       @default(1)
+  testada_em      DateTime? @db.Timestamptz(0)
+  criado_em       DateTime  @default(now()) @db.Timestamptz(0)
+  atualizado_em   DateTime  @default(now()) @db.Timestamptz(0)
+
+  cartas CartaHabilidade[]
+
+  @@index([status, tipo_efeito])
+  @@map("habilidade")
+}
+
+model CartaHabilidade {
+  id_carta      String   @db.Uuid
+  id_habilidade String   @db.Uuid
+  ordem         Int      @default(1)
+  criado_em     DateTime @default(now()) @db.Timestamptz(0)
+
+  carta      Carta      @relation(fields: [id_carta], references: [id], onDelete: Cascade)
+  habilidade Habilidade @relation(fields: [id_habilidade], references: [id], onDelete: Restrict)
+
+  @@id([id_carta, id_habilidade])
+  @@unique([id_carta, ordem])
+  @@index([id_habilidade])
+  @@map("carta_habilidade")
 }
 
 model Banner {
