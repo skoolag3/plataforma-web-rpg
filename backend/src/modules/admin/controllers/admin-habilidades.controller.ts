@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import {
   CreateAdminHabilidadeDto,
   InativarAdminHabilidadeDto,
+  TestarAdminHabilidadeDto,
 } from '../dto/admin-habilidade.dto';
 import { AdminHabilidadesService } from '../services/admin-habilidades.service';
 
@@ -44,6 +45,16 @@ export class AdminHabilidadesController {
   @Put(':id')
   atualizar(@Param('id') id: string, @Body() dto: CreateAdminHabilidadeDto) {
     return this.habilidadesService.atualizar(id, dto);
+  }
+
+  @Post(':id/testar')
+  testar(@Param('id') id: string, @Body() dto: TestarAdminHabilidadeDto) {
+    return this.habilidadesService.testar(id, dto);
+  }
+
+  @Post(':id/publicar')
+  publicar(@Param('id') id: string) {
+    return this.habilidadesService.publicar(id);
   }
 
   @Delete(':id')

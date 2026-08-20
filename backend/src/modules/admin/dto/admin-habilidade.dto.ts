@@ -113,3 +113,25 @@ export class InativarAdminHabilidadeDto {
   @MaxLength(100)
   confirmarNome: string;
 }
+
+export class TestarAdminHabilidadeDto {
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  turno: number;
+
+  @IsInt()
+  @Min(0)
+  @Max(9999)
+  ataquesRealizados: number;
+
+  @IsInt()
+  @Min(0)
+  @Max(999999)
+  hpAtual: number;
+
+  @IsInt()
+  @Min(1)
+  @Max(999999)
+  hpMaximo: number;
+}

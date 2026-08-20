@@ -67,6 +67,24 @@ export type SalvarAdminHabilidadePayload = {
   duracaoTurnos?: number;
 };
 
+export type TestarAdminHabilidadePayload = {
+  turno: number;
+  ataquesRealizados: number;
+  hpAtual: number;
+  hpMaximo: number;
+};
+
+export type ResultadoTesteAdminHabilidade = {
+  habilidade: AdminHabilidade;
+  resultado: {
+    acionada: boolean;
+    requisitoAtendido: boolean;
+    valorCalculado: number;
+    percentualHp: number;
+    resumo: string;
+  };
+};
+
 export type AdminCarta = {
   id: string;
   nome: string;
@@ -253,6 +271,25 @@ export function inativarAdminHabilidade(id: string, confirmarNome: string) {
   return adminRequest<AdminHabilidade>(`/admin/habilidades/${id}`, {
     method: "DELETE",
     body: JSON.stringify({ confirmarNome }),
+  });
+}
+
+export function testarAdminHabilidade(
+  id: string,
+  payload: TestarAdminHabilidadePayload,
+) {
+  return adminRequest<ResultadoTesteAdminHabilidade>(
+    `/admin/habilidades/${id}/testar`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function publicarAdminHabilidade(id: string) {
+  return adminRequest<AdminHabilidade>(`/admin/habilidades/${id}/publicar`, {
+    method: "POST",
   });
 }
 

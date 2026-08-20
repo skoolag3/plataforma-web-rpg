@@ -1,0 +1,65 @@
+.conteudo {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.explicacao {
+  grid-column: 1 / -1;
+  margin: 0;
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  border-radius: 0.6rem;
+  background: rgba(76, 29, 149, 0.08);
+  padding: 0.7rem;
+  color: #9aa7ba;
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.resultado {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.7rem;
+  background: rgba(2, 6, 18, 0.58);
+  padding: 0.7rem;
+}
+
+.resultado[data-acionada="true"] {
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(20, 83, 45, 0.1);
+}
+
+.resultado > div {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.resultado small {
+  color: #71809a;
+  font-size: 0.57rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.resultado strong {
+  color: #e2e8f0;
+  font-size: 0.76rem;
+}
+
+.resumo {
+  grid-column: 1 / -1;
+  margin: 0.2rem 0 0;
+  color: #aab5c5;
+  font-size: 0.66rem;
+}
+
+@media (max-width: 560px) {
+  .conteudo,
+  .resultado {
+    grid-template-columns: 1fr;
+  }
+}

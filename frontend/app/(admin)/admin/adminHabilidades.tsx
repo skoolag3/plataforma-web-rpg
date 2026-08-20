@@ -1,12 +1,21 @@
 "use client";
 
-import { Edit3, Plus, Search, Sparkles, Trash2 } from "lucide-react";
+import {
+  Edit3,
+  FlaskConical,
+  Plus,
+  Rocket,
+  Search,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   atualizarAdminHabilidade,
   criarAdminHabilidade,
   inativarAdminHabilidade,
   listarAdminHabilidades,
+  publicarAdminHabilidade,
   type AdminHabilidade,
   type SalvarAdminHabilidadePayload,
 } from "../../lib/admin";
@@ -15,6 +24,7 @@ import {
   AdminHabilidadeFormulario,
   type FormHabilidade,
 } from "./adminHabilidadeFormulario";
+import { AdminHabilidadeTeste } from "./adminHabilidadeTeste";
 import { AdminLayout } from "./adminShared";
 
 const formularioVazio: FormHabilidade = {
@@ -100,8 +110,11 @@ export function Habilidades() {
   const [filtroTipo, setFiltroTipo] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
   const [form, setForm] = useState<FormHabilidade | null>(null);
+  const [habilidadeTeste, setHabilidadeTeste] =
+    useState<AdminHabilidade | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
+  const [processandoId, setProcessandoId] = useState("");
   const [erro, setErro] = useState("");
   const [feedback, setFeedback] = useState("");
 
@@ -128,18 +141,21 @@ export function Habilidades() {
   }, []);
 
   useEffect(() => {
-    if (!form) return;
+    if (!form && !habilidadeTeste) return;
     const overflowAnterior = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     function fecharComEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setForm(null);
+      if (event.key === "Escape") {
+        setForm(null);
+        setHabilidadeTeste(null);
+      }
     }
     document.addEventListener("keydown", fecharComEscape);
     return () => {
       document.body.style.overflow = overflowAnterior;
       document.removeEventListener("keydown", fecharComEscape);
     };
-  }, [form]);
+  }, [form, habilidadeTeste]);
 
   const tipos = useMemo(
     () =>
@@ -224,6 +240,38 @@ export function Habilidades() {
     }
   }
 
+  function atualizarHabilidade(atualizada: AdminHabilidade) {
+    setHabilidades((atuais) =>
+      atuais.map((item) => (item.id === atualizada.id ? atualizada : item)),
+    );
+    setHabilidadeTeste((atual) =>
+      atual?.id === atualizada.id ? atualizada : atual,
+    );
+  }
+
+  async function publicar(habilidade: AdminHabilidade) {
+    if (!habilidade.testadaEm) {
+      setErro("Execute ao menos um teste antes de publicar esta versão.");
+      return;
+    }
+    if (!window.confirm(`Publicar a habilidade ${habilidade.nome}?`)) return;
+
+    setProcessandoId(habilidade.id);
+    setErro("");
+    setFeedback("");
+    try {
+      const atualizada = await publicarAdminHabilidade(habilidade.id);
+      atualizarHabilidade(atualizada);
+      setFeedback("Habilidade publicada e disponível para vinculação.");
+    } catch (error) {
+      setErro(
+        error instanceof Error ? error.message : "Não foi possível publicar.",
+      );
+    } finally {
+      setProcessandoId("");
+    }
+  }
+
   return (
     <AdminLayout
       title="Habilidades"
@@ -277,7 +325,12 @@ export function Habilidades() {
                         <Sparkles aria-hidden="true" />
                         <span>
                           <strong>{habilidade.nome}</strong>
-                          <small>v{habilidade.versao}</small>
+                          <small>
+                            v{habilidade.versao}
+                            {habilidade.testadaEm
+                              ? " · testada"
+                              : " · não testada"}
+                          </small>
                         </span>
                       </span>
                     </td>
@@ -295,6 +348,32 @@ export function Habilidades() {
                           aria-label={`Editar ${habilidade.nome}`}
                         >
                           <Edit3 aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setHabilidadeTeste(habilidade)}
+                          disabled={habilidade.status === "INATIVA"}
+                          aria-label={`Testar ${habilidade.nome}`}
+                          title="Testar cenário"
+                        >
+                          <FlaskConical aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void publicar(habilidade)}
+                          disabled={
+                            habilidade.status !== "RASCUNHO" ||
+                            !habilidade.testadaEm ||
+                            processandoId === habilidade.id
+                          }
+                          aria-label={`Publicar ${habilidade.nome}`}
+                          title={
+                            habilidade.testadaEm
+                              ? "Publicar versão testada"
+                              : "Teste esta versão antes de publicar"
+                          }
+                        >
+                          <Rocket aria-hidden="true" />
                         </button>
                         <button
                           type="button"
@@ -359,6 +438,13 @@ export function Habilidades() {
           aoAtualizar={atualizarForm}
           aoSalvar={salvar}
           aoFechar={() => setForm(null)}
+        />
+      ) : null}
+      {habilidadeTeste ? (
+        <AdminHabilidadeTeste
+          habilidade={habilidadeTeste}
+          aoTestar={atualizarHabilidade}
+          aoFechar={() => setHabilidadeTeste(null)}
         />
       ) : null}
     </AdminLayout>

@@ -6,14 +6,24 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
-import type { CreateAdminHabilidadeDto } from '../dto/admin-habilidade.dto';
 import type {
+  CreateAdminHabilidadeDto,
+  TestarAdminHabilidadeDto,
+} from '../dto/admin-habilidade.dto';
+import type {
+  AlvoHabilidade,
+  AtributoHabilidade,
   ConfiguracaoHabilidade,
   EscalaHabilidade,
+  FormaAplicacaoHabilidade,
+  GatilhoHabilidade,
   RequisitoHabilidade,
   StatusHabilidade,
+  TipoEfeitoHabilidade,
+  UnidadeHabilidade,
 } from '../../jogo/habilidades/habilidade.types';
 import { validarHabilidade } from '../../jogo/habilidades/habilidade.validator';
+import { simularHabilidade } from '../../jogo/habilidades/habilidade.simulator';
 
 @Injectable()
 export class AdminHabilidadesService {
@@ -110,6 +120,58 @@ export class AdminHabilidadesService {
         testada_em: null,
         atualizado_em: new Date(),
       },
+    });
+    return this.toResponse(habilidade);
+  }
+
+  async testar(id: string, dto: TestarAdminHabilidadeDto) {
+    const atual = await this.buscarRegistro(id);
+    if (atual.status === 'INATIVA') {
+      throw new BadRequestException(
+        'Uma habilidade inativa não pode ser testada.',
+      );
+    }
+    if (dto.hpAtual > dto.hpMaximo) {
+      throw new BadRequestException(
+        'O HP atual não pode ser maior que o HP máximo.',
+      );
+    }
+
+    const configuracao = this.toConfigFromRecord(atual);
+    const validacao = validarHabilidade(configuracao);
+    if (!validacao.valida) {
+      throw new BadRequestException({
+        message: 'A configuração salva não passou na validação.',
+        details: validacao.erros,
+      });
+    }
+
+    const res = simularHabilidade(configuracao, dto);
+    const testadaEm = new Date();
+    const habilidade = await this.prisma.habilidade.update({
+      where: { id },
+      data: { testada_em: testadaEm, atualizado_em: testadaEm },
+    });
+
+    return { habilidade: this.toResponse(habilidade), resultado: res };
+  }
+
+  async publicar(id: string) {
+    const atual = await this.buscarRegistro(id);
+    if (atual.status !== 'RASCUNHO') {
+      throw new BadRequestException(
+        'Somente uma habilidade em rascunho pode ser publicada.',
+      );
+    }
+    if (!atual.testada_em) {
+      throw new BadRequestException(
+        'Teste a habilidade antes de publicar esta versão.',
+      );
+    }
+
+    const habilidade = await this.prisma.habilidade.update({
+      where: { id },
+      data: { status: 'PUBLICADA', atualizado_em: new Date() },
     });
     return this.toResponse(habilidade);
   }
@@ -216,6 +278,64 @@ export class AdminHabilidadesService {
       tipo: dto.escalaTipo,
       valor: dto.escalaValor ?? Number.NaN,
       limite: dto.escalaLimite ?? Number.NaN,
+    };
+  }
+
+  private toConfigFromRecord(
+    habilidade: Prisma.HabilidadeGetPayload<Record<string, never>>,
+  ): ConfiguracaoHabilidade {
+    return {
+      nome: habilidade.nome,
+      descricao: habilidade.descricao ?? undefined,
+      modoExecucao: 'AUTOMATICA',
+      tipoEfeito: habilidade.tipo_efeito as TipoEfeitoHabilidade,
+      gatilho: habilidade.gatilho as GatilhoHabilidade,
+      alvo: habilidade.alvo as AlvoHabilidade,
+      atributo: habilidade.atributo
+        ? (habilidade.atributo as AtributoHabilidade)
+        : undefined,
+      unidade: habilidade.unidade as UnidadeHabilidade,
+      valorBase: habilidade.valor_base,
+      formaAplicacao: habilidade.forma_aplicacao as FormaAplicacaoHabilidade,
+      requisito: this.toRequisitoFromRecord(habilidade),
+      escala: this.toEscalaFromRecord(habilidade),
+      duracaoTurnos: habilidade.duracao_turnos ?? undefined,
+      status: habilidade.status as StatusHabilidade,
+    };
+  }
+
+  private toRequisitoFromRecord(
+    habilidade: Prisma.HabilidadeGetPayload<Record<string, never>>,
+  ): RequisitoHabilidade {
+    if (habilidade.requisito_tipo === 'CONTADOR_ATAQUES') {
+      return {
+        tipo: 'CONTADOR_ATAQUES',
+        quantidade: habilidade.requisito_valor ?? Number.NaN,
+      };
+    }
+    if (habilidade.requisito_tipo === 'HP_ABAIXO') {
+      return {
+        tipo: 'HP_ABAIXO',
+        percentual: habilidade.requisito_valor ?? Number.NaN,
+      };
+    }
+    if (habilidade.requisito_tipo === 'TURNO_MINIMO') {
+      return {
+        tipo: 'TURNO_MINIMO',
+        turno: habilidade.requisito_valor ?? Number.NaN,
+      };
+    }
+    return { tipo: 'NENHUM' };
+  }
+
+  private toEscalaFromRecord(
+    habilidade: Prisma.HabilidadeGetPayload<Record<string, never>>,
+  ): EscalaHabilidade {
+    if (habilidade.escala_tipo === 'NENHUMA') return { tipo: 'NENHUMA' };
+    return {
+      tipo: habilidade.escala_tipo as 'POR_TURNO' | 'POR_ATAQUE',
+      valor: habilidade.escala_valor ?? Number.NaN,
+      limite: habilidade.escala_limite ?? Number.NaN,
     };
   }
 

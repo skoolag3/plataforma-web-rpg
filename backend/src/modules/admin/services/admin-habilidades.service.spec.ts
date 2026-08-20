@@ -184,4 +184,87 @@ describe('AdminHabilidadesService', () => {
       },
     });
   });
+
+  it('simula a habilidade e registra quando a versão foi testada', async () => {
+    prisma.habilidade.update.mockResolvedValue({
+      ...habilidade,
+      testada_em: new Date('2026-08-20T11:00:00Z'),
+    });
+
+    const res = await service.testar(habilidade.id, {
+      turno: 3,
+      ataquesRealizados: 3,
+      hpAtual: 80,
+      hpMaximo: 100,
+    });
+
+    expect(res.resultado).toMatchObject({
+      acionada: true,
+      requisitoAtendido: true,
+      valorCalculado: 150,
+    });
+    expect(prisma.habilidade.update).toHaveBeenCalledWith({
+      where: { id: habilidade.id },
+      data: {
+        testada_em: expect.any(Date),
+        atualizado_em: expect.any(Date),
+      },
+    });
+  });
+
+  it('rejeita cenário com HP atual maior que o máximo', async () => {
+    await expect(
+      service.testar(habilidade.id, {
+        turno: 1,
+        ataquesRealizados: 0,
+        hpAtual: 101,
+        hpMaximo: 100,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(prisma.habilidade.update).not.toHaveBeenCalled();
+  });
+
+  it('não testa uma habilidade inativa', async () => {
+    prisma.habilidade.findUnique.mockResolvedValue({
+      ...habilidade,
+      status: 'INATIVA',
+    });
+
+    await expect(
+      service.testar(habilidade.id, {
+        turno: 1,
+        ataquesRealizados: 0,
+        hpAtual: 100,
+        hpMaximo: 100,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('não publica uma versão que ainda não foi testada', async () => {
+    await expect(service.publicar(habilidade.id)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(prisma.habilidade.update).not.toHaveBeenCalled();
+  });
+
+  it('publica um rascunho testado', async () => {
+    prisma.habilidade.findUnique.mockResolvedValue({
+      ...habilidade,
+      testada_em: new Date('2026-08-20T11:00:00Z'),
+    });
+    prisma.habilidade.update.mockResolvedValue({
+      ...habilidade,
+      status: 'PUBLICADA',
+      testada_em: new Date('2026-08-20T11:00:00Z'),
+    });
+
+    const res = await service.publicar(habilidade.id);
+
+    expect(res.status).toBe('PUBLICADA');
+    expect(prisma.habilidade.update).toHaveBeenCalledWith({
+      where: { id: habilidade.id },
+      data: { status: 'PUBLICADA', atualizado_em: expect.any(Date) },
+    });
+  });
 });
