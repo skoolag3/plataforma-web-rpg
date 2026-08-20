@@ -49,6 +49,8 @@ model Usuario {
   decks                Deck[]
   partidas             LogPartida[]          @relation("PartidasUsuario")
   partidasComoOponente LogPartida[]          @relation("PartidasOponente")
+  logsAdminComoAutor   LogAdminUsuario[]     @relation("LogAdminAutor")
+  logsAdminComoAlvo    LogAdminUsuario[]     @relation("LogAdminAlvo")
 
   @@map("usuario")
 }
@@ -192,6 +194,24 @@ model LedgerRuby {
 
   @@index([id_usuario], map: "idx_ledger_ruby_usuario")
   @@map("ledger_ruby")
+}
+
+model LogAdminUsuario {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id_admin   String   @db.Uuid
+  id_usuario String   @db.Uuid
+  acao       String   @db.VarChar(50)
+  categoria  String   @db.VarChar(30)
+  descricao  String   @db.VarChar(255)
+  detalhes   Json?
+  criado_em  DateTime @default(now()) @db.Timestamptz(0)
+
+  admin   Usuario @relation("LogAdminAutor", fields: [id_admin], references: [id], onDelete: Restrict)
+  usuario Usuario @relation("LogAdminAlvo", fields: [id_usuario], references: [id], onDelete: Cascade)
+
+  @@index([id_admin, criado_em(sort: Desc)])
+  @@index([id_usuario, criado_em(sort: Desc)])
+  @@map("log_admin_usuario")
 }
 
 model Carta {

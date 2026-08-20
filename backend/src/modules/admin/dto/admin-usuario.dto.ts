@@ -3,6 +3,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   MaxLength,
   Min,
@@ -33,4 +34,31 @@ export class UpdateAdminUsuarioDto {
   @IsOptional()
   @IsBoolean()
   emailVerificado?: boolean;
+}
+
+export class AjustarSaldoUsuarioDto {
+  @IsInt()
+  @Min(-1000000)
+  @Max(1000000)
+  rubys: number;
+
+  @IsInt()
+  @Min(-1000000)
+  @Max(1000000)
+  moedas: number;
+
+  @IsString()
+  @MinLength(3)
+  @MaxLength(180)
+  motivo: string;
+}
+
+export class AjustarColecaoUsuarioDto {
+  @IsUUID()
+  idCarta: string;
+
+  @IsInt()
+  @Min(-999)
+  @Max(999)
+  quantidade: number;
 }

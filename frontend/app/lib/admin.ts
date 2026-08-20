@@ -78,6 +78,36 @@ export type UpdateAdminUsuarioPayload = {
   emailVerificado?: boolean;
 };
 
+export type AdminUsuarioCarta = {
+  id: string;
+  nome: string;
+  raridade: string;
+  elemento: string;
+  foto: string | null;
+  moldura: string | null;
+  configVisual: ConfigVisualCarta | null;
+  quantidade: number;
+};
+
+export type AdminUsuarioAtividade = {
+  id: string;
+  tipo: "RUBY" | "MOEDA" | "COMPRA" | "GACHA" | "ADMIN";
+  titulo: string;
+  descricao: string | null;
+  valor: number | null;
+  unidade: "RUBYS" | "MOEDAS" | "BRL" | null;
+  natureza: "ENTRADA" | "SAIDA" | "NEUTRO";
+  criadoEm: string | null;
+  autoria: { id: string; nome: string; email: string } | null;
+  detalhes: Record<string, unknown> | null;
+};
+
+export type AjusteSaldoUsuarioPayload = {
+  rubys: number;
+  moedas: number;
+  motivo: string;
+};
+
 export type AdminDashboardResumo = {
   metricas: {
     usuarios: number;
@@ -230,6 +260,37 @@ export function listarAdminUsuarios(filtros: { busca?: string; status?: string }
 
 export function atualizarAdminUsuario(id: string, payload: UpdateAdminUsuarioPayload) {
   return adminRequest<AdminUsuario>(`/admin/usuarios/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function obterColecaoAdminUsuario(id: string) {
+  return adminRequest<AdminUsuarioCarta[]>(`/admin/usuarios/${id}/colecao`);
+}
+
+export function obterAtividadeAdminUsuario(id: string, limite = 50) {
+  return adminRequest<AdminUsuarioAtividade[]>(
+    `/admin/usuarios/${id}/atividade?limite=${limite}`,
+  );
+}
+
+export function ajustarColecaoAdminUsuario(
+  id: string,
+  idCarta: string,
+  quantidade: number,
+) {
+  return adminRequest<AdminUsuarioCarta[]>(`/admin/usuarios/${id}/colecao`, {
+    method: "PATCH",
+    body: JSON.stringify({ idCarta, quantidade }),
+  });
+}
+
+export function ajustarSaldoAdminUsuario(
+  id: string,
+  payload: AjusteSaldoUsuarioPayload,
+) {
+  return adminRequest<AdminUsuario>(`/admin/usuarios/${id}/saldos`, {
     method: "PATCH",
     body: JSON.stringify(payload),
   });

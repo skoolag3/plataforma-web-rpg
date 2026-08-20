@@ -1,10 +1,11 @@
 "use client";
 
-import { Activity, Plus, Search } from "lucide-react";
+import { Activity, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { obterAdminDashboard, type AdminDashboardResumo } from "../../lib/admin";
 import styles from "../../styles/admin/admin.module.css";
 import { Cartas, NovaCarta } from "./adminCartas";
+import { DecksNpc } from "./adminDecksNpc";
 import { Habilidades } from "./adminHabilidades";
 import { AdminLayout, DataTable } from "./adminShared";
 import { Usuarios } from "./adminUsuarios";
@@ -17,15 +18,6 @@ type AdminView =
   | "decks"
   | "usuarios"
   | "banners";
-
-const decks = [
-  ["Aprendiz da Luz", "Facil", "Controle", "6/6", "Ativo"],
-  ["Guardiao Ancestral", "Normal", "Defensivo", "6/6", "Ativo"],
-  ["Necromante Sombrio", "Normal", "Aggro", "6/6", "Ativo"],
-  ["Cavaleiro Real", "Dificil", "Balanceado", "6/6", "Ativo"],
-  ["Deusa da Lua", "Dificil", "Controle", "6/6", "Inativo"],
-  ["Lorde das Chamas", "Extremo", "Aggro", "6/6", "Inativo"],
-];
 
 const banners = [
   ["Eclipse Roxo", "Limitado", "27/06/2026", "10/07/2026", "Ativo"],
@@ -149,15 +141,6 @@ function Dashboard() {
   );
 }
 
-function Decks() {
-  return (
-    <AdminLayout title="Decks de NPC" subtitle="Gerencie os decks utilizados pelos bots.">
-      <div className={styles.toolbar}><label><Search aria-hidden="true" /><input placeholder="Buscar deck..." /></label><button className={styles.primaryBtn}><Plus aria-hidden="true" /> Novo Deck</button></div>
-      <DataTable headers={["Deck", "Dificuldade", "Estilo", "Cartas", "Status"]} rows={decks} />
-    </AdminLayout>
-  );
-}
-
 function Banners() {
   return (
     <AdminLayout title="Banners / Gacha" subtitle="Gerencie os banners disponiveis.">
@@ -171,7 +154,7 @@ export function AdminScreen({ view }: { view: AdminView }) {
   if (view === "cartas") return <Cartas />;
   if (view === "nova-carta") return <NovaCarta />;
   if (view === "habilidades") return <Habilidades />;
-  if (view === "decks") return <Decks />;
+  if (view === "decks") return <DecksNpc />;
   if (view === "usuarios") return <Usuarios />;
   if (view === "banners") return <Banners />;
   return <Dashboard />;

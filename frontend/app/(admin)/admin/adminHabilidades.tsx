@@ -1,7 +1,7 @@
 "use client";
 
 import { Edit3, Plus, Save, Search, Sparkles, X } from "lucide-react";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import styles from "../../styles/admin/admin.module.css";
 import { AdminLayout } from "./adminShared";
 
@@ -72,6 +72,23 @@ export function Habilidades() {
     setForm(null);
   }
 
+  useEffect(() => {
+    if (!form) return;
+
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function fecharComEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setForm(null);
+    }
+
+    document.addEventListener("keydown", fecharComEscape);
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      document.removeEventListener("keydown", fecharComEscape);
+    };
+  }, [form]);
+
   return (
     <AdminLayout title="Habilidades" subtitle="Gerencie todas as habilidades do jogo.">
       <div className={styles.cartasWorkspace}>
@@ -127,18 +144,20 @@ export function Habilidades() {
       </div>
 
       {form ? (
-        <form className={`${styles.usuarioEditor} ${styles.habilidadeEditor}`} onSubmit={salvar}>
-          <header>
-            <div><h2>{form.id ? "Editando habilidade" : "Nova habilidade"}</h2><p>Configuração da regra executada durante a partida.</p></div>
-            <button type="button" onClick={() => setForm(null)} aria-label="Fechar formulário"><X aria-hidden="true" /></button>
-          </header>
-          <label>Nome<input value={form.nome} onChange={(event) => atualizar("nome", event.target.value)} required /></label>
-          <label>Tipo<select value={form.tipo} onChange={(event) => atualizar("tipo", event.target.value)}><option value="buff">buff</option><option value="damage">damage</option><option value="heal">heal</option><option value="shield">shield</option><option value="lifesteal">lifesteal</option><option value="evasion">evasion</option></select></label>
-          <label>Gatilho<select value={form.gatilho} onChange={(event) => atualizar("gatilho", event.target.value)}><option value="on_attack">on_attack</option><option value="on_damage">on_damage</option><option value="on_turn_start">on_turn_start</option></select></label>
-          <label>Alvo<select value={form.alvo} onChange={(event) => atualizar("alvo", event.target.value)}><option value="self">self</option><option value="ally">ally</option><option value="enemy">enemy</option></select></label>
-          <label className={styles.usuarioToggle}><input type="checkbox" checked={form.ativa} onChange={(event) => atualizar("ativa", event.target.checked)} /><span><strong>Habilidade ativa</strong><small>Permite que a habilidade seja utilizada pelas cartas.</small></span></label>
-          <div className={styles.editorActions}><button type="button" onClick={() => setForm(null)}>Cancelar</button><button type="submit" className={styles.primaryBtn}><Save aria-hidden="true" /> Salvar</button></div>
-        </form>
+        <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setForm(null); }}>
+          <form className={`${styles.usuarioEditor} ${styles.habilidadeEditor} ${styles.habilidadeModal}`} onSubmit={salvar} role="dialog" aria-modal="true" aria-labelledby="habilidade-modal-titulo">
+            <header>
+              <div><h2 id="habilidade-modal-titulo">{form.id ? "Editando habilidade" : "Nova habilidade"}</h2><p>Configuração da regra executada durante a partida.</p></div>
+              <button type="button" onClick={() => setForm(null)} aria-label="Fechar formulário"><X aria-hidden="true" /></button>
+            </header>
+            <label>Nome<input value={form.nome} onChange={(event) => atualizar("nome", event.target.value)} required autoFocus /></label>
+            <label>Tipo<select value={form.tipo} onChange={(event) => atualizar("tipo", event.target.value)}><option value="buff">buff</option><option value="damage">damage</option><option value="heal">heal</option><option value="shield">shield</option><option value="lifesteal">lifesteal</option><option value="evasion">evasion</option></select></label>
+            <label>Gatilho<select value={form.gatilho} onChange={(event) => atualizar("gatilho", event.target.value)}><option value="on_attack">on_attack</option><option value="on_damage">on_damage</option><option value="on_turn_start">on_turn_start</option></select></label>
+            <label>Alvo<select value={form.alvo} onChange={(event) => atualizar("alvo", event.target.value)}><option value="self">self</option><option value="ally">ally</option><option value="enemy">enemy</option></select></label>
+            <label className={styles.usuarioToggle}><input type="checkbox" checked={form.ativa} onChange={(event) => atualizar("ativa", event.target.checked)} /><span><strong>Habilidade ativa</strong><small>Permite que a habilidade seja utilizada pelas cartas.</small></span></label>
+            <div className={styles.editorActions}><button type="button" onClick={() => setForm(null)}>Cancelar</button><button type="submit" className={styles.primaryBtn}><Save aria-hidden="true" /> Salvar</button></div>
+          </form>
+        </div>
       ) : null}
     </AdminLayout>
   );
