@@ -33,7 +33,6 @@ export type ColecaoResponse = {
   jogador: {
     nome: string;
     nivel: number;
-    moedas: number;
     rubys: number;
     avatarUrl: string | null;
   };
@@ -128,28 +127,63 @@ export function excluirDeck(id: string) {
   });
 }
 
-export type ResultadoPartida = {
+export type CartaPartida = {
   id: string;
-  personalidade: string;
-  dificuldade: "FACIL" | "MEDIA" | "DIFICIL";
-  resultado: "VITORIA" | "DERROTA" | "EMPATE";
-  variacaoPontos: number;
-  estado: {
-    turno: number;
-    eventos: { turno: number; tipo: string; texto: string; valor?: number }[];
-  };
+  nome: string;
+  raridade: string;
+  elemento: string;
+  foto: string | null;
+  moldura: string | null;
+  configVisual: ConfigVisualCarta | null;
+  passiva: Record<string, unknown>;
+  hp: number;
+  hpAtual: number;
+  ataqueBase: number;
+  defesaBase: number;
+  velocidadeBase: number;
+  ataque: number;
+  defesa: number;
+  velocidade: number;
+  derrotada: boolean;
+  posicao: number;
 };
 
-export function buscarProvocacaoBot() {
-  return jogoRequest<{ personalidade: string; pergunta: string }>(
-    "/partidas/bot/provocacao",
-  );
+export type EstadoPartida = {
+  id: string;
+  status: "EM_ANDAMENTO" | "FINALIZADA";
+  resultado: "VITORIA" | "DERROTA" | "EMPATE" | null;
+  turno: number;
+  vez: "JOGADOR" | null;
+  deck: { id: string; nome: string } | null;
+  recompensas: { pontos: number; rubys: number };
+  jogador: { ativa: number; cartas: CartaPartida[] };
+  bot: { ativa: number; cartas: CartaPartida[] };
+  eventos: {
+    id: string;
+    sequencia: number;
+    turno: number;
+    tipo: string;
+    origem: "JOGADOR" | "BOT" | null;
+    texto: string;
+    valor: number | null;
+    criadoEm: string;
+  }[];
+};
+
+export function buscarPartidaAtual() {
+  return jogoRequest<EstadoPartida | null>("/partidas/atual");
 }
 
-export function iniciarPartidaBot(resposta: string) {
-  return jogoRequest<ResultadoPartida>("/partidas/bot", {
+export function iniciarPartida(idDeck: string) {
+  return jogoRequest<EstadoPartida>("/partidas", {
     method: "POST",
-    body: JSON.stringify({ resposta }),
+    body: JSON.stringify({ idDeck }),
+  });
+}
+
+export function executarTurno(idPartida: string) {
+  return jogoRequest<EstadoPartida>(`/partidas/${idPartida}/turnos`, {
+    method: "POST",
   });
 }
 
@@ -178,7 +212,7 @@ export type BannerGacha = {
 };
 
 export type GachaResponse = {
-  jogador: { nome: string; nivel: number; rubys: number; moedas: number };
+  jogador: { nome: string; nivel: number; rubys: number };
   banners: BannerGacha[];
 };
 

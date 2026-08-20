@@ -1,38 +1,74 @@
 "use client";
 
-import { Bot, Shield, Sparkles, Swords } from "lucide-react";
-import Link from "next/link";
+import { ShieldCheck, Swords } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
-  buscarProvocacaoBot,
-  iniciarPartidaBot,
-  type ResultadoPartida,
+  buscarPartidaAtual,
+  executarTurno,
+  iniciarPartida,
+  listarDecks,
+  type Deck,
+  type EstadoPartida,
 } from "../../lib/jogo";
 import styles from "../../styles/partida.module.css";
+import { MesaBatalha } from "./mesaBatalha";
+import { PartidaPreparacao } from "./partidaPreparacao";
 
 export default function PartidaPage() {
-  const [provocacao, setProvocacao] = useState({ personalidade: "", pergunta: "" });
-  const [resposta, setResposta] = useState("");
-  const [resultado, setResultado] = useState<ResultadoPartida | null>(null);
+  const [decks, setDecks] = useState<Deck[]>([]);
+  const [idDeck, setIdDeck] = useState("");
+  const [partida, setPartida] = useState<EstadoPartida | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState("");
-  const [lutando, setLutando] = useState(false);
-  useEffect(() => { buscarProvocacaoBot().then(setProvocacao).catch((e) => setErro(e.message)); }, []);
-  async function batalhar() {
-    setLutando(true); setErro("");
-    try { setResultado(await iniciarPartidaBot(resposta)); }
-    catch (e) { setErro(e instanceof Error ? e.message : "Erro ao iniciar a batalha."); }
-    finally { setLutando(false); }
+
+  useEffect(() => {
+    Promise.all([listarDecks(), buscarPartidaAtual()])
+      .then(([lista, atual]) => {
+        setDecks(lista);
+        setPartida(atual);
+        const preferido = lista.find((deck) => deck.ativo && deck.completo)
+          ?? lista.find((deck) => deck.completo);
+        setIdDeck(preferido?.id ?? "");
+      })
+      .catch((error) => setErro(error instanceof Error ? error.message : "Não foi possível preparar a arena."))
+      .finally(() => setCarregando(false));
+  }, []);
+
+  async function comecar() {
+    if (!idDeck) return;
+    setProcessando(true);
+    setErro("");
+    try {
+      setPartida(await iniciarPartida(idDeck));
+    } catch (error) {
+      setErro(error instanceof Error ? error.message : "Não foi possível iniciar a batalha.");
+    } finally {
+      setProcessando(false);
+    }
   }
+
+  async function atacar() {
+    if (!partida) return;
+    setProcessando(true);
+    setErro("");
+    try {
+      setPartida(await executarTurno(partida.id));
+    } catch (error) {
+      setErro(error instanceof Error ? error.message : "Não foi possível executar o turno.");
+    } finally {
+      setProcessando(false);
+    }
+  }
+
   return (
     <main className={styles.pagina}>
       <section className={styles.container}>
-        <header className={styles.topo}><div><span>Duelo tático</span><h1>Arena 1v1</h1><p>Prepare sua resposta, desafie o bot e conquiste pontos no ranking.</p></div><Link href="/decks">Gerenciar deck</Link></header>
-        {!resultado ? <section className={styles.desafio}>
-          <div className={styles.oponente}><span><Bot /></span><div><small>Seu oponente</small><strong>{provocacao.personalidade || "Carregando oponente..."}</strong><p>Sua resposta define como o bot enfrentará você.</p></div></div>
-          <blockquote>&ldquo;{provocacao.pergunta}&rdquo;</blockquote>
-          <label className={styles.resposta}><span>Sua resposta <small>{resposta.length}/500</small></span><textarea value={resposta} onChange={(e) => setResposta(e.target.value)} maxLength={500} placeholder="Responda ao vilão..." /></label>
-          {erro && <p className={styles.erro}>{erro}</p>}<button className={styles.batalhar} onClick={() => void batalhar()} disabled={lutando || resposta.trim().length < 2}><Swords />{lutando ? "Simulando turnos..." : "Aceitar duelo"}</button>
-        </section> : <section className={styles.resultado}><aside className={styles.resumo}><Sparkles /><small>Resultado</small><h2>{resultado.resultado}</h2><dl><div><dt>Dificuldade</dt><dd>{resultado.dificuldade}</dd></div><div><dt>Turnos</dt><dd>{resultado.estado.turno}</dd></div></dl><p className={resultado.variacaoPontos >= 0 ? styles.positivo : styles.negativo}>{resultado.variacaoPontos >= 0 ? "+" : ""}{resultado.variacaoPontos} pontos</p><button onClick={() => { setResultado(null); setResposta(""); }}>Nova partida</button></aside><div className={styles.log}><h2><Shield /> Log da partida</h2>{resultado.estado.eventos.map((evento, i) => <div className={styles.evento} key={i}><span>T{evento.turno}</span>{evento.texto}</div>)}</div></section>}
+        <header className={styles.topo}>
+          <div><span><ShieldCheck /> Servidor autoritativo</span><h1>Arena por turnos</h1><p>Escolha o deck, respeite a ordem das cartas e avance um turno por ação.</p></div>
+          <strong><Swords /> Batalha 1×1</strong>
+        </header>
+        {carregando ? <div className={styles.carregando}>Preparando arena...</div> : partida ? <MesaBatalha partida={partida} processando={processando} erro={erro} onAtacar={atacar} onNovaBatalha={() => { setPartida(null); setErro(""); }} /> : <PartidaPreparacao decks={decks} idSelecionado={idDeck} carregando={processando} erro={erro} onSelecionar={setIdDeck} onIniciar={() => void comecar()} />}
       </section>
     </main>
   );

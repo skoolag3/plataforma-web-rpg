@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { CartaMontada } from "../../components/cartaMontada";
+import { FiltroSelect } from "../cartas/components/filtroSelect";
 import {
   ativarDeck,
   atualizarDeck,
@@ -28,6 +30,19 @@ import {
 import styles from "../../styles/decks.module.css";
 
 const SLOT_COUNT = 6;
+
+function montarSlots(deck: Deck | undefined, cartas: CartaColecao[]) {
+  if (!deck) return Array<CartaColecao | null>(SLOT_COUNT).fill(null);
+
+  const cartasDoDeck = [...deck.cartas]
+    .sort((a, b) => a.posicao - b.posicao)
+    .map((carta) => cartas.find((item) => item.id === carta.id) ?? null);
+
+  return [
+    ...cartasDoDeck,
+    ...Array<CartaColecao | null>(Math.max(0, SLOT_COUNT - cartasDoDeck.length)).fill(null),
+  ];
+}
 
 export default function DecksPage() {
   const [decks, setDecks] = useState<Deck[]>([]);
@@ -55,21 +70,30 @@ export default function DecksPage() {
         buscarColecao(),
       ]);
       setDecks(decksData);
-      setColecao(colecaoData.itens.filter((carta) => carta.obtida));
+      const cartasObtidas = colecaoData.itens.filter((carta) => carta.obtida);
+      const deckEquipado = decksData.find((deck) => deck.ativo);
+      const slotsIniciais = montarSlots(deckEquipado, cartasObtidas);
+      setColecao(cartasObtidas);
+      setEditandoId(deckEquipado?.id ?? null);
+      setNome(deckEquipado?.nome ?? "Meu Deck");
 
       const cartaInicialId = new URLSearchParams(window.location.search).get("carta");
       const cartaInicial = colecaoData.itens.find(
         (carta) => carta.id === cartaInicialId && carta.obtida,
       );
       if (cartaInicial) {
-        setSlots((atuais) => {
-          if (atuais.some((carta) => carta?.id === cartaInicial.id)) return atuais;
-          const proximos = [...atuais];
-          proximos[0] = cartaInicial;
-          return proximos;
-        });
-        setMensagem(`${cartaInicial.nome} foi adicionada ao primeiro slot.`);
+        if (!slotsIniciais.some((carta) => carta?.id === cartaInicial.id)) {
+          const primeiroVazio = slotsIniciais.findIndex((carta) => !carta);
+          if (primeiroVazio >= 0) {
+            slotsIniciais[primeiroVazio] = cartaInicial;
+            setSlotSelecionado(primeiroVazio);
+            setMensagem(`${cartaInicial.nome} foi adicionada ao deck equipado.`);
+          } else {
+            setMensagem("O deck equipado está cheio. Remova uma carta antes de adicionar outra.");
+          }
+        }
       }
+      setSlots(slotsIniciais);
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Erro ao carregar decks.");
     } finally {
@@ -96,7 +120,7 @@ export default function DecksPage() {
   const cartasSelecionadas = slots.filter(
     (carta): carta is CartaColecao => Boolean(carta),
   );
-  const deckCompleto = cartasSelecionadas.length === SLOT_COUNT;
+  const deckCompleto = cartasSelecionadas.length >= 3;
 
   function novoDeck() {
     setEditandoId(null);
@@ -108,15 +132,9 @@ export default function DecksPage() {
   }
 
   function editar(deck: Deck) {
-    const cartasDoDeck = [...deck.cartas]
-      .sort((a, b) => a.posicao - b.posicao)
-      .map((carta) => colecao.find((item) => item.id === carta.id) ?? null);
     setEditandoId(deck.id);
     setNome(deck.nome);
-    setSlots([
-      ...cartasDoDeck,
-      ...Array(Math.max(0, SLOT_COUNT - cartasDoDeck.length)).fill(null),
-    ]);
+    setSlots(montarSlots(deck, colecao));
     setSlotSelecionado(0);
     setErro("");
     setMensagem(`Editando ${deck.nome}.`);
@@ -149,7 +167,7 @@ export default function DecksPage() {
       return;
     }
     if (ativar && !deckCompleto) {
-      setErro("Preencha os 6 slots antes de salvar e ativar.");
+      setErro("Escolha pelo menos 3 cartas antes de salvar e ativar.");
       return;
     }
 
@@ -162,7 +180,7 @@ export default function DecksPage() {
         ? await atualizarDeck(editandoId, { nome: nomeLimpo, cartas: ids, ativar })
         : await criarDeck(nomeLimpo, ids, ativar);
       setEditandoId(resposta.deck.id);
-      setMensagem(resposta.message);
+      setMensagem(ativar ? "Deck salvo e equipado." : resposta.message);
       setDecks(await listarDecks());
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Erro ao salvar deck.");
@@ -171,15 +189,21 @@ export default function DecksPage() {
     }
   }
 
-  async function tornarAtivo(deck: Deck) {
+  async function equiparDeck(deck: Deck) {
     setErro("");
     setMensagem("");
     try {
-      const resposta = await ativarDeck(deck.id);
-      setMensagem(resposta.message);
-      setDecks(await listarDecks());
+      await ativarDeck(deck.id);
+      const decksAtualizados = await listarDecks();
+      const deckEquipado = decksAtualizados.find((item) => item.ativo) ?? deck;
+      setDecks(decksAtualizados);
+      setEditandoId(deckEquipado.id);
+      setNome(deckEquipado.nome);
+      setSlots(montarSlots(deckEquipado, colecao));
+      setSlotSelecionado(0);
+      setMensagem("Deck equipado com sucesso.");
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Erro ao ativar deck.");
+      setErro(error instanceof Error ? error.message : "Erro ao equipar deck.");
     }
   }
 
@@ -208,11 +232,8 @@ export default function DecksPage() {
             <ArrowLeft aria-hidden="true" /> Voltar para a coleção
           </Link>
           <h1>Construtor de decks</h1>
-          <p>Monte, valide e escolha o deck que sera usado nas partidas.</p>
+          <p>Monte e equipe o deck que será usado nas partidas.</p>
         </div>
-        <button type="button" className={styles.novo} onClick={novoDeck}>
-          <Plus aria-hidden="true" /> Novo deck
-        </button>
       </header>
 
       {(erro || mensagem) && (
@@ -223,7 +244,12 @@ export default function DecksPage() {
 
       <div className={styles.layout}>
         <aside className={styles.listaDecks}>
-          <h2>Meus decks <span>{decks.length}</span></h2>
+          <div className={styles.listaDecksTopo}>
+            <h2>Meus decks <span>{decks.length}</span></h2>
+            <button type="button" className={styles.novoDeckLista} onClick={novoDeck}>
+              <Plus aria-hidden="true" /> Novo
+            </button>
+          </div>
           {!decks.length && <p className={styles.vazio}>Nenhum deck salvo ainda.</p>}
           {decks.map((deck) => (
             <article
@@ -236,7 +262,7 @@ export default function DecksPage() {
                   <strong>{deck.nome}</strong>
                   <small>{deck.cartas.length}/6 cartas</small>
                 </span>
-                {deck.ativo && <em><CheckCircle2 aria-hidden="true" /> Ativo</em>}
+                {deck.ativo && <em><CheckCircle2 aria-hidden="true" /> Equipado</em>}
               </button>
               <div className={styles.deckAcoes}>
                 <button type="button" onClick={() => editar(deck)} aria-label={`Editar ${deck.nome}`}>
@@ -245,10 +271,10 @@ export default function DecksPage() {
                 {!deck.ativo && (
                   <button
                     type="button"
-                    onClick={() => void tornarAtivo(deck)}
+                    onClick={() => void equiparDeck(deck)}
                     disabled={!deck.completo}
-                    aria-label={`Ativar ${deck.nome}`}
-                    title={deck.completo ? "Ativar deck" : "Complete os 6 slots"}
+                    aria-label={`Equipar ${deck.nome}`}
+                    title={deck.completo ? "Equipar deck" : "Escolha pelo menos 3 cartas"}
                   >
                     <Check aria-hidden="true" />
                   </button>
@@ -258,7 +284,7 @@ export default function DecksPage() {
                   onClick={() => void removerDeck(deck)}
                   disabled={deck.ativo}
                   aria-label={`Excluir ${deck.nome}`}
-                  title={deck.ativo ? "O deck ativo não pode ser excluído" : "Excluir deck"}
+                  title={deck.ativo ? "O deck equipado não pode ser excluído" : "Excluir deck"}
                 >
                   <Trash2 aria-hidden="true" />
                 </button>
@@ -280,8 +306,8 @@ export default function DecksPage() {
             <div className={deckCompleto ? styles.validacaoOk : styles.validacaoPendente}>
               <ShieldCheck aria-hidden="true" />
               <span>
-                <strong>{deckCompleto ? "Deck valido" : "Deck incompleto"}</strong>
-                {cartasSelecionadas.length}/6 cartas unicas
+                <strong>{deckCompleto ? "Deck válido" : "Mínimo de 3 cartas"}</strong>
+                {cartasSelecionadas.length}/6 cartas únicas
               </span>
             </div>
           </div>
@@ -291,20 +317,20 @@ export default function DecksPage() {
               <button
                 type="button"
                 key={index}
-                className={`${styles.slot} ${slotSelecionado === index ? styles.slotAtivo : ""}`}
+                className={`${styles.slot} ${carta ? styles.slotPreenchido : ""} ${slotSelecionado === index ? styles.slotAtivo : ""}`}
                 onClick={() => setSlotSelecionado(index)}
               >
                 <span className={styles.numero}>{index + 1}</span>
                 {carta ? (
                   <>
-                    {carta.foto ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={carta.foto} alt="" />
-                    ) : (
-                      <span className={styles.semArte}><Layers aria-hidden="true" /></span>
-                    )}
-                    <strong>{carta.nome}</strong>
-                    <small>{carta.raridade} · {carta.elemento}</small>
+                    <span className={styles.slotCartaVisual}>
+                      <CartaMontada arte={carta.foto ?? undefined} moldura={carta.moldura ?? undefined} config={carta.configVisual ?? undefined} placeholder={<Layers aria-hidden="true" />} />
+                    </span>
+                    <span className={styles.slotCartaInfo}>
+                      <strong>{carta.nome}</strong>
+                      <small>{carta.raridade} · {carta.elemento}</small>
+                      <em>{carta.classe}</em>
+                    </span>
                     <span
                       role="button"
                       tabIndex={0}
@@ -347,7 +373,7 @@ export default function DecksPage() {
               disabled={salvando || !deckCompleto}
               onClick={() => void salvar(true)}
             >
-              <ShieldCheck aria-hidden="true" /> Salvar e ativar
+              <ShieldCheck aria-hidden="true" /> Salvar e equipar
             </button>
           </div>
         </section>
@@ -363,12 +389,8 @@ export default function DecksPage() {
             />
           </label>
           <div className={styles.filtros}>
-            <select value={raridade} onChange={(event) => setRaridade(event.target.value)}>
-              {["Todas", "UR", "SSR", "SR", "R", "N"].map((item) => <option key={item}>{item}</option>)}
-            </select>
-            <select value={elemento} onChange={(event) => setElemento(event.target.value)}>
-              {["Todos", "natureza", "agua", "fogo", "sombra", "luz"].map((item) => <option key={item}>{item}</option>)}
-            </select>
+            <FiltroSelect rotulo="Raridade" valor={raridade} opcoes={["Todas", "UR", "SSR", "SR", "R", "N"]} aoAlterar={setRaridade} />
+            <FiltroSelect rotulo="Elemento" valor={elemento} opcoes={["Todos", "natureza", "agua", "fogo", "sombra", "luz"]} aoAlterar={setElemento} />
           </div>
           <div className={styles.cartas}>
             {cartasFiltradas.map((carta) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Flame, Gem, Leaf, Moon, Shapes, Shield, SlidersHorizontal, Waves, Zap } from "lucide-react";
 
 import { styles } from "../styles";
 
@@ -11,6 +11,27 @@ type FiltroSelectProps = {
   opcoes: string[];
   aoAlterar: (valor: string) => void;
 };
+
+const elementos = {
+  natureza: { icone: Leaf, cor: "#7ee757" },
+  agua: { icone: Waves, cor: "#38bdf8" },
+  fogo: { icone: Flame, cor: "#fb7185" },
+  sombra: { icone: Moon, cor: "#c084fc" },
+  luz: { icone: Zap, cor: "#facc15" },
+};
+
+function ValorFiltro({ rotulo, valor }: { rotulo: string; valor: string }) {
+  const elemento = elementos[valor as keyof typeof elementos];
+  const Icone = elemento?.icone
+    ?? (rotulo === "Raridade" ? Gem : rotulo === "Classe" ? Shield : valor === "Todos" || valor === "Todas" ? SlidersHorizontal : Shapes);
+
+  return (
+    <span className={styles.valorFiltro} style={elemento ? { color: elemento.cor } : undefined} data-raridade={rotulo === "Raridade" ? valor : undefined}>
+      <Icone aria-hidden="true" />
+      <strong>{valor}</strong>
+    </span>
+  );
+}
 
 export function FiltroSelect({
   rotulo,
@@ -57,7 +78,7 @@ export function FiltroSelect({
         aria-expanded={aberto}
         onClick={() => setAberto((atual) => !atual)}
       >
-        <strong>{valor}</strong>
+        <ValorFiltro rotulo={rotulo} valor={valor} />
         <ChevronDown aria-hidden="true" />
       </button>
 
@@ -75,7 +96,7 @@ export function FiltroSelect({
                 setAberto(false);
               }}
             >
-              {opcao}
+              <ValorFiltro rotulo={rotulo} valor={opcao} />
               {opcao === valor ? <Check aria-hidden="true" /> : null}
             </button>
           ))}

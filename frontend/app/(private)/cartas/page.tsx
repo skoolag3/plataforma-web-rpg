@@ -15,7 +15,6 @@ import { FiltrosColecao } from "./components/filtrosColecao";
 import { GradeCartas } from "./components/gradeCartas";
 import { ModalDeck } from "./components/modalDeck";
 import { Paginacao } from "./components/paginacao";
-import { SidebarColecao } from "./components/sidebarColecao";
 import { styles } from "./styles";
 import type { Card, ResumoColecao } from "./types";
 
@@ -44,8 +43,6 @@ export default function CartasPage() {
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [pagina, setPagina] = useState(1);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
-  const [recompensaResgatada, setRecompensaResgatada] = useState(false);
-
   const [deckSlots, setDeckSlots] = useState<Array<string | null>>(
     Array.from({ length: 6 }, () => null),
   );
@@ -178,11 +175,6 @@ export default function CartasPage() {
   return (
     <main className={styles.pagina}>
       <div className={styles.shellSemSidebar}>
-        <SidebarColecao
-          recompensaResgatada={recompensaResgatada}
-          aoResgatarRecompensa={() => setRecompensaResgatada(true)}
-        />
-
         <section className={styles.conteudo}>
           <CabecalhoColecao resumo={resumo} />
 

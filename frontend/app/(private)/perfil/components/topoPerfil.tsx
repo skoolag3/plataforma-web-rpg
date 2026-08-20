@@ -1,4 +1,5 @@
-import { Bell, ChevronDown, Coins, Gem, UserRound } from "lucide-react";
+import { Bell, ChevronDown, UserRound } from "lucide-react";
+import { IconeRuby } from "../../../components/iconeRuby";
 import type { PerfilConta } from "../../../lib/perfil";
 import styles from "../../../styles/perfil/perfilLayout.module.css";
 
@@ -11,11 +12,7 @@ export function TopoPerfil({ perfil }: PropsTopoPerfil) {
     <header className={styles.topoPerfil}>
       <div className={styles.saldoTopo}>
         <span>
-          <Coins aria-hidden="true" />
-          {perfil.moedas.toLocaleString("pt-BR")}
-        </span>
-        <span>
-          <Gem aria-hidden="true" />
+          <IconeRuby />
           {perfil.rubys.toLocaleString("pt-BR")}
         </span>
       </div>

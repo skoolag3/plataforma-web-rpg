@@ -26,7 +26,6 @@ export type PerfilConta = {
   decksCriados: number;
   partidasJogadas: number;
   rubys: number;
-  moedas: number;
   ultimoLogin: string;
   exclusaoAgendadaPara: string | null;
   preferencias: PreferenciasConta;
@@ -39,7 +38,6 @@ export type MolduraConta = {
   classeCss: string;
   imagemUrl?: string | null;
   requisito?: string | null;
-  precoMoedas: number;
   obtida: boolean;
 };
 

@@ -31,7 +31,6 @@ export class GachaService {
           nome: true,
           nivel: true,
           saldo_rubys_cache: true,
-          saldo_moedas_cache: true,
         },
       }),
     ]);
@@ -51,7 +50,6 @@ export class GachaService {
         nome: usuario.nome,
         nivel: usuario.nivel ?? 1,
         rubys: usuario.saldo_rubys_cache ?? 0,
-        moedas: usuario.saldo_moedas_cache ?? 0,
       },
       banners: banners.map((banner) => ({
         id: banner.id,

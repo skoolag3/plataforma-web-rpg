@@ -88,8 +88,8 @@ export function AdminUsuarioPainel({ usuario, onClose, onUpdateUsuario }: Props)
   }
 
   async function ajustarSaldo(payload: AjusteSaldoUsuarioPayload) {
-    if (payload.rubys === 0 && payload.moedas === 0) {
-      setErro("Informe uma quantidade de Rubys ou moedas.");
+    if (payload.rubys === 0) {
+      setErro("Informe uma quantidade de Rubys.");
       return false;
     }
     setSalvando(true);
@@ -133,7 +133,6 @@ export function AdminUsuarioPainel({ usuario, onClose, onUpdateUsuario }: Props)
             <span><small>Nível</small><strong>{usuario.nivel}</strong></span>
             <span><small>Partidas</small><strong>{formatNumber(usuario.partidas)}</strong></span>
             <span><small>Rubys</small><strong>{formatNumber(usuario.rubys)}</strong></span>
-            <span><small>Moedas</small><strong>{formatNumber(usuario.moedas)}</strong></span>
             <span><small>E-mail</small><strong>{usuario.emailVerificado ? "Verificado" : "Pendente"}</strong></span>
             <span><small>Último login</small><strong>{formatDate(usuario.ultimoLoginEm)}</strong></span>
           </div>

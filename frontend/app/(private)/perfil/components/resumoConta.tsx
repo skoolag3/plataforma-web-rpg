@@ -1,4 +1,5 @@
-import { BarChart3, Clock3, Coins, Gem, Layers3, Swords } from "lucide-react";
+import { BarChart3, Clock3, Layers3, Swords } from "lucide-react";
+import { IconeRuby } from "../../../components/iconeRuby";
 import type { PerfilConta } from "../../../lib/perfil";
 import styles from "../../../styles/perfil/painelPerfil.module.css";
 
@@ -40,17 +41,10 @@ export function ResumoConta({ perfil }: PropsResumoConta) {
         </div>
         <div className={styles.divisorResumo}>
           <dt>
-            <Gem aria-hidden="true" />
+            <IconeRuby />
             Rubys
           </dt>
           <dd>{perfil.rubys.toLocaleString("pt-BR")}</dd>
-        </div>
-        <div>
-          <dt>
-            <Coins aria-hidden="true" />
-            Moedas
-          </dt>
-          <dd>{perfil.moedas.toLocaleString("pt-BR")}</dd>
         </div>
         <div className={styles.divisorResumo}>
           <dt>

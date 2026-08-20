@@ -1,28 +1,18 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
-  BookOpen,
-  Boxes,
   Flame,
-  Gem,
   Gift,
-  Home,
-  Layers,
   Leaf,
-  LogOut,
   Moon,
-  Shirt,
   Sparkles,
-  Trophy,
-  User,
   Waves,
-  X,
   Zap,
 } from "lucide-react";
-import Link from "next/link";
+import { CartaMontada, type ConfigVisualCarta } from "../../components/cartaMontada";
+import { IconeRuby } from "../../components/iconeRuby";
 import {
   buscarGacha,
   girarGacha,
@@ -32,8 +22,6 @@ import {
 } from "../../lib/jogo";
 import cardsStyles from "../../styles/inventario/cards.module.css";
 import layoutStyles from "../../styles/inventario/layout.module.css";
-import sidebarStyles from "../../styles/inventario/sidebar.module.css";
-import topbarStyles from "../../styles/inventario/topbar.module.css";
 import gachaActionsStyles from "../../styles/gacha/actions.module.css";
 import gachaBannerStyles from "../../styles/gacha/banner.module.css";
 import gachaCardsStyles from "../../styles/gacha/cards.module.css";
@@ -42,8 +30,6 @@ import gachaResultsStyles from "../../styles/gacha/results.module.css";
 
 const styles = {
   ...layoutStyles,
-  ...sidebarStyles,
-  ...topbarStyles,
   ...cardsStyles,
   ...gachaLayoutStyles,
   ...gachaBannerStyles,
@@ -65,20 +51,10 @@ type CartaGacha = {
   artB: string;
   destaque?: boolean;
   foto?: string | null;
+  moldura?: string | null;
+  configVisual?: ConfigVisualCarta | null;
   nova?: boolean;
 };
-
-const navItems = [
-  { href: "/dashboard", label: "Início", icon: Home },
-  { href: "/cartas", label: "Coleção", icon: Layers },
-  { href: "/decks", label: "Decks", icon: Boxes },
-  { href: "#", label: "Loja", icon: Shirt },
-  { href: "/gacha", label: "Gacha", icon: Sparkles, ativo: true },
-  { href: "#", label: "Histórico", icon: BookOpen },
-  { href: "#", label: "Ranking", icon: Trophy },
-  { href: "/perfil", label: "Perfil", icon: User },
-  { href: "#", label: "Sair", icon: LogOut },
-];
 
 const cartasPool: CartaGacha[] = [
   {
@@ -139,22 +115,6 @@ const cartasPool: CartaGacha[] = [
   },
 ];
 
-function cardStyle(card: CartaGacha): CSSProperties {
-  return {
-    "--borda": card.borda,
-    "--elemento": card.elementoCor,
-    "--artA": card.artA,
-    "--artB": card.artB,
-    ...(card.foto
-      ? {
-          backgroundImage: `linear-gradient(180deg, transparent 38%, rgba(2, 6, 23, 0.92) 86%), url("${card.foto}")`,
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-        }
-      : {}),
-  } as CSSProperties;
-}
-
 function estrelas(raridade: CartaGacha["raridade"]) {
   return raridade === "UR" ? 5 : raridade === "SSR" ? 4 : raridade === "SR" ? 3 : raridade === "R" ? 2 : 1;
 }
@@ -172,6 +132,23 @@ function mapearCarta(carta: CartaGachaApi): CartaGacha {
       carta.elemento === "sombra" ? Moon : Zap,
     borda: carta.raridade === "UR" ? "#a78bfa" : carta.raridade === "SSR" ? "#f59e0b" : base.borda,
   };
+}
+
+function CartaVisualGacha({ carta }: { carta: CartaGacha }) {
+  const Icone = carta.icon;
+  return (
+    <CartaMontada
+      arte={carta.foto ?? undefined}
+      moldura={carta.moldura ?? undefined}
+      config={carta.configVisual ?? undefined}
+      placeholder={<Icone aria-hidden="true" />}
+    >
+      <span className={styles.cartaGachaInfo}>
+        <span><b>{carta.raridade}</b><Icone aria-hidden="true" /></span>
+        <strong>{carta.nome}</strong>
+      </span>
+    </CartaMontada>
+  );
 }
 
 export default function GachaPage() {
@@ -199,7 +176,6 @@ export default function GachaPage() {
   }, []);
 
   const destaque = resultado[0] ?? cartasPool[0];
-  const IconeDestaque = destaque.icon;
   const resultadoMultiplo = resultado.length > 1;
   const custo10 = bannerAtivo?.custoDez ?? 2700;
 
@@ -248,65 +224,22 @@ export default function GachaPage() {
   return (
     <main className={styles.pagina}>
       <div className={styles.shellSemSidebar}>
-        <aside className={styles.sidebar} aria-label="Menu do gacha">
-          <div className={styles.marca}>
-            <span className={styles.marcaIcone}>
-              <Gem aria-hidden="true" />
-            </span>
-            <span className={styles.marcaTexto}>
-              <strong>Anime Cards</strong>
-              <span>RPG Online</span>
-            </span>
-          </div>
-
-          <nav className={styles.nav}>
-            {navItems.map((item) => {
-              const Icone = item.icon;
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={item.ativo ? styles.navLinkAtivo : styles.navLink}
-                >
-                  <Icone aria-hidden="true" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <section className={styles.presente} aria-label="Giro diário">
-            <span className={styles.presenteIcone}>
-              <Gift aria-hidden="true" />
-            </span>
-            <strong>{resgatado ? "Giro diário resgatado" : "Giro diário disponível!"}</strong>
-            <p>{resgatado ? "Volte amanhã para novas recompensas." : "Resgate agora suas recompensas gratuitas."}</p>
-            <button type="button" onClick={() => void resgatarDiario()} disabled={resgatado || !bannerAtivo}>
-              {resgatado ? "Resgatado" : "Resgatar"}
-            </button>
-          </section>
-        </aside>
-
         <section className={styles.conteudo}>
-          <header className={styles.topbar}>
-            <div className={styles.titulo}>
-              <h1>
-                Gacha
-                <span>
-                  <Sparkles aria-hidden="true" />
-                </span>
-              </h1>
+          <header className={styles.gachaTopo}>
+            <div><span><Sparkles aria-hidden="true" /> Invocações</span><h1>Gacha</h1><p>Invoque cartas e expanda suas possibilidades.</p></div>
+            <div className={styles.gachaTopoAcoes}>
+              <span className={styles.saldoTopo}><IconeRuby tamanho={24} /><small>Seu saldo</small><strong>{rubys.toLocaleString("pt-BR")}</strong></span>
+              <button type="button" onClick={() => void resgatarDiario()} disabled={resgatado || !bannerAtivo}><Gift aria-hidden="true" />{resgatado ? "Diário resgatado" : "Resgatar diário"}</button>
             </div>
-
           </header>
 
           <section className={styles.gachaPainel} data-estado={statusResultado}>
-            {erro ? <p role="alert">{erro}</p> : null}
+            {erro ? <p className={styles.erroGacha} role="alert">{erro}</p> : null}
             {invocando ? (
               <div className={styles.invocando}>
                 <div className={styles.portal} aria-hidden="true">
                   <div className={styles.cartaPortal}>
-                    <Gem aria-hidden="true" />
+                    <IconeRuby tamanho={56} />
                   </div>
                 </div>
                 <strong>Invocando...</strong>
@@ -318,29 +251,20 @@ export default function GachaPage() {
                   <>
                     <div className={styles.gradeResultado}>
                       {resultado.map((carta, index) => {
-                        const Icone = carta.icon;
                         return (
                           <article
                             className={[styles.cartaResultado, carta.raridade === "UR" ? styles.cartaObtidaDestaque : ""].join(" ")}
-                            style={cardStyle(carta)}
                             key={`${carta.nome}-${index}`}
                           >
-                            <span className={styles.arte} aria-hidden="true" />
-                            <span className={styles.raridade}>{carta.raridade}</span>
-                            <span className={styles.elemento}>
-                              <Icone aria-hidden="true" />
-                            </span>
-                            <span className={styles.cardInfo}>
-                              <strong>{carta.nome}</strong>
-                              <span>{carta.subtitulo}</span>
-                            </span>
+                            <CartaVisualGacha carta={carta} />
+                            <small>{carta.subtitulo}</small>
                           </article>
                         );
                       })}
                     </div>
                     <footer className={styles.resultadoAcoes}>
                       <span>
-                        <Gem aria-hidden="true" />
+                        <IconeRuby />
                         Rubys obtidos 30
                       </span>
                       <button type="button" className={styles.btnPrimario} onClick={() => invocar(10)}>
@@ -354,17 +278,8 @@ export default function GachaPage() {
                 ) : (
                   <>
                     <strong className={styles.raridadeGrande}>{destaque.raridade}</strong>
-                    <article className={styles.cartaObtida} style={cardStyle(destaque)}>
-                      <span className={styles.arte} aria-hidden="true" />
-                      <span className={styles.raridade}>{destaque.raridade}</span>
-                      <span className={styles.elemento}>
-                        <IconeDestaque aria-hidden="true" />
-                      </span>
-                      <span className={styles.cardInfo}>
-                        <strong>{destaque.nome}</strong>
-                        <span>{"★".repeat(estrelas(destaque.raridade))}</span>
-                      </span>
-                    </article>
+                    <article className={styles.cartaObtida}><CartaVisualGacha carta={destaque} /></article>
+                    <span className={styles.estrelasResultado}>{"★".repeat(estrelas(destaque.raridade))}</span>
                     <p>Novo herói adicionado à sua coleção!</p>
                     <div className={styles.resultadoBotoes}>
                       <button type="button" className={styles.btnPrimario}>
@@ -398,12 +313,13 @@ export default function GachaPage() {
 
                 <section className={styles.banner}>
                   <div className={styles.bannerTexto}>
+                    <small className={styles.bannerSelo}><Sparkles aria-hidden="true" /> Banner em destaque</small>
                     <h2>{bannerAtivo?.nome.toUpperCase() ?? "SEM BANNERS"}</h2>
-                    <p>{bannerAtivo ? `${bannerAtivo.cartas.length} cartas disponiveis neste banner.` : "Cadastre cartas ativas para habilitar o gacha."}</p>
-                    <span>Pity garantido em {bannerAtivo?.limitePity ?? 80} giros</span>
-                    <div className={styles.pityMini}>
-                      <span />
-                      <strong>{pity}/80</strong>
+                    <p>{bannerAtivo ? `${bannerAtivo.cartas.length} cartas disponíveis neste banner. Cada invocação aproxima você da garantia UR.` : "Cadastre cartas ativas para habilitar o gacha."}</p>
+                    <div className={styles.pityPainel}>
+                      <span><small>Garantia UR</small><strong>{pity} / {bannerAtivo?.limitePity ?? 80}</strong></span>
+                      <span className={styles.pityBarra}><span style={{ width: `${(pity / (bannerAtivo?.limitePity ?? 80)) * 100}%` }} /></span>
+                      <small>O progresso permanece entre as invocações deste banner.</small>
                     </div>
                     <div className={styles.bannerAcoes}>
                       <button type="button">Detalhes</button>
@@ -411,46 +327,21 @@ export default function GachaPage() {
                     </div>
                   </div>
                   <div className={styles.bannerCartas}>
-                    {(bannerAtivo?.cartas.slice(0, 2).map(mapearCarta) ?? []).map((carta) => (
-                      <article className={styles.cartaPequena} style={cardStyle(carta)} key={carta.nome}>
-                        <span className={styles.arte} aria-hidden="true" />
-                        <span className={styles.raridade}>{carta.raridade}</span>
-                        <span className={styles.cardInfo}>
-                          <strong>{carta.nome}</strong>
-                        </span>
+                    {(bannerAtivo?.cartas.slice(0, 3).map(mapearCarta) ?? []).map((carta, index) => (
+                      <article className={styles.cartaPequena} data-posicao={index} key={carta.nome}>
+                        <CartaVisualGacha carta={carta} />
                       </article>
                     ))}
                   </div>
                 </section>
 
-                <section className={styles.invocacoes}>
-                  <button type="button" className={styles.invocarUm} disabled={!bannerAtivo || rubys < (bannerAtivo?.custoGiro ?? 0)} onClick={() => void invocar(1)}>
-                    Invocar 1x <Gem aria-hidden="true" /> {bannerAtivo?.custoGiro ?? 0}
-                  </button>
-                  <button type="button" className={styles.invocarDez} disabled={!bannerAtivo || rubys < custo10} onClick={() => void invocar(10)}>
-                    Invocar 10x <Gem aria-hidden="true" /> {custo10.toLocaleString("pt-BR")}
-                  </button>
+                <section className={styles.painelInvocacao}>
+                  <div><small>Rubys disponíveis</small><strong><IconeRuby /> {rubys.toLocaleString("pt-BR")}</strong><button type="button">Obter Rubys</button></div>
+                  <div className={styles.invocacoes}>
+                    <button type="button" className={styles.invocarUm} disabled={!bannerAtivo || rubys < (bannerAtivo?.custoGiro ?? 0)} onClick={() => void invocar(1)}><span>Invocar 1x</span><strong><IconeRuby /> {bannerAtivo?.custoGiro ?? 0}</strong></button>
+                    <button type="button" className={styles.invocarDez} disabled={!bannerAtivo || rubys < custo10} onClick={() => void invocar(10)}><span>Invocar 10x</span><strong><IconeRuby /> {custo10.toLocaleString("pt-BR")}</strong></button>
+                  </div>
                 </section>
-
-                <section className={styles.rubysBox}>
-                  <span>
-                    <Gem aria-hidden="true" />
-                    Rubys atuais <strong>{rubys}</strong>
-                  </span>
-                  <button type="button">Comprar Rubys</button>
-                </section>
-
-                <aside className={styles.pityBox}>
-                  <button type="button" className={styles.fecharPity} aria-label="Fechar garantia">
-                    <X aria-hidden="true" />
-                  </button>
-                  <h3>Garantia UR</h3>
-                  <p>A cada 80 invocacoes, voce garante uma carta UR.</p>
-                  <strong>{pity} / {bannerAtivo?.limitePity ?? 80}</strong>
-                  <span className={styles.pityBarra}>
-                    <span style={{ width: `${(pity / (bannerAtivo?.limitePity ?? 80)) * 100}%` }} />
-                  </span>
-                </aside>
               </div>
             )}
           </section>

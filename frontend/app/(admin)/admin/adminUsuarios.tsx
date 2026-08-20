@@ -160,7 +160,7 @@ export function Usuarios() {
                   <tr key={usuario.id}>
                     <td data-label="Usuário"><span className={styles.usuarioCell}><strong>{usuario.nome}</strong><small>{usuario.email}</small></span></td>
                     <td data-label="Progresso"><span className={styles.usuarioDadoDuplo}><strong>Nv. {usuario.nivel}</strong><small>{formatNumber(usuario.partidas)} partidas</small></span></td>
-                    <td data-label="Saldos"><span className={styles.usuarioDadoDuplo}><strong>{formatNumber(usuario.rubys)} Rubys</strong><small>{formatNumber(usuario.moedas)} moedas</small></span></td>
+                    <td data-label="Saldo"><span className={styles.usuarioDadoDuplo}><strong>{formatNumber(usuario.rubys)} Rubys</strong></span></td>
                     <td data-label="Status"><Status value={usuario.bloqueado ? "Bloqueado" : usuario.ativo ? "Ativo" : "Inativo"} /></td>
                     <td data-label="Ações"><span className={styles.rowActions}>
                       <button type="button" className={selecionado?.id === usuario.id ? styles.rowActionSelected : undefined} onClick={() => { setEditando(null); setSelecionado(usuario); }} title="Gerenciar usuário" aria-label={`Gerenciar ${usuario.nome}`}><SlidersHorizontal aria-hidden="true" /></button>

@@ -1,51 +1,25 @@
 .topbar {
-  display: block;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
   border-bottom: 1px solid var(--member-border);
-  padding-bottom: 1.25rem;
+  padding-bottom: 0.65rem;
 }
 
-.titulo {
-  min-width: 0;
-}
+.titulo { position:relative;display:flex;min-width:0;align-items:center;justify-content:space-between;gap:1rem; }
 
 .titulo h1 {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 900;
   letter-spacing: -0.045em;
   line-height: 1;
 }
 
-.titulo h1 span {
-  display: grid;
-  width: 2.05rem;
-  height: 2.05rem;
-  place-items: center;
-  border: 1px solid rgba(168, 85, 247, 0.42);
-  border-radius: 999px;
-  background: rgba(88, 28, 135, 0.34);
-  color: #a78bfa;
-}
-
-.titulo h1 svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-.progressoLinha {
-  display: grid;
-  grid-template-columns: auto minmax(8rem, 28rem) auto;
-  gap: 0.9rem;
-  align-items: center;
-  margin-top: 0.9rem;
-  color: #c4d2eb;
-  font-size: 0.96rem;
-  font-weight: 750;
-}
+.titulo > div > p { margin:.25rem 0 0;color:#7f8ba0;font-size:.65rem;font-weight:750; }
+.conquistas { position:relative;z-index:20; }
+.conquistas summary { display:flex;min-height:2.35rem;align-items:center;gap:.4rem;border:1px solid rgba(167,139,250,.26);border-radius:.6rem;background:rgba(124,58,237,.12);color:#ddd6fe;cursor:pointer;padding:0 .65rem;font-size:.62rem;font-weight:850;list-style:none; }
+.conquistas summary::-webkit-details-marker{display:none}.conquistas summary > svg{width:.8rem}.conquistas summary > svg:last-child{color:#71809a;transition:transform 150ms ease}.conquistas[open] summary > svg:last-child{transform:rotate(180deg)}.conquistas summary strong{border-radius:999px;background:rgba(190,242,100,.12);color:#bef264;padding:.15rem .35rem;font-size:.52rem}
+.conquistas > div { position:absolute;top:calc(100% + .4rem);right:0;display:grid;width:17rem;gap:.55rem;border:1px solid rgba(167,139,250,.28);border-radius:.7rem;background:#0b0e18;box-shadow:0 1rem 2.5rem rgba(0,0,0,.4);padding:.7rem; }
+.conquistas > div > span:first-child{display:flex;align-items:center;justify-content:space-between;gap:.5rem}.conquistas > div strong{font-size:.65rem}.conquistas > div small{color:#bef264;font-size:.55rem;font-weight:850}.conquistas > div p{margin:0;color:#71809a;font-size:.52rem;line-height:1.35}
 
 .barra {
   display: block;
@@ -65,7 +39,6 @@
 }
 
 @media (max-width: 760px) {
-  .progressoLinha {
-    grid-template-columns: 1fr;
-  }
+  .titulo { align-items:flex-start; }
+  .conquistas summary > span { display:none; }
 }

@@ -147,7 +147,6 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
         0,
       ),
       rubys: usuario.saldo_rubys_cache ?? 0,
-      moedas: usuario.saldo_moedas_cache ?? 0,
       ultimoLogin: usuario.ultimo_login_em
         ? this.formatarDataBrasil(usuario.ultimo_login_em)
         : 'Primeiro acesso',
@@ -411,7 +410,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
             select: { id_usuario: true },
           },
         },
-        orderBy: [{ preco_moedas: 'asc' }, { nome: 'asc' }],
+        orderBy: { nome: 'asc' },
       }),
       this.prisma.carta.findMany({
         where: {
@@ -439,7 +438,6 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
         descricao: moldura.descricao,
         classeCss: moldura.classe_css,
         imagemUrl: null,
-        precoMoedas: moldura.preco_moedas,
         obtida: moldura.usuarios.length > 0,
       })),
       ...cartasComMoldura.flatMap((carta) =>
@@ -452,7 +450,6 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
               classeCss: 'molduraCarta',
               imagemUrl: carta.moldura,
               requisito: `Obtenha a carta ${carta.nome}.`,
-              precoMoedas: 0,
               obtida: carta.inventarios.length > 0,
             },
           ]

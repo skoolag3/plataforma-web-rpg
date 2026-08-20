@@ -61,7 +61,6 @@ export type AdminUsuario = {
   nivel: number;
   partidas: number;
   rubys: number;
-  moedas: number;
   ativo: boolean;
   bloqueado: boolean;
   admin: boolean;
@@ -91,11 +90,11 @@ export type AdminUsuarioCarta = {
 
 export type AdminUsuarioAtividade = {
   id: string;
-  tipo: "RUBY" | "MOEDA" | "COMPRA" | "GACHA" | "ADMIN";
+  tipo: "RUBY" | "COMPRA" | "GACHA" | "ADMIN";
   titulo: string;
   descricao: string | null;
   valor: number | null;
-  unidade: "RUBYS" | "MOEDAS" | "BRL" | null;
+  unidade: "RUBYS" | "BRL" | null;
   natureza: "ENTRADA" | "SAIDA" | "NEUTRO";
   criadoEm: string | null;
   autoria: { id: string; nome: string; email: string } | null;
@@ -104,7 +103,6 @@ export type AdminUsuarioAtividade = {
 
 export type AjusteSaldoUsuarioPayload = {
   rubys: number;
-  moedas: number;
   motivo: string;
 };
 

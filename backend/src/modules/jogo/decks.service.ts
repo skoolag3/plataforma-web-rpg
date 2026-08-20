@@ -168,9 +168,9 @@ export class DecksService {
       throw new BadRequestException('Não é permitido repetir cartas no deck.');
     }
 
-    if (exigirCompleto && idsCartas.length !== 6) {
+    if (exigirCompleto && idsCartas.length < 3) {
       throw new BadRequestException(
-        'Um deck precisa ter exatamente 6 cartas para ser ativado.',
+        'Um deck precisa ter pelo menos 3 cartas para ser ativado.',
       );
     }
 
@@ -220,7 +220,7 @@ export class DecksService {
       id: deck.id,
       nome: deck.nome,
       ativo: deck.ativo ?? false,
-      completo: deck.cartas.length === 6,
+      completo: deck.cartas.length >= 3,
       criadoEm: deck.criado_em,
       atualizadoEm: deck.atualizado_em,
       cartas: deck.cartas.map((item) => {

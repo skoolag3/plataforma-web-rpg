@@ -2,7 +2,6 @@
 
 import {
   Boxes,
-  Coins,
   Gem,
   Home,
   Layers,
@@ -20,6 +19,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { clearSession, getStoredUser, getToken, subscribeAuthChange } from "../lib/auth";
 import { buscarPerfilApi } from "../lib/perfil";
 import styles from "../styles/privateNavbar.module.css";
+import { IconeRuby } from "./iconeRuby";
 
 const links = [
   { href: "/dashboard", label: "Início", icon: Home },
@@ -35,7 +35,6 @@ export function PrivateNavbar() {
   const router = useRouter();
   const [aberto, setAberto] = useState(false);
   const [resumoPerfil, setResumoPerfil] = useState({
-    moedas: 0,
     rubys: 0,
     avatarUrl: null as string | null,
     molduraUrl: null as string | null,
@@ -54,7 +53,6 @@ export function PrivateNavbar() {
 
       void buscarPerfilApi(token)
         .then((perfil) => setResumoPerfil({
-          moedas: perfil.moedas,
           rubys: perfil.rubys,
           avatarUrl: perfil.avatarUrl ?? null,
           molduraUrl: perfil.molduraUrl ?? null,
@@ -93,8 +91,7 @@ export function PrivateNavbar() {
         </div>
         <div className={styles.usuario}>
           <div className={styles.saldos} aria-label="Saldos do jogador">
-            <span title="Moedas"><Coins aria-hidden="true" />{resumoPerfil.moedas.toLocaleString("pt-BR")}</span>
-            <span title="Rubys"><Gem aria-hidden="true" />{resumoPerfil.rubys.toLocaleString("pt-BR")}</span>
+            <span title="Rubys"><IconeRuby />{resumoPerfil.rubys.toLocaleString("pt-BR")}</span>
           </div>
           <Link href="/perfil">
             <span className={`${styles.avatarVisual} ${styles[resumoPerfil.molduraClasse] ?? ""}`}>

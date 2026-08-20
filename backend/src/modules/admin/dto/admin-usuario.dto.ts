@@ -42,11 +42,6 @@ export class AjustarSaldoUsuarioDto {
   @Max(1000000)
   rubys: number;
 
-  @IsInt()
-  @Min(-1000000)
-  @Max(1000000)
-  moedas: number;
-
   @IsString()
   @MinLength(3)
   @MaxLength(180)

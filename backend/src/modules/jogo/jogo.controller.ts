@@ -52,17 +52,33 @@ export class JogoController {
     return this.gachaService.resgatarDiario(usuario.id, dto.idBanner);
   }
 
-  @Get('partidas/bot/provocacao')
-  provocacaoBot() {
-    return this.partidasService.provocacao();
-  }
-
-  @Post('partidas/bot')
-  iniciarPartidaBot(
+  @Post('partidas')
+  iniciarPartida(
     @CurrentUser() usuario: AuthenticatedUser,
     @Body() dto: IniciarPartidaDto,
   ) {
-    return this.partidasService.iniciarContraBot(usuario.id, dto.resposta);
+    return this.partidasService.iniciar(usuario.id, dto.idDeck);
+  }
+
+  @Get('partidas/atual')
+  buscarPartidaAtual(@CurrentUser() usuario: AuthenticatedUser) {
+    return this.partidasService.buscarAtual(usuario.id);
+  }
+
+  @Get('partidas/:id')
+  buscarPartida(
+    @CurrentUser() usuario: AuthenticatedUser,
+    @Param('id') id: string,
+  ) {
+    return this.partidasService.buscar(usuario.id, id);
+  }
+
+  @Post('partidas/:id/turnos')
+  executarTurno(
+    @CurrentUser() usuario: AuthenticatedUser,
+    @Param('id') id: string,
+  ) {
+    return this.partidasService.executarTurno(usuario.id, id);
   }
 
   @Get('partidas')

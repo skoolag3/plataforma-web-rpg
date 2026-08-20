@@ -1,0 +1,8 @@
+.iconeRuby {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 0.28em rgba(255, 45, 95, 0.45));
+}

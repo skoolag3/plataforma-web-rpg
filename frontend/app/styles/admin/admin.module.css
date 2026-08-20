@@ -1380,7 +1380,6 @@
 .usuarioLinhaTempo article { display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.6rem;align-items:center;border:1px solid rgba(148,163,184,.1);border-radius:.62rem;background:rgba(3,7,17,.48);padding:.55rem .65rem; }
 .usuarioAtividadeIcone { display:grid;width:2rem;height:2rem;place-items:center;border:1px solid rgba(139,92,246,.22);border-radius:.55rem;background:rgba(91,33,182,.15);color:#c4b5fd; }
 .usuarioAtividadeIcone svg { width:.85rem; }
-.usuarioLinhaTempo article[data-tipo="MOEDA"] .usuarioAtividadeIcone { border-color:rgba(251,191,36,.22);background:rgba(146,64,14,.12);color:#fbbf24; }
 .usuarioLinhaTempo article[data-tipo="ADMIN"] .usuarioAtividadeIcone { border-color:rgba(74,222,128,.22);background:rgba(22,101,52,.12);color:#86efac; }
 .usuarioLinhaTempo article > div { min-width:0; }
 .usuarioLinhaTempo article > div strong { display:block;color:#e2e8f0;font-size:.68rem; }

@@ -84,7 +84,6 @@ export class ColecaoService {
         select: {
           nome: true,
           nivel: true,
-          saldo_moedas_cache: true,
           saldo_rubys_cache: true,
           perfil: { select: { avatar_url: true } },
         },
@@ -102,7 +101,6 @@ export class ColecaoService {
       jogador: {
         nome: usuario.nome,
         nivel: usuario.nivel ?? 1,
-        moedas: usuario.saldo_moedas_cache ?? 0,
         rubys: usuario.saldo_rubys_cache ?? 0,
         avatarUrl: usuario.perfil?.avatar_url ?? null,
       },

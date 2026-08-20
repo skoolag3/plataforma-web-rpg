@@ -338,8 +338,7 @@ export function CardUsuario({
                 <small>
                   {moldura.obtida
                     ? "Disponível"
-                    : moldura.requisito ??
-                      `${moldura.precoMoedas.toLocaleString("pt-BR")} moedas`}
+                    : moldura.requisito ?? "Bloqueada"}
                 </small>
               </button>
             ))}

@@ -27,7 +27,6 @@ model Usuario {
   nivel                            Int?      @default(1)
   pontos_experiencia               Int?      @default(0)
   saldo_rubys_cache                Int?      @default(0)
-  saldo_moedas_cache               Int?      @default(0)
   ativo                            Boolean?  @default(true)
   criado_em                        DateTime? @default(now()) @db.Timestamptz(0)
   atualizado_em                    DateTime? @default(now()) @db.Timestamptz(0)
@@ -39,7 +38,6 @@ model Usuario {
   perfil               PerfilUsuario?
   provedores           ProvedorUsuario[]
   molduras             UsuarioMoldura[]
-  ledgerMoedas         LedgerMoeda[]
   solicitacoesExclusao SolicitacaoExclusao[]
   transacoes           LogTransacao[]
   ledgerRubys          LedgerRuby[]
@@ -77,14 +75,13 @@ model PerfilUsuario {
 }
 
 model Moldura {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  slug         String   @unique @db.VarChar(80)
-  nome         String   @db.VarChar(100)
-  descricao    String?  @db.VarChar(255)
-  classe_css   String   @db.VarChar(80)
-  preco_moedas Int      @default(0)
-  ativo        Boolean  @default(true)
-  criado_em    DateTime @default(now()) @db.Timestamptz(0)
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug       String   @unique @db.VarChar(80)
+  nome       String   @db.VarChar(100)
+  descricao  String?  @db.VarChar(255)
+  classe_css String   @db.VarChar(80)
+  ativo      Boolean  @default(true)
+  criado_em  DateTime @default(now()) @db.Timestamptz(0)
 
   perfis   PerfilUsuario[]
   usuarios UsuarioMoldura[]
@@ -118,21 +115,6 @@ model ProvedorUsuario {
   @@unique([provedor, id_provedor])
   @@unique([id_usuario, provedor])
   @@map("provedor_usuario")
-}
-
-model LedgerMoeda {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  id_usuario    String   @db.Uuid
-  quantidade    Int
-  motivo        String   @db.VarChar(50)
-  id_referencia String?  @db.Uuid
-  descricao     String?
-  criado_em     DateTime @default(now()) @db.Timestamptz(0)
-
-  usuario Usuario @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
-
-  @@index([id_usuario])
-  @@map("ledger_moeda")
 }
 
 model SolicitacaoExclusao {
@@ -235,6 +217,7 @@ model Carta {
   gachaLogs        LogGacha[]
   inventarios      Inventario[]
   deckCartas       DeckCarta[]
+  partidasCartas   PartidaCarta[]
   perfisComMoldura PerfilUsuario[] @relation("CartaMolduraPerfil")
 
   @@map("carta")
@@ -353,15 +336,68 @@ model LogPartida {
   resultado           String    @db.VarChar(20)
   turnos_jogados      Int       @default(0)
   variacao_pontos     Int?      @default(0)
+  recompensa_rubys    Int       @default(0)
   timestamp_inicio    DateTime? @default(now()) @db.Timestamptz(0)
   timestamp_fim       DateTime? @db.Timestamptz(0)
 
-  usuario  Usuario? @relation("PartidasUsuario", fields: [id_usuario], references: [id])
-  oponente Usuario? @relation("PartidasOponente", fields: [id_usuario_oponente], references: [id])
-  deck     Deck?    @relation(fields: [id_deck_usado], references: [id])
+  usuario  Usuario?        @relation("PartidasUsuario", fields: [id_usuario], references: [id])
+  oponente Usuario?        @relation("PartidasOponente", fields: [id_usuario_oponente], references: [id])
+  deck     Deck?           @relation(fields: [id_deck_usado], references: [id])
+  cartas   PartidaCarta[]
+  eventos  EventoPartida[]
 
   @@index([id_usuario], map: "idx_log_partida_usuario")
   @@index([id_usuario_oponente], map: "idx_log_partida_oponente")
   @@index([timestamp_inicio(sort: Desc)], map: "idx_log_partida_timestamp")
   @@map("log_partida")
+}
+
+model PartidaCarta {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id_partida       String   @db.Uuid
+  id_carta         String   @db.Uuid
+  lado             String   @db.VarChar(10)
+  posicao          Int
+  nome_snapshot    String   @db.VarChar(150)
+  raridade         String   @db.VarChar(50)
+  elemento         String   @db.VarChar(20)
+  foto             String?  @db.VarChar(500)
+  moldura          String?  @db.VarChar(500)
+  config_visual    Json?
+  passiva          Json?
+  hp_base          Int
+  ataque_base      Int
+  defesa_base      Int
+  velocidade_base  Int
+  hp_atual         Int
+  ataque_atual     Int
+  defesa_atual     Int
+  velocidade_atual Int
+  derrotada        Boolean  @default(false)
+  atualizado_em    DateTime @default(now()) @db.Timestamptz(0)
+
+  partida LogPartida @relation(fields: [id_partida], references: [id], onDelete: Cascade)
+  carta   Carta      @relation(fields: [id_carta], references: [id], onDelete: Restrict)
+
+  @@unique([id_partida, lado, posicao])
+  @@index([id_partida, lado, derrotada])
+  @@map("partida_carta")
+}
+
+model EventoPartida {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id_partida String   @db.Uuid
+  sequencia  Int
+  turno      Int
+  tipo       String   @db.VarChar(30)
+  origem     String?  @db.VarChar(10)
+  texto      String   @db.VarChar(500)
+  valor      Int?
+  criado_em  DateTime @default(now()) @db.Timestamptz(0)
+
+  partida LogPartida @relation(fields: [id_partida], references: [id], onDelete: Cascade)
+
+  @@unique([id_partida, sequencia])
+  @@index([id_partida, turno])
+  @@map("evento_partida")
 }

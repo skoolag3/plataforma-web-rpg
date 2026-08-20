@@ -17,7 +17,6 @@ const usuarioSelect = {
   email: true,
   nivel: true,
   saldo_rubys_cache: true,
-  saldo_moedas_cache: true,
   ativo: true,
   bloqueado: true,
   is_admin: true,
@@ -262,7 +261,7 @@ export class AdminUsuariosService {
     dto: AjustarSaldoUsuarioDto,
     idAdmin: string,
   ) {
-    if (dto.rubys === 0 && dto.moedas === 0) {
+    if (dto.rubys === 0) {
       throw new BadRequestException('Informe ao menos um ajuste de saldo.');
     }
 
@@ -272,30 +271,25 @@ export class AdminUsuariosService {
         where: { id, excluido_em: null },
         select: {
           saldo_rubys_cache: true,
-          saldo_moedas_cache: true,
         },
       });
       if (!atual) throw new NotFoundException('Usuário não encontrado.');
 
       const rubysAtuais = atual.saldo_rubys_cache ?? 0;
-      const moedasAtuais = atual.saldo_moedas_cache ?? 0;
-      if (rubysAtuais + dto.rubys < 0 || moedasAtuais + dto.moedas < 0) {
+      if (rubysAtuais + dto.rubys < 0) {
         throw new BadRequestException(
           'O ajuste não pode deixar o saldo do usuário negativo.',
         );
       }
 
       const rubysNovos = rubysAtuais + dto.rubys;
-      const moedasNovas = moedasAtuais + dto.moedas;
       const alterados = await tx.usuario.updateMany({
         where: {
           id,
           saldo_rubys_cache: atual.saldo_rubys_cache,
-          saldo_moedas_cache: atual.saldo_moedas_cache,
         },
         data: {
           saldo_rubys_cache: rubysNovos,
-          saldo_moedas_cache: moedasNovas,
           atualizado_em: new Date(),
         },
       });
@@ -305,28 +299,15 @@ export class AdminUsuariosService {
         );
       }
 
-      if (dto.rubys !== 0) {
-        await tx.ledgerRuby.create({
-          data: {
-            id_usuario: id,
-            quantidade: dto.rubys,
-            motivo: 'AJUSTE_ADMIN',
-            id_referencia: idAdmin,
-            descricao: motivo,
-          },
-        });
-      }
-      if (dto.moedas !== 0) {
-        await tx.ledgerMoeda.create({
-          data: {
-            id_usuario: id,
-            quantidade: dto.moedas,
-            motivo: 'AJUSTE_ADMIN',
-            id_referencia: idAdmin,
-            descricao: motivo,
-          },
-        });
-      }
+      await tx.ledgerRuby.create({
+        data: {
+          id_usuario: id,
+          quantidade: dto.rubys,
+          motivo: 'AJUSTE_ADMIN',
+          id_referencia: idAdmin,
+          descricao: motivo,
+        },
+      });
 
       await tx.logAdminUsuario.create({
         data: {
@@ -337,9 +318,8 @@ export class AdminUsuariosService {
           descricao: motivo,
           detalhes: {
             rubys: dto.rubys,
-            moedas: dto.moedas,
-            saldoAnterior: { rubys: rubysAtuais, moedas: moedasAtuais },
-            saldoAtual: { rubys: rubysNovos, moedas: moedasNovas },
+            saldoAnterior: { rubys: rubysAtuais },
+            saldoAtual: { rubys: rubysNovos },
           },
         },
       });
@@ -360,13 +340,8 @@ export class AdminUsuariosService {
       ? Math.min(100, Math.max(10, limiteConvertido))
       : 50;
 
-    const [rubys, moedas, compras, gachas, auditorias] = await Promise.all([
+    const [rubys, compras, gachas, auditorias] = await Promise.all([
       this.prisma.ledgerRuby.findMany({
-        where: { id_usuario: id },
-        orderBy: { criado_em: 'desc' },
-        take: limite,
-      }),
-      this.prisma.ledgerMoeda.findMany({
         where: { id_usuario: id },
         orderBy: { criado_em: 'desc' },
         take: limite,
@@ -411,10 +386,9 @@ export class AdminUsuariosService {
       }),
     ]);
 
-    const idsAutoria = [
-      ...rubys.map((item) => item.id_referencia),
-      ...moedas.map((item) => item.id_referencia),
-    ].filter((item): item is string => Boolean(item));
+    const idsAutoria = rubys
+      .map((item) => item.id_referencia)
+      .filter((item): item is string => Boolean(item));
     const autores = idsAutoria.length
       ? await this.prisma.usuario.findMany({
           where: { id: { in: idsAutoria }, is_admin: true },
@@ -431,20 +405,6 @@ export class AdminUsuariosService {
         descricao: item.descricao,
         valor: item.quantidade,
         unidade: 'RUBYS',
-        natureza: item.quantidade >= 0 ? 'ENTRADA' : 'SAIDA',
-        criadoEm: item.criado_em,
-        autoria: item.id_referencia
-          ? (autorPorId.get(item.id_referencia) ?? null)
-          : null,
-        detalhes: null,
-      })),
-      ...moedas.map((item) => ({
-        id: `moeda:${item.id}`,
-        tipo: 'MOEDA',
-        titulo: this.formatarMotivo(item.motivo, 'Movimentação de moedas'),
-        descricao: item.descricao,
-        valor: item.quantidade,
-        unidade: 'MOEDAS',
         natureza: item.quantidade >= 0 ? 'ENTRADA' : 'SAIDA',
         criadoEm: item.criado_em,
         autoria: item.id_referencia
@@ -529,7 +489,6 @@ export class AdminUsuariosService {
       nivel: usuario.nivel ?? 1,
       partidas: usuario._count.partidas,
       rubys: usuario.saldo_rubys_cache ?? 0,
-      moedas: usuario.saldo_moedas_cache ?? 0,
       ativo: Boolean(usuario.ativo),
       bloqueado: Boolean(usuario.bloqueado),
       admin: Boolean(usuario.is_admin),

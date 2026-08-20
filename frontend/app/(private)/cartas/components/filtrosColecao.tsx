@@ -19,8 +19,16 @@ type FiltrosColecaoProps = {
 
 export function FiltrosColecao(props: FiltrosColecaoProps) {
   return (
-    <>
-      <div className={styles.filtros}>
+    <div className={styles.filtros}>
+        <label className={styles.busca}>
+          <Search aria-hidden="true" />
+          <input
+            type="search"
+            value={props.busca}
+            onChange={(evento) => props.aoAlterarBusca(evento.target.value)}
+            placeholder="Buscar carta..."
+          />
+        </label>
         <FiltroSelect
           rotulo="Raridade"
           valor={props.raridade}
@@ -40,17 +48,6 @@ export function FiltrosColecao(props: FiltrosColecaoProps) {
           aoAlterar={props.aoAlterarClasse}
         />
 
-        <label className={styles.busca}>
-          <input
-            type="search"
-            value={props.busca}
-            onChange={(evento) => props.aoAlterarBusca(evento.target.value)}
-            placeholder="Buscar carta..."
-          />
-          <Search aria-hidden="true" />
-        </label>
-      </div>
-
       <label className={styles.favoritos}>
         <input
           type="checkbox"
@@ -62,6 +59,6 @@ export function FiltrosColecao(props: FiltrosColecaoProps) {
         <span className={styles.checkbox} aria-hidden="true" />
         Mostrar apenas favoritas
       </label>
-    </>
+    </div>
   );
 }
