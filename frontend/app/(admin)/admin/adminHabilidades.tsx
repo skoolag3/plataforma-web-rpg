@@ -1,87 +1,139 @@
 "use client";
 
-import { Edit3, Plus, Save, Search, Sparkles, X } from "lucide-react";
+import { Edit3, Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import {
+  atualizarAdminHabilidade,
+  criarAdminHabilidade,
+  inativarAdminHabilidade,
+  listarAdminHabilidades,
+  type AdminHabilidade,
+  type SalvarAdminHabilidadePayload,
+} from "../../lib/admin";
 import styles from "../../styles/admin/admin.module.css";
+import {
+  AdminHabilidadeFormulario,
+  type FormHabilidade,
+} from "./adminHabilidadeFormulario";
 import { AdminLayout } from "./adminShared";
 
-type Habilidade = {
-  id: string;
-  nome: string;
-  tipo: string;
-  gatilho: string;
-  alvo: string;
-  ativa: boolean;
-};
-
-const habilidadesIniciais: Habilidade[] = [
-  { id: "vontade-floresta", nome: "Vontade da Floresta", tipo: "buff", gatilho: "on_attack", alvo: "self", ativa: true },
-  { id: "luz-purificadora", nome: "Luz Purificadora", tipo: "heal", gatilho: "on_turn_start", alvo: "ally", ativa: true },
-  { id: "explosao-ignea", nome: "Explosão Ígnea", tipo: "damage", gatilho: "on_attack", alvo: "enemy", ativa: true },
-  { id: "escudo-sagrado", nome: "Escudo Sagrado", tipo: "shield", gatilho: "on_turn_start", alvo: "self", ativa: true },
-  { id: "drenar-vida", nome: "Drenar Vida", tipo: "lifesteal", gatilho: "on_damage", alvo: "self", ativa: true },
-  { id: "passo-sombrio", nome: "Passo Sombrio", tipo: "evasion", gatilho: "on_turn_start", alvo: "self", ativa: false },
-];
-
-const formularioVazio: Habilidade = {
-  id: "",
+const formularioVazio: FormHabilidade = {
   nome: "",
-  tipo: "buff",
-  gatilho: "on_attack",
-  alvo: "self",
-  ativa: true,
+  descricao: "",
+  tipoEfeito: "DANO",
+  gatilho: "AO_ATACAR",
+  alvo: "INIMIGO_ATIVO",
+  unidade: "PERCENTUAL",
+  valorBase: 100,
+  formaAplicacao: "APOS_ACAO",
+  requisitoTipo: "NENHUM",
+  requisitoValor: 3,
+  escalaTipo: "NENHUMA",
+  escalaValor: 5,
+  escalaLimite: 100,
 };
 
-function Status({ ativa }: { ativa: boolean }) {
-  return <span className={ativa ? styles.statusAtivo : styles.statusInativo}>{ativa ? "Ativa" : "Inativa"}</span>;
+function Status({ status }: { status: AdminHabilidade["status"] }) {
+  const classe =
+    status === "PUBLICADA"
+      ? styles.statusAtivo
+      : status === "RASCUNHO"
+        ? styles.statusRascunho
+        : styles.statusInativo;
+  const texto =
+    status === "PUBLICADA"
+      ? "Publicada"
+      : status === "RASCUNHO"
+        ? "Rascunho"
+        : "Inativa";
+  return <span className={classe}>{texto}</span>;
+}
+
+function toForm(habilidade: AdminHabilidade): FormHabilidade {
+  return {
+    id: habilidade.id,
+    nome: habilidade.nome,
+    descricao: habilidade.descricao ?? "",
+    tipoEfeito: habilidade.tipoEfeito,
+    gatilho: habilidade.gatilho,
+    alvo: habilidade.alvo,
+    atributo: habilidade.atributo ?? undefined,
+    unidade: habilidade.unidade,
+    valorBase: habilidade.valorBase,
+    formaAplicacao: habilidade.formaAplicacao,
+    requisitoTipo: habilidade.requisitoTipo,
+    requisitoValor: habilidade.requisitoValor ?? 3,
+    escalaTipo: habilidade.escalaTipo,
+    escalaValor: habilidade.escalaValor ?? 5,
+    escalaLimite: habilidade.escalaLimite ?? habilidade.valorBase,
+    duracaoTurnos: habilidade.duracaoTurnos ?? undefined,
+  };
+}
+
+function toPayload(form: FormHabilidade): SalvarAdminHabilidadePayload {
+  const alteraAtributo =
+    form.tipoEfeito === "BUFF" || form.tipoEfeito === "DEBUFF";
+  const aceitaDuracao = alteraAtributo || form.tipoEfeito === "ESCUDO";
+  return {
+    nome: form.nome.trim(),
+    descricao: form.descricao?.trim() || undefined,
+    tipoEfeito: form.tipoEfeito,
+    gatilho: form.gatilho,
+    alvo: form.alvo,
+    atributo: alteraAtributo ? (form.atributo ?? "ATAQUE") : undefined,
+    unidade: form.unidade,
+    valorBase: form.valorBase,
+    formaAplicacao: form.formaAplicacao,
+    requisitoTipo: form.requisitoTipo,
+    requisitoValor:
+      form.requisitoTipo === "NENHUM" ? undefined : form.requisitoValor,
+    escalaTipo: form.escalaTipo,
+    escalaValor: form.escalaTipo === "NENHUMA" ? undefined : form.escalaValor,
+    escalaLimite: form.escalaTipo === "NENHUMA" ? undefined : form.escalaLimite,
+    duracaoTurnos: aceitaDuracao ? form.duracaoTurnos : undefined,
+  };
 }
 
 export function Habilidades() {
-  const [habilidades, setHabilidades] = useState(habilidadesIniciais);
+  const [habilidades, setHabilidades] = useState<AdminHabilidade[]>([]);
   const [busca, setBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
-  const [form, setForm] = useState<Habilidade | null>(null);
+  const [form, setForm] = useState<FormHabilidade | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState("");
+  const [feedback, setFeedback] = useState("");
 
-  const tipos = useMemo(() => [...new Set(habilidades.map((habilidade) => habilidade.tipo))].sort(), [habilidades]);
-  const habilidadesFiltradas = useMemo(() => {
-    const termo = busca.trim().toLocaleLowerCase("pt-BR");
-
-    return habilidades.filter((habilidade) => {
-      const correspondeBusca = !termo || [habilidade.nome, habilidade.tipo, habilidade.gatilho, habilidade.alvo]
-        .some((valor) => valor.toLocaleLowerCase("pt-BR").includes(termo));
-      const correspondeTipo = !filtroTipo || habilidade.tipo === filtroTipo;
-      const correspondeStatus = !filtroStatus || (filtroStatus === "ativas" ? habilidade.ativa : !habilidade.ativa);
-      return correspondeBusca && correspondeTipo && correspondeStatus;
-    });
-  }, [busca, filtroStatus, filtroTipo, habilidades]);
-
-  function atualizar<K extends keyof Habilidade>(campo: K, valor: Habilidade[K]) {
-    setForm((atual) => atual ? { ...atual, [campo]: valor } : atual);
-  }
-
-  function salvar(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!form) return;
-
-    if (form.id) {
-      setHabilidades((atuais) => atuais.map((habilidade) => habilidade.id === form.id ? form : habilidade));
-    } else {
-      setHabilidades((atuais) => [...atuais, { ...form, id: `local-${Date.now()}` }]);
-    }
-    setForm(null);
-  }
+  useEffect(() => {
+    let ativo = true;
+    listarAdminHabilidades()
+      .then((res) => {
+        if (ativo) setHabilidades(res);
+      })
+      .catch((error) => {
+        if (ativo)
+          setErro(
+            error instanceof Error
+              ? error.message
+              : "Erro ao carregar habilidades.",
+          );
+      })
+      .finally(() => {
+        if (ativo) setCarregando(false);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!form) return;
-
     const overflowAnterior = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
     function fecharComEscape(event: KeyboardEvent) {
       if (event.key === "Escape") setForm(null);
     }
-
     document.addEventListener("keydown", fecharComEscape);
     return () => {
       document.body.style.overflow = overflowAnterior;
@@ -89,32 +141,171 @@ export function Habilidades() {
     };
   }, [form]);
 
+  const tipos = useMemo(
+    () =>
+      [
+        ...new Set(habilidades.map((habilidade) => habilidade.tipoEfeito)),
+      ].sort(),
+    [habilidades],
+  );
+  const habilidadesFiltradas = useMemo(() => {
+    const termo = busca.trim().toLocaleLowerCase("pt-BR");
+    return habilidades.filter((habilidade) => {
+      const correspondeBusca =
+        !termo ||
+        [
+          habilidade.nome,
+          habilidade.tipoEfeito,
+          habilidade.gatilho,
+          habilidade.alvo,
+        ].some((valor) => valor.toLocaleLowerCase("pt-BR").includes(termo));
+      return (
+        correspondeBusca &&
+        (!filtroTipo || habilidade.tipoEfeito === filtroTipo) &&
+        (!filtroStatus || habilidade.status === filtroStatus)
+      );
+    });
+  }, [busca, filtroStatus, filtroTipo, habilidades]);
+
+  function atualizarForm<K extends keyof FormHabilidade>(
+    campo: K,
+    valor: FormHabilidade[K],
+  ) {
+    setForm((atual) => (atual ? { ...atual, [campo]: valor } : atual));
+  }
+
+  async function salvar(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!form) return;
+    setSalvando(true);
+    setErro("");
+    setFeedback("");
+    try {
+      const salva = form.id
+        ? await atualizarAdminHabilidade(form.id, toPayload(form))
+        : await criarAdminHabilidade(toPayload(form));
+      setHabilidades((atuais) =>
+        form.id
+          ? atuais.map((habilidade) =>
+              habilidade.id === salva.id ? salva : habilidade,
+            )
+          : [salva, ...atuais],
+      );
+      setFeedback(
+        form.id ? "Habilidade atualizada como rascunho." : "Rascunho criado.",
+      );
+      setForm(null);
+    } catch (error) {
+      setErro(
+        error instanceof Error ? error.message : "Não foi possível salvar.",
+      );
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function inativar(habilidade: AdminHabilidade) {
+    if (!window.confirm(`Inativar a habilidade ${habilidade.nome}?`)) return;
+    setErro("");
+    setFeedback("");
+    try {
+      const atualizada = await inativarAdminHabilidade(
+        habilidade.id,
+        habilidade.nome,
+      );
+      setHabilidades((atuais) =>
+        atuais.map((item) => (item.id === atualizada.id ? atualizada : item)),
+      );
+      setFeedback("Habilidade inativada.");
+    } catch (error) {
+      setErro(
+        error instanceof Error ? error.message : "Não foi possível inativar.",
+      );
+    }
+  }
+
   return (
-    <AdminLayout title="Habilidades" subtitle="Gerencie todas as habilidades do jogo.">
+    <AdminLayout
+      title="Habilidades"
+      subtitle="Crie e organize as regras executadas pelo servidor."
+    >
+      {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
+      {feedback ? <p className={styles.feedbackSuccess}>{feedback}</p> : null}
       <div className={styles.cartasWorkspace}>
-        <section className={`${styles.cartasListaPanel} ${styles.habilidadesListaPanel}`}>
+        <section
+          className={`${styles.cartasListaPanel} ${styles.habilidadesListaPanel}`}
+        >
           <header className={styles.cartasListaTopo}>
             <div>
               <strong>Habilidades cadastradas</strong>
-              <small>{habilidadesFiltradas.length} {habilidadesFiltradas.length === 1 ? "resultado" : "resultados"}</small>
+              <small>
+                {carregando
+                  ? "Carregando..."
+                  : `${habilidadesFiltradas.length} resultados`}
+              </small>
             </div>
-            <button type="button" className={styles.primaryBtn} onClick={() => setForm({ ...formularioVazio })}>
-              <Plus aria-hidden="true" /> Nova Habilidade
+            <button
+              type="button"
+              className={styles.primaryBtn}
+              onClick={() => setForm({ ...formularioVazio })}
+            >
+              <Plus aria-hidden="true" /> Nova habilidade
             </button>
           </header>
           <div className={styles.tableWrap}>
             <table>
-              <thead><tr><th>Habilidade</th><th>Tipo</th><th>Gatilho</th><th>Alvo</th><th>Status</th><th>Ações</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Habilidade</th>
+                  <th>Tipo</th>
+                  <th>Gatilho</th>
+                  <th>Alvo</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
               <tbody>
-                {habilidadesFiltradas.length === 0 ? <tr className={styles.emptyTableRow}><td colSpan={6}>Nenhuma habilidade encontrada.</td></tr> : null}
+                {!carregando && habilidadesFiltradas.length === 0 ? (
+                  <tr className={styles.emptyTableRow}>
+                    <td colSpan={6}>Nenhuma habilidade encontrada.</td>
+                  </tr>
+                ) : null}
                 {habilidadesFiltradas.map((habilidade) => (
                   <tr key={habilidade.id}>
-                    <td><span className={styles.habilidadeNome}><Sparkles aria-hidden="true" /><strong>{habilidade.nome}</strong></span></td>
-                    <td>{habilidade.tipo}</td>
+                    <td>
+                      <span className={styles.habilidadeNome}>
+                        <Sparkles aria-hidden="true" />
+                        <span>
+                          <strong>{habilidade.nome}</strong>
+                          <small>v{habilidade.versao}</small>
+                        </span>
+                      </span>
+                    </td>
+                    <td>{habilidade.tipoEfeito}</td>
                     <td>{habilidade.gatilho}</td>
                     <td>{habilidade.alvo}</td>
-                    <td><Status ativa={habilidade.ativa} /></td>
-                    <td><span className={styles.rowActions}><button type="button" className={form?.id === habilidade.id ? styles.rowActionSelected : undefined} onClick={() => setForm(form?.id === habilidade.id ? null : { ...habilidade })} aria-label={`Editar ${habilidade.nome}`} aria-pressed={form?.id === habilidade.id}><Edit3 aria-hidden="true" /></button></span></td>
+                    <td>
+                      <Status status={habilidade.status} />
+                    </td>
+                    <td>
+                      <span className={styles.rowActions}>
+                        <button
+                          type="button"
+                          onClick={() => setForm(toForm(habilidade))}
+                          aria-label={`Editar ${habilidade.nome}`}
+                        >
+                          <Edit3 aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void inativar(habilidade)}
+                          disabled={habilidade.status === "INATIVA"}
+                          aria-label={`Inativar ${habilidade.nome}`}
+                        >
+                          <Trash2 aria-hidden="true" />
+                        </button>
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -122,42 +313,53 @@ export function Habilidades() {
           </div>
         </section>
 
-        <aside className={`${styles.toolbar} ${styles.cartasToolbar}`} aria-label="Filtros de habilidades">
+        <aside
+          className={`${styles.toolbar} ${styles.cartasToolbar}`}
+          aria-label="Filtros de habilidades"
+        >
           <header className={styles.filtrosTopo}>
             <strong>Filtros</strong>
-            <small>Atualização automática</small>
+            <small>Atualização local</small>
           </header>
           <label>
             <Search aria-hidden="true" />
-            <input placeholder="Buscar habilidade..." value={busca} onChange={(event) => setBusca(event.target.value)} />
+            <input
+              placeholder="Buscar habilidade..."
+              value={busca}
+              onChange={(event) => setBusca(event.target.value)}
+            />
           </label>
-          <select value={filtroTipo} onChange={(event) => setFiltroTipo(event.target.value)} aria-label="Filtrar por tipo">
-            <option value="">Tipo</option>
-            {tipos.map((tipo) => <option key={tipo}>{tipo}</option>)}
+          <select
+            value={filtroTipo}
+            onChange={(event) => setFiltroTipo(event.target.value)}
+            aria-label="Filtrar por tipo"
+          >
+            <option value="">Todos os tipos</option>
+            {tipos.map((tipo) => (
+              <option key={tipo}>{tipo}</option>
+            ))}
           </select>
-          <select value={filtroStatus} onChange={(event) => setFiltroStatus(event.target.value)} aria-label="Filtrar por status">
-            <option value="">Status</option>
-            <option value="ativas">Ativas</option>
-            <option value="inativas">Inativas</option>
+          <select
+            value={filtroStatus}
+            onChange={(event) => setFiltroStatus(event.target.value)}
+            aria-label="Filtrar por status"
+          >
+            <option value="">Todos os status</option>
+            <option value="RASCUNHO">Rascunhos</option>
+            <option value="PUBLICADA">Publicadas</option>
+            <option value="INATIVA">Inativas</option>
           </select>
         </aside>
       </div>
 
       {form ? (
-        <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setForm(null); }}>
-          <form className={`${styles.usuarioEditor} ${styles.habilidadeEditor} ${styles.habilidadeModal}`} onSubmit={salvar} role="dialog" aria-modal="true" aria-labelledby="habilidade-modal-titulo">
-            <header>
-              <div><h2 id="habilidade-modal-titulo">{form.id ? "Editando habilidade" : "Nova habilidade"}</h2><p>Configuração da regra executada durante a partida.</p></div>
-              <button type="button" onClick={() => setForm(null)} aria-label="Fechar formulário"><X aria-hidden="true" /></button>
-            </header>
-            <label>Nome<input value={form.nome} onChange={(event) => atualizar("nome", event.target.value)} required autoFocus /></label>
-            <label>Tipo<select value={form.tipo} onChange={(event) => atualizar("tipo", event.target.value)}><option value="buff">buff</option><option value="damage">damage</option><option value="heal">heal</option><option value="shield">shield</option><option value="lifesteal">lifesteal</option><option value="evasion">evasion</option></select></label>
-            <label>Gatilho<select value={form.gatilho} onChange={(event) => atualizar("gatilho", event.target.value)}><option value="on_attack">on_attack</option><option value="on_damage">on_damage</option><option value="on_turn_start">on_turn_start</option></select></label>
-            <label>Alvo<select value={form.alvo} onChange={(event) => atualizar("alvo", event.target.value)}><option value="self">self</option><option value="ally">ally</option><option value="enemy">enemy</option></select></label>
-            <label className={styles.usuarioToggle}><input type="checkbox" checked={form.ativa} onChange={(event) => atualizar("ativa", event.target.checked)} /><span><strong>Habilidade ativa</strong><small>Permite que a habilidade seja utilizada pelas cartas.</small></span></label>
-            <div className={styles.editorActions}><button type="button" onClick={() => setForm(null)}>Cancelar</button><button type="submit" className={styles.primaryBtn}><Save aria-hidden="true" /> Salvar</button></div>
-          </form>
-        </div>
+        <AdminHabilidadeFormulario
+          form={form}
+          salvando={salvando}
+          aoAtualizar={atualizarForm}
+          aoSalvar={salvar}
+          aoFechar={() => setForm(null)}
+        />
       ) : null}
     </AdminLayout>
   );

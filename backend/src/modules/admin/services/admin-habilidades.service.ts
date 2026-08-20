@@ -50,13 +50,7 @@ export class AdminHabilidadesService {
   }
 
   async buscar(id: string) {
-    const habilidade = await this.prisma.habilidade.findUnique({
-      where: { id },
-    });
-    if (!habilidade) {
-      throw new NotFoundException('Habilidade não encontrada.');
-    }
-    return this.toResponse(habilidade);
+    return this.toResponse(await this.buscarRegistro(id));
   }
 
   async criar(dto: CreateAdminHabilidadeDto) {
@@ -77,6 +71,67 @@ export class AdminHabilidadesService {
       }
       throw erro;
     }
+  }
+
+  async atualizar(id: string, dto: CreateAdminHabilidadeDto) {
+    await this.buscarRegistro(id);
+    const configuracao = this.toConfig(dto, 'RASCUNHO');
+    this.validar(configuracao, dto);
+
+    try {
+      const habilidade = await this.prisma.habilidade.update({
+        where: { id },
+        data: {
+          ...this.toCreateData(configuracao),
+          status: 'RASCUNHO',
+          versao: { increment: 1 },
+          testada_em: null,
+          atualizado_em: new Date(),
+        },
+      });
+      return this.toResponse(habilidade);
+    } catch (erro) {
+      this.tratarNomeDuplicado(erro);
+    }
+  }
+
+  async inativar(id: string, confirmarNome: string) {
+    const atual = await this.buscarRegistro(id);
+    if (confirmarNome !== atual.nome) {
+      throw new BadRequestException(
+        'O nome informado não corresponde à habilidade.',
+      );
+    }
+
+    const habilidade = await this.prisma.habilidade.update({
+      where: { id },
+      data: {
+        status: 'INATIVA',
+        testada_em: null,
+        atualizado_em: new Date(),
+      },
+    });
+    return this.toResponse(habilidade);
+  }
+
+  private async buscarRegistro(id: string) {
+    const habilidade = await this.prisma.habilidade.findUnique({
+      where: { id },
+    });
+    if (!habilidade) {
+      throw new NotFoundException('Habilidade não encontrada.');
+    }
+    return habilidade;
+  }
+
+  private tratarNomeDuplicado(erro: unknown): never {
+    if (
+      erro instanceof Prisma.PrismaClientKnownRequestError &&
+      erro.code === 'P2002'
+    ) {
+      throw new ConflictException('Já existe uma habilidade com este nome.');
+    }
+    throw erro;
   }
 
   private validar(

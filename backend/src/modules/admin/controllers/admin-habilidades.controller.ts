@@ -1,15 +1,20 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../../common/guards/admin.guard';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { CreateAdminHabilidadeDto } from '../dto/admin-habilidade.dto';
+import {
+  CreateAdminHabilidadeDto,
+  InativarAdminHabilidadeDto,
+} from '../dto/admin-habilidade.dto';
 import { AdminHabilidadesService } from '../services/admin-habilidades.service';
 
 @Controller('admin/habilidades')
@@ -34,5 +39,15 @@ export class AdminHabilidadesController {
   @Post()
   criar(@Body() dto: CreateAdminHabilidadeDto) {
     return this.habilidadesService.criar(dto);
+  }
+
+  @Put(':id')
+  atualizar(@Param('id') id: string, @Body() dto: CreateAdminHabilidadeDto) {
+    return this.habilidadesService.atualizar(id, dto);
+  }
+
+  @Delete(':id')
+  inativar(@Param('id') id: string, @Body() dto: InativarAdminHabilidadeDto) {
+    return this.habilidadesService.inativar(id, dto.confirmarNome);
   }
 }

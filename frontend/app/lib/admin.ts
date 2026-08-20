@@ -7,7 +7,64 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 type ApiErrorResponse = {
   message?: string | string[];
-  details?: { messages?: string[] }[];
+  details?: { messages?: string[]; mensagem?: string }[];
+};
+
+export type TipoEfeitoHabilidade =
+  | "BUFF"
+  | "DEBUFF"
+  | "DANO"
+  | "CURA"
+  | "ESCUDO"
+  | "ROUBO_VIDA"
+  | "EVASAO";
+
+export type AdminHabilidade = {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  modoExecucao: "AUTOMATICA";
+  tipoEfeito: TipoEfeitoHabilidade;
+  gatilho:
+    | "AO_ENTRAR"
+    | "AO_ATACAR"
+    | "AO_RECEBER_DANO"
+    | "INICIO_TURNO"
+    | "FIM_TURNO";
+  alvo: "PROPRIA_CARTA" | "ALIADO_ATIVO" | "INIMIGO_ATIVO";
+  atributo: "ATAQUE" | "DEFESA" | "VELOCIDADE" | null;
+  unidade: "FIXO" | "PERCENTUAL";
+  valorBase: number;
+  formaAplicacao: "ANTES_ACAO" | "APOS_ACAO" | "SUBSTITUI_ATAQUE";
+  requisitoTipo: "NENHUM" | "CONTADOR_ATAQUES" | "HP_ABAIXO" | "TURNO_MINIMO";
+  requisitoValor: number | null;
+  escalaTipo: "NENHUMA" | "POR_TURNO" | "POR_ATAQUE";
+  escalaValor: number | null;
+  escalaLimite: number | null;
+  duracaoTurnos: number | null;
+  status: "RASCUNHO" | "PUBLICADA" | "INATIVA";
+  versao: number;
+  testadaEm: string | null;
+  criadoEm: string;
+  atualizadoEm: string;
+};
+
+export type SalvarAdminHabilidadePayload = {
+  nome: string;
+  descricao?: string;
+  tipoEfeito: AdminHabilidade["tipoEfeito"];
+  gatilho: AdminHabilidade["gatilho"];
+  alvo: AdminHabilidade["alvo"];
+  atributo?: Exclude<AdminHabilidade["atributo"], null>;
+  unidade: AdminHabilidade["unidade"];
+  valorBase: number;
+  formaAplicacao: AdminHabilidade["formaAplicacao"];
+  requisitoTipo: AdminHabilidade["requisitoTipo"];
+  requisitoValor?: number;
+  escalaTipo: AdminHabilidade["escalaTipo"];
+  escalaValor?: number;
+  escalaLimite?: number;
+  duracaoTurnos?: number;
 };
 
 export type AdminCarta = {
@@ -150,7 +207,9 @@ async function adminRequest<T>(path: string, options: RequestInit = {}) {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
-      ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+      ...(options.body instanceof FormData
+        ? {}
+        : { "Content-Type": "application/json" }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
@@ -169,15 +228,45 @@ export function obterAdminDashboard() {
   return adminRequest<AdminDashboardResumo>("/admin/dashboard");
 }
 
-export function listarAdminCartas(filtros: {
-  busca?: string;
-  raridade?: string;
-  elemento?: string;
-  status?: string;
-  classe?: string;
-  periodo?: string;
-  ordem?: string;
-} = {}) {
+export function listarAdminHabilidades() {
+  return adminRequest<AdminHabilidade[]>("/admin/habilidades");
+}
+
+export function criarAdminHabilidade(payload: SalvarAdminHabilidadePayload) {
+  return adminRequest<AdminHabilidade>("/admin/habilidades", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function atualizarAdminHabilidade(
+  id: string,
+  payload: SalvarAdminHabilidadePayload,
+) {
+  return adminRequest<AdminHabilidade>(`/admin/habilidades/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function inativarAdminHabilidade(id: string, confirmarNome: string) {
+  return adminRequest<AdminHabilidade>(`/admin/habilidades/${id}`, {
+    method: "DELETE",
+    body: JSON.stringify({ confirmarNome }),
+  });
+}
+
+export function listarAdminCartas(
+  filtros: {
+    busca?: string;
+    raridade?: string;
+    elemento?: string;
+    status?: string;
+    classe?: string;
+    periodo?: string;
+    ordem?: string;
+  } = {},
+) {
   const params = new URLSearchParams();
 
   if (filtros.busca?.trim()) {
@@ -219,7 +308,10 @@ export function criarAdminCarta(payload: CreateAdminCartaPayload) {
   });
 }
 
-export function atualizarAdminCarta(id: string, payload: UpdateAdminCartaPayload) {
+export function atualizarAdminCarta(
+  id: string,
+  payload: UpdateAdminCartaPayload,
+) {
   return adminRequest<AdminCarta>(`/admin/cartas/${id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
@@ -235,10 +327,13 @@ export function removerAdminCarta(
   confirmarNome: string,
   confirmarImpacto: boolean,
 ) {
-  return adminRequest<{ message: string; carta: AdminCarta }>(`/admin/cartas/${id}`, {
-    method: "DELETE",
-    body: JSON.stringify({ confirmarNome, confirmarImpacto }),
-  });
+  return adminRequest<{ message: string; carta: AdminCarta }>(
+    `/admin/cartas/${id}`,
+    {
+      method: "DELETE",
+      body: JSON.stringify({ confirmarNome, confirmarImpacto }),
+    },
+  );
 }
 
 export function uploadCartaAssets(formData: FormData) {
@@ -248,15 +343,22 @@ export function uploadCartaAssets(formData: FormData) {
   });
 }
 
-export function listarAdminUsuarios(filtros: { busca?: string; status?: string } = {}) {
+export function listarAdminUsuarios(
+  filtros: { busca?: string; status?: string } = {},
+) {
   const params = new URLSearchParams();
   if (filtros.busca?.trim()) params.set("q", filtros.busca.trim());
   if (filtros.status) params.set("status", filtros.status);
   const query = params.toString();
-  return adminRequest<AdminUsuario[]>(`/admin/usuarios${query ? `?${query}` : ""}`);
+  return adminRequest<AdminUsuario[]>(
+    `/admin/usuarios${query ? `?${query}` : ""}`,
+  );
 }
 
-export function atualizarAdminUsuario(id: string, payload: UpdateAdminUsuarioPayload) {
+export function atualizarAdminUsuario(
+  id: string,
+  payload: UpdateAdminUsuarioPayload,
+) {
   return adminRequest<AdminUsuario>(`/admin/usuarios/${id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
@@ -301,9 +403,11 @@ function formatApiError(data: ApiErrorResponse | null) {
     return fallback;
   }
 
-  const message = Array.isArray(data.message) ? data.message.join(" ") : data.message;
+  const message = Array.isArray(data.message)
+    ? data.message.join(" ")
+    : data.message;
   const details = data.details
-    ?.flatMap((detail) => detail.messages ?? [])
+    ?.flatMap((detail) => detail.messages ?? detail.mensagem ?? [])
     .filter(Boolean);
 
   if (details?.length) {

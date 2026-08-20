@@ -106,3 +106,10 @@ export class CreateAdminHabilidadeDto {
   @Max(20)
   duracaoTurnos?: number;
 }
+
+export class InativarAdminHabilidadeDto {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(100)
+  confirmarNome: string;
+}

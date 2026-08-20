@@ -52,6 +52,7 @@ describe('AdminHabilidadesService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
     },
   };
   let service: AdminHabilidadesService;
@@ -61,6 +62,7 @@ describe('AdminHabilidadesService', () => {
     prisma.habilidade.findMany.mockResolvedValue([]);
     prisma.habilidade.findUnique.mockResolvedValue(habilidade);
     prisma.habilidade.create.mockResolvedValue(habilidade);
+    prisma.habilidade.update.mockResolvedValue(habilidade);
     service = new AdminHabilidadesService(prisma as never);
   });
 
@@ -126,5 +128,60 @@ describe('AdminHabilidadesService', () => {
       ),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(prisma.habilidade.create).not.toHaveBeenCalled();
+  });
+
+  it('faz uma habilidade editada voltar para rascunho', async () => {
+    prisma.habilidade.findUnique.mockResolvedValue({
+      ...habilidade,
+      status: 'PUBLICADA',
+      versao: 4,
+      testada_em: new Date(),
+    });
+
+    await service.atualizar(habilidade.id, criarDto({ valorBase: 180 }));
+
+    expect(prisma.habilidade.update).toHaveBeenCalledWith({
+      where: { id: habilidade.id },
+      data: expect.objectContaining({
+        valor_base: 180,
+        status: 'RASCUNHO',
+        versao: { increment: 1 },
+        testada_em: null,
+        atualizado_em: expect.any(Date),
+      }),
+    });
+  });
+
+  it('não atualiza uma configuração inválida', async () => {
+    await expect(
+      service.atualizar(habilidade.id, criarDto({ valorBase: 501 })),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.habilidade.update).not.toHaveBeenCalled();
+  });
+
+  it('recusa inativação quando o nome não corresponde', async () => {
+    await expect(
+      service.inativar(habilidade.id, 'Outra habilidade'),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.habilidade.update).not.toHaveBeenCalled();
+  });
+
+  it('inativa e invalida o teste anterior', async () => {
+    prisma.habilidade.update.mockResolvedValue({
+      ...habilidade,
+      status: 'INATIVA',
+      testada_em: null,
+    });
+
+    await service.inativar(habilidade.id, habilidade.nome);
+
+    expect(prisma.habilidade.update).toHaveBeenCalledWith({
+      where: { id: habilidade.id },
+      data: {
+        status: 'INATIVA',
+        testada_em: null,
+        atualizado_em: expect.any(Date),
+      },
+    });
   });
 });
