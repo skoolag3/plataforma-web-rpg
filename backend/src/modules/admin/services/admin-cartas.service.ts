@@ -10,9 +10,20 @@ import {
   UpdateAdminCartaDto,
 } from '../dto/admin-carta.dto';
 
+const cartaInclude = {
+  habilidades: {
+    orderBy: { ordem: 'asc' as const },
+    include: { habilidade: true },
+  },
+} satisfies Prisma.CartaInclude;
+
+type CartaComHabilidades = Prisma.CartaGetPayload<{
+  include: typeof cartaInclude;
+}>;
+
 @Injectable()
 export class AdminCartasService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async listar(filtros: {
     busca?: string;
@@ -35,23 +46,22 @@ export class AdminCartasService {
           : { excluido_em: null }),
         ...(filtros.raridade ? { raridade: filtros.raridade } : {}),
         ...(filtros.elemento ? { elemento: filtros.elemento } : {}),
-        ...(classe
-          ? { passiva: { path: ['classe'], equals: classe } }
-          : {}),
+        ...(classe ? { passiva: { path: ['classe'], equals: classe } } : {}),
         ...(criadoDepoisDe ? { criado_em: { gte: criadoDepoisDe } } : {}),
         ...(status === 'ativas' ? { ativo: true } : {}),
         ...(status === 'inativas' ? { ativo: false } : {}),
         ...(q
           ? {
-            OR: [
-              { nome: { contains: q, mode: 'insensitive' } },
-              { elemento: { contains: q, mode: 'insensitive' } },
-              { raridade: { contains: q, mode: 'insensitive' } },
-            ],
-          }
+              OR: [
+                { nome: { contains: q, mode: 'insensitive' } },
+                { elemento: { contains: q, mode: 'insensitive' } },
+                { raridade: { contains: q, mode: 'insensitive' } },
+              ],
+            }
           : {}),
       },
       orderBy,
+      include: cartaInclude,
     });
 
     return cartas.map((carta) => this.toResponse(carta));
@@ -81,7 +91,9 @@ export class AdminCartasService {
     }
   }
 
-  private obterOrdenacao(ordem?: string): Prisma.CartaOrderByWithRelationInput[] {
+  private obterOrdenacao(
+    ordem?: string,
+  ): Prisma.CartaOrderByWithRelationInput[] {
     switch (ordem) {
       case 'antigas':
         return [{ criado_em: 'asc' }, { nome: 'asc' }];
@@ -97,6 +109,7 @@ export class AdminCartasService {
   async buscar(id: string) {
     const carta = await this.prisma.carta.findFirst({
       where: { id, excluido_em: null },
+      include: cartaInclude,
     });
 
     if (!carta) {
@@ -121,8 +134,10 @@ export class AdminCartasService {
   }
 
   async criar(dto: CreateAdminCartaDto) {
+    await this.validarHabilidades(dto.habilidadesIds);
     const carta = await this.prisma.carta.create({
       data: this.toCreateData(dto),
+      include: cartaInclude,
     });
 
     return this.toResponse(carta);
@@ -130,6 +145,7 @@ export class AdminCartasService {
 
   async atualizar(id: string, dto: UpdateAdminCartaDto) {
     const atual = await this.buscar(id);
+    await this.validarHabilidades(dto.habilidadesIds);
 
     if (atual.ativo && dto.ativo === false && !dto.confirmarImpacto) {
       throw new BadRequestException(
@@ -143,16 +159,13 @@ export class AdminCartasService {
         ...this.toUpdateData(dto),
         atualizado_em: new Date(),
       },
+      include: cartaInclude,
     });
 
     return this.toResponse(carta);
   }
 
-  async remover(
-    id: string,
-    confirmarNome: string,
-    confirmarImpacto: boolean,
-  ) {
+  async remover(id: string, confirmarNome: string, confirmarImpacto: boolean) {
     const atual = await this.buscar(id);
 
     if (confirmarNome !== atual.nome) {
@@ -174,6 +187,7 @@ export class AdminCartasService {
         excluido_em: new Date(),
         atualizado_em: new Date(),
       },
+      include: cartaInclude,
     });
 
     return {
@@ -195,6 +209,7 @@ export class AdminCartasService {
       moldura: dto.moldura,
       config_visual: dto.configVisual as Prisma.InputJsonValue | undefined,
       ativo: dto.ativo ?? true,
+      habilidades: this.toHabilidadesCreate(dto.habilidadesIds),
     };
   }
 
@@ -207,8 +222,8 @@ export class AdminCartasService {
       ...(dto.danoBase !== undefined ? { dano_base: dto.danoBase } : {}),
       ...(dto.defesaBase !== undefined ? { defesa_base: dto.defesaBase } : {}),
       ...(dto.passiva !== undefined ||
-        dto.classe !== undefined ||
-        dto.custo !== undefined
+      dto.classe !== undefined ||
+      dto.custo !== undefined
         ? { passiva: this.buildPassiva(dto) }
         : {}),
       ...(dto.foto !== undefined ? { foto: dto.foto } : {}),
@@ -217,7 +232,45 @@ export class AdminCartasService {
         ? { config_visual: dto.configVisual as Prisma.InputJsonValue }
         : {}),
       ...(dto.ativo !== undefined ? { ativo: dto.ativo } : {}),
+      ...(dto.habilidadesIds !== undefined
+        ? {
+            habilidades: {
+              deleteMany: {},
+              create: this.toHabilidadesCreateItems(dto.habilidadesIds),
+            },
+          }
+        : {}),
     };
+  }
+
+  private async validarHabilidades(habilidadesIds?: string[]) {
+    if (!habilidadesIds?.length) return;
+
+    const habilidades = await this.prisma.habilidade.findMany({
+      where: {
+        id: { in: habilidadesIds },
+        status: 'PUBLICADA',
+      },
+      select: { id: true },
+    });
+
+    if (habilidades.length !== habilidadesIds.length) {
+      throw new BadRequestException(
+        'Todas as habilidades da carta precisam existir e estar publicadas.',
+      );
+    }
+  }
+
+  private toHabilidadesCreate(habilidadesIds?: string[]) {
+    if (habilidadesIds === undefined) return undefined;
+    return { create: this.toHabilidadesCreateItems(habilidadesIds) };
+  }
+
+  private toHabilidadesCreateItems(habilidadesIds: string[]) {
+    return habilidadesIds.map((id, index) => ({
+      ordem: index + 1,
+      habilidade: { connect: { id } },
+    }));
   }
 
   private buildPassiva(dto: {
@@ -232,11 +285,11 @@ export class AdminCartasService {
     };
   }
 
-  private toResponse(carta: Prisma.CartaGetPayload<Record<string, never>>) {
+  private toResponse(carta: CartaComHabilidades) {
     const passiva =
       carta.passiva &&
-        typeof carta.passiva === 'object' &&
-        !Array.isArray(carta.passiva)
+      typeof carta.passiva === 'object' &&
+      !Array.isArray(carta.passiva)
         ? (carta.passiva as Record<string, unknown>)
         : {};
 
@@ -258,6 +311,17 @@ export class AdminCartasService {
       excluidoEm: carta.excluido_em,
       criadoEm: carta.criado_em,
       atualizadoEm: carta.atualizado_em,
+      habilidades: (carta.habilidades ?? []).map((vinculo) => ({
+        id: vinculo.habilidade.id,
+        nome: vinculo.habilidade.nome,
+        descricao: vinculo.habilidade.descricao,
+        tipoEfeito: vinculo.habilidade.tipo_efeito,
+        gatilho: vinculo.habilidade.gatilho,
+        alvo: vinculo.habilidade.alvo,
+        status: vinculo.habilidade.status,
+        versao: vinculo.habilidade.versao,
+        ordem: vinculo.ordem,
+      })),
     };
   }
 }

@@ -103,6 +103,19 @@ export type AdminCarta = {
   excluidoEm?: string | null;
   criadoEm?: string;
   atualizadoEm?: string;
+  habilidades: AdminCartaHabilidade[];
+};
+
+export type AdminCartaHabilidade = {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  tipoEfeito: TipoEfeitoHabilidade;
+  gatilho: AdminHabilidade["gatilho"];
+  alvo: AdminHabilidade["alvo"];
+  status: AdminHabilidade["status"];
+  versao: number;
+  ordem: number;
 };
 
 export type CreateAdminCartaPayload = {
@@ -119,6 +132,7 @@ export type CreateAdminCartaPayload = {
   moldura?: string;
   configVisual?: ConfigVisualCarta;
   ativo?: boolean;
+  habilidadesIds?: string[];
 };
 
 export type UpdateAdminCartaPayload = Partial<CreateAdminCartaPayload> & {

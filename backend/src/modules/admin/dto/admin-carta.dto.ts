@@ -1,10 +1,14 @@
 import {
+  ArrayMaxSize,
+  ArrayUnique,
+  IsArray,
   IsBoolean,
   IsIn,
   IsInt,
   IsObject,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   MaxLength,
   Min,
@@ -71,6 +75,13 @@ export class CreateAdminCartaDto {
   @IsOptional()
   @IsBoolean()
   ativo?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @ArrayMaxSize(3)
+  @IsUUID('4', { each: true })
+  habilidadesIds?: string[];
 }
 
 export class UpdateAdminCartaDto {
@@ -141,6 +152,13 @@ export class UpdateAdminCartaDto {
   @IsOptional()
   @IsBoolean()
   confirmarImpacto?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @ArrayMaxSize(3)
+  @IsUUID('4', { each: true })
+  habilidadesIds?: string[];
 }
 
 export class RemoveAdminCartaDto {

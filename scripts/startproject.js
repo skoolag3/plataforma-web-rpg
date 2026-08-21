@@ -27,7 +27,7 @@ const servers = [
   },
 ];
 
-const startupTimeoutMs = 90_000;
+const startupTimeoutMs = 180_000;
 
 function quotePowerShell(value) {
   return `'${value.replaceAll("'", "''")}'`;
@@ -147,32 +147,24 @@ async function main() {
     }
   }
 
-  const serversToStart = [];
-
   for (const server of servers) {
-    if (!(await isPortInUse(server.port))) {
-      serversToStart.push(server);
-      continue;
+    if (await isPortInUse(server.port)) {
+      if (await isExpectedServer(server)) {
+        console.log(`${server.name} ja esta ativo na porta ${server.port}.`);
+        continue;
+      }
+
+      throw new Error(
+        `A porta ${server.port} esta ocupada por outro processo (${describePortOwner(server.port)}).`,
+      );
     }
 
-    if (await isExpectedServer(server)) {
-      console.log(`${server.name} ja esta ativo na porta ${server.port}.`);
-      continue;
-    }
-
-    throw new Error(
-      `A porta ${server.port} esta ocupada por outro processo (${describePortOwner(server.port)}).`,
-    );
-  }
-
-  for (const server of serversToStart) {
     startServer(server);
-  }
+    console.log(`Aguardando ${server.name} responder...`);
 
-  for (const server of servers) {
     if (!(await waitUntilReady(server))) {
       throw new Error(
-        `${server.name} nao respondeu na porta ${server.port} em 90 segundos. Confira a janela do servidor.`,
+        `${server.name} nao respondeu na porta ${server.port} em 180 segundos. Confira a janela do servidor.`,
       );
     }
 

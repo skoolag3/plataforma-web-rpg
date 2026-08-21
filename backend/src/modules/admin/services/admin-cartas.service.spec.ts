@@ -23,7 +23,11 @@ describe('AdminCartasService', () => {
     carta: {
       findFirst: jest.fn(),
       findMany: jest.fn(),
+      create: jest.fn(),
       update: jest.fn(),
+    },
+    habilidade: {
+      findMany: jest.fn(),
     },
     inventario: {
       count: jest.fn(),
@@ -35,6 +39,8 @@ describe('AdminCartasService', () => {
     jest.resetAllMocks();
     prisma.carta.findFirst.mockResolvedValue(carta);
     prisma.carta.findMany.mockResolvedValue([]);
+    prisma.carta.create.mockResolvedValue(carta);
+    prisma.habilidade.findMany.mockResolvedValue([]);
     service = new AdminCartasService(prisma as never);
   });
 
@@ -88,6 +94,7 @@ describe('AdminCartasService', () => {
         ativo: false,
         atualizado_em: expect.any(Date),
       }),
+      include: expect.any(Object),
     });
   });
 
@@ -107,6 +114,7 @@ describe('AdminCartasService', () => {
         excluido_em: expect.any(Date),
         atualizado_em: expect.any(Date),
       }),
+      include: expect.any(Object),
     });
   });
 
@@ -124,6 +132,81 @@ describe('AdminCartasService', () => {
         criado_em: { gte: expect.any(Date) },
       }),
       orderBy: [{ nome: 'asc' }],
+      include: expect.any(Object),
+    });
+  });
+
+  it('recusa vínculo com habilidade que não está publicada', async () => {
+    prisma.habilidade.findMany.mockResolvedValue([]);
+
+    await expect(
+      service.criar({
+        nome: 'Flare',
+        elemento: 'fogo',
+        raridade: 'UR',
+        hpBase: 320,
+        danoBase: 190,
+        defesaBase: 120,
+        habilidadesIds: ['habilidade-rascunho'],
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(prisma.carta.create).not.toHaveBeenCalled();
+  });
+
+  it('vincula habilidades publicadas na ordem informada', async () => {
+    prisma.habilidade.findMany.mockResolvedValue([
+      { id: 'habilidade-1' },
+      { id: 'habilidade-2' },
+    ]);
+
+    await service.criar({
+      nome: 'Flare',
+      elemento: 'fogo',
+      raridade: 'UR',
+      hpBase: 320,
+      danoBase: 190,
+      defesaBase: 120,
+      habilidadesIds: ['habilidade-2', 'habilidade-1'],
+    });
+
+    expect(prisma.habilidade.findMany).toHaveBeenCalledWith({
+      where: {
+        id: { in: ['habilidade-2', 'habilidade-1'] },
+        status: 'PUBLICADA',
+      },
+      select: { id: true },
+    });
+    expect(prisma.carta.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        habilidades: {
+          create: [
+            {
+              ordem: 1,
+              habilidade: { connect: { id: 'habilidade-2' } },
+            },
+            {
+              ordem: 2,
+              habilidade: { connect: { id: 'habilidade-1' } },
+            },
+          ],
+        },
+      }),
+      include: expect.any(Object),
+    });
+  });
+
+  it('remove todos os vínculos quando a lista fica vazia', async () => {
+    prisma.carta.update.mockResolvedValue(carta);
+
+    await service.atualizar(carta.id, { habilidadesIds: [] });
+
+    expect(prisma.carta.update).toHaveBeenCalledWith({
+      where: { id: carta.id },
+      data: expect.objectContaining({
+        habilidades: { deleteMany: {}, create: [] },
+      }),
+      include: expect.any(Object),
     });
   });
 });

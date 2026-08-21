@@ -47,6 +47,7 @@ import {
   raridades,
 } from "./adminCartaVisual";
 import { AdminLayout } from "./adminShared";
+import { AdminCartaHabilidades } from "./adminCartaHabilidades";
 
 type CartaFormState = {
   nome: string;
@@ -57,7 +58,7 @@ type CartaFormState = {
   hpBase: string;
   danoBase: string;
   defesaBase: string;
-  passiva: string;
+  habilidadesIds: string[];
   ativo: boolean;
   configVisual: ConfigVisualCarta;
 };
@@ -81,7 +82,7 @@ function criarFormularioNovaCarta(): CartaFormState {
     hpBase: "100",
     danoBase: "20",
     defesaBase: "10",
-    passiva: "{}",
+    habilidadesIds: [],
     ativo: true,
     configVisual: criarConfigVisualPadrao(),
   };
@@ -393,7 +394,7 @@ export function NovaCarta() {
       raridade: padrao.raridade,
       elemento: padrao.elemento,
       classe: padrao.classe,
-      passiva: padrao.passiva,
+      habilidadesIds: padrao.habilidadesIds,
       ativo: padrao.ativo,
     }));
   }
@@ -433,7 +434,6 @@ export function NovaCarta() {
     setSalvando(true);
 
     try {
-      const passiva = parsePassiva(form.passiva);
       const payload: CreateAdminCartaPayload = {
         nome: form.nome.trim(),
         raridade: form.raridade,
@@ -443,7 +443,7 @@ export function NovaCarta() {
         hpBase: toNumber(form.hpBase, "HP"),
         danoBase: toNumber(form.danoBase, "ATK"),
         defesaBase: toNumber(form.defesaBase, "DEF"),
-        passiva,
+        habilidadesIds: form.habilidadesIds,
         ativo: form.ativo,
         configVisual: form.configVisual,
       };
@@ -492,15 +492,10 @@ export function NovaCarta() {
               <label>Raridade<select className={`${styles.selectRaridade} ${classeRaridade(form.raridade)}`} value={form.raridade} onChange={(event) => updateField("raridade", event.target.value as CartaFormState["raridade"])}>{raridades.map((raridade) => <option className={classeRaridade(raridade)} key={raridade}>{raridade}</option>)}</select></label>
               <label>Elemento<ElementoSelect value={form.elemento} onChange={(value) => { if (value) updateField("elemento", value); }} /></label>
               <label>Classe<select value={form.classe} onChange={(event) => updateField("classe", event.target.value)}><option value="">Selecione</option>{classesCarta.map((classe) => <option key={classe}>{classe}</option>)}</select></label>
-              <label>Modelo da passiva<select defaultValue="" onChange={(event) => {
-                const modelos: Record<string, Record<string, unknown>> = {
-                  entradaBuff: { nome: "Impulso inicial", gatilho: "on_enter", tipo: "buff", alvo: "self", atributo: "ataque", valor: 10, velocidade: 12 },
-                  entradaDebuff: { nome: "Presenca opressora", gatilho: "on_enter", tipo: "debuff", alvo: "enemy", atributo: "defesa", valor: 10, velocidade: 10 },
-                  ataqueBuff: { nome: "Furia crescente", gatilho: "on_attack", tipo: "buff", alvo: "self", atributo: "ataque", valor: 5, velocidade: 14 },
-                };
-                updateField("passiva", JSON.stringify(modelos[event.target.value] ?? {}, null, 2));
-              }}><option value="">Sem passiva</option><option value="entradaBuff">Buff ao entrar</option><option value="entradaDebuff">Debuff ao entrar</option><option value="ataqueBuff">Buff ao atacar</option></select></label>
-              <label className={styles.fullField}>Configuração da passiva<textarea className={styles.codeArea} value={form.passiva} onChange={(event) => updateField("passiva", event.target.value)} /><small>O modelo preenche o JSON; ajuste os valores se necessário.</small></label>
+              <AdminCartaHabilidades
+                selecionadasIds={form.habilidadesIds}
+                aoAlterar={(ids) => updateField("habilidadesIds", ids)}
+              />
             </div>
           </details>
           <details className={styles.editorSection}>
@@ -601,7 +596,7 @@ function CartaEditor({
       raridade: salvo.raridade,
       elemento: salvo.elemento,
       classe: salvo.classe,
-      passiva: salvo.passiva,
+      habilidadesIds: salvo.habilidadesIds,
       ativo: salvo.ativo,
     }));
   }
@@ -649,7 +644,7 @@ function CartaEditor({
         hpBase: toNumber(form.hpBase, "HP"),
         danoBase: toNumber(form.danoBase, "ATK"),
         defesaBase: toNumber(form.defesaBase, "DEF"),
-        passiva: parsePassiva(form.passiva),
+        habilidadesIds: form.habilidadesIds,
         ativo: form.ativo,
         confirmarImpacto: carta.ativo && !form.ativo,
         configVisual: form.configVisual,
@@ -757,7 +752,11 @@ function CartaEditor({
               <label>Raridade<select className={`${styles.selectRaridade} ${classeRaridade(form.raridade)}`} value={form.raridade} onChange={(event) => updateField("raridade", event.target.value as CartaFormState["raridade"])}>{raridades.map((raridade) => <option className={classeRaridade(raridade)} key={raridade}>{raridade}</option>)}</select></label>
               <label>Elemento<ElementoSelect value={form.elemento} onChange={(value) => { if (value) updateField("elemento", value); }} /></label>
               <label>Classe<select value={form.classe} onChange={(event) => updateField("classe", event.target.value)}><option value="">Selecione</option>{form.classe && !classesCarta.includes(form.classe as (typeof classesCarta)[number]) ? <option value={form.classe}>{form.classe} (legada)</option> : null}{classesCarta.map((classe) => <option key={classe}>{classe}</option>)}</select></label>
-              <label className={styles.fullField}>Passiva<textarea className={styles.codeArea} value={form.passiva} onChange={(event) => updateField("passiva", event.target.value)} /></label>
+              <AdminCartaHabilidades
+                selecionadasIds={form.habilidadesIds}
+                habilidadesIniciais={carta.habilidades}
+                aoAlterar={(ids) => updateField("habilidadesIds", ids)}
+              />
 
             </div>
           </details>
@@ -911,7 +910,9 @@ function cartaToForm(carta: AdminCarta): CartaFormState {
     hpBase: carta.hpBase.toString(),
     danoBase: carta.danoBase.toString(),
     defesaBase: carta.defesaBase.toString(),
-    passiva: JSON.stringify(carta.passiva ?? {}, null, 2),
+    habilidadesIds: (carta.habilidades ?? []).map(
+      (habilidade) => habilidade.id,
+    ),
     ativo: carta.ativo,
     configVisual: normalizarConfigVisual(carta.configVisual),
   };
@@ -927,20 +928,6 @@ function mensagemImpacto(usuariosComCarta: number) {
   }
 
   return `Há ${usuariosComCarta} usuários com esta carta.`;
-}
-
-function parsePassiva(value: string) {
-  if (!value.trim()) {
-    return {};
-  }
-
-  const parsed = JSON.parse(value) as unknown;
-
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error("A passiva precisa ser um objeto JSON.");
-  }
-
-  return parsed as Record<string, unknown>;
 }
 
 function toNumber(value: string, label: string) {
