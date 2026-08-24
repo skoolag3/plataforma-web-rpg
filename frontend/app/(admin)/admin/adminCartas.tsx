@@ -33,6 +33,7 @@ import {
   type ConfigVisualCarta,
 } from "../../components/cartaMontada";
 import styles from "../../styles/admin/admin.module.css";
+
 import {
   CampoArquivo,
   ControleVisualCarta,
@@ -48,6 +49,7 @@ import {
 } from "./adminCartaVisual";
 import { AdminLayout } from "./adminShared";
 import { AdminCartaHabilidades } from "./adminCartaHabilidades";
+
 
 type CartaFormState = {
   nome: string;

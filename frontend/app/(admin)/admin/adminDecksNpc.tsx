@@ -3,7 +3,9 @@
 import { Bot, Edit3, Plus, Save, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import styles from "../../styles/admin/admin.module.css";
+
 import { AdminLayout } from "./adminShared";
+
 
 type DeckNpc = {
   id: string;
