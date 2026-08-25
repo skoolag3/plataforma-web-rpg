@@ -5,7 +5,7 @@ import {
   obterAdminDashboard,
   type AdminDashboardResumo,
 } from "../../lib/admin";
-import styles from "../../styles/admin/admin.module.css";
+import styles from "../../styles/admin/adminShared.module.css";
 import { AdminLayout } from "./adminShared";
 import { DashboardPainel } from "./adminDashboardPainel";
 import { DashboardResumo } from "./adminDashboardResumo";

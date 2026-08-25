@@ -6,8 +6,12 @@ import {
   type ResultadoTesteAdminHabilidade,
   type TestarAdminHabilidadePayload,
 } from "../../lib/admin";
-import stylesAdmin from "../../styles/admin/admin.module.css";
+import sharedStyles from "../../styles/admin/adminShared.module.css";
+import habilidadeStyles from "../../styles/admin/adminHabilidades.module.css";
 import styles from "./adminHabilidadeTeste.module.css";
+import { combinarEstilos } from "./combinarEstilos";
+
+const stylesAdmin = combinarEstilos(sharedStyles, habilidadeStyles);
 
 type Props = {
   habilidade: AdminHabilidade;

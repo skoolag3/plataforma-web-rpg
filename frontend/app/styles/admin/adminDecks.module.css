@@ -1,0 +1,6 @@
+.decksListaPanel{ margin-bottom: 0.8rem; }
+
+.decksListaPanel .tableWrap{ border: 0; border-radius: 0; box-shadow: none; }
+
+.decksListaPanel .tableWrap table{ min-width: 39rem; }
+

@@ -19,7 +19,8 @@ import {
   type AdminHabilidade,
   type SalvarAdminHabilidadePayload,
 } from "../../lib/admin";
-import styles from "../../styles/admin/admin.module.css";
+import sharedStyles from "../../styles/admin/adminShared.module.css";
+import featureStyles from "../../styles/admin/adminHabilidades.module.css";
 
 import {
   AdminHabilidadeFormulario,
@@ -27,6 +28,9 @@ import {
 } from "./adminHabilidadeFormulario";
 import { AdminHabilidadeTeste } from "./adminHabilidadeTeste";
 import { AdminLayout } from "./adminShared";
+import { combinarEstilos } from "./combinarEstilos";
+
+const styles = combinarEstilos(sharedStyles, featureStyles);
 
 
 const formularioVazio: FormHabilidade = {

@@ -9,7 +9,13 @@ import {
   type ConfigVisualCarta,
   type DimensoesImagem,
 } from "../../components/cartaMontada";
-import styles from "../../styles/admin/admin.module.css";
+import sharedStyles from "../../styles/admin/adminShared.module.css";
+import editorStyles from "../../styles/admin/adminCartaEditor.module.css";
+import visualStyles from "../../styles/admin/adminCartaVisual.module.css";
+import listaStyles from "../../styles/admin/adminCartasLista.module.css";
+import { combinarEstilos } from "./combinarEstilos";
+
+const styles = combinarEstilos(sharedStyles, listaStyles, editorStyles, visualStyles);
 
 export const raridades = ["UR", "SSR", "SR", "R", "N"] as const;
 export const classesCarta = ["Mago", "Espadachim", "Guerreiro", "Guardião", "Caçador", "Vidente"] as const;

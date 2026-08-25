@@ -1,0 +1,430 @@
+.formPanel input[type="checkbox"]{
+  width: 1rem;
+  height: 1rem;
+  accent-color: #7c3aed;
+  padding: 0;
+}
+
+.rowActions svg,
+.editPanel header button svg{
+  width: 1rem;
+  height: 1rem;
+}
+
+.editPanel{
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  border: 1px solid rgba(168, 85, 247, 0.26);
+  border-radius: 0.85rem;
+  background: rgba(7, 12, 25, 0.64);
+  padding: 0.8rem;
+}
+
+.editPanel header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  padding: 0.1rem 0.15rem 0.65rem;
+}
+
+.editPanel h2,
+.editPanel p{
+  margin: 0;
+}
+
+.editPanel p{
+  color: #94a3b8;
+  font-size: 0.86rem;
+}
+
+.editPanel header button{
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(248, 113, 113, 0.42);
+  border-radius: 0.4rem;
+  background: rgba(127, 29, 29, 0.64);
+  color: #fecaca;
+  cursor: pointer;
+}
+
+.editPanel header button:hover{
+  border-color: rgba(248, 113, 113, 0.68);
+  background: rgba(153, 27, 27, 0.78);
+}
+
+.editorGrid{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 23rem);
+  gap: 0.8rem;
+  align-items: start;
+}
+
+.formPanel{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.novaCartaStatus{
+  display: flex;
+  grid-column: 1 / -1;
+  min-height: 3.15rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.65rem;
+  background: #0a101d;
+  padding: 0.5rem 0.6rem 0.5rem 0.75rem;
+}
+
+.novaCartaStatus > span,
+.novaCartaStatus > div{
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+}
+
+.novaCartaStatus > span{ color: #dbe4f2; font-size: 0.73rem; }
+
+.novaCartaStatus > span svg{ width: 0.85rem; height: 0.85rem; color: #94a3b8; }
+
+.novaCartaStatus button{
+  min-height: 2rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.45rem;
+  background: #101725;
+  padding: 0.35rem 0.75rem;
+  color: #8f9bb0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.novaCartaStatus .statusInicialAtivo{
+  border-color: rgba(74, 222, 128, 0.42);
+  background: rgba(20, 83, 45, 0.72);
+  color: #bbf7d0;
+}
+
+.novaCartaStatus .statusInicialInativo{
+  border-color: rgba(251, 191, 36, 0.42);
+  background: rgba(120, 53, 15, 0.64);
+  color: #fde68a;
+}
+
+.editorSection{
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.65rem;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.84), rgba(6, 10, 23, 0.92));
+  box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.14);
+}
+
+.editorSection[open]{
+  grid-column: 1 / -1;
+  overflow: visible;
+  border-color: rgba(139, 92, 246, 0.34);
+  box-shadow: 0 0.9rem 2.5rem rgba(2, 6, 23, 0.28), inset 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.editorSection summary{
+  display: flex;
+  min-height: 3.35rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.68rem 0.78rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.editorSection summary::-webkit-details-marker{ display: none; }
+
+.editorSection summary:hover{
+  background: rgba(124, 58, 237, 0.06);
+}
+
+.editorSection summary span,
+.editorSection summary strong,
+.editorSection summary small{
+  display: block;
+}
+
+.editorSection summary strong{
+  color: #f8fafc;
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+}
+
+.editorSection summary small{
+  margin-top: 0.12rem;
+  color: #77849a;
+  font-size: 0.62rem;
+  font-weight: 600;
+}
+
+.editorSection summary svg{
+  width: 0.9rem;
+  flex: 0 0 auto;
+  color: #a78bfa;
+  transition: transform 180ms ease;
+}
+
+.editorSection[open] summary{
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.12), transparent 70%);
+}
+
+.editorSection[open] summary svg{ transform: rotate(180deg); }
+
+.editorSectionContent{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  padding: 0.8rem;
+}
+
+.sectionResetRow{
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  margin-bottom: -0.2rem;
+}
+
+.sectionResetRow button{
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  gap: 0.42rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.45rem;
+  background: rgba(15, 23, 42, 0.62);
+  color: #aeb8ca;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 750;
+  padding: 0.35rem 0.62rem;
+}
+
+.sectionResetRow button:hover{
+  border-color: rgba(167, 139, 250, 0.42);
+  color: #f8fafc;
+}
+
+.sectionResetRow svg{
+  width: 0.76rem;
+  height: 0.76rem;
+}
+
+.advancedSection[open]{
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+.advancedContent{
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.statusManagement,
+.dangerZone{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.65rem;
+  background: rgba(2, 6, 18, 0.45);
+  padding: 0.9rem;
+}
+
+.statusManagement > div,
+.dangerZone > div:first-child{
+  display: grid;
+  gap: 0.25rem;
+}
+
+.statusManagement strong,
+.dangerZone strong{
+  color: #f8fafc;
+  font-size: 0.78rem;
+}
+
+.statusManagement small,
+.dangerZone small{
+  max-width: 34rem;
+  color: #8290a7;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.statusManagement > button,
+.dangerZone > button,
+.deleteConfirmation button{
+  display: inline-flex;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  flex: 0 0 auto;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.48rem;
+  background: rgba(15, 23, 42, 0.72);
+  color: #dbe4f0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.55rem 0.75rem;
+}
+
+.statusManagement button:hover{
+  border-color: rgba(167, 139, 250, 0.5);
+  background: rgba(124, 58, 237, 0.15);
+}
+
+.statusManagement button:disabled,
+.dangerZone button:disabled,
+.deleteConfirmation button:disabled{
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.statusManagement svg,
+.dangerZone svg,
+.deleteConfirmation svg{
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.dangerZone{
+  border-color: rgba(248, 113, 113, 0.24);
+  background: rgba(127, 29, 29, 0.08);
+}
+
+.dangerZone .dangerButton{
+  border-color: rgba(248, 113, 113, 0.42);
+  background: rgba(127, 29, 29, 0.3);
+  color: #fecaca;
+}
+
+.dangerZone .dangerButton:hover:not(:disabled){
+  border-color: #ef4444;
+  background: rgba(185, 28, 28, 0.48);
+  color: #fff;
+}
+
+.deleteConfirmation{
+  display: grid;
+  min-width: min(100%, 22rem);
+  gap: 0.55rem;
+}
+
+.deleteConfirmation label{
+  display: grid;
+  gap: 0.4rem;
+  color: #cbd5e1;
+  font-size: 0.68rem;
+}
+
+.deleteConfirmation input{
+  min-height: 2.35rem;
+}
+
+.deleteConfirmation > div{
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.impactConfirmation{
+  display: grid;
+  min-width: min(100%, 22rem);
+  gap: 0.35rem;
+  border-left: 3px solid #f59e0b;
+  border-radius: 0.45rem;
+  background: rgba(120, 53, 15, 0.16);
+  padding: 0.7rem;
+}
+
+.impactConfirmation > strong{
+  color: #fde68a;
+  font-size: 0.72rem;
+}
+
+.impactConfirmation > span{
+  color: #cbd5e1;
+  font-size: 0.68rem;
+}
+
+.impactConfirmation > div{
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.formPanel > h2{
+  grid-column: 1 / -1;
+  margin: 0.35rem 0 0.15rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  padding: 0 0 0.7rem;
+  color: #f8fafc;
+  font-size: 0.92rem;
+}
+
+.formPanel > h2:first-child{ margin-top: 0; }
+
+.formPanel input,
+.formPanel select,
+.formPanel textarea{
+  min-height: 2.65rem;
+  border-color: rgba(148, 163, 184, 0.2);
+  border-radius: 0.52rem;
+  background-color: rgba(2, 6, 18, 0.78);
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.formPanel input:focus,
+.formPanel select:focus,
+.formPanel textarea:focus{
+  border-color: rgba(168, 85, 247, 0.7);
+  outline: 0;
+  box-shadow: none;
+  background-color: rgba(7, 10, 24, 0.96);
+}
+
+.formPanel textarea{
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.formPanel > label:has(.codeArea){
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1080px){.metrics,
+  .dashboardGrid,
+  .editorGrid{
+    grid-template-columns: 1fr;
+  }}
+
+@media (max-width: 720px){.toolbar,
+  .formPanel,
+  .editorSectionContent{
+    grid-template-columns: 1fr;
+  }
+.novaCartaStatus{ align-items: stretch; flex-direction: column; }
+.novaCartaStatus > div{ display: grid; grid-template-columns: 1fr 1fr; }}
+

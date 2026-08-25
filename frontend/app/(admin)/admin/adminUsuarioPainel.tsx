@@ -12,10 +12,14 @@ import {
   type AdminUsuarioCarta,
   type AjusteSaldoUsuarioPayload,
 } from "../../lib/admin";
-import styles from "../../styles/admin/admin.module.css";
+import sharedStyles from "../../styles/admin/adminShared.module.css";
+import featureStyles from "../../styles/admin/adminUsuarios.module.css";
 
 import { AdminUsuarioColecao } from "./adminUsuarioColecao";
 import { AdminUsuarioFinanceiro } from "./adminUsuarioFinanceiro";
+import { combinarEstilos } from "./combinarEstilos";
+
+const styles = combinarEstilos(sharedStyles, featureStyles);
 
 
 type AbaUsuario = "resumo" | "colecao" | "financeiro";

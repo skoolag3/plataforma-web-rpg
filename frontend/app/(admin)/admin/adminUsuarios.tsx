@@ -3,10 +3,14 @@
 import { Edit3, MoreHorizontal, Save, Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { atualizarAdminUsuario, listarAdminUsuarios, type AdminUsuario } from "../../lib/admin";
-import styles from "../../styles/admin/admin.module.css";
+import sharedStyles from "../../styles/admin/adminShared.module.css";
+import featureStyles from "../../styles/admin/adminUsuarios.module.css";
 
 import { AdminLayout } from "./adminShared";
 import { AdminUsuarioPainel } from "./adminUsuarioPainel";
+import { combinarEstilos } from "./combinarEstilos";
+
+const styles = combinarEstilos(sharedStyles, featureStyles);
 
 
 function Status({ value }: { value: string }) {

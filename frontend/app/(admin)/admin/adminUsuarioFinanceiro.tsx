@@ -14,9 +14,13 @@ import type {
   AdminUsuarioAtividade,
   AjusteSaldoUsuarioPayload,
 } from "../../lib/admin";
-import styles from "../../styles/admin/admin.module.css";
+import sharedStyles from "../../styles/admin/adminShared.module.css";
+import featureStyles from "../../styles/admin/adminUsuarios.module.css";
 
 import { IconeRuby } from "../../components/iconeRuby";
+import { combinarEstilos } from "./combinarEstilos";
+
+const styles = combinarEstilos(sharedStyles, featureStyles);
 
 
 type FiltroAtividade = "TODOS" | "ECONOMIA" | "COMPRAS" | "ADMIN";

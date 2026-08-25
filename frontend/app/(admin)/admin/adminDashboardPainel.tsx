@@ -1,7 +1,7 @@
 import { Activity, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import type { AdminDashboardResumo } from "../../lib/admin";
-import baseStyles from "../../styles/admin/admin.module.css";
+import baseStyles from "../../styles/admin/adminShared.module.css";
 import styles from "../../styles/admin/adminDashboardPainel.module.css";
 
 const raridades = ["UR", "SSR", "SR", "R", "N"] as const;

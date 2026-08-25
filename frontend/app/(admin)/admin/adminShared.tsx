@@ -16,7 +16,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import styles from "../../styles/admin/admin.module.css";
+import styles from "../../styles/admin/adminShared.module.css";
 import layoutStyles from "../../styles/admin/adminLayout.module.css";
 
 const nav = [

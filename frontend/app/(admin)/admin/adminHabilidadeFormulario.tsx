@@ -4,7 +4,11 @@ import type {
   AdminHabilidade,
   SalvarAdminHabilidadePayload,
 } from "../../lib/admin";
-import styles from "../../styles/admin/admin.module.css";
+import sharedStyles from "../../styles/admin/adminShared.module.css";
+import featureStyles from "../../styles/admin/adminHabilidades.module.css";
+import { combinarEstilos } from "./combinarEstilos";
+
+const styles = combinarEstilos(sharedStyles, featureStyles);
 
 export type FormHabilidade = SalvarAdminHabilidadePayload & { id?: string };
 

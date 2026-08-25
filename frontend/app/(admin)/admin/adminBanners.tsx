@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import styles from "../../styles/admin/admin.module.css";
+import styles from "../../styles/admin/adminShared.module.css";
 import { AdminLayout, DataTable } from "./adminShared";
 
 const banners = [

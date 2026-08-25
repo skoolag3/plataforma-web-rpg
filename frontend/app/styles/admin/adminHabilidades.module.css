@@ -1,0 +1,17 @@
+.habilidadesListaPanel{ margin-bottom: 0.8rem; }
+
+.habilidadesListaPanel .tableWrap{ border: 0; border-radius: 0; box-shadow: none; }
+
+.habilidadesListaPanel .tableWrap table{ min-width: 39rem; }
+
+.statusRascunho{
+  display: inline-flex;
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  border-radius: 999px;
+  background: rgba(161, 98, 7, 0.14);
+  padding: 0.16rem 0.4rem;
+  color: #fde047;
+  font-size: 0.65rem;
+  font-weight: 850;
+}
+

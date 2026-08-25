@@ -2,9 +2,13 @@
 
 import { Bot, Edit3, Plus, Save, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import styles from "../../styles/admin/admin.module.css";
+import sharedStyles from "../../styles/admin/adminShared.module.css";
+import featureStyles from "../../styles/admin/adminDecks.module.css";
 
 import { AdminLayout } from "./adminShared";
+import { combinarEstilos } from "./combinarEstilos";
+
+const styles = combinarEstilos(sharedStyles, featureStyles);
 
 
 type DeckNpc = {

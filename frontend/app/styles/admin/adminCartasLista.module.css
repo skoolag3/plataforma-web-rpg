@@ -1,0 +1,428 @@
+.lineChart .raridadeUR{ background: linear-gradient(180deg, #f9a8d4, #a855f7 58%, #6d28d9); }
+
+.lineChart .raridadeSSR{ background: linear-gradient(180deg, #fde68a, #f59e0b 58%, #b45309); }
+
+.lineChart .raridadeSR{ background: linear-gradient(180deg, #a5f3fc, #06b6d4 58%, #0e7490); }
+
+.lineChart .raridadeR{ background: linear-gradient(180deg, #c4b5fd, #8b5cf6 58%, #5b21b6); }
+
+.lineChart .raridadeN{ background: linear-gradient(180deg, #cbd5e1, #64748b 58%, #334155); }
+
+.cartasListaTopo > .cartasListaAcoes{
+  display: flex;
+  grid-auto-flow: initial;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ordenacaoCartas{
+  display: flex;
+  min-height: 2.35rem;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.5rem;
+  background: #0d1422;
+  padding: 0 0.3rem 0 0.55rem;
+  color: #94a3b8;
+}
+
+.ordenacaoCartas svg{ width: 0.82rem; height: 0.82rem; }
+
+.ordenacaoCartas select{
+  min-height: 2rem;
+  border: 0;
+  outline: 0;
+  background-color: transparent;
+  color: #e2e8f0;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+.ordenacaoCartas option{ background: #101827; color: #f8fafc; }
+
+.srOnly{
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.cartasWorkspace > .cartasToolbar > select,
+.cartasWorkspace > .cartasToolbar > .elementoSelect .elementoSelectTrigger{
+  height: 2rem;
+  min-height: 2rem;
+  border-color: rgba(148, 163, 184, 0.18) !important;
+  border-radius: 0.65rem;
+  background: #101725 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  font-size: 0.69rem;
+  line-height: 1;
+  box-shadow:
+    inset 1px 1px rgba(255, 255, 255, 0.06),
+    inset -1px -1px rgba(0, 0, 0, 0.48),
+    0 1px 2px rgba(0, 0, 0, 0.26);
+  transition: box-shadow 150ms ease, transform 150ms ease, border-color 150ms ease;
+}
+
+.cartasWorkspace > .cartasToolbar > .elementoSelect .elementoSelectTrigger{
+  padding-right: 0.58rem !important;
+  padding-left: 0.78rem !important;
+}
+
+.cartasWorkspace > .cartasToolbar .elementoSelectValor{
+  gap: 0.42rem;
+  line-height: 1;
+}
+
+.cartasWorkspace > .cartasToolbar .elementoSelectValor strong{
+  font-size: 0.69rem;
+  line-height: 1;
+}
+
+.cartasWorkspace > .cartasToolbar > .elementoSelect{
+  height: 2rem;
+}
+
+.cartasWorkspace > .cartasToolbar > select:focus,
+.cartasWorkspace > .cartasToolbar .elementoSelect:not(.elementoSelectVazio) .elementoSelectTrigger,
+.cartasWorkspace > .cartasToolbar .elementoSelectTrigger[aria-expanded="true"]{
+  box-shadow:
+    inset 1px 1px rgba(255, 255, 255, 0.05),
+    inset -1px -1px rgba(0, 0, 0, 0.5),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.cartasWorkspace > .cartasToolbar > .selectRaridade:not(:has(option:checked[value=""])){
+  box-shadow:
+    inset 1px 1px rgba(255, 255, 255, 0.05),
+    inset -1px -1px rgba(0, 0, 0, 0.5),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.cartasWorkspace > .cartasToolbar .elementoSelect .elementoIcone{
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.cartasWorkspace > .cartasToolbar .statusSelectIcone{
+  width: 1rem;
+  height: 1rem;
+}
+
+.periodoFiltro{
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 0.45rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  padding: 0.55rem 0.1rem 0.12rem;
+}
+
+.periodoCabecalho{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: #71809a;
+  font-size: 0.61rem;
+  font-weight: 700;
+}
+
+.periodoCabecalho strong{ color: #c4b5fd; font-size: 0.64rem; }
+
+.periodoFiltro input[type="range"]{
+  width: 100%;
+  height: 0.34rem;
+  min-height: 0;
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  outline: 0;
+  background: linear-gradient(to right, #8b5cf6 0 var(--periodo-progresso), #273247 var(--periodo-progresso) 100%);
+  cursor: pointer;
+}
+
+.periodoFiltro input[type="range"]::-webkit-slider-thumb{
+  width: 0.9rem;
+  height: 0.9rem;
+  appearance: none;
+  border: 2px solid #ddd6fe;
+  border-radius: 50%;
+  background: #7c3aed;
+  box-shadow: 0 0 0 3px #080d19;
+}
+
+.periodoFiltro input[type="range"]::-moz-range-thumb{
+  width: 0.72rem;
+  height: 0.72rem;
+  border: 2px solid #ddd6fe;
+  border-radius: 50%;
+  background: #7c3aed;
+  box-shadow: 0 0 0 3px #080d19;
+}
+
+.periodoMetas{
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  color: #66748c;
+  font-size: 0.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.periodoMetas span:first-child{ text-align: left; }
+
+.periodoMetas span:last-child{ text-align: right; }
+
+.cartasListaPanel .cardCell{ gap: 0.48rem; }
+
+.cartasListaPanel .cardThumb{ width: 1.8rem; height: 2.2rem; }
+
+.cartasListaPanel .elementoVisual{ gap: 0.38rem; }
+
+.cartasListaPanel .elementoVisual .elementoIcone{ width: 1.35rem; height: 1.35rem; }
+
+.cartasListaPanel .raridadeBadge{ min-width: 2.2rem; min-height: 1.35rem; padding: 0.12rem 0.4rem; font-size: 0.61rem; }
+
+.selectRaridade{
+  border-color: color-mix(in srgb, currentColor 38%, transparent) !important;
+  color: #e2e8f0;
+  font-weight: 850 !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.selectRaridade.raridadeUR{ color: #f0abfc; background-color: rgba(126, 34, 206, 0.16); }
+
+.selectRaridade.raridadeSSR{ color: #fcd34d; background-color: rgba(180, 83, 9, 0.16); }
+
+.selectRaridade.raridadeSR{ color: #67e8f9; background-color: rgba(8, 145, 178, 0.16); }
+
+.selectRaridade.raridadeR{ color: #c4b5fd; background-color: rgba(109, 40, 217, 0.14); }
+
+.selectRaridade.raridadeN{ color: #cbd5e1; background-color: rgba(71, 85, 105, 0.16); }
+
+.selectRaridade option{
+  background: #111827;
+  font-weight: 800;
+}
+
+.selectRaridade option[value=""]{ color: #f8fafc; }
+
+.selectRaridade option.raridadeUR{ color: #f0abfc; }
+
+.selectRaridade option.raridadeSSR{ color: #fcd34d; }
+
+.selectRaridade option.raridadeSR{ color: #67e8f9; }
+
+.selectRaridade option.raridadeR{ color: #c4b5fd; }
+
+.selectRaridade option.raridadeN{ color: #cbd5e1; }
+
+.elementoVisual{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--elemento-cor);
+}
+
+.elementoVisual strong,
+.nomeCartaElemento{
+  color: var(--elemento-cor);
+  font-weight: 850;
+}
+
+.elementoIcone{
+  display: inline-block;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--elemento-cor) 52%, transparent);
+  border-radius: 0.45rem;
+  background-color: color-mix(in srgb, var(--elemento-cor) 12%, #070c19);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.elementoSelect{
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.elementoSelect .elementoIcone{
+  width: 1.55rem;
+  height: 1.55rem;
+}
+
+.elementoSelectTrigger{
+  display: flex;
+  width: 100%;
+  min-height: 2.65rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--elemento-cor) 48%, transparent) !important;
+  border-radius: 0.52rem;
+  background: rgba(2, 6, 18, 0.78) !important;
+  color: var(--elemento-cor) !important;
+  cursor: pointer;
+  padding: 0.45rem 0.65rem !important;
+  font: inherit;
+  font-weight: 850 !important;
+  text-align: left;
+}
+
+.elementoSelectTrigger > svg{
+  width: 1rem;
+  flex: 0 0 auto;
+  transition: transform 150ms ease;
+}
+
+.elementoSelectTrigger[aria-expanded="true"] > svg{
+  transform: rotate(180deg);
+}
+
+.elementoSelectValor{
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.elementoSelectValor strong{
+  overflow: hidden;
+  color: var(--elemento-cor);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.elementoSelectVazio .elementoSelectTrigger{
+  color: #cbd5e1 !important;
+}
+
+.cartasToolbar > .elementoSelect{
+  min-width: 0;
+}
+
+.cartasToolbar > .elementoSelect,
+.cartasToolbar > .elementoSelect .elementoSelectTrigger{
+  width: 100%;
+  height: 2.55rem;
+}
+
+.elementoOpcoes{
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  left: 0;
+  display: grid;
+  gap: 0.18rem;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.58rem;
+  background: #0d1322;
+  padding: 0.3rem;
+}
+
+.elementoOpcoes > button{
+  display: flex;
+  width: 100%;
+  min-height: 2.45rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 0.42rem;
+  background: transparent;
+  color: var(--elemento-cor, #cbd5e1);
+  cursor: pointer;
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+}
+
+.elementoOpcoes > button:hover,
+.elementoOpcoes > button[aria-selected="true"]{
+  border-color: color-mix(in srgb, var(--elemento-cor, #94a3b8) 38%, transparent);
+  background: color-mix(in srgb, var(--elemento-cor, #94a3b8) 12%, transparent);
+}
+
+.elementoOpcoes > button > svg{
+  width: 1rem;
+  flex: 0 0 auto;
+}
+
+.elementoOpcaoNeutra{
+  color: #cbd5e1;
+  font-weight: 750;
+}
+
+.statusSelectIcone{
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+  color: var(--elemento-cor);
+}
+
+.nomePersonagemElemento{
+  border-color: color-mix(in srgb, var(--elemento-cor) 38%, rgba(148, 163, 184, 0.2)) !important;
+  color: var(--elemento-cor) !important;
+  font-weight: 800 !important;
+}
+
+.raridadeBadge{
+  display: inline-flex;
+  min-width: 2.6rem;
+  min-height: 1.55rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.raridadeBadge.raridadeUR{ color: #f0abfc; background: rgba(126, 34, 206, 0.2); }
+
+.raridadeBadge.raridadeSSR{ color: #fcd34d; background: rgba(180, 83, 9, 0.2); }
+
+.raridadeBadge.raridadeSR{ color: #67e8f9; background: rgba(8, 145, 178, 0.2); }
+
+.raridadeBadge.raridadeR{ color: #c4b5fd; background: rgba(109, 40, 217, 0.18); }
+
+.raridadeBadge.raridadeN{ color: #cbd5e1; background: rgba(71, 85, 105, 0.2); }
+
+.cardCell{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 850;
+}
+
+.cardThumb{
+  display: inline-block;
+  width: 2.25rem;
+  height: 2.75rem;
+  border: 1px solid rgba(168, 85, 247, 0.55);
+  border-radius: 0.3rem;
+  display: inline-grid;
+  place-items: center;
+  color: #64748b;
+  background: linear-gradient(145deg, #24283a, #10131c);
+  background-position: center;
+  background-size: cover;
+}
+
+.cardThumb svg{ width: 1rem; }
+
+@media (max-width: 720px){.cartasListaTopo > .cartasListaAcoes{ justify-content: space-between; }}
+
