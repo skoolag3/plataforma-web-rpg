@@ -1,3 +1,5 @@
+import type { ConfigVisualCarta } from "../components/cartaMontada";
+
 export type PreferenciasConta = {
   receberNotificacoes: boolean;
   mostrarNoRanking: boolean;
@@ -13,6 +15,7 @@ export type PerfilConta = {
   moldura: string;
   molduraClasse: string;
   molduraUrl?: string | null;
+  molduraConfig?: ConfigVisualCarta | null;
   avatarUrl?: string | null;
   bannerUrl?: string | null;
   googleVinculado: boolean;
@@ -37,6 +40,7 @@ export type MolduraConta = {
   descricao?: string | null;
   classeCss: string;
   imagemUrl?: string | null;
+  configVisual?: ConfigVisualCarta | null;
   requisito?: string | null;
   obtida: boolean;
 };
@@ -62,6 +66,7 @@ async function requisicaoPerfil<T>(
 ): Promise<T> {
   const resposta = await fetch(`${API_URL}${caminho}`, {
     ...opcoes,
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -146,6 +151,7 @@ export function selecionarMolduraApi(token: string, idMoldura: string) {
       moldura: string;
       molduraClasse: string;
       molduraUrl?: string | null;
+      molduraConfig?: ConfigVisualCarta | null;
     }
   >(token, "/perfil/moldura", {
     method: "PATCH",

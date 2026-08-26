@@ -38,6 +38,7 @@ export function AdminNoticias() {
   const [noticias, setNoticias] = useState<AdminNoticia[]>([]);
   const [form, setForm] = useState(formularioVazio);
   const [editando, setEditando] = useState<string | null>(null);
+  const [editorAberto, setEditorAberto] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
 
@@ -64,10 +65,19 @@ export function AdminNoticias() {
     setEditando(null);
     setForm(formularioVazio);
     setErro("");
+    setEditorAberto(true);
+  }
+
+  function fecharEditor() {
+    setEditando(null);
+    setForm(formularioVazio);
+    setErro("");
+    setEditorAberto(false);
   }
 
   function editar(noticia: AdminNoticia) {
     setEditando(noticia.id);
+    setEditorAberto(true);
     setForm({
       titulo: noticia.titulo,
       resumo: noticia.resumo,
@@ -113,7 +123,7 @@ export function AdminNoticias() {
     try {
       if (editando) await atualizarAdminNoticia(editando, form);
       else await criarAdminNoticia(form);
-      novo();
+      fecharEditor();
       await carregar();
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro ao salvar notícia.");
@@ -125,7 +135,7 @@ export function AdminNoticias() {
   async function remover(id: string) {
     if (!window.confirm("Remover esta notícia definitivamente?")) return;
     await removerAdminNoticia(id);
-    if (editando === id) novo();
+    if (editando === id) fecharEditor();
     await carregar();
   }
 
@@ -134,18 +144,26 @@ export function AdminNoticias() {
       title="Notícias e propaganda"
       subtitle="Crie chamadas para a página inicial e conteúdos completos por assunto."
     >
-      <div className={styles.layout}>
+      <div
+        className={`${styles.layout} ${!editorAberto ? styles.layoutFechado : ""}`}
+      >
         <section className={styles.lista}>
           <header>
             <div>
               <strong>Publicações</strong>
-              <small>{noticias.length} cadastradas</small>
+              <small>
+                {noticias.length}{" "}
+                {noticias.length === 1 ? "cadastrada" : "cadastradas"}
+              </small>
             </div>
             <button onClick={novo}>
-              <Plus /> Nova
+              <Plus /> Criar publicação
             </button>
           </header>
           <div>
+            {erro && !editorAberto ? (
+              <p className={styles.erroLista}>{erro}</p>
+            ) : null}
             {noticias.map((noticia) => (
               <article key={noticia.id}>
                 {noticia.imagem ? (
@@ -182,139 +200,152 @@ export function AdminNoticias() {
           </div>
         </section>
 
-        <section className={styles.formulario}>
-          <header>
-            <div>
-              <strong>
-                {editando ? "Editar publicação" : "Nova publicação"}
-              </strong>
-              <small>
-                O resumo aparece no banner; o conteúdo completo fica na página
-                interna.
-              </small>
-            </div>
-            {editando ? (
-              <button onClick={novo}>
+        {editorAberto ? (
+          <section className={styles.formulario}>
+            <header>
+              <div>
+                <strong>
+                  {editando ? "Editar publicação" : "Nova publicação"}
+                </strong>
+                <small>
+                  O resumo aparece no banner; o conteúdo completo fica na página
+                  interna.
+                </small>
+              </div>
+              <button onClick={fecharEditor} title="Fechar editor">
                 <X />
               </button>
-            ) : null}
-          </header>
-          <div className={styles.camposDuplos}>
-            <label>
-              <span>Título</span>
-              <input
-                value={form.titulo}
-                onChange={(e) => atualizar("titulo", e.target.value)}
-              />
-            </label>
-            <label>
-              <span>Categoria</span>
-              <select
-                value={form.categoria}
-                onChange={(e) =>
-                  atualizar(
-                    "categoria",
-                    e.target.value as SalvarAdminNoticiaPayload["categoria"],
-                  )
-                }
-              >
-                <option>NOVIDADE</option>
-                <option>BALANCE</option>
-                <option>EVENTO</option>
-                <option>AVISO</option>
-              </select>
-            </label>
-          </div>
-          <label>
-            <span>Resumo do banner</span>
-            <textarea
-              rows={2}
-              maxLength={320}
-              value={form.resumo}
-              onChange={(e) => atualizar("resumo", e.target.value)}
-            />
-          </label>
-          <label>
-            <span>Conteúdo completo</span>
-            <textarea
-              rows={8}
-              value={form.conteudo}
-              onChange={(e) => atualizar("conteudo", e.target.value)}
-            />
-          </label>
-          <div className={styles.imagemCampo}>
-            <label>
-              <ImagePlus />
-              <span>Imagem de capa</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => void enviarImagem(e)}
-              />
-            </label>
-            {form.imagem ? (
-              <Image src={form.imagem} alt="Prévia" width={220} height={110} />
-            ) : null}
-          </div>
-          <div className={styles.anexos}>
-            <header>
-              <strong>
-                <Link2 /> Anexos
-              </strong>
-              <button
-                onClick={() =>
-                  atualizar("anexos", [...form.anexos, { titulo: "", url: "" }])
-                }
-              >
-                <Plus /> Adicionar
-              </button>
             </header>
-            {form.anexos.map((anexo, indice) => (
-              <div key={indice}>
+            <div className={styles.camposDuplos}>
+              <label>
+                <span>Título</span>
                 <input
-                  placeholder="Nome do anexo"
-                  value={anexo.titulo}
-                  onChange={(e) =>
-                    atualizarAnexo(indice, "titulo", e.target.value)
-                  }
+                  value={form.titulo}
+                  onChange={(e) => atualizar("titulo", e.target.value)}
                 />
-                <input
-                  placeholder="https://..."
-                  value={anexo.url}
+              </label>
+              <label>
+                <span>Categoria</span>
+                <select
+                  value={form.categoria}
                   onChange={(e) =>
-                    atualizarAnexo(indice, "url", e.target.value)
-                  }
-                />
-                <button
-                  onClick={() =>
                     atualizar(
-                      "anexos",
-                      form.anexos.filter((_, i) => i !== indice),
+                      "categoria",
+                      e.target.value as SalvarAdminNoticiaPayload["categoria"],
                     )
                   }
                 >
-                  <X />
+                  <option>NOVIDADE</option>
+                  <option>BALANCE</option>
+                  <option>EVENTO</option>
+                  <option>AVISO</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              <span>Resumo do banner</span>
+              <textarea
+                rows={2}
+                maxLength={320}
+                value={form.resumo}
+                onChange={(e) => atualizar("resumo", e.target.value)}
+              />
+            </label>
+            <label>
+              <span>Conteúdo completo</span>
+              <textarea
+                rows={6}
+                value={form.conteudo}
+                onChange={(e) => atualizar("conteudo", e.target.value)}
+              />
+            </label>
+            <div className={styles.imagemCampo}>
+              <label>
+                <ImagePlus />
+                <span>Imagem de capa</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => void enviarImagem(e)}
+                />
+              </label>
+              {form.imagem ? (
+                <Image
+                  src={form.imagem}
+                  alt="Prévia"
+                  width={220}
+                  height={110}
+                />
+              ) : null}
+            </div>
+            <div className={styles.anexos}>
+              <header>
+                <strong>
+                  <Link2 /> Anexos
+                </strong>
+                <button
+                  onClick={() =>
+                    atualizar("anexos", [
+                      ...form.anexos,
+                      { titulo: "", url: "" },
+                    ])
+                  }
+                >
+                  <Plus /> Adicionar
                 </button>
-              </div>
-            ))}
-          </div>
-          <label className={styles.publicar}>
-            <input
-              type="checkbox"
-              checked={form.publicada}
-              onChange={(e) => atualizar("publicada", e.target.checked)}
-            />
-            <span>Publicar na página inicial</span>
-          </label>
-          {erro ? <p className={styles.erro}>{erro}</p> : null}
-          <button
-            className={styles.salvar}
-            disabled={salvando}
-            onClick={() => void salvar()}
-          >
-            <Save /> {salvando ? "Salvando..." : "Salvar publicação"}
-          </button>
-        </section>
+              </header>
+              {form.anexos.map((anexo, indice) => (
+                <div key={indice}>
+                  <input
+                    placeholder="Nome do anexo"
+                    value={anexo.titulo}
+                    onChange={(e) =>
+                      atualizarAnexo(indice, "titulo", e.target.value)
+                    }
+                  />
+                  <input
+                    placeholder="https://..."
+                    value={anexo.url}
+                    onChange={(e) =>
+                      atualizarAnexo(indice, "url", e.target.value)
+                    }
+                  />
+                  <button
+                    onClick={() =>
+                      atualizar(
+                        "anexos",
+                        form.anexos.filter((_, i) => i !== indice),
+                      )
+                    }
+                  >
+                    <X />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <label className={styles.publicar}>
+              <input
+                type="checkbox"
+                checked={form.publicada}
+                onChange={(e) => atualizar("publicada", e.target.checked)}
+              />
+              <span>Publicar na página inicial</span>
+            </label>
+            {erro ? <p className={styles.erro}>{erro}</p> : null}
+            <button
+              className={styles.salvar}
+              disabled={salvando}
+              onClick={() => void salvar()}
+            >
+              <Save />
+              {salvando
+                ? "Salvando..."
+                : editando
+                  ? "Salvar alterações"
+                  : "Criar publicação"}
+            </button>
+          </section>
+        ) : null}
       </div>
     </AdminLayout>
   );

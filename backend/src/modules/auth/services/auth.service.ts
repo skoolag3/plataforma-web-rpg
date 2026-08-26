@@ -152,6 +152,8 @@ export class AuthService {
 
   async solicitarRedefinicaoSenha(data: SolicitarRedefinicaoSenhaDto) {
     const email = data.email.toLowerCase().trim();
+    const mensagem =
+      'Se o e-mail existir, enviaremos um link para alterar a senha.';
     this.validarEmail(email);
     await this.validarEmailEntregavel(email);
 
@@ -160,7 +162,7 @@ export class AuthService {
     });
 
     if (!usuario || usuario.excluido_em) {
-      throw new BadRequestException('E-mail não encontrado.');
+      return { message: mensagem };
     }
 
     const usuarioComToken = await this.atualizarTokenRedefinicaoSenha(
@@ -174,7 +176,7 @@ export class AuthService {
     });
 
     return {
-      message: 'Enviamos um link para alterar a senha.',
+      message: mensagem,
     };
   }
 

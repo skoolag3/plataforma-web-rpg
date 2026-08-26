@@ -70,6 +70,9 @@ describe('PerfilService', () => {
         id: '81ca9b78-93ca-46eb-bc41-e29327724f2f',
         nome: 'Flare',
         moldura: 'https://cdn.exemplo.com/flare.png',
+        config_visual: {
+          molduraPerfil: { escalaX: 1.1, escalaY: 0.9, x: 2, y: -1 },
+        },
       },
     });
     prisma.perfilUsuario.upsert.mockResolvedValue({});
@@ -94,6 +97,9 @@ describe('PerfilService', () => {
       expect.objectContaining({
         moldura: 'Moldura de Flare',
         molduraUrl: 'https://cdn.exemplo.com/flare.png',
+        molduraConfig: expect.objectContaining({
+          molduraPerfil: expect.objectContaining({ escalaX: 1.1 }),
+        }),
       }),
     );
   });

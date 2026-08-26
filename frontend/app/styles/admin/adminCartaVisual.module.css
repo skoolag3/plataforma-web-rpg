@@ -373,9 +373,73 @@
   text-transform: uppercase;
 }
 
+.ajudaPresetPerfil {
+  margin-top: -0.25rem;
+  color: #7f8aa0;
+  font-size: 0.62rem;
+  line-height: 1.4;
+}
+
+.presetPerfilGrid {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: start;
+}
+
+.previewAvatarPerfil {
+  position: sticky;
+  top: 0.6rem;
+  display: grid;
+  width: 7.5rem;
+  height: 7.5rem;
+  overflow: visible;
+  place-items: center;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  border-radius: 1rem;
+  background-color: #211d31;
+  background-position: center;
+  background-size: cover;
+}
+
+.previewAvatarPerfil > svg {
+  width: 3.6rem;
+  color: #d8d2e8;
+}
+
+.previewMolduraPerfil {
+  position: absolute;
+  inset: -0.3rem;
+  z-index: 2;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+  transform: translate(var(--perfilMolduraX), var(--perfilMolduraY))
+    rotate(var(--perfilMolduraRotacao))
+    scale(var(--perfilMolduraEscalaX), var(--perfilMolduraEscalaY));
+}
+
+.controlesPresetPerfil {
+  display: grid;
+  gap: 0.5rem;
+}
+
 .controleFaixa {
   display: grid !important;
   gap: 0.28rem !important;
+}
+
+@media (max-width: 620px) {
+  .presetPerfilGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .previewAvatarPerfil {
+    position: relative;
+    top: auto;
+    margin-inline: auto;
+  }
 }
 
 .controleFaixa > span {

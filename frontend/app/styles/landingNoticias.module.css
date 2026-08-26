@@ -3,8 +3,47 @@
   z-index: 2;
   scroll-margin-top: 1rem;
   overflow: hidden;
-  background: #07080c;
+  border-top: 1px solid rgba(139, 92, 246, 0.1);
+  background:
+    radial-gradient(
+      circle at 12% 30%,
+      rgba(190, 242, 100, 0.08),
+      transparent 25rem
+    ),
+    radial-gradient(
+      circle at 78% 18%,
+      rgba(124, 58, 237, 0.2),
+      transparent 34rem
+    ),
+    linear-gradient(145deg, #0b0913 0%, #080910 48%, #07080c 100%);
   padding: clamp(3.5rem, 7vw, 6rem) 0 clamp(4rem, 8vw, 7rem);
+}
+
+.secaoNoticias::before {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 4rem 4rem;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+  content: "";
+  pointer-events: none;
+}
+
+.secaoNoticias::after {
+  position: absolute;
+  top: -12rem;
+  right: -9rem;
+  width: 32rem;
+  height: 32rem;
+  border: 1px solid rgba(190, 242, 100, 0.08);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 5rem rgba(124, 58, 237, 0.025),
+    0 0 0 10rem rgba(124, 58, 237, 0.018);
+  content: "";
+  pointer-events: none;
 }
 
 .cabecalhoNoticias {
@@ -54,11 +93,16 @@
   margin: 0 auto;
 }
 
+.gradeNoticias:has(> :nth-child(2):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .cardNoticia {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  min-height: 17rem;
+  min-height: 15rem;
+  aspect-ratio: 16 / 10;
   border: 1px solid var(--corBorda);
   border-radius: 0.85rem;
   background: #0f1118;
@@ -77,8 +121,8 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(7, 8, 12, 0.18) 0%,
-    rgba(7, 8, 12, 0.72) 48%,
+    rgba(7, 8, 12, 0.22) 0%,
+    rgba(7, 8, 12, 0.65) 48%,
     rgba(7, 8, 12, 0.98) 100%
   );
   content: "";
@@ -97,11 +141,14 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 42%;
 }
 
 .cardNoticia:hover {
   border-color: rgba(190, 242, 100, 0.28);
-  box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.24);
+  box-shadow:
+    0 1.5rem 3rem rgba(0, 0, 0, 0.28),
+    0 0 2.5rem rgba(124, 58, 237, 0.1);
   transform: translateY(-3px);
 }
 
@@ -167,7 +214,7 @@
   font-weight: 900;
 }
 
-.lerMais {
+.cardNoticia > .lerMais {
   position: absolute;
   right: 1.35rem;
   bottom: 1.35rem;

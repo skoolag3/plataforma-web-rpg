@@ -1,30 +1,31 @@
-.cardResumo,
-.cardPreferencias,
-.zonaPerigo {
+.cardResumo {
   border: 1px solid var(--member-border);
   border-radius: var(--member-radius);
-  background: linear-gradient(145deg, rgba(255,255,255,.035), transparent 46%), var(--member-surface);
-  box-shadow: inset 0 1px rgba(255,255,255,.045), 0 1rem 3rem rgba(0,0,0,.12);
-  padding: 1.3rem 1.4rem;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.035), transparent 46%),
+    var(--member-surface);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.045),
+    0 1rem 3rem rgba(0, 0, 0, 0.12);
+  padding: 1rem;
 }
 
 .cardResumo {
-  border-color: rgba(167,139,250,.3);
-  box-shadow: inset 0 1px rgba(255,255,255,.05), 0 1rem 3rem rgba(0,0,0,.14);
+  border-color: rgba(167, 139, 250, 0.3);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.05),
+    0 1rem 3rem rgba(0, 0, 0, 0.14);
 }
 
-.cardResumo h2,
-.cardPreferencias h2,
-.zonaPerigo h2 {
+.cardResumo h2 {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  margin: 0 0 1rem;
-  font-size: 0.95rem;
+  margin: 0 0 0.55rem;
+  font-size: 0.85rem;
 }
 
-.cardResumo h2 svg,
-.cardPreferencias h2 svg {
+.cardResumo h2 svg {
   width: 1.45rem;
   color: #9b6cff;
 }
@@ -36,7 +37,7 @@
 
 .listaResumo > div {
   display: flex;
-  min-height: 2.7rem;
+  min-height: 2.25rem;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
@@ -47,7 +48,7 @@
   align-items: center;
   gap: 0.62rem;
   color: #c2c7d2;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
 }
 
 .listaResumo dt svg {
@@ -58,7 +59,7 @@
 .listaResumo dd {
   margin: 0;
   color: #a987ff;
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 750;
   text-align: right;
 }
@@ -69,87 +70,12 @@
   padding-top: 0.35rem;
 }
 
-.cardPreferencias {
-  display: grid;
-  gap: 0.78rem;
-}
-
-.cardPreferencias h2 {
-  margin-bottom: 0.45rem;
-}
-
-.cardPreferencias label {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  color: #d0d4de;
-  cursor: pointer;
-  font-size: 0.78rem;
-}
-
-.cardPreferencias input {
-  width: 1.15rem;
-  height: 1.15rem;
-  margin: 0;
-  accent-color: #7c3aed;
-}
-
-.cardPreferencias > small {
-  color: #8f98ac;
-  font-size: 0.66rem;
-}
-
 .sucessoPreferencia {
   color: #6ee7b7 !important;
 }
 
 .erroPreferencia {
   color: #fda4af !important;
-}
-
-.zonaPerigo {
-  border-color: #f43f5240;
-}
-
-.zonaPerigo h2 {
-  margin-bottom: 0.45rem;
-  color: #fb3f5c;
-}
-
-.zonaPerigo h2 svg {
-  width: 1.35rem;
-}
-
-.zonaPerigo p {
-  margin: 0 0 0.8rem;
-  color: #9ca3b3;
-  font-size: 0.72rem;
-}
-
-.zonaPerigo button {
-  display: flex;
-  width: 100%;
-  min-height: 2.55rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 0.55rem;
-  border: 1px solid #f43f52b8;
-  border-radius: 0.75rem;
-  background: #7f1d1d0d;
-  color: #fb4d67;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 750;
-}
-
-.zonaPerigo button:hover {
-  background: #be185e1f;
-}
-
-.zonaPerigo button svg {
-  width: 1rem;
 }
 
 @media (max-width: 850px) {
@@ -162,4 +88,61 @@
   .cardResumo {
     grid-row: auto;
   }
+}
+
+.listaPreferencias {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.listaPreferencias label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #d0d4de;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.listaPreferencias input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  accent-color: #7c3aed;
+}
+
+.listaPreferencias > small {
+  color: #8f98ac;
+  font-size: 0.66rem;
+}
+
+.zonaPerigoConteudo p {
+  margin: 0 0 0.7rem;
+  color: #9ca3b3;
+  font-size: 0.7rem;
+}
+
+.zonaPerigoConteudo button {
+  display: flex;
+  width: 100%;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
+  border: 1px solid #f43f52a0;
+  border-radius: 0.65rem;
+  background: #7f1d1d0d;
+  color: #fb4d67;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.zonaPerigoConteudo button:hover {
+  background: #be185e1f;
+}
+.zonaPerigoConteudo button svg {
+  width: 0.9rem;
 }

@@ -47,7 +47,7 @@
 .avatarVisual { position:relative; display:grid; width:2.35rem; height:2.35rem; aspect-ratio:1 / 1; flex:0 0 auto; place-items:center; }
 .fotoAvatar { display:grid; width:100%; height:100%; overflow:hidden; place-items:center; border:1px solid rgba(167,139,250,.28); border-radius:.62rem; background-color:#202438; background-position:center; background-repeat:no-repeat; background-size:cover; }
 .fotoAvatar svg { width:1.05rem; }
-.molduraImagem { position:absolute; inset:-.16rem; z-index:2; background-position:center; background-repeat:no-repeat; background-size:100% 100%; pointer-events:none; transform:translateY(.04rem) scaleY(1.04); }
+.molduraImagem { position:absolute; inset:-.16rem; z-index:2; background-position:center; background-repeat:no-repeat; background-size:100% 100%; pointer-events:none; transform:translate(var(--perfilMolduraX),var(--perfilMolduraY)) rotate(var(--perfilMolduraRotacao)) scale(var(--perfilMolduraEscalaX),var(--perfilMolduraEscalaY)); }
 .molduraImagem::before { position:absolute; inset:0; background-image:inherit; background-position:center; background-repeat:no-repeat; background-size:100% 100%; content:""; opacity:.9; transform:scale(.91); }
 .molduraPadrao .fotoAvatar { border-color:#64748b; }
 .molduraVioleta .fotoAvatar { border-color:#8b5cf6; }

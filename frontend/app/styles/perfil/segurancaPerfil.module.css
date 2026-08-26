@@ -1,42 +1,8 @@
-.cardSeguranca {
-  border: 1px solid var(--member-border);
-  border-radius: var(--member-radius);
-  background: linear-gradient(145deg, rgba(255,255,255,.035), transparent 46%), var(--member-surface);
-  box-shadow: inset 0 1px rgba(255,255,255,.045), 0 1rem 3rem rgba(0,0,0,.12);
-  padding: 1.25rem;
-}
-
-.cabecalhoSeguranca {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 0.95rem;
-}
-
-.cabecalhoSeguranca h2 {
-  margin: 0;
-  font-size: 0.98rem;
-}
-
-.cabecalhoSeguranca p {
-  margin: 0.25rem 0 0;
-  color: #9da5b8;
-  font-size: 0.74rem;
-}
-
-.iconeConfig,
 .iconeItemSeguranca {
   display: grid;
   place-items: center;
   background: #4c1d9524;
   color: #a78bfa;
-}
-
-.iconeConfig {
-  width: 2.55rem;
-  height: 2.55rem;
-  border: 1px solid #8b5cf63d;
-  border-radius: 50%;
 }
 
 .iconeItemSeguranca {
@@ -45,7 +11,6 @@
   border-radius: 0.5rem;
 }
 
-.iconeConfig svg,
 .iconeItemSeguranca svg {
   width: 1rem;
 }
@@ -62,8 +27,8 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.8rem;
   align-items: center;
-  min-height: 4.25rem;
-  padding: 0.7rem 0.85rem;
+  min-height: 3.55rem;
+  padding: 0.5rem 0.7rem;
 }
 
 .itemSeguranca + .itemSeguranca,

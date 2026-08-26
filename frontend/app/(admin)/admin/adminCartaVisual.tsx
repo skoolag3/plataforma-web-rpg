@@ -8,6 +8,7 @@ import {
   CircleOff,
   ImagePlus,
   Trash2,
+  UserRound,
 } from "lucide-react";
 import {
   useEffect,
@@ -19,6 +20,7 @@ import {
 import {
   CartaMontada,
   PROPORCAO_CARTA,
+  criarEstiloMolduraPerfil,
   criarConfigVisualPadrao,
   type ConfigVisualCarta,
   type DimensoesImagem,
@@ -470,9 +472,13 @@ export function PreviewCarta({
 export function ControleVisualCarta({
   value,
   onChange,
+  arte,
+  moldura,
 }: {
   value: ConfigVisualCarta;
   onChange: (value: ConfigVisualCarta) => void;
+  arte?: string;
+  moldura?: string;
 }) {
   function atualizarArte(
     campo: keyof ConfigVisualCarta["arte"],
@@ -486,6 +492,16 @@ export function ControleVisualCarta({
     valor: number,
   ) {
     onChange({ ...value, moldura: { ...value.moldura, [campo]: valor } });
+  }
+
+  function atualizarMolduraPerfil(
+    campo: keyof ConfigVisualCarta["molduraPerfil"],
+    valor: number,
+  ) {
+    onChange({
+      ...value,
+      molduraPerfil: { ...value.molduraPerfil, [campo]: valor },
+    });
   }
 
   return (
@@ -622,6 +638,81 @@ export function ControleVisualCarta({
           sufixo="%"
           onChange={(valor) => atualizarMoldura("base", valor)}
         />
+      </div>
+      <div className={styles.grupoControles}>
+        <strong>Preset da moldura no perfil</strong>
+        <small className={styles.ajudaPresetPerfil}>
+          Define o encaixe usado no avatar do jogador e na barra de navegação.
+        </small>
+        <div className={styles.presetPerfilGrid}>
+          <span
+            className={styles.previewAvatarPerfil}
+            style={arte ? { backgroundImage: `url("${arte}")` } : undefined}
+          >
+            {!arte ? <UserRound aria-hidden="true" /> : null}
+            {moldura ? (
+              <i
+                className={styles.previewMolduraPerfil}
+                style={{
+                  ...criarEstiloMolduraPerfil(value),
+                  backgroundImage: `url("${moldura}")`,
+                }}
+                aria-hidden="true"
+              />
+            ) : null}
+          </span>
+          <div className={styles.controlesPresetPerfil}>
+            <ControleFaixa
+              rotulo="Largura"
+              value={value.molduraPerfil.escalaX}
+              min={0.5}
+              max={2}
+              step={0.01}
+              onChange={(valor) =>
+                atualizarMolduraPerfil("escalaX", valor)
+              }
+            />
+            <ControleFaixa
+              rotulo="Altura"
+              value={value.molduraPerfil.escalaY}
+              min={0.5}
+              max={2}
+              step={0.01}
+              onChange={(valor) =>
+                atualizarMolduraPerfil("escalaY", valor)
+              }
+            />
+            <ControleFaixa
+              rotulo="Horizontal"
+              value={value.molduraPerfil.x}
+              min={-50}
+              max={50}
+              step={0.5}
+              sufixo="%"
+              onChange={(valor) => atualizarMolduraPerfil("x", valor)}
+            />
+            <ControleFaixa
+              rotulo="Vertical"
+              value={value.molduraPerfil.y}
+              min={-50}
+              max={50}
+              step={0.5}
+              sufixo="%"
+              onChange={(valor) => atualizarMolduraPerfil("y", valor)}
+            />
+            <ControleFaixa
+              rotulo="Rotação"
+              value={value.molduraPerfil.rotacao}
+              min={-20}
+              max={20}
+              step={0.5}
+              sufixo="°"
+              onChange={(valor) =>
+                atualizarMolduraPerfil("rotacao", valor)
+              }
+            />
+          </div>
+        </div>
       </div>
     </section>
   );

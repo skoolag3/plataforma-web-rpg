@@ -38,7 +38,7 @@
     "cloudinary": "^2.10.0",
     "deep-email-validator": "^0.1.27",
     "dotenv": "^17.4.2",
-    "nodemailer": "^8.0.7",
+    "nodemailer": "^9.0.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.20.0",

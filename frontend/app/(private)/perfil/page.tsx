@@ -58,9 +58,7 @@ export default function PerfilPage() {
     if (!token) throw new Error("Sessão expirada.");
 
     const resposta = await atualizarNomeApi(token, nome);
-    setPerfil((atual) =>
-      atual ? { ...atual, user: resposta.nome } : atual,
-    );
+    setPerfil((atual) => (atual ? { ...atual, user: resposta.nome } : atual));
     updateStoredUser({ nome: resposta.nome });
     return resposta.message;
   }
@@ -122,6 +120,7 @@ export default function PerfilPage() {
             moldura: resposta.moldura,
             molduraClasse: resposta.molduraClasse,
             molduraUrl: resposta.molduraUrl ?? null,
+            molduraConfig: resposta.molduraConfig ?? null,
           }
         : atual,
     );
@@ -205,11 +204,8 @@ export default function PerfilPage() {
         <div className={styles.conteudoPerfil}>
           <header className={styles.cabecalhoPerfil}>
             <p className={styles.sobretitulo}>Conta do jogador</p>
-            <h1>Gerenciamento de Perfil</h1>
-            <p>
-              Gerencie suas informações pessoais, segurança e preferências da
-              conta.
-            </p>
+            <h1>Seu perfil</h1>
+            <p>Identidade, progresso e configurações da sua conta.</p>
           </header>
 
           <div className={styles.gradePerfil}>

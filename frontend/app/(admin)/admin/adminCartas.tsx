@@ -828,6 +828,8 @@ export function NovaCarta() {
               />
               <ControleVisualCarta
                 value={form.configVisual}
+                arte={cardImage}
+                moldura={cardFrame}
                 onChange={(configVisual) =>
                   updateField("configVisual", configVisual)
                 }
@@ -1264,6 +1266,8 @@ function CartaEditor({
               />
               <ControleVisualCarta
                 value={form.configVisual}
+                arte={cardImage}
+                moldura={cardFrame}
                 onChange={(configVisual) =>
                   updateField("configVisual", configVisual)
                 }

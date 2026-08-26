@@ -1,10 +1,12 @@
 "use client";
 
 import { Ban, RotateCcw, ShieldAlert, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import styles from "../../../styles/perfil/painelPerfil.module.css";
 import modalStyles from "../../../styles/perfil/modalPerfil.module.css";
 import { ModalEdicao } from "./modalEdicao";
+import { SecaoRecolhivel } from "./secaoRecolhivel";
 
 type PropsZonaPerigo = {
   exclusaoAgendadaPara: string | null;
@@ -19,6 +21,7 @@ export function ZonaPerigo({
   aoExcluir,
   aoCancelarExclusao,
 }: PropsZonaPerigo) {
+  const router = useRouter();
   const [acao, setAcao] = useState<"desativar" | "excluir" | null>(null);
   const [erro, setErro] = useState("");
   const [mensagem, setMensagem] = useState("");
@@ -38,34 +41,41 @@ export function ZonaPerigo({
 
   return (
     <>
-      <section className={styles.zonaPerigo}>
-        <h2>
-          <ShieldAlert aria-hidden="true" />
-          Zona de perigo
-        </h2>
-        <p>
-          {exclusaoAgendadaPara
-            ? `Exclusão agendada para ${exclusaoAgendadaPara}.`
-            : "A exclusão é agendada por 30 dias antes da anonimização."}
-        </p>
-        {mensagem ? <p>{mensagem}</p> : null}
-        {erro && !acao ? <p>{erro}</p> : null}
-        <button type="button" onClick={() => setAcao("desativar")}>
-          <Ban aria-hidden="true" />
-          Desativar conta
-        </button>
-        {exclusaoAgendadaPara ? (
-          <button type="button" onClick={cancelarExclusao} disabled={salvando}>
-            <RotateCcw aria-hidden="true" />
-            {salvando ? "Cancelando..." : "Cancelar exclusão"}
+      <SecaoRecolhivel
+        titulo="Conta e privacidade"
+        descricao="Desativação e exclusão da conta"
+        icone={ShieldAlert}
+        perigo
+      >
+        <div className={styles.zonaPerigoConteudo}>
+          <p>
+            {exclusaoAgendadaPara
+              ? `Exclusão agendada para ${exclusaoAgendadaPara}.`
+              : "A exclusão é agendada por 30 dias antes da anonimização."}
+          </p>
+          {mensagem ? <p>{mensagem}</p> : null}
+          {erro && !acao ? <p>{erro}</p> : null}
+          <button type="button" onClick={() => setAcao("desativar")}>
+            <Ban aria-hidden="true" />
+            Desativar conta
           </button>
-        ) : (
-          <button type="button" onClick={() => setAcao("excluir")}>
-            <Trash2 aria-hidden="true" />
-            Excluir conta
-          </button>
-        )}
-      </section>
+          {exclusaoAgendadaPara ? (
+            <button
+              type="button"
+              onClick={cancelarExclusao}
+              disabled={salvando}
+            >
+              <RotateCcw aria-hidden="true" />
+              {salvando ? "Cancelando..." : "Cancelar exclusão"}
+            </button>
+          ) : (
+            <button type="button" onClick={() => setAcao("excluir")}>
+              <Trash2 aria-hidden="true" />
+              Excluir conta
+            </button>
+          )}
+        </div>
+      </SecaoRecolhivel>
 
       {acao ? (
         <ModalEdicao
@@ -89,7 +99,7 @@ export function ZonaPerigo({
               const operacao =
                 acao === "desativar" ? aoDesativar(senha) : aoExcluir(senha);
               operacao
-                .then(() => window.location.assign("/"))
+                .then(() => router.push("/"))
                 .catch((e) =>
                   setErro(e instanceof Error ? e.message : "Erro na operação."),
                 )

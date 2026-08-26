@@ -20,6 +20,10 @@ import { clearSession, getStoredUser, getToken, subscribeAuthChange } from "../l
 import { buscarPerfilApi } from "../lib/perfil";
 import styles from "../styles/privateNavbar.module.css";
 import { IconeRuby } from "./iconeRuby";
+import {
+  criarEstiloMolduraPerfil,
+  type ConfigVisualCarta,
+} from "./cartaMontada";
 
 const links = [
   { href: "/dashboard", label: "Início", icon: Home },
@@ -38,6 +42,7 @@ export function PrivateNavbar() {
     rubys: 0,
     avatarUrl: null as string | null,
     molduraUrl: null as string | null,
+    molduraConfig: null as ConfigVisualCarta | null,
     molduraClasse: "molduraPadrao",
   });
   const usuario = useSyncExternalStore(
@@ -56,6 +61,7 @@ export function PrivateNavbar() {
           rubys: perfil.rubys,
           avatarUrl: perfil.avatarUrl ?? null,
           molduraUrl: perfil.molduraUrl ?? null,
+          molduraConfig: perfil.molduraConfig ?? null,
           molduraClasse: perfil.molduraClasse,
         }))
         .catch(() => undefined);
@@ -104,7 +110,10 @@ export function PrivateNavbar() {
               {resumoPerfil.molduraUrl ? (
                 <i
                   className={styles.molduraImagem}
-                  style={{ backgroundImage: `url("${resumoPerfil.molduraUrl}")` }}
+                  style={{
+                    ...criarEstiloMolduraPerfil(resumoPerfil.molduraConfig),
+                    backgroundImage: `url("${resumoPerfil.molduraUrl}")`,
+                  }}
                   aria-hidden="true"
                 />
               ) : null}

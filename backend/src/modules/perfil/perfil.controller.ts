@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -22,13 +23,38 @@ import { SelecionarMolduraDto } from './dto/selecionar-moldura.dto';
 import { PerfilStorageService } from './perfil-storage.service';
 import { PerfilService } from './perfil.service';
 
+const tiposImagemPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+
+function filtrarImagemPerfil(
+  _request: unknown,
+  arquivo: Express.Multer.File,
+  callback: (error: Error | null, aceitarArquivo: boolean) => void,
+) {
+  if (tiposImagemPermitidos.includes(arquivo.mimetype)) {
+    callback(null, true);
+    return;
+  }
+
+  callback(new BadRequestException('Use uma imagem JPG, PNG ou WebP.'), false);
+}
+
+const opcoesUploadAvatar = {
+  limits: { fileSize: 2 * 1024 * 1024, files: 1 },
+  fileFilter: filtrarImagemPerfil,
+};
+
+const opcoesUploadBanner = {
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: filtrarImagemPerfil,
+};
+
 @UseGuards(JwtAuthGuard)
 @Controller('perfil')
 export class PerfilController {
   constructor(
     private readonly perfilService: PerfilService,
     private readonly storageService: PerfilStorageService,
-  ) { }
+  ) {}
 
   @Get()
   buscarPerfil(@CurrentUser() usuario: AuthenticatedUser) {
@@ -89,7 +115,7 @@ export class PerfilController {
   }
 
   @Post('avatar')
-  @UseInterceptors(FileInterceptor('arquivo'))
+  @UseInterceptors(FileInterceptor('arquivo', opcoesUploadAvatar))
   async enviarAvatar(
     @CurrentUser() usuario: AuthenticatedUser,
     @UploadedFile() arquivo: Express.Multer.File,
@@ -99,7 +125,7 @@ export class PerfilController {
   }
 
   @Post('banner')
-  @UseInterceptors(FileInterceptor('arquivo'))
+  @UseInterceptors(FileInterceptor('arquivo', opcoesUploadBanner))
   async enviarBanner(
     @CurrentUser() usuario: AuthenticatedUser,
     @UploadedFile() arquivo: Express.Multer.File,

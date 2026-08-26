@@ -125,6 +125,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
         ? 'molduraCarta'
         : perfil.molduraSelecionada?.classe_css ?? 'molduraPadrao',
       molduraUrl: perfil.cartaMolduraSelecionada?.moldura ?? null,
+      molduraConfig: perfil.cartaMolduraSelecionada?.config_visual ?? null,
       avatarUrl: perfil.avatar_url,
       bannerUrl: perfil.banner_url,
       googleVinculado: usuario.provedores.length > 0,
@@ -449,6 +450,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
               descricao: `Obtida com a carta ${carta.nome}.`,
               classeCss: 'molduraCarta',
               imagemUrl: carta.moldura,
+              configVisual: carta.config_visual,
               requisito: `Obtenha a carta ${carta.nome}.`,
               obtida: carta.inventarios.length > 0,
             },
@@ -495,6 +497,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       moldura: posse.moldura.nome,
       molduraClasse: posse.moldura.classe_css,
       molduraUrl: null,
+      molduraConfig: null,
     };
   }
 
@@ -539,6 +542,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       moldura: `Moldura de ${item.carta.nome}`,
       molduraClasse: 'molduraCarta',
       molduraUrl: item.carta.moldura,
+      molduraConfig: item.carta.config_visual,
     };
   }
 

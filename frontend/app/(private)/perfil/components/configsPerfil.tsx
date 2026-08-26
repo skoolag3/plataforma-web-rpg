@@ -1,18 +1,12 @@
 "use client";
 
-import {
-  Eye,
-  EyeOff,
-  KeyRound,
-  Mail,
-  Pencil,
-  ShieldCheck,
-} from "lucide-react";
+import { Eye, EyeOff, KeyRound, Mail, Pencil, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import type { PerfilConta } from "../../../lib/perfil";
 import styles from "../../../styles/perfil/segurancaPerfil.module.css";
 import modalStyles from "../../../styles/perfil/modalPerfil.module.css";
 import { ModalEdicao } from "./modalEdicao";
+import { SecaoRecolhivel } from "./secaoRecolhivel";
 
 type PropsConfigsPerfil = {
   perfil: PerfilConta;
@@ -47,17 +41,11 @@ export function ConfigsPerfil({
 
   return (
     <>
-      <section className={styles.cardSeguranca}>
-        <header className={styles.cabecalhoSeguranca}>
-          <span className={styles.iconeConfig}>
-            <ShieldCheck aria-hidden="true" />
-          </span>
-          <span>
-            <h2>Segurança da conta</h2>
-            <p>Gerencie suas credenciais e formas de acesso.</p>
-          </span>
-        </header>
-
+      <SecaoRecolhivel
+        titulo="Segurança da conta"
+        descricao="E-mail, senha e formas de acesso"
+        icone={ShieldCheck}
+      >
         <div className={styles.listaSeguranca}>
           <div className={styles.itemSeguranca}>
             <span className={styles.iconeItemSeguranca}>
@@ -118,7 +106,7 @@ export function ConfigsPerfil({
             </button>
           </div>
         </div>
-      </section>
+      </SecaoRecolhivel>
 
       {modalAberto === "email" ? (
         <ModalEdicao
@@ -176,7 +164,9 @@ export function ConfigsPerfil({
               />
             </label>
             {erro ? <p className={modalStyles.erroForm}>{erro}</p> : null}
-            {sucesso ? <p className={modalStyles.sucessoForm}>{sucesso}</p> : null}
+            {sucesso ? (
+              <p className={modalStyles.sucessoForm}>{sucesso}</p>
+            ) : null}
             <div className={modalStyles.acoesModal}>
               <button
                 type="button"
@@ -287,7 +277,9 @@ export function ConfigsPerfil({
               </span>
             </label>
             {erro ? <p className={modalStyles.erroForm}>{erro}</p> : null}
-            {sucesso ? <p className={modalStyles.sucessoForm}>{sucesso}</p> : null}
+            {sucesso ? (
+              <p className={modalStyles.sucessoForm}>{sucesso}</p>
+            ) : null}
             <div className={modalStyles.acoesModal}>
               <button
                 type="button"

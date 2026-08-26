@@ -34,6 +34,13 @@ export type ConfigVisualCarta = {
     topo: number;
     base: number;
   };
+  molduraPerfil: {
+    escalaX: number;
+    escalaY: number;
+    x: number;
+    y: number;
+    rotacao: number;
+  };
 };
 
 export function criarConfigVisualPadrao(): ConfigVisualCarta {
@@ -50,6 +57,13 @@ export function criarConfigVisualPadrao(): ConfigVisualCarta {
       topo: 0,
       base: 0,
     },
+    molduraPerfil: {
+      escalaX: 1,
+      escalaY: 1.045,
+      x: 0,
+      y: 1,
+      rotacao: 0,
+    },
   };
 }
 
@@ -60,7 +74,25 @@ export function normalizarConfigVisual(
   return {
     arte: { ...padrao.arte, ...config?.arte },
     moldura: { ...padrao.moldura, ...config?.moldura },
+    molduraPerfil: {
+      ...padrao.molduraPerfil,
+      ...config?.molduraPerfil,
+    },
   };
+}
+
+export function criarEstiloMolduraPerfil(
+  config?: Partial<ConfigVisualCarta> | null,
+): CSSProperties {
+  const ajuste = normalizarConfigVisual(config).molduraPerfil;
+
+  return {
+    "--perfilMolduraEscalaX": ajuste.escalaX,
+    "--perfilMolduraEscalaY": ajuste.escalaY,
+    "--perfilMolduraX": `${ajuste.x}%`,
+    "--perfilMolduraY": `${ajuste.y}%`,
+    "--perfilMolduraRotacao": `${ajuste.rotacao}deg`,
+  } as CSSProperties;
 }
 
 function imagemLocalTemporaria(url: string) {

@@ -1,28 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { PrismaService } from '../../../database/prisma.service';
+import { obterJwtSecret } from '../jwt.config';
 
 type JwtPayload = {
   sub: string;
-  email: string;
-  isAdmin: boolean;
 };
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly prisma: PrismaService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET ?? 'dev-secret',
+      secretOrKey: obterJwtSecret(),
     });
   }
 
-  validate(payload: JwtPayload) {
+  async validate(payload: JwtPayload) {
+    const usuario = await this.prisma.usuario.findFirst({
+      where: {
+        id: payload.sub,
+        ativo: true,
+        bloqueado: false,
+        email_verificado: true,
+        excluido_em: null,
+      },
+      select: {
+        id: true,
+        email: true,
+        is_admin: true,
+      },
+    });
+
+    if (!usuario) {
+      throw new UnauthorizedException('Sessão inválida ou conta indisponível.');
+    }
+
     return {
-      id: payload.sub,
-      email: payload.email,
-      isAdmin: payload.isAdmin,
+      id: usuario.id,
+      email: usuario.email,
+      isAdmin: Boolean(usuario.is_admin),
     };
   }
 }

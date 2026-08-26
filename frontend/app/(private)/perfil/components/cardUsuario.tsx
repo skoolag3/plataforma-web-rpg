@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useRef, useState } from "react";
+import { criarEstiloMolduraPerfil } from "../../../components/cartaMontada";
 import type { MolduraConta, PerfilConta } from "../../../lib/perfil";
 import styles from "../../../styles/perfil/cardUsuario.module.css";
 import modalStyles from "../../../styles/perfil/modalPerfil.module.css";
@@ -96,7 +97,10 @@ export function CardUsuario({
           {perfil.molduraUrl ? (
             <span
               className={styles.molduraCartaAvatar}
-              style={{ backgroundImage: `url("${perfil.molduraUrl}")` }}
+              style={{
+                ...criarEstiloMolduraPerfil(perfil.molduraConfig),
+                backgroundImage: `url("${perfil.molduraUrl}")`,
+              }}
               aria-hidden="true"
             />
           ) : null}
@@ -328,12 +332,18 @@ export function CardUsuario({
                     styles.amostraMoldura,
                     styles[moldura.classeCss] ?? "",
                   ].join(" ")}
-                  style={
-                    moldura.imagemUrl
-                      ? { backgroundImage: `url("${moldura.imagemUrl}")` }
-                      : undefined
-                  }
-                />
+                >
+                  {moldura.imagemUrl ? (
+                    <i
+                      className={styles.imagemAmostraMoldura}
+                      style={{
+                        ...criarEstiloMolduraPerfil(moldura.configVisual),
+                        backgroundImage: `url("${moldura.imagemUrl}")`,
+                      }}
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                </span>
                 <strong>{moldura.nome}</strong>
                 <small>
                   {moldura.obtida

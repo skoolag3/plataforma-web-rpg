@@ -4,6 +4,7 @@ import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { PreferenciasConta } from "../../../lib/perfil";
 import styles from "../../../styles/perfil/painelPerfil.module.css";
+import { SecaoRecolhivel } from "./secaoRecolhivel";
 
 type PropsPreferenciasPerfil = {
   preferencias: PreferenciasConta;
@@ -44,43 +45,46 @@ export function PreferenciasPerfil({
   }
 
   return (
-    <section className={styles.cardPreferencias}>
-      <h2>
-        <Settings aria-hidden="true" />
-        Preferências
-      </h2>
+    <SecaoRecolhivel
+      titulo="Preferências"
+      descricao="Privacidade e notificações"
+      icone={Settings}
+    >
+      <div className={styles.listaPreferencias}>
+        <label>
+          <input
+            type="checkbox"
+            checked={valores.receberNotificacoes}
+            onChange={() => alternar("receberNotificacoes")}
+            disabled={salvando}
+          />
+          <span>Receber notificações</span>
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={valores.mostrarNoRanking}
+            onChange={() => alternar("mostrarNoRanking")}
+            disabled={salvando}
+          />
+          <span>Mostrar perfil no ranking</span>
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={valores.ocultarHistorico}
+            onChange={() => alternar("ocultarHistorico")}
+            disabled={salvando}
+          />
+          <span>Ocultar histórico de partidas</span>
+        </label>
 
-      <label>
-        <input
-          type="checkbox"
-          checked={valores.receberNotificacoes}
-          onChange={() => alternar("receberNotificacoes")}
-          disabled={salvando}
-        />
-        <span>Receber notificações</span>
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={valores.mostrarNoRanking}
-          onChange={() => alternar("mostrarNoRanking")}
-          disabled={salvando}
-        />
-        <span>Mostrar perfil no ranking</span>
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={valores.ocultarHistorico}
-          onChange={() => alternar("ocultarHistorico")}
-          disabled={salvando}
-        />
-        <span>Ocultar histórico de partidas</span>
-      </label>
-
-      {salvando ? <small>Salvando...</small> : null}
-      {mensagem ? <small className={styles.sucessoPreferencia}>{mensagem}</small> : null}
-      {erro ? <small className={styles.erroPreferencia}>{erro}</small> : null}
-    </section>
+        {salvando ? <small>Salvando...</small> : null}
+        {mensagem ? (
+          <small className={styles.sucessoPreferencia}>{mensagem}</small>
+        ) : null}
+        {erro ? <small className={styles.erroPreferencia}>{erro}</small> : null}
+      </div>
+    </SecaoRecolhivel>
   );
 }
