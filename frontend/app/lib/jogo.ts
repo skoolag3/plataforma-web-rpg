@@ -42,11 +42,14 @@ export type CartaDeck = {
   id: string;
   nome: string;
   raridade: string;
-  elemento: string;
+  elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
   classe: string;
   foto: string | null;
   moldura: string | null;
   configVisual: ConfigVisualCarta | null;
+  hpBase: number;
+  danoBase: number;
+  defesaBase: number;
   posicao: number;
 };
 
@@ -82,7 +85,9 @@ async function jogoRequest<T>(path: string, options: RequestInit = {}) {
       .filter(Boolean);
     throw new Error(
       details?.join(" ") ||
-        (Array.isArray(data?.message) ? data.message.join(" ") : data?.message) ||
+        (Array.isArray(data?.message)
+          ? data.message.join(" ")
+          : data?.message) ||
         "Não foi possível concluir a solicitação.",
     );
   }
@@ -233,8 +238,11 @@ export function girarGacha(idBanner: string, quantidade: 1 | 10) {
 }
 
 export function resgatarGiroDiario(idBanner: string) {
-  return jogoRequest<{ message: string; rubysRecebidos: number }>("/gacha/diario", {
-    method: "POST",
-    body: JSON.stringify({ idBanner }),
-  });
+  return jogoRequest<{ message: string; rubysRecebidos: number }>(
+    "/gacha/diario",
+    {
+      method: "POST",
+      body: JSON.stringify({ idBanner }),
+    },
+  );
 }

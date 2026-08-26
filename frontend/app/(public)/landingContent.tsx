@@ -19,9 +19,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
+import Image from "next/image";
 import type { CSSProperties, PointerEvent } from "react";
 import { useEffect, useState } from "react";
 import { CartaMontada } from "../components/cartaMontada";
+import { listarNoticias, type NoticiaPublica } from "../lib/noticias";
+import { listarCartasVitrine, type CartaVitrine } from "../lib/vitrine";
 import { ModalEsqueciSenha, ModalLogin, ModalCadastro } from "./authModal";
 import estilosBase from "../styles/landingBase.module.css";
 import estilosHero from "../styles/landingHero.module.css";
@@ -79,9 +82,21 @@ type NoticiaLanding = {
 };
 
 const recursos = [
-  { icone: faScaleBalanced, titulo: "Regras justas", texto: "As jogadas são validadas pelo servidor." },
-  { icone: faDiceD6, titulo: "Decks de 6 cartas", texto: "Monte combinações curtas e estratégicas." },
-  { icone: faShieldHalved, titulo: "Progressão sem pay-to-win", texto: "Ganhe cartas e Rubys jogando." },
+  {
+    icone: faScaleBalanced,
+    titulo: "Regras justas",
+    texto: "As jogadas são validadas pelo servidor.",
+  },
+  {
+    icone: faDiceD6,
+    titulo: "Decks de 6 cartas",
+    texto: "Monte combinações curtas e estratégicas.",
+  },
+  {
+    icone: faShieldHalved,
+    titulo: "Progressão sem pay-to-win",
+    texto: "Ganhe cartas e Rubys jogando.",
+  },
 ] satisfies TopicoLanding[];
 
 const metricas = [
@@ -96,20 +111,64 @@ const molduraFlare =
   "https://res.cloudinary.com/djqmayaj1/image/upload/v1786237975/moderation/cartas/molduras/file_pav0ss.png";
 
 const cartas = [
-  { id: "flare-esquerda", nome: "Flare", funcao: "UR", imagem: imagemFlare, moldura: molduraFlare, classe: styles.cartaUm },
-  { id: "flare-centro", nome: "Flare", funcao: "UR", imagem: imagemFlare, moldura: molduraFlare, classe: styles.cartaDois },
-  { id: "flare-direita", nome: "Flare", funcao: "UR", imagem: imagemFlare, moldura: molduraFlare, classe: styles.cartaTres },
+  {
+    id: "flare-esquerda",
+    nome: "Flare",
+    funcao: "UR",
+    imagem: imagemFlare,
+    moldura: molduraFlare,
+    classe: styles.cartaUm,
+  },
+  {
+    id: "flare-centro",
+    nome: "Flare",
+    funcao: "UR",
+    imagem: imagemFlare,
+    moldura: molduraFlare,
+    classe: styles.cartaDois,
+  },
+  {
+    id: "flare-direita",
+    nome: "Flare",
+    funcao: "UR",
+    imagem: imagemFlare,
+    moldura: molduraFlare,
+    classe: styles.cartaTres,
+  },
 ];
 
-const noticias = [
-  { icone: faTrophy, tag: "Novidade", tagClasse: styles.tagTemporada, titulo: "Novas cartas chegam à arena", resumo: "Amplie sua coleção, teste novas combinações e evolua seus decks.", data: "12 MAI 2026" },
-  { icone: faBolt, tag: "Balance", tagClasse: styles.tagBalanceamento, titulo: "Ajustes no custo de energia", resumo: "Mudanças pontuais deixam os duelos mais dinâmicos e abrem novas estratégias.", data: "10 MAI 2026" },
-  { icone: faWandMagicSparkles, tag: "Evento", tagClasse: styles.tagEvento, titulo: "Registro antecipado libera carta rara", resumo: "Crie sua conta antes da estreia e comece a jornada com uma carta especial.", data: "08 MAI 2026" },
+const noticiasExemplo = [
+  {
+    icone: faTrophy,
+    tag: "Novidade",
+    tagClasse: styles.tagTemporada,
+    titulo: "Novas cartas chegam à arena",
+    resumo: "Amplie sua coleção, teste novas combinações e evolua seus decks.",
+    data: "12 MAI 2026",
+  },
+  {
+    icone: faBolt,
+    tag: "Balance",
+    tagClasse: styles.tagBalanceamento,
+    titulo: "Ajustes no custo de energia",
+    resumo:
+      "Mudanças pontuais deixam os duelos mais dinâmicos e abrem novas estratégias.",
+    data: "10 MAI 2026",
+  },
+  {
+    icone: faWandMagicSparkles,
+    tag: "Evento",
+    tagClasse: styles.tagEvento,
+    titulo: "Registro antecipado libera carta rara",
+    resumo:
+      "Crie sua conta antes da estreia e comece a jornada com uma carta especial.",
+    data: "08 MAI 2026",
+  },
 ] satisfies NoticiaLanding[];
 
 function obterEstiloParticula(indice: number) {
   return {
-    "--posEsquerda": `${(indice * 7) % 104 - 4}%`,
+    "--posEsquerda": `${((indice * 7) % 104) - 4}%`,
     "--posTopo": `${18 + (indice % 6) * 11}%`,
     "--tamanho": `${0.18 + (indice % 4) * 0.08}rem`,
     "--duracao": `${6 + indice * 0.35}s`,
@@ -139,12 +198,27 @@ function aoSairPonteiroCarta(evento: PointerEvent<HTMLElement>) {
   carta.style.setProperty("--rotacaoY", "0deg");
 }
 
-export function LandingContent({ modalInicial = null }: PropriedadesLandingContent) {
+export function LandingContent({
+  modalInicial = null,
+}: PropriedadesLandingContent) {
   const [modal, setModal] = useState<TipoModal>(modalInicial);
+  const [noticiasPublicadas, setNoticiasPublicadas] = useState<
+    NoticiaPublica[]
+  >([]);
+  const [cartasVitrine, setCartasVitrine] = useState<CartaVitrine[]>([]);
 
   useEffect(() => {
     setModal(modalInicial);
   }, [modalInicial]);
+
+  useEffect(() => {
+    listarNoticias()
+      .then(setNoticiasPublicadas)
+      .catch(() => undefined);
+    listarCartasVitrine()
+      .then(setCartasVitrine)
+      .catch(() => undefined);
+  }, []);
 
   return (
     <main className={styles.pagina}>
@@ -158,17 +232,23 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
           <div className={styles.conteudoHero}>
             <h1 className={styles.tituloHero}>
               Sua estratégia.
-              <br />Seu deck.
-              <br /><span>Sua lenda.</span>
+              <br />
+              Seu deck.
+              <br />
+              <span>Sua lenda.</span>
             </h1>
             <p className={styles.textoHero}>
-              Colecione heróis, crie combos poderosos e domine duelos táticos
-              em partidas rápidas direto do navegador.
+              Colecione heróis, crie combos poderosos e domine duelos táticos em
+              partidas rápidas direto do navegador.
             </p>
 
             <div className={styles.acoesHero}>
               <Link href="/cadastro" className={styles.btnJogar}>
-                <FontAwesomeIcon className={styles.iconeBtnJogar} icon={faPlay} aria-hidden="true" />
+                <FontAwesomeIcon
+                  className={styles.iconeBtnJogar}
+                  icon={faPlay}
+                  aria-hidden="true"
+                />
                 Jogar grátis
               </Link>
               <Link href="#como-jogar" className={styles.btnSecundario}>
@@ -179,24 +259,46 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
 
             <div className={styles.provaSocial}>
               <span className={styles.avatares} aria-hidden="true">
-                <i>K</i><i>R</i><i>N</i>
+                <i>K</i>
+                <i>R</i>
+                <i>N</i>
               </span>
-              <span><strong>+2.400 duelistas</strong> já entraram na arena</span>
+              <span>
+                <strong>+2.400 duelistas</strong> já entraram na arena
+              </span>
             </div>
-
           </div>
 
           <div id="cartas" className={styles.visualHero}>
             <div className={styles.personagemHero} />
-            <div className={styles.conjuntoCartas} aria-label="Cartas de exemplo">
-              {cartas.map((carta) => (
+            <div
+              className={styles.conjuntoCartas}
+              aria-label="Cartas de exemplo"
+            >
+              {(cartasVitrine.length
+                ? cartasVitrine.map((carta) => ({
+                    id: carta.id,
+                    nome: carta.nome,
+                    funcao: carta.raridade,
+                    imagem: carta.foto ?? "",
+                    moldura: carta.moldura ?? "",
+                    configVisual: carta.config_visual ?? undefined,
+                  }))
+                : cartas
+              ).map((carta, indice) => (
                 <article
-                  className={`${styles.cartaAnime} ${carta.classe}`}
+                  className={`${styles.cartaAnime} ${[styles.cartaUm, styles.cartaDois, styles.cartaTres][indice]}`}
                   key={carta.id}
                   onPointerMove={aoMoverPonteiroCarta}
                   onPointerLeave={aoSairPonteiroCarta}
                 >
-                  <CartaMontada arte={carta.imagem} moldura={carta.moldura}>
+                  <CartaMontada
+                    arte={carta.imagem}
+                    moldura={carta.moldura}
+                    config={
+                      "configVisual" in carta ? carta.configVisual : undefined
+                    }
+                  >
                     <span className={styles.infoCarta}>
                       <strong>{carta.nome}</strong>
                       <span>{carta.funcao}</span>
@@ -224,7 +326,11 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
           <div id="ranking" className={styles.metricas}>
             {metricas.map((metrica) => (
               <div className={styles.metrica} key={metrica.texto}>
-                <FontAwesomeIcon className={styles.iconeMetrica} icon={metrica.icone} aria-hidden="true" />
+                <FontAwesomeIcon
+                  className={styles.iconeMetrica}
+                  icon={metrica.icone}
+                  aria-hidden="true"
+                />
                 <div>
                   <strong>{metrica.valor}</strong>
                   <span>{metrica.texto}</span>
@@ -244,21 +350,77 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
           <p>Atualizações de temporada, balanceamento e eventos especiais.</p>
         </div>
         <div className={styles.gradeNoticias}>
-          {noticias.map((noticia) => (
-            <article className={styles.cardNoticia} key={noticia.titulo}>
-              <div className={styles.topoNoticia}>
-                <span className={`${styles.tagNoticia} ${noticia.tagClasse}`}>{noticia.tag}</span>
-                <FontAwesomeIcon className={styles.iconeNoticia} icon={noticia.icone} aria-hidden="true" />
-              </div>
-              <h3>{noticia.titulo}</h3>
-              <p>{noticia.resumo}</p>
-              <time>
-                <FontAwesomeIcon icon={faCalendarDays} aria-hidden="true" />
-                {noticia.data}
-              </time>
-              <span className={styles.lerMais}>Ler novidade <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" /></span>
-            </article>
-          ))}
+          {(noticiasPublicadas.length
+            ? noticiasPublicadas
+            : noticiasExemplo
+          ).map((noticia) => {
+            const categoria =
+              "categoria" in noticia
+                ? noticia.categoria
+                : noticia.tag.toUpperCase();
+            const visual =
+              categoria === "BALANCE"
+                ? { icone: faBolt, classe: styles.tagBalanceamento }
+                : categoria === "EVENTO"
+                  ? { icone: faWandMagicSparkles, classe: styles.tagEvento }
+                  : { icone: faTrophy, classe: styles.tagTemporada };
+            const data =
+              "criado_em" in noticia
+                ? new Date(noticia.criado_em).toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : noticia.data;
+            const conteudo = (
+              <>
+                {"imagem" in noticia && noticia.imagem ? (
+                  <Image
+                    className={styles.imagemNoticia}
+                    src={noticia.imagem}
+                    alt=""
+                    width={560}
+                    height={220}
+                  />
+                ) : null}
+                <div className={styles.topoNoticia}>
+                  <span
+                    className={`${styles.tagNoticia} ${"tagClasse" in noticia ? noticia.tagClasse : visual.classe}`}
+                  >
+                    {"tag" in noticia ? noticia.tag : noticia.categoria}
+                  </span>
+                  <FontAwesomeIcon
+                    className={styles.iconeNoticia}
+                    icon={"icone" in noticia ? noticia.icone : visual.icone}
+                    aria-hidden="true"
+                  />
+                </div>
+                <h3>{noticia.titulo}</h3>
+                <p>{noticia.resumo}</p>
+                <time>
+                  <FontAwesomeIcon icon={faCalendarDays} aria-hidden="true" />
+                  {data}
+                </time>
+                <span className={styles.lerMais}>
+                  Ler novidade{" "}
+                  <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
+                </span>
+              </>
+            );
+            return "id" in noticia ? (
+              <Link
+                className={styles.cardNoticia}
+                href={`/noticias/${noticia.id}`}
+                key={noticia.id}
+              >
+                {conteudo}
+              </Link>
+            ) : (
+              <article className={styles.cardNoticia} key={noticia.titulo}>
+                {conteudo}
+              </article>
+            );
+          })}
         </div>
       </section>
 
@@ -269,9 +431,11 @@ export function LandingContent({ modalInicial = null }: PropriedadesLandingConte
         <ModalCadastro aoFechar={() => setModal(null)} aoTrocar={setModal} />
       ) : null}
       {modal === "forgot" ? (
-        <ModalEsqueciSenha aoFechar={() => setModal(null)} aoTrocar={setModal} />
+        <ModalEsqueciSenha
+          aoFechar={() => setModal(null)}
+          aoTrocar={setModal}
+        />
       ) : null}
     </main>
   );
 }
-

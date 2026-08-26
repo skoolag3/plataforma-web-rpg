@@ -25,7 +25,7 @@ type UploadedAsset = {
 export class AdminCloudinaryService {
   private configured = false;
 
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async uploadCartaAssets(files: CartaAssetFiles) {
     const { foto, moldura } = this.extractFiles(files);
@@ -61,19 +61,23 @@ export class AdminCloudinaryService {
     const cartaAtualizada =
       assets.foto || assets.moldura
         ? await this.prisma.carta.update({
-          where: { id },
-          data: {
-            ...(assets.foto ? { foto: assets.foto.url } : {}),
-            ...(assets.moldura ? { moldura: assets.moldura.url } : {}),
-            atualizado_em: new Date(),
-          },
-        })
+            where: { id },
+            data: {
+              ...(assets.foto ? { foto: assets.foto.url } : {}),
+              ...(assets.moldura ? { moldura: assets.moldura.url } : {}),
+              atualizado_em: new Date(),
+            },
+          })
         : carta;
 
     return {
       carta: cartaAtualizada,
       assets,
     };
+  }
+
+  uploadNoticiaImagem(imagem: Express.Multer.File) {
+    return this.uploadImage(imagem, 'noticias');
   }
 
   private extractFiles(files: CartaAssetFiles) {

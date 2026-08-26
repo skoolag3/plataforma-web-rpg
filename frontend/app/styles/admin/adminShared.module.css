@@ -2,7 +2,7 @@
 .toolbar button,
 .primaryBtn,
 .editorActions button,
-.editorActions a{
+.editorActions a {
   min-height: 2.5rem;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 0.42rem;
@@ -19,14 +19,17 @@
 .adminActions button:disabled,
 .toolbar button:disabled,
 .primaryBtn:disabled,
-.editorActions button:disabled{
+.editorActions button:disabled {
   cursor: not-allowed;
   opacity: 0.65;
 }
 
-.toolbar{
+.toolbar {
   display: grid;
-  grid-template-columns: minmax(16rem, 1fr) repeat(3, minmax(8rem, 10rem)) auto auto;
+  grid-template-columns: minmax(16rem, 1fr) repeat(
+      3,
+      minmax(8rem, 10rem)
+    ) auto auto;
   gap: 0.65rem;
   align-items: center;
   margin-bottom: 1rem;
@@ -36,7 +39,7 @@
   padding: 0.65rem;
 }
 
-.toolbar label{
+.toolbar label {
   display: flex;
   min-width: 18rem;
   align-items: center;
@@ -47,19 +50,19 @@
   padding: 0 0.75rem;
 }
 
-.toolbar input{
+.toolbar input {
   border: 0;
   background: transparent;
   outline: 0;
 }
 
-.toolbar select{
+.toolbar select {
   min-width: 8.5rem;
   height: 2.5rem;
 }
 
 .toolbar > button,
-.toolbar > .primaryBtn{
+.toolbar > .primaryBtn {
   display: inline-flex;
   min-height: 2.5rem;
   align-items: center;
@@ -68,9 +71,12 @@
   white-space: nowrap;
 }
 
-.toolbar svg{ width: 0.95rem; height: 0.95rem; }
+.toolbar svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
 
-.cartasToolbar{
+.cartasToolbar {
   grid-template-columns: minmax(13rem, 1fr) repeat(3, minmax(7.5rem, 9rem)) auto;
   gap: 0.5rem;
   border-color: rgba(148, 163, 184, 0.14);
@@ -79,7 +85,7 @@
   padding: 0.55rem;
 }
 
-.cartasToolbar label{
+.cartasToolbar label {
   min-width: 0;
   min-height: 2.55rem;
   gap: 0.6rem;
@@ -87,14 +93,14 @@
   padding: 0 0.7rem;
 }
 
-.cartasToolbar label svg{
+.cartasToolbar label svg {
   width: 0.88rem;
   height: 0.88rem;
   flex: 0 0 auto;
   color: #94a3b8;
 }
 
-.cartasToolbar input{
+.cartasToolbar input {
   min-width: 0;
   padding: 0;
   color: #e2e8f0;
@@ -102,20 +108,25 @@
   font-weight: 600;
 }
 
-.cartasToolbar input::placeholder{ color: #78859b; opacity: 1; }
+.cartasToolbar input::placeholder {
+  color: #78859b;
+  opacity: 1;
+}
 
-.cartasToolbar > select{
+.cartasToolbar > select {
   min-width: 0;
   height: 2.55rem;
   border-radius: 0.5rem;
-  background-position: calc(100% - 0.85rem) 50%, calc(100% - 0.58rem) 50%;
+  background-position:
+    calc(100% - 0.85rem) 50%,
+    calc(100% - 0.58rem) 50%;
   padding: 0.55rem 1.8rem 0.55rem 0.7rem;
   font-size: 0.73rem;
   font-weight: 750;
 }
 
 .cartasToolbar > button,
-.cartasToolbar > .primaryBtn{
+.cartasToolbar > .primaryBtn {
   min-height: 2.55rem;
   border-radius: 0.5rem;
   padding: 0.5rem 0.78rem;
@@ -123,18 +134,24 @@
   font-weight: 800;
 }
 
-.cartasToolbar > button{ color: #cbd5e1; }
+.cartasToolbar > button {
+  color: #cbd5e1;
+}
 
-.cartasToolbar > .primaryBtn{ box-shadow: none; }
+.cartasToolbar > .primaryBtn {
+  box-shadow: none;
+}
 
-.cartasWorkspace{
+.cartasWorkspace {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 17.5rem;
   align-items: start;
   gap: 0.85rem;
 }
 
-.cartasListaPanel{
+.cartasListaPanel {
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.13);
@@ -146,7 +163,7 @@
     0 2px 4px rgba(0, 0, 0, 0.12);
 }
 
-.cartasListaTopo{
+.cartasListaTopo {
   display: flex;
   min-height: 3.75rem;
   align-items: center;
@@ -156,18 +173,28 @@
   padding: 0.55rem 0.7rem 0.55rem 0.85rem;
 }
 
-.cartasListaTopo > div{
+.cartasListaTopo > div {
   display: grid;
   gap: 0.14rem;
 }
 
-.cartasListaTopo strong{ color: #f8fafc; font-size: 0.82rem; }
+.cartasListaTopo strong {
+  color: #f8fafc;
+  font-size: 0.82rem;
+}
 
-.cartasListaTopo small{ color: #71809a; font-size: 0.65rem; }
+.cartasListaTopo small {
+  color: #71809a;
+  font-size: 0.65rem;
+}
 
-.cartasListaTopo .primaryBtn{ min-height: 2.35rem; padding: 0.45rem 0.7rem; font-size: 0.68rem; }
+.cartasListaTopo .primaryBtn {
+  min-height: 2.35rem;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.68rem;
+}
 
-.cartasWorkspace > .cartasToolbar{
+.cartasWorkspace > .cartasToolbar {
   position: sticky;
   top: 1rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -182,7 +209,7 @@
     0 2px 4px rgba(0, 0, 0, 0.14);
 }
 
-.cartasWorkspace > .cartasToolbar label{
+.cartasWorkspace > .cartasToolbar label {
   grid-column: 1 / -1;
   min-width: 0;
   min-height: 2.7rem;
@@ -196,12 +223,12 @@
     0 1px rgba(255, 255, 255, 0.018);
 }
 
-.cartasWorkspace > .cartasToolbar > select{
+.cartasWorkspace > .cartasToolbar > select {
   padding-left: 0.78rem !important;
   padding-right: 1.8rem !important;
 }
 
-.filtrosTopo{
+.filtrosTopo {
   display: grid;
   grid-column: 1 / -1;
   gap: 0.14rem;
@@ -210,33 +237,50 @@
   padding: 0.05rem 0.1rem 0.55rem;
 }
 
-.filtrosTopo strong{ color: #f8fafc; font-size: 0.78rem; }
+.filtrosTopo strong {
+  color: #f8fafc;
+  font-size: 0.78rem;
+}
 
-.filtrosTopo small{ color: #71809a; font-size: 0.62rem; }
+.filtrosTopo small {
+  color: #71809a;
+  font-size: 0.62rem;
+}
 
-.cartasListaPanel .tableWrap{
+.cartasListaPanel .tableWrap {
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
 }
 
-.cartasListaPanel .tableWrap table{ min-width: 42rem; }
+.cartasListaPanel .tableWrap table {
+  min-width: 42rem;
+}
 
 .cartasListaPanel .tableWrap th,
-.cartasListaPanel .tableWrap td{ padding: 0.58rem 0.62rem; font-size: 0.75rem; }
+.cartasListaPanel .tableWrap td {
+  padding: 0.58rem 0.62rem;
+  font-size: 0.75rem;
+}
 
 .cartasListaPanel .statusAtivo,
-.cartasListaPanel .statusInativo{ font-size: 0.65rem; padding: 0.16rem 0.4rem; }
+.cartasListaPanel .statusInativo {
+  font-size: 0.65rem;
+  padding: 0.16rem 0.4rem;
+}
 
-.cartasListaPanel .rowActions button{ width: 1.8rem; height: 1.8rem; }
+.cartasListaPanel .rowActions button {
+  width: 1.8rem;
+  height: 1.8rem;
+}
 
-.cartasListaPanel .emptyTableRow:hover{
+.cartasListaPanel .emptyTableRow:hover {
   background: transparent;
   box-shadow: none;
 }
 
-.cartasListaPanel .emptyTableRow td{
+.cartasListaPanel .emptyTableRow td {
   height: 4rem;
   color: #71809a;
   font-size: 0.72rem;
@@ -244,22 +288,34 @@
   text-align: center;
 }
 
-.habilidadeNome{
+.habilidadeNome {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   color: #e2e8f0;
 }
 
-.habilidadeNome svg{ width: 1rem; height: 1rem; color: #a78bfa; }
+.habilidadeNome svg {
+  width: 1rem;
+  height: 1rem;
+  color: #a78bfa;
+}
 
-.habilidadeNome strong{ font-size: 0.76rem; }
+.habilidadeNome strong {
+  font-size: 0.76rem;
+}
 
-.habilidadeNome > span{ display: grid; gap: 0.08rem; }
+.habilidadeNome > span {
+  display: grid;
+  gap: 0.08rem;
+}
 
-.habilidadeNome small{ color: #64748b; font-size: 0.58rem; }
+.habilidadeNome small {
+  color: #64748b;
+  font-size: 0.58rem;
+}
 
-.primaryBtn{
+.primaryBtn {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -268,19 +324,19 @@
   color: #fff;
 }
 
-.tableWrap{
+.tableWrap {
   overflow: auto;
   border-radius: 0.8rem;
 }
 
-.tableWrap table{
+.tableWrap table {
   width: 100%;
   border-collapse: collapse;
   min-width: 46rem;
 }
 
 .tableWrap th,
-.tableWrap td{
+.tableWrap td {
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
   color: #cbd5e1;
   font-size: 0.84rem;
@@ -288,46 +344,48 @@
   text-align: left;
 }
 
-.tableWrap th{
+.tableWrap th {
   background: rgba(7, 12, 25, 0.92);
   color: #94a3b8;
   font-weight: 850;
 }
 
-.tableWrap tbody tr{
-  transition: background 150ms ease, box-shadow 150ms ease;
+.tableWrap tbody tr {
+  transition:
+    background 150ms ease,
+    box-shadow 150ms ease;
 }
 
-.tableWrap tbody tr:hover{
+.tableWrap tbody tr:hover {
   background: rgba(124, 58, 237, 0.07);
   box-shadow: inset 3px 0 #7c3aed;
 }
 
 .statusAtivo,
-.statusInativo{
+.statusInativo {
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 900;
   padding: 0.2rem 0.5rem;
 }
 
-.statusAtivo{
+.statusAtivo {
   background: rgba(34, 197, 94, 0.15);
   color: #86efac;
 }
 
-.statusInativo{
+.statusInativo {
   background: rgba(239, 68, 68, 0.14);
   color: #fca5a5;
 }
 
-.rowActions{
+.rowActions {
   display: inline-flex;
   gap: 0.55rem;
   color: #94a3b8;
 }
 
-.rowActions button{
+.rowActions button {
   display: grid;
   width: 2rem;
   height: 2rem;
@@ -339,12 +397,12 @@
   cursor: pointer;
 }
 
-.rowActions button:disabled{
+.rowActions button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
 
-.rowActions .rowActionSelected{
+.rowActions .rowActionSelected {
   border-color: #8b5cf6;
   background: linear-gradient(135deg, #7c3aed, #9333ea);
   color: #fff;
@@ -352,18 +410,22 @@
 }
 
 .usuarioDetalhes,
-.usuarioEditor{
+.usuarioEditor {
   display: grid;
   gap: 1rem;
   margin-top: 1rem;
   border: 1px solid rgba(167, 139, 250, 0.2);
   border-radius: 0.75rem;
-  background: linear-gradient(145deg, rgba(15, 23, 42, 0.86), rgba(5, 9, 21, 0.94));
+  background: linear-gradient(
+    145deg,
+    rgba(15, 23, 42, 0.86),
+    rgba(5, 9, 21, 0.94)
+  );
   padding: 1rem;
 }
 
 .usuarioDetalhes > header,
-.usuarioEditor > header{
+.usuarioEditor > header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -373,13 +435,21 @@
 }
 
 .usuarioDetalhes h2,
-.usuarioEditor h2{ margin: 0; color: #f8fafc; font-size: 0.9rem; }
+.usuarioEditor h2 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 0.9rem;
+}
 
 .usuarioDetalhes header p,
-.usuarioEditor header p{ margin: 0.2rem 0 0; color: #71809a; font-size: 0.7rem; }
+.usuarioEditor header p {
+  margin: 0.2rem 0 0;
+  color: #71809a;
+  font-size: 0.7rem;
+}
 
 .usuarioDetalhes header button,
-.usuarioEditor header button{
+.usuarioEditor header button {
   display: grid;
   width: 2rem;
   height: 2rem;
@@ -392,17 +462,30 @@
 }
 
 .usuarioDetalhes header svg,
-.usuarioEditor header svg{ width: 0.9rem; height: 0.9rem; }
+.usuarioEditor header svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
 
-.usuarioEditor{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.usuarioEditor {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 
 .usuarioEditor > header,
-.usuarioEditor > .editorActions{ grid-column: 1 / -1; }
+.usuarioEditor > .editorActions {
+  grid-column: 1 / -1;
+}
 
-.usuarioEditor > label{ display: grid; gap: 0.35rem; color: #cbd5e1; font-size: 0.74rem; font-weight: 800; }
+.usuarioEditor > label {
+  display: grid;
+  gap: 0.35rem;
+  color: #cbd5e1;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
 
 .usuarioEditor input,
-.usuarioEditor select{
+.usuarioEditor select {
   width: 100%;
   min-height: 2.65rem;
   border: 1px solid rgba(148, 163, 184, 0.2);
@@ -415,9 +498,12 @@
 }
 
 .usuarioEditor input:focus,
-.usuarioEditor select:focus{ border-color: rgba(168, 85, 247, 0.7); box-shadow: none; }
+.usuarioEditor select:focus {
+  border-color: rgba(168, 85, 247, 0.7);
+  box-shadow: none;
+}
 
-.habilidadeEditor{
+.habilidadeEditor {
   border-color: rgba(148, 163, 184, 0.16);
   background: #080d19;
   box-shadow:
@@ -426,7 +512,7 @@
     0 2px 4px rgba(0, 0, 0, 0.12);
 }
 
-.modalBackdrop{
+.modalBackdrop {
   position: fixed;
   z-index: 100;
   inset: 0;
@@ -438,7 +524,7 @@
   backdrop-filter: blur(3px);
 }
 
-.habilidadeModal{
+.habilidadeModal {
   width: min(100%, 48rem);
   max-height: calc(100dvh - 2rem);
   overflow-y: auto;
@@ -451,7 +537,7 @@
     0 12px 28px rgba(0, 0, 0, 0.34);
 }
 
-.usuarioEditor > .usuarioToggle{
+.usuarioEditor > .usuarioToggle {
   display: flex;
   grid-column: 1 / -1;
   min-height: 3.2rem;
@@ -463,17 +549,32 @@
   padding: 0.65rem 0.75rem;
 }
 
-.usuarioToggle input{ width: 1rem; min-height: 1rem; height: 1rem; accent-color: #7c3aed; }
+.usuarioToggle input {
+  width: 1rem;
+  min-height: 1rem;
+  height: 1rem;
+  accent-color: #7c3aed;
+}
 
-.usuarioToggle span{ display: grid; gap: 0.12rem; }
+.usuarioToggle span {
+  display: grid;
+  gap: 0.12rem;
+}
 
-.usuarioToggle strong{ color: #e2e8f0; font-size: 0.72rem; }
+.usuarioToggle strong {
+  color: #e2e8f0;
+  font-size: 0.72rem;
+}
 
-.usuarioToggle small{ color: #71809a; font-size: 0.64rem; font-weight: 600; }
+.usuarioToggle small {
+  color: #71809a;
+  font-size: 0.64rem;
+  font-weight: 600;
+}
 
 .feedbackInfo,
 .feedbackSuccess,
-.feedbackError{
+.feedbackError {
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 0.45rem;
   margin: 0 0 1rem;
@@ -482,22 +583,22 @@
   font-weight: 800;
 }
 
-.feedbackInfo{
+.feedbackInfo {
   background: rgba(59, 130, 246, 0.1);
   color: #bfdbfe;
 }
 
-.feedbackSuccess{
+.feedbackSuccess {
   background: rgba(34, 197, 94, 0.12);
   color: #86efac;
 }
 
-.feedbackError{
+.feedbackError {
   background: rgba(239, 68, 68, 0.12);
   color: #fecaca;
 }
 
-.editorActions{
+.editorActions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.55rem;
@@ -506,13 +607,13 @@
 }
 
 .editorActions a,
-.editorActions button{
+.editorActions button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.editorActions > :first-child{
+.editorActions > :first-child {
   border-color: rgba(248, 113, 113, 0.42);
   background: rgba(127, 29, 29, 0.72);
   color: #fecaca;
@@ -520,44 +621,73 @@
 }
 
 .editorActions > :last-child,
-.editorActions > .primaryBtn:last-child{
+.editorActions > .primaryBtn:last-child {
   border-color: rgba(74, 222, 128, 0.42);
   background: rgba(20, 83, 45, 0.86);
   color: #dcfce7;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.055);
 }
 
-.editorActions > :first-child:hover{ background: rgba(153, 27, 27, 0.78); }
+.editorActions > :first-child:hover {
+  background: rgba(153, 27, 27, 0.78);
+}
 
-.editorActions > :last-child:hover{ background: rgba(22, 101, 52, 0.92); }
+.editorActions > :last-child:hover {
+  background: rgba(22, 101, 52, 0.92);
+}
 
-@media (max-width: 1080px){.cartasToolbar{
+@media (max-width: 1080px) {
+  .cartasToolbar {
     grid-template-columns: minmax(14rem, 1fr) repeat(3, minmax(7rem, 1fr));
   }
-.cartasWorkspace{ grid-template-columns: 1fr; }
-.cartasWorkspace > .cartasToolbar{
+  .cartasWorkspace {
+    grid-template-columns: 1fr;
+  }
+  .cartasWorkspace > .cartasToolbar {
     position: static;
     grid-row: 1;
     grid-template-columns: repeat(2, minmax(7rem, 1fr));
   }
-.cartasListaPanel{ grid-row: 2; }
-.filtrosTopo{ grid-column: 1 / -1; }
-.cartasToolbar > .primaryBtn{ grid-column: 4; }}
+  .cartasListaPanel {
+    grid-row: 2;
+  }
+  .filtrosTopo {
+    grid-column: 1 / -1;
+  }
+  .cartasToolbar > .primaryBtn {
+    grid-column: 4;
+  }
+}
 
-@media (max-width: 720px){.topbar,
-  .toolbar{
+@media (max-width: 720px) {
+  .topbar,
+  .toolbar {
     display: grid;
   }
-.cartasWorkspace > .cartasToolbar{ grid-template-columns: 1fr; }
-.cartasListaTopo{ align-items: stretch; flex-direction: column; }
-.cartasToolbar > button,
-  .cartasToolbar > .primaryBtn{ grid-column: auto; }
-.usuarioEditor > header,
+  .cartasWorkspace > .cartasToolbar {
+    grid-template-columns: 1fr;
+  }
+  .cartasListaTopo {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .cartasToolbar > button,
+  .cartasToolbar > .primaryBtn {
+    grid-column: auto;
+  }
+  .usuarioEditor > header,
   .usuarioEditor > .editorActions,
-  .usuarioEditor > .usuarioToggle{ grid-column: auto; }
-.modalBackdrop{ align-items: start; padding: 0.6rem; }
-.habilidadeModal{ max-height: calc(100dvh - 1.2rem); }
-.toolbar label{
+  .usuarioEditor > .usuarioToggle {
+    grid-column: auto;
+  }
+  .modalBackdrop {
+    align-items: start;
+    padding: 0.6rem;
+  }
+  .habilidadeModal {
+    max-height: calc(100dvh - 1.2rem);
+  }
+  .toolbar label {
     min-width: 0;
-  }}
-
+  }
+}

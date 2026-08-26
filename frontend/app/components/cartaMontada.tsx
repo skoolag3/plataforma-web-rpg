@@ -1,7 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import type { CSSProperties, ReactNode } from "react";
+import {
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import styles from "../styles/cartaMontada.module.css";
 
 export const PROPORCAO_CARTA = 2 / 3;
@@ -48,7 +53,9 @@ export function criarConfigVisualPadrao(): ConfigVisualCarta {
   };
 }
 
-export function normalizarConfigVisual(config?: Partial<ConfigVisualCarta> | null): ConfigVisualCarta {
+export function normalizarConfigVisual(
+  config?: Partial<ConfigVisualCarta> | null,
+): ConfigVisualCarta {
   const padrao = criarConfigVisualPadrao();
   return {
     arte: { ...padrao.arte, ...config?.arte },
@@ -56,11 +63,16 @@ export function normalizarConfigVisual(config?: Partial<ConfigVisualCarta> | nul
   };
 }
 
+function imagemLocalTemporaria(url: string) {
+  return url.startsWith("blob:") || url.startsWith("data:");
+}
+
 type PropsCartaMontada = {
   arte?: string;
   moldura?: string;
   children?: ReactNode;
   placeholder?: ReactNode;
+  verso?: ReactNode;
   config?: ConfigVisualCarta;
   onDimensoesArte?: (dimensoes: DimensoesImagem) => void;
   onDimensoesMoldura?: (dimensoes: DimensoesImagem) => void;
@@ -71,10 +83,12 @@ export function CartaMontada({
   moldura,
   children,
   placeholder,
+  verso,
   config,
   onDimensoesArte,
   onDimensoesMoldura,
 }: PropsCartaMontada) {
+  const [virada, setVirada] = useState(false);
   const configNormalizada = normalizarConfigVisual(config);
   const estiloArte = {
     "--arteEscala": configNormalizada.arte.escala,
@@ -94,45 +108,81 @@ export function CartaMontada({
     "--molduraBase": `${configNormalizada.moldura.base}%`,
   } as CSSProperties;
 
+  function alternarLado() {
+    if (verso) setVirada((atual) => !atual);
+  }
+
+  function handleTecla(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      alternarLado();
+    }
+  }
+
   return (
-    <div className={styles.carta}>
-      <span className={styles.canvasArte}>
-        {arte ? (
-          <Image
-            className={styles.arte}
-            src={arte}
-            alt=""
-            fill
-            sizes="20rem"
-            unoptimized
-            style={estiloArte}
-            onLoad={(event) => onDimensoesArte?.({
-              largura: event.currentTarget.naturalWidth,
-              altura: event.currentTarget.naturalHeight,
-            })}
-          />
-        ) : (
-          <span className={styles.placeholder}>{placeholder}</span>
-        )}
-        <span className={styles.sombra} aria-hidden="true" />
-      </span>
-      {moldura ? (
-        <span className={styles.camadaMoldura} style={estiloMoldura}>
-          <Image
-            className={styles.moldura}
-            src={moldura}
-            alt=""
-            fill
-            sizes="20rem"
-            unoptimized
-            onLoad={(event) => onDimensoesMoldura?.({
-              largura: event.currentTarget.naturalWidth,
-              altura: event.currentTarget.naturalHeight,
-            })}
-          />
+    <div
+      className={`${styles.carta} ${verso ? styles.cartaInterativa : ""}`}
+      role={verso ? "button" : undefined}
+      tabIndex={verso ? 0 : undefined}
+      aria-label={
+        verso
+          ? virada
+            ? "Mostrar frente da carta"
+            : "Mostrar atributos da carta"
+          : undefined
+      }
+      aria-pressed={verso ? virada : undefined}
+      onClick={alternarLado}
+      onKeyDown={verso ? handleTecla : undefined}
+    >
+      <span className={`${styles.miolo} ${virada ? styles.virada : ""}`}>
+        <span className={styles.frente}>
+          <span className={styles.canvasArte}>
+            {arte ? (
+              <Image
+                className={styles.arte}
+                src={arte}
+                alt=""
+                fill
+                sizes="20rem"
+                unoptimized={imagemLocalTemporaria(arte)}
+                style={estiloArte}
+                onLoad={(event) =>
+                  onDimensoesArte?.({
+                    largura: event.currentTarget.naturalWidth,
+                    altura: event.currentTarget.naturalHeight,
+                  })
+                }
+              />
+            ) : (
+              <span className={styles.placeholder}>{placeholder}</span>
+            )}
+            <span className={styles.sombra} aria-hidden="true" />
+          </span>
+          {moldura ? (
+            <span className={styles.camadaMoldura} style={estiloMoldura}>
+              <Image
+                className={styles.moldura}
+                src={moldura}
+                alt=""
+                fill
+                sizes="20rem"
+                unoptimized={imagemLocalTemporaria(moldura)}
+                onLoad={(event) =>
+                  onDimensoesMoldura?.({
+                    largura: event.currentTarget.naturalWidth,
+                    altura: event.currentTarget.naturalHeight,
+                  })
+                }
+              />
+            </span>
+          ) : null}
+          {children ? (
+            <span className={styles.conteudo}>{children}</span>
+          ) : null}
         </span>
-      ) : null}
-      {children ? <span className={styles.conteudo}>{children}</span> : null}
+        {verso ? <span className={styles.verso}>{verso}</span> : null}
+      </span>
     </div>
   );
 }

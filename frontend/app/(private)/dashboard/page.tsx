@@ -4,7 +4,6 @@ import { ChevronRight, Layers, Sparkles, Swords, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CartaMontada } from "../../components/cartaMontada";
-import { IconeRuby } from "../../components/iconeRuby";
 import { getToken } from "../../lib/auth";
 import { listarDecks, type Deck } from "../../lib/jogo";
 import { buscarPerfilApi, type PerfilConta } from "../../lib/perfil";
@@ -45,14 +44,7 @@ export default function DashboardPage() {
             <span>Salão do invocador</span>
             <h1>Pronto para lutar, {perfil?.user ?? "aventureiro"}?</h1>
           </div>
-          <div className={styles.recursos} aria-label="Recursos do jogador">
-            <span>
-              <IconeRuby tamanho={18} />
-              <strong>
-                {perfil?.rubys?.toLocaleString("pt-BR") ?? "—"}
-              </strong>{" "}
-              rubys
-            </span>
+          <div className={styles.recursos} aria-label="Progresso do jogador">
             <span>
               <Trophy />
               <strong>

@@ -1,0 +1,280 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.8fr) minmax(28rem, 1.2fr);
+  gap: 0.8rem;
+  align-items: start;
+}
+.lista,
+.formulario {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.8rem;
+  background: rgba(8, 13, 26, 0.78);
+}
+.lista > header,
+.formulario > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  padding: 0.7rem;
+}
+.lista header div,
+.formulario header div {
+  display: grid;
+  gap: 0.1rem;
+}
+.lista header strong,
+.formulario header strong {
+  font-size: 0.78rem;
+}
+.lista header small,
+.formulario header small {
+  color: #77849a;
+  font-size: 0.58rem;
+}
+.lista button,
+.formulario button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  border: 1px solid rgba(167, 139, 250, 0.24);
+  border-radius: 0.45rem;
+  background: rgba(124, 58, 237, 0.14);
+  color: #ddd6fe;
+  cursor: pointer;
+  padding: 0.4rem 0.55rem;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+.lista button svg,
+.formulario button svg {
+  width: 0.78rem;
+  height: 0.78rem;
+}
+.lista > div {
+  display: grid;
+  gap: 0.38rem;
+  max-height: 42rem;
+  overflow: auto;
+  padding: 0.55rem;
+}
+.lista article {
+  display: grid;
+  grid-template-columns: 4.4rem minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 0.55rem;
+  background: #080d19;
+  padding: 0.42rem;
+}
+.lista article > img,
+.lista article > span {
+  width: 4.4rem;
+  height: 2.8rem;
+  border-radius: 0.38rem;
+  object-fit: cover;
+}
+.lista article > span {
+  display: grid;
+  place-items: center;
+  background: #11182a;
+  color: #7c8aa2;
+}
+.lista article > span svg {
+  width: 1rem;
+}
+.lista article > div {
+  min-width: 0;
+}
+.lista article small,
+.lista article strong,
+.lista article p {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lista article small {
+  color: #a78bfa;
+  font-size: 0.48rem;
+}
+.lista article strong {
+  margin: 0.12rem 0;
+  color: #f8fafc;
+  font-size: 0.68rem;
+}
+.lista article p {
+  margin: 0;
+  color: #77849a;
+  font-size: 0.55rem;
+}
+.lista article nav {
+  display: grid;
+  gap: 0.25rem;
+}
+.lista article nav button {
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+}
+.lista article nav button:last-child {
+  color: #fca5a5;
+}
+.formulario {
+  display: grid;
+  gap: 0.65rem;
+  padding-bottom: 0.75rem;
+}
+.formulario > label,
+.camposDuplos label {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0 0.75rem;
+  color: #cbd5e1;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+.camposDuplos {
+  display: grid;
+  grid-template-columns: 1fr 11rem;
+  gap: 0.55rem;
+  padding: 0 0.75rem;
+}
+.camposDuplos label {
+  margin: 0;
+}
+.formulario input,
+.formulario textarea,
+.formulario select {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.45rem;
+  background: #050a15;
+  color: #f8fafc;
+  padding: 0.55rem 0.62rem;
+  font: inherit;
+  font-size: 0.67rem;
+  outline: 0;
+}
+.formulario input:focus,
+.formulario textarea:focus,
+.formulario select:focus {
+  border-color: #8b5cf6;
+}
+.formulario textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+.imagemCampo {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 0.75rem;
+}
+.imagemCampo label {
+  display: flex;
+  min-height: 3rem;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px dashed rgba(167, 139, 250, 0.35);
+  border-radius: 0.5rem;
+  color: #c4b5fd;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+.imagemCampo label svg {
+  width: 0.9rem;
+}
+.imagemCampo input {
+  display: none;
+}
+.imagemCampo img {
+  width: 7rem;
+  height: 3.5rem;
+  border-radius: 0.45rem;
+  object-fit: cover;
+}
+.anexos {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  padding-top: 0.6rem;
+}
+.anexos > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.anexos > header strong {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+}
+.anexos > header svg {
+  width: 0.8rem;
+}
+.anexos > div {
+  display: grid;
+  grid-template-columns: 0.7fr 1.3fr auto;
+  gap: 0.35rem;
+}
+.anexos > div button {
+  width: 2rem;
+  padding: 0;
+}
+.formulario .publicar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.publicar input {
+  width: 1rem;
+  accent-color: #7c3aed;
+}
+.salvar {
+  min-height: 2.5rem;
+  margin: 0 0.75rem;
+  background: linear-gradient(135deg, #6d28d9, #9333ea) !important;
+  color: #fff !important;
+}
+.erro {
+  margin: 0 0.75rem;
+  color: #fca5a5;
+  font-size: 0.62rem;
+}
+.vazio {
+  padding: 2rem;
+  color: #77849a;
+  font-size: 0.65rem;
+  text-align: center;
+}
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .lista > div {
+    max-height: 20rem;
+  }
+}
+@media (max-width: 560px) {
+  .camposDuplos {
+    grid-template-columns: 1fr;
+  }
+  .anexos > div {
+    grid-template-columns: 1fr auto;
+  }
+  .anexos > div input:nth-child(2) {
+    grid-column: 1;
+  }
+  .deck {
+  }
+}

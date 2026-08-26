@@ -1,0 +1,126 @@
+.pagina {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 50% 0,
+      rgba(124, 58, 237, 0.16),
+      transparent 32rem
+    ),
+    #05070d;
+  color: #f8fafc;
+  padding: 1.2rem 1rem 4rem;
+}
+.pagina > nav,
+.pagina > article {
+  width: min(52rem, 100%);
+  margin: auto;
+}
+.pagina > nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #c4b5fd;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.pagina > nav svg {
+  width: 0.85rem;
+}
+.pagina article {
+  margin-top: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 1rem;
+  background: #0b0f19;
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.25);
+}
+.pagina article > header {
+  padding: clamp(1.2rem, 4vw, 2.4rem);
+}
+.pagina header > span {
+  display: inline-flex;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.2);
+  color: #d8b4fe;
+  padding: 0.28rem 0.6rem;
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+.pagina h1 {
+  margin: 0.75rem 0 0.5rem;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.pagina header p {
+  max-width: 42rem;
+  margin: 0;
+  color: #a8afbd;
+  line-height: 1.6;
+}
+.pagina time {
+  display: block;
+  margin-top: 1rem;
+  color: #727e93;
+  font-size: 0.65rem;
+}
+.pagina article > img {
+  display: block;
+  width: 100%;
+  height: min(28rem, 48vw);
+  object-fit: cover;
+}
+.conteudo {
+  padding: clamp(1.2rem, 4vw, 2.4rem);
+  color: #d7dce6;
+  font-size: 0.95rem;
+  line-height: 1.85;
+  white-space: pre-wrap;
+}
+.anexos {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0 clamp(1.2rem, 4vw, 2.4rem) 2rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  padding-top: 1rem;
+}
+.anexos h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.3rem;
+  font-size: 0.85rem;
+}
+.anexos h2 svg {
+  width: 1rem;
+  color: #a78bfa;
+}
+.anexos a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(167, 139, 250, 0.18);
+  border-radius: 0.55rem;
+  background: rgba(124, 58, 237, 0.08);
+  color: #ddd6fe;
+  padding: 0.7rem;
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+.anexos a svg {
+  width: 0.85rem;
+}
+.estado {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  gap: 0.5rem;
+  background: #05070d;
+  color: #cbd5e1;
+  text-align: center;
+}
+.estado a {
+  color: #c4b5fd;
+}

@@ -11,13 +11,7 @@ type ApiErrorResponse = {
 };
 
 export type TipoEfeitoHabilidade =
-  | "BUFF"
-  | "DEBUFF"
-  | "DANO"
-  | "CURA"
-  | "ESCUDO"
-  | "ROUBO_VIDA"
-  | "EVASAO";
+  "BUFF" | "DEBUFF" | "DANO" | "CURA" | "ESCUDO" | "ROUBO_VIDA" | "EVASAO";
 
 export type AdminHabilidade = {
   id: string;
@@ -220,6 +214,29 @@ export type AdminDashboardResumo = {
   }[];
 };
 
+export type AnexoNoticia = { titulo: string; url: string };
+
+export type AdminNoticia = {
+  id: string;
+  titulo: string;
+  resumo: string;
+  conteudo: string;
+  imagem: string | null;
+  categoria: "NOVIDADE" | "BALANCE" | "EVENTO" | "AVISO";
+  anexos: AnexoNoticia[] | null;
+  publicada: boolean;
+  criado_em: string;
+  atualizado_em: string;
+};
+
+export type SalvarAdminNoticiaPayload = Omit<
+  AdminNoticia,
+  "id" | "criado_em" | "atualizado_em" | "anexos" | "imagem"
+> & {
+  anexos: AnexoNoticia[];
+  imagem?: string;
+};
+
 export type UploadedAsset = {
   url: string;
   publicId: string;
@@ -389,6 +406,40 @@ export function removerAdminCarta(
 
 export function uploadCartaAssets(formData: FormData) {
   return adminRequest<UploadCartaAssetsResponse>("/admin/uploads/cartas", {
+    method: "POST",
+    body: formData,
+  });
+}
+
+export function listarAdminNoticias() {
+  return adminRequest<AdminNoticia[]>("/admin/noticias");
+}
+
+export function criarAdminNoticia(payload: SalvarAdminNoticiaPayload) {
+  return adminRequest<AdminNoticia>("/admin/noticias", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function atualizarAdminNoticia(
+  id: string,
+  payload: SalvarAdminNoticiaPayload,
+) {
+  return adminRequest<AdminNoticia>(`/admin/noticias/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removerAdminNoticia(id: string) {
+  return adminRequest<{ message: string }>(`/admin/noticias/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function uploadNoticiaImagem(formData: FormData) {
+  return adminRequest<UploadedAsset>("/admin/uploads/noticias", {
     method: "POST",
     body: formData,
   });

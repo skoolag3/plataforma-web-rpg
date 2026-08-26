@@ -447,3 +447,19 @@ model EventoPartida {
   @@index([id_partida, turno])
   @@map("evento_partida")
 }
+
+model Noticia {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  titulo        String   @db.VarChar(180)
+  resumo        String   @db.VarChar(320)
+  conteudo      String
+  imagem        String?  @db.VarChar(500)
+  categoria     String   @default("NOVIDADE") @db.VarChar(30)
+  anexos        Json?
+  publicada     Boolean  @default(false)
+  criado_em     DateTime @default(now()) @db.Timestamptz(0)
+  atualizado_em DateTime @default(now()) @db.Timestamptz(0)
+
+  @@index([publicada, criado_em(sort: Desc)])
+  @@map("noticia")
+}

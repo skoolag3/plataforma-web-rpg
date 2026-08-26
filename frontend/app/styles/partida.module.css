@@ -1,125 +1,938 @@
 .pagina {
   min-height: calc(100vh - 4.7rem);
   overflow-x: hidden;
-  padding: clamp(1.2rem, 3vw, 2.5rem) 1rem 3rem;
+  padding: clamp(0.75rem, 1.8vw, 1.35rem) 1rem 2rem;
   color: var(--member-text);
 }
 
-.container { width: min(76rem, 100%); margin: auto; }
-.topo { display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.2rem;border-bottom:1px solid var(--member-border);padding-bottom:1rem; }
-.topo span { display:inline-flex;align-items:center;gap:.35rem;color:var(--member-lime);font-size:.62rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase; }
-.topo span svg,.topo > strong svg { width:.85rem; }
-.topo h1 { margin:.35rem 0 .25rem;font-size:clamp(1.9rem,4vw,3rem);line-height:1;letter-spacing:-.045em; }
-.topo p { margin:0;color:var(--member-muted);font-size:.82rem; }
-.topo > strong { display:inline-flex;align-items:center;gap:.4rem;color:#c4b5fd;font-size:.72rem;text-transform:uppercase; }
-.carregando { display:grid;min-height:24rem;place-items:center;border:1px solid var(--member-border);border-radius:1rem;background:var(--member-surface);color:var(--member-muted); }
-.erro { margin:.5rem 0;color:#fca5a5;font-size:.72rem;text-align:center; }
+.container {
+  width: min(76rem, 100%);
+  margin: auto;
+}
+.topo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--member-border);
+  padding-bottom: 0.7rem;
+}
+.topo span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--member-lime);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.topo span svg,
+.topo > strong svg {
+  width: 0.85rem;
+}
+.topo h1 {
+  margin: 0.25rem 0 0.18rem;
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+.topo p {
+  margin: 0;
+  color: var(--member-muted);
+  font-size: 0.82rem;
+}
+.topo > strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #c4b5fd;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+.carregando {
+  display: grid;
+  min-height: 24rem;
+  place-items: center;
+  border: 1px solid var(--member-border);
+  border-radius: 1rem;
+  background: var(--member-surface);
+  color: var(--member-muted);
+}
+.erro {
+  margin: 0.5rem 0;
+  color: #fca5a5;
+  font-size: 0.72rem;
+  text-align: center;
+}
 
-.preparacao { display:grid;gap:1rem;border:1px solid var(--member-border);border-radius:1rem;background:linear-gradient(145deg,rgba(255,255,255,.035),transparent 42%),var(--member-surface);padding:clamp(1rem,3vw,1.6rem); }
-.preparacao > header { display:flex;align-items:flex-start;justify-content:space-between;gap:1rem; }
-.preparacao > header small { color:var(--member-lime);font-size:.6rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase; }
-.preparacao > header h2 { margin:.25rem 0;font-size:1.35rem; }
-.preparacao > header p { margin:0;color:var(--member-muted);font-size:.75rem; }
-.preparacao > header a,.semDeck a { border:1px solid rgba(167,139,250,.25);border-radius:.6rem;background:rgba(124,58,237,.12);color:#ddd6fe;padding:.55rem .7rem;font-size:.65rem;font-weight:800;text-decoration:none; }
-.listaDecks { display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.65rem; }
-.listaDecks > button { display:grid;gap:.6rem;border:1px solid var(--member-border);border-radius:.8rem;background:rgba(5,8,16,.55);color:inherit;cursor:pointer;padding:.75rem;text-align:left;transition:150ms ease; }
-.listaDecks > button:hover:not(:disabled) { border-color:rgba(167,139,250,.38);transform:translateY(-1px); }
-.listaDecks > button:disabled { cursor:not-allowed;filter:saturate(.25);opacity:.48; }
-.listaDecks > .deckSelecionado { border-color:#8b5cf6;background:linear-gradient(145deg,rgba(124,58,237,.22),rgba(5,8,16,.7));box-shadow:0 0 0 1px rgba(139,92,246,.16); }
-.deckTopo { display:flex;align-items:center;justify-content:space-between;gap:.5rem; }
-.deckTopo > span { display:flex;align-items:center;gap:.4rem;font-size:.76rem;font-weight:850; }
-.deckTopo svg { width:.85rem;color:#a78bfa; }
-.miniCartas { display:grid;grid-template-columns:repeat(6,1fr);gap:.25rem; }
-.miniCartas > span { aspect-ratio:2/3;border:1px solid rgba(255,255,255,.08);border-radius:.28rem;background:linear-gradient(145deg,#26213c,#0c1220);background-position:center;background-size:cover; }
-.listaDecks > button > small { color:var(--member-muted);font-size:.58rem;text-transform:uppercase; }
-.btnIniciar { display:flex;width:min(22rem,100%);min-height:2.8rem;align-items:center;justify-content:center;gap:.45rem;justify-self:center;border:1px solid rgba(255,255,255,.12);border-radius:.7rem;background:linear-gradient(135deg,#b8e96d,#9b7cf7 48%,#6d28d9);color:#fff;cursor:pointer;font:inherit;font-size:.75rem;font-weight:900; }
-.btnIniciar:disabled { cursor:not-allowed;filter:saturate(.25);opacity:.45; }
-.btnIniciar svg { width:1rem; }
-.semDeck { display:grid;min-height:15rem;place-items:center;align-content:center;gap:.4rem;border:1px dashed var(--member-border);border-radius:.8rem;color:var(--member-muted);text-align:center; }
-.semDeck > svg { width:1.6rem;color:#8b5cf6; }.semDeck strong{color:#e5e7eb}.semDeck p{margin:0 0 .5rem;font-size:.72rem}
+.preparacao {
+  display: grid;
+  gap: 0.7rem;
+  border: 1px solid var(--member-border);
+  border-radius: 1rem;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.035), transparent 42%),
+    var(--member-surface);
+  padding: clamp(0.75rem, 1.7vw, 1rem);
+}
+.preparacao > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.preparacao > header small {
+  color: var(--member-lime);
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.preparacao > header h2 {
+  margin: 0.15rem 0;
+  font-size: 1.1rem;
+}
+.preparacao > header p {
+  margin: 0;
+  color: var(--member-muted);
+  font-size: 0.75rem;
+}
+.preparacao > header a,
+.semDeck a {
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 0.6rem;
+  background: rgba(124, 58, 237, 0.12);
+  color: #ddd6fe;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.listaDecks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 40rem), 48rem));
+  justify-content: center;
+  gap: 0.55rem;
+}
+.deckOpcao {
+  position: relative;
+  display: grid;
+  min-height: 13.5rem;
+  grid-template-columns: minmax(10rem, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 0.25rem 0.8rem;
+  border: 1px solid var(--member-border);
+  border-radius: 0.8rem;
+  background: rgba(5, 8, 16, 0.55);
+  color: inherit;
+  overflow: visible;
+  padding: 0.9rem 1rem;
+  text-align: left;
+  transition: 150ms ease;
+}
+.deckOpcao:hover:not(.deckIndisponivel) {
+  border-color: rgba(167, 139, 250, 0.38);
+  transform: translateY(-1px);
+}
+.deckIndisponivel {
+  cursor: not-allowed;
+  filter: saturate(0.25);
+  opacity: 0.48;
+}
+.listaDecks > .deckSelecionado {
+  border-color: #8b5cf6;
+  background: linear-gradient(
+    145deg,
+    rgba(124, 58, 237, 0.22),
+    rgba(5, 8, 16, 0.7)
+  );
+  box-shadow:
+    0 0 0 1px rgba(139, 92, 246, 0.16),
+    0 0.9rem 2rem rgba(55, 24, 105, 0.18);
+}
+.deckTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.deckSelecionar {
+  display: grid;
+  align-self: stretch;
+  align-content: center;
+  gap: 0.65rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: left;
+}
+.deckSelecionar:disabled {
+  cursor: not-allowed;
+}
+.deckSelecionar:focus-visible {
+  border-radius: 0.4rem;
+  outline: 2px solid var(--member-lime);
+  outline-offset: 0.25rem;
+}
+.deckSelecionar > small {
+  color: var(--member-muted);
+  font-size: 0.55rem;
+  text-transform: uppercase;
+}
+.deckTopo > span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+.deckTopo svg {
+  width: 0.85rem;
+  color: #a78bfa;
+}
+.miniCartas {
+  position: relative;
+  display: flex;
+  grid-column: 2;
+  grid-row: 1/3;
+  gap: 0.65rem;
+  align-items: center;
+}
+.miniCartas > span {
+  display: block;
+  width: clamp(6.5rem, 8vw, 7.8rem);
+  flex: 0 0 auto;
+  filter: drop-shadow(0 0.5rem 0.65rem rgba(0, 0, 0, 0.38));
+  transform-origin: bottom center;
+  transition: transform 160ms ease;
+}
+.miniCartas > span:nth-child(1) {
+  transform: rotate(-2deg) translateY(0.12rem);
+}
+.miniCartas > span:nth-child(2) {
+  transform: translateY(-0.12rem);
+}
+.miniCartas > span:nth-child(3) {
+  transform: rotate(2deg) translateY(0.12rem);
+}
+.deckOpcao:hover:not(.deckIndisponivel) .miniCartas > span {
+  transform: translateY(-0.18rem) rotate(0);
+}
+.miniCartas > span svg {
+  width: 1rem;
+}
+.btnIniciar {
+  display: flex;
+  width: min(20rem, 100%);
+  min-height: 2.45rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  justify-self: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.65rem;
+  background: linear-gradient(135deg, #b8e96d, #9b7cf7 48%, #6d28d9);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+.btnIniciar:disabled {
+  cursor: not-allowed;
+  filter: saturate(0.25);
+  opacity: 0.45;
+}
+.btnIniciar svg {
+  width: 1rem;
+}
+.semDeck {
+  display: grid;
+  min-height: 15rem;
+  place-items: center;
+  align-content: center;
+  gap: 0.4rem;
+  border: 1px dashed var(--member-border);
+  border-radius: 0.8rem;
+  color: var(--member-muted);
+  text-align: center;
+}
+.semDeck > svg {
+  width: 1.6rem;
+  color: #8b5cf6;
+}
+.semDeck strong {
+  color: #e5e7eb;
+}
+.semDeck p {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+}
 
-.batalhaLayout { display:grid;grid-template-columns:minmax(0,1fr) 20rem;gap:.65rem;align-items:start; }
-.arena,.logBatalha { border:1px solid var(--member-border);border-radius:1rem;background:var(--member-surface);box-shadow:inset 0 1px rgba(255,255,255,.04),0 1.5rem 4rem rgba(0,0,0,.17); }
-.arena { position:relative;isolation:isolate;overflow:hidden;padding:.75rem; }
-.arena::before { position:absolute;z-index:-1;inset:0;background:radial-gradient(circle at 50% 50%,rgba(139,92,246,.18),transparent 33%),linear-gradient(115deg,transparent 48%,rgba(190,242,100,.035) 49%,rgba(190,242,100,.035) 51%,transparent 52%),repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 1px,transparent 1px 5.5rem),linear-gradient(160deg,#141123,#080c16 62%,#050811);content:""; }
-.arenaTopo { display:flex;align-items:center;justify-content:space-between;gap:.6rem;border-bottom:1px solid rgba(255,255,255,.07);padding:.15rem .3rem .6rem;color:#8994a8;font-size:.6rem;text-transform:uppercase; }
-.arenaTopo span { display:flex;align-items:center;gap:.3rem; }.arenaTopo svg{width:.75rem}.arenaTopo strong{color:#d8b4fe;font-size:.7rem}
-.mesaCampo { display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(.7rem,3vw,2rem);align-items:center;min-height:27rem;padding:1rem clamp(.2rem,2vw,1rem);perspective:1000px; }
-.marcaArena { display:grid;width:2.5rem;height:2.5rem;place-items:center;border:1px solid rgba(190,242,100,.25);border-radius:999px;background:rgba(5,8,16,.75);color:var(--member-lime);font-size:.68rem;font-weight:950;box-shadow:0 0 2rem rgba(190,242,100,.08); }
-.cartaCampo { display:grid;justify-items:center;gap:.45rem;min-width:0; }
-.cartaCampo.bot { transform:translateY(-.6rem) rotateX(-2deg); }
-.cartaCampo.jogador { transform:translateY(.6rem) rotateX(2deg); }
-.statusCarta { display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.18rem .5rem;width:min(15rem,100%);border:1px solid rgba(255,255,255,.08);border-radius:.6rem;background:rgba(3,6,14,.76);padding:.45rem .55rem;backdrop-filter:blur(5px); }
-.statusCarta > span:first-child { min-width:0; }.statusCarta strong,.statusCarta small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.statusCarta strong{font-size:.68rem}.statusCarta small{margin-top:.08rem;color:#71809a;font-size:.5rem;text-transform:uppercase}
-.statusCarta > b { align-self:center;color:#d1fae5;font-size:.56rem;white-space:nowrap; }
-.barraHp { grid-column:1/-1;height:.28rem;overflow:hidden;border-radius:999px;background:#241a2d; }
-.barraHp i { display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#65a30d,#bef264);transition:width 300ms ease; }
-.cartaVisual { width:clamp(8rem,15vw,11rem); }
-.infoCartaMesa { display:grid;width:100%;gap:.12rem;color:#fff;text-shadow:0 2px 5px #000; }
-.infoCartaMesa b { width:max-content;border-radius:999px;background:rgba(76,29,149,.72);padding:.1rem .35rem;font-size:.48rem; }
-.infoCartaMesa strong { overflow:hidden;font-size:.72rem;text-overflow:ellipsis;white-space:nowrap; }
-.atributosCarta { display:flex;flex-wrap:wrap;justify-content:center;gap:.28rem; }
-.atributosCarta span { display:inline-flex;align-items:center;gap:.18rem;border:1px solid rgba(255,255,255,.07);border-radius:.35rem;background:rgba(4,7,14,.72);color:#7f8ba0;padding:.25rem .35rem;font-size:.48rem;font-weight:800; }
-.atributosCarta svg { width:.58rem;color:#a78bfa; }.atributosCarta b{color:#e5e7eb}
-.atributosCarta em { color:#bef264;font-size:.44rem;font-style:normal; }.atributosCarta .atributoAlterado{border-color:rgba(190,242,100,.2);background:rgba(77,124,15,.12)}
-.passivaCarta { display:flex;max-width:15rem;align-items:center;gap:.3rem;margin:0;color:#c4b5fd;font-size:.55rem;text-align:center; }
-.passivaCarta svg { width:.65rem;flex:0 0 auto; }
-.filaDeck { display:flex;justify-content:center;gap:.3rem;padding:.55rem; }
-.filaDeck > span { position:relative;width:2rem;aspect-ratio:2/3;border:1px solid rgba(255,255,255,.09);border-radius:.28rem;background:linear-gradient(145deg,#28223c,#0c111d);background-position:center;background-size:cover;filter:saturate(.7);opacity:.65;transition:150ms ease; }
-.filaDeck b { position:absolute;right:.1rem;bottom:.1rem;display:grid;width:.8rem;height:.8rem;place-items:center;border-radius:999px;background:rgba(0,0,0,.72);color:#fff;font-size:.42rem; }
-.filaDeck > .cartaAtivaFila { border-color:#bef264;filter:none;opacity:1;box-shadow:0 0 .8rem rgba(190,242,100,.2);transform:translateY(-2px); }
-.filaDeck > .cartaDerrotada { filter:grayscale(1);opacity:.22; }
-.rodapeArena { display:grid;grid-template-columns:minmax(16rem,22rem) minmax(16rem,1fr);gap:.8rem;align-items:end;border-top:1px solid rgba(255,255,255,.07);padding:.7rem .2rem .15rem; }
-.deckJogador { display:grid;gap:.45rem;justify-self:start;width:100%;border:1px solid rgba(167,139,250,.18);border-radius:.7rem;background:rgba(3,6,14,.74);padding:.55rem;backdrop-filter:blur(5px); }
-.deckJogador > header { display:flex;align-items:center;justify-content:space-between;gap:.5rem; }
-.deckJogador > header span { display:grid;gap:.08rem; }.deckJogador > header strong{font-size:.65rem;text-transform:uppercase}.deckJogador > header small{color:#71809a;font-size:.48rem}.deckJogador > header b{color:#c4b5fd;font-size:.5rem;text-transform:uppercase}
-.gridDeckJogador { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.35rem; }
-.gridDeckJogador article { display:grid;grid-template-columns:2.2rem minmax(0,1fr);grid-template-rows:auto auto;gap:.15rem .35rem;align-items:center;min-width:0;border:1px solid rgba(255,255,255,.06);border-radius:.48rem;background:rgba(10,13,24,.78);padding:.3rem;transition:150ms ease; }
-.gridDeckJogador article > strong { align-self:end;overflow:hidden;color:#cbd5e1;font-size:.5rem;text-overflow:ellipsis;white-space:nowrap; }
-.miniCartaVisual { position:relative;grid-row:1/3;width:2.2rem;filter:saturate(.75); }
-.miniCartaVisual > span { position:absolute;right:-.12rem;bottom:-.08rem;display:grid;width:.8rem;height:.8rem;place-items:center;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#080b13;color:#fff;font-size:.4rem;font-weight:900; }
-.miniCartaHp { align-self:start;height:.2rem;overflow:hidden;border-radius:999px;background:#291a2d; }.miniCartaHp i{display:block;height:100%;border-radius:inherit;background:#84cc16}
-.gridDeckJogador > .miniCartaAtiva { border-color:rgba(190,242,100,.48);background:rgba(77,124,15,.1);box-shadow:0 0 .8rem rgba(190,242,100,.09); }.gridDeckJogador > .miniCartaAtiva .miniCartaVisual{filter:none}
-.gridDeckJogador > .miniCartaDerrotada { filter:grayscale(1);opacity:.3; }.gridDeckJogador > .miniCartaDerrotada .miniCartaHp i{width:0!important}
-.acoesBatalha { display:grid;justify-items:center;padding:.7rem .5rem .2rem; }
-.acoesBatalha button { display:flex;width:min(18rem,100%);min-height:2.6rem;align-items:center;justify-content:center;gap:.4rem;border:1px solid rgba(190,242,100,.28);border-radius:.7rem;background:linear-gradient(135deg,#6d28d9,#8b5cf6 58%,#84cc16);color:#fff;cursor:pointer;font:inherit;font-size:.72rem;font-weight:900; }
-.acoesBatalha button:disabled{cursor:wait;filter:saturate(.25);opacity:.55}.acoesBatalha button svg{width:.9rem}.acoesBatalha small{margin-top:.35rem;color:#657087;font-size:.5rem}
+.batalhaLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  gap: 0.55rem;
+  align-items: start;
+}
+.arena,
+.logBatalha {
+  border: 1px solid var(--member-border);
+  border-radius: 1rem;
+  background: var(--member-surface);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.04),
+    0 1.5rem 4rem rgba(0, 0, 0, 0.17);
+}
+.arena {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 0.6rem;
+}
+.arena::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(139, 92, 246, 0.18),
+      transparent 33%
+    ),
+    linear-gradient(
+      115deg,
+      transparent 48%,
+      rgba(190, 242, 100, 0.035) 49%,
+      rgba(190, 242, 100, 0.035) 51%,
+      transparent 52%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.018) 0 1px,
+      transparent 1px 5.5rem
+    ),
+    linear-gradient(160deg, #141123, #080c16 62%, #050811);
+  content: "";
+}
+.arenaTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.15rem 0.3rem 0.6rem;
+  color: #8994a8;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+.arenaTopo span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.arenaTopo svg {
+  width: 0.75rem;
+}
+.arenaTopo strong {
+  color: #d8b4fe;
+  font-size: 0.7rem;
+}
+.mesaCampo {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: clamp(0.7rem, 3vw, 2rem);
+  align-items: center;
+  min-height: 21.5rem;
+  padding: 0.45rem clamp(0.2rem, 1.4vw, 0.7rem) 0.3rem;
+}
+.marcaArena {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border: 1px solid rgba(190, 242, 100, 0.25);
+  border-radius: 999px;
+  background: rgba(5, 8, 16, 0.75);
+  color: var(--member-lime);
+  font-size: 0.68rem;
+  font-weight: 950;
+  box-shadow: 0 0 2rem rgba(190, 242, 100, 0.08);
+}
+.cartaCampo {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+.donoCarta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4.5rem;
+  border: 1px solid rgba(167, 139, 250, 0.26);
+  border-radius: 999px;
+  background: rgba(76, 29, 149, 0.24);
+  color: #ddd6fe;
+  padding: 0.22rem 0.5rem;
+  font-size: 0.5rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.donoCarta[data-lado="bot"] {
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(127, 29, 29, 0.2);
+  color: #fecaca;
+}
+.cartaCampo.bot {
+  transform: translateY(-0.35rem);
+}
+.cartaCampo.jogador {
+  transform: translateY(0.35rem);
+}
+.statusCarta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.18rem 0.5rem;
+  width: min(15rem, 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.6rem;
+  background: rgba(3, 6, 14, 0.76);
+  padding: 0.45rem 0.55rem;
+  backdrop-filter: blur(5px);
+}
+.statusCarta > span:first-child {
+  min-width: 0;
+}
+.statusCarta strong,
+.statusCarta small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.statusCarta strong {
+  font-size: 0.68rem;
+}
+.statusCarta small {
+  margin-top: 0.08rem;
+  color: #71809a;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+}
+.statusCarta > b {
+  align-self: center;
+  color: #d1fae5;
+  font-size: 0.56rem;
+  white-space: nowrap;
+}
+.barraHp {
+  grid-column: 1/-1;
+  height: 0.28rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #241a2d;
+}
+.barraHp i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #65a30d, #bef264);
+  transition: width 300ms ease;
+}
+.cartaVisual {
+  width: clamp(8rem, 15vw, 11rem);
+}
+.atributosCarta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.28rem;
+}
+.atributosCarta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.35rem;
+  background: rgba(4, 7, 14, 0.72);
+  color: #7f8ba0;
+  padding: 0.25rem 0.35rem;
+  font-size: 0.48rem;
+  font-weight: 800;
+}
+.atributosCarta svg {
+  width: 0.58rem;
+  color: #a78bfa;
+}
+.atributosCarta b {
+  color: #e5e7eb;
+}
+.atributosCarta em {
+  color: #bef264;
+  font-size: 0.44rem;
+  font-style: normal;
+}
+.atributosCarta .atributoAlterado {
+  border-color: rgba(190, 242, 100, 0.2);
+  background: rgba(77, 124, 15, 0.12);
+}
+.passivaCarta {
+  display: flex;
+  max-width: 15rem;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+  color: #c4b5fd;
+  font-size: 0.55rem;
+  text-align: center;
+}
+.passivaCarta svg {
+  width: 0.65rem;
+  flex: 0 0 auto;
+}
+.filaDeck {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.55rem;
+}
+.filaDeck > span {
+  position: relative;
+  width: 2rem;
+  aspect-ratio: 2/3;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 0.28rem;
+  background: linear-gradient(145deg, #28223c, #0c111d);
+  background-position: center;
+  background-size: cover;
+  filter: saturate(0.7);
+  opacity: 0.65;
+  transition: 150ms ease;
+}
+.filaDeck b {
+  position: absolute;
+  right: 0.1rem;
+  bottom: 0.1rem;
+  display: grid;
+  width: 0.8rem;
+  height: 0.8rem;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: 0.42rem;
+}
+.filaDeck > .cartaAtivaFila {
+  border-color: #bef264;
+  filter: none;
+  opacity: 1;
+  box-shadow: 0 0 0.8rem rgba(190, 242, 100, 0.2);
+  transform: translateY(-2px);
+}
+.filaDeck > .cartaDerrotada {
+  filter: grayscale(1);
+  opacity: 0.22;
+}
+.rodapeArena {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) minmax(16rem, 1fr);
+  gap: 0.6rem;
+  align-items: end;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.45rem 0.1rem 0.05rem;
+}
+.deckJogador {
+  display: grid;
+  gap: 0.3rem;
+  justify-self: start;
+  width: 100%;
+  border: 1px solid rgba(167, 139, 250, 0.18);
+  border-radius: 0.7rem;
+  background: rgba(3, 6, 14, 0.74);
+  padding: 0.42rem;
+  backdrop-filter: blur(5px);
+}
+.deckJogador > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.deckJogador > header span {
+  display: grid;
+  gap: 0.08rem;
+}
+.deckJogador > header strong {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
+.deckJogador > header small {
+  color: #71809a;
+  font-size: 0.48rem;
+}
+.deckJogador > header b {
+  color: #c4b5fd;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+}
+.gridDeckJogador {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+.gridDeckJogador article {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 0.15rem 0.35rem;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.48rem;
+  background: rgba(10, 13, 24, 0.78);
+  padding: 0.3rem;
+  transition: 150ms ease;
+}
+.gridDeckJogador article > strong {
+  align-self: end;
+  overflow: hidden;
+  color: #cbd5e1;
+  font-size: 0.5rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.miniCartaVisual {
+  position: relative;
+  grid-row: 1/3;
+  width: 2.2rem;
+  filter: saturate(0.75);
+}
+.miniCartaVisual > span {
+  position: absolute;
+  right: -0.12rem;
+  bottom: -0.08rem;
+  display: grid;
+  width: 0.8rem;
+  height: 0.8rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: #080b13;
+  color: #fff;
+  font-size: 0.4rem;
+  font-weight: 900;
+}
+.miniCartaHp {
+  align-self: start;
+  height: 0.2rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #291a2d;
+}
+.miniCartaHp i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #84cc16;
+}
+.gridDeckJogador > .miniCartaAtiva {
+  border-color: rgba(190, 242, 100, 0.48);
+  background: rgba(77, 124, 15, 0.1);
+  box-shadow: 0 0 0.8rem rgba(190, 242, 100, 0.09);
+}
+.gridDeckJogador > .miniCartaAtiva .miniCartaVisual {
+  filter: none;
+}
+.gridDeckJogador > .miniCartaDerrotada {
+  filter: grayscale(1);
+  opacity: 0.3;
+}
+.gridDeckJogador > .miniCartaDerrotada .miniCartaHp i {
+  width: 0 !important;
+}
+.acoesBatalha {
+  display: grid;
+  justify-items: center;
+  padding: 0.35rem 0.5rem 0.1rem;
+}
+.acoesBatalha button {
+  display: flex;
+  width: min(18rem, 100%);
+  min-height: 2.6rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(190, 242, 100, 0.28);
+  border-radius: 0.7rem;
+  background: linear-gradient(135deg, #6d28d9, #8b5cf6 58%, #84cc16);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+.acoesBatalha button:disabled {
+  cursor: wait;
+  filter: saturate(0.25);
+  opacity: 0.55;
+}
+.acoesBatalha button svg {
+  width: 0.9rem;
+}
+.acoesBatalha small {
+  margin-top: 0.35rem;
+  color: #657087;
+  font-size: 0.5rem;
+}
 
-.logBatalha { position:sticky;top:5rem;display:grid;grid-template-rows:auto minmax(0,1fr);height:min(44rem,calc(100vh - 6rem));gap:.55rem;overflow:hidden;padding:.65rem; }
-.logBatalha > header { border-bottom:1px solid rgba(255,255,255,.07);padding:.15rem .15rem .55rem; }.logBatalha h2 { display:flex;align-items:center;gap:.35rem;margin:0;color:#e5e7eb;font-size:.72rem; }.logBatalha h2 svg{width:.85rem;color:#a78bfa}.logBatalha > header p{margin:.15rem 0 0;color:#657087;font-size:.5rem}
-.listaTurnos { display:flex;min-height:0;flex-direction:column;gap:.7rem;overflow-y:auto;padding:.1rem .2rem .35rem;scrollbar-width:thin;scrollbar-color:#4c3b69 transparent; }
-.grupoTurno { display:grid;gap:.4rem; }
-.grupoTurno > header { display:flex;align-items:center;gap:.45rem;color:#657087; }
-.grupoTurno > header::before,.grupoTurno > header::after { height:1px;flex:1;background:rgba(167,139,250,.13);content:""; }
-.grupoTurno > header strong { color:#c4b5fd;font-size:.48rem;text-transform:uppercase;white-space:nowrap; }.grupoTurno > header span{font-size:.4rem;white-space:nowrap}
-.grupoTurno > div { display:flex;flex-direction:column;gap:.28rem; }
-.logBatalha article { display:grid;max-width:92%;gap:.14rem;align-self:center;border:1px solid rgba(255,255,255,.07);border-radius:.58rem;background:rgba(12,16,27,.9);padding:.4rem .5rem;box-shadow:0 .25rem .7rem rgba(0,0,0,.1); }
-.logBatalha article > b{color:#7f8ba0;font-size:.4rem;line-height:1.2;text-transform:uppercase}.logBatalha article p { margin:0;color:#c4ccd8;font-size:.53rem;line-height:1.4;overflow-wrap:anywhere; }
-.logBatalha article[data-origem="BOT"] { align-self:flex-start;border-color:rgba(248,113,113,.16);border-bottom-left-radius:.18rem;background:rgba(69,18,28,.22); }.logBatalha article[data-origem="BOT"] > b{color:#fca5a5}
-.logBatalha article[data-origem="JOGADOR"] { align-self:flex-end;border-color:rgba(139,92,246,.22);border-bottom-right-radius:.18rem;background:rgba(76,29,149,.28); }.logBatalha article[data-origem="JOGADOR"] > b{color:#c4b5fd}
-.fimBatalha { display:grid;justify-items:center;padding:.7rem .5rem .2rem;text-align:center; }
-.fimBatalha > svg { width:1.4rem;color:#bef264; }.fimBatalha small{margin-top:.25rem;color:#76839a;font-size:.54rem;text-transform:uppercase}.fimBatalha h2{margin:.2rem 0;color:#f5f3ff;font-size:1.4rem}
-.fimBatalha p { display:flex;align-items:center;gap:.3rem;margin:.1rem 0 .6rem;color:#bef264;font-size:.65rem; }.fimBatalha p svg{width:.75rem}
-.fimBatalha button { border:1px solid rgba(167,139,250,.28);border-radius:.55rem;background:rgba(124,58,237,.15);color:#ddd6fe;cursor:pointer;padding:.5rem .7rem;font:inherit;font-size:.62rem;font-weight:800; }
+.logBatalha {
+  position: sticky;
+  top: 5rem;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: min(44rem, calc(100vh - 6rem));
+  gap: 0.55rem;
+  overflow: hidden;
+  padding: 0.65rem;
+}
+.logBatalha > header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.15rem 0.15rem 0.55rem;
+}
+.logBatalha h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  color: #e5e7eb;
+  font-size: 0.72rem;
+}
+.logBatalha h2 svg {
+  width: 0.85rem;
+  color: #a78bfa;
+}
+.logBatalha > header p {
+  margin: 0.15rem 0 0;
+  color: #657087;
+  font-size: 0.5rem;
+}
+.listaTurnos {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 0.7rem;
+  overflow-y: auto;
+  padding: 0.1rem 0.2rem 0.35rem;
+  scrollbar-width: thin;
+  scrollbar-color: #4c3b69 transparent;
+}
+.grupoTurno {
+  display: grid;
+  gap: 0.4rem;
+}
+.grupoTurno > header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #657087;
+}
+.grupoTurno > header::before,
+.grupoTurno > header::after {
+  height: 1px;
+  flex: 1;
+  background: rgba(167, 139, 250, 0.13);
+  content: "";
+}
+.grupoTurno > header strong {
+  color: #c4b5fd;
+  font-size: 0.48rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.grupoTurno > header span {
+  font-size: 0.4rem;
+  white-space: nowrap;
+}
+.grupoTurno > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+.logBatalha article {
+  display: grid;
+  max-width: 92%;
+  gap: 0.14rem;
+  align-self: center;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.58rem;
+  background: rgba(12, 16, 27, 0.9);
+  padding: 0.4rem 0.5rem;
+  box-shadow: 0 0.25rem 0.7rem rgba(0, 0, 0, 0.1);
+}
+.logBatalha article > b {
+  color: #7f8ba0;
+  font-size: 0.4rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.logBatalha article p {
+  margin: 0;
+  color: #c4ccd8;
+  font-size: 0.53rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.logBatalha article[data-origem="BOT"] {
+  align-self: flex-start;
+  border-color: rgba(248, 113, 113, 0.16);
+  border-bottom-left-radius: 0.18rem;
+  background: rgba(69, 18, 28, 0.22);
+}
+.logBatalha article[data-origem="BOT"] > b {
+  color: #fca5a5;
+}
+.logBatalha article[data-origem="JOGADOR"] {
+  align-self: flex-end;
+  border-color: rgba(139, 92, 246, 0.22);
+  border-bottom-right-radius: 0.18rem;
+  background: rgba(76, 29, 149, 0.28);
+}
+.logBatalha article[data-origem="JOGADOR"] > b {
+  color: #c4b5fd;
+}
+.fimBatalha {
+  display: grid;
+  justify-items: center;
+  padding: 0.7rem 0.5rem 0.2rem;
+  text-align: center;
+}
+.fimBatalha > svg {
+  width: 1.4rem;
+  color: #bef264;
+}
+.fimBatalha small {
+  margin-top: 0.25rem;
+  color: #76839a;
+  font-size: 0.54rem;
+  text-transform: uppercase;
+}
+.fimBatalha h2 {
+  margin: 0.2rem 0;
+  color: #f5f3ff;
+  font-size: 1.4rem;
+}
+.fimBatalha p {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0.1rem 0 0.6rem;
+  color: #bef264;
+  font-size: 0.65rem;
+}
+.fimBatalha p svg {
+  width: 0.75rem;
+}
+.fimBatalha button {
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  border-radius: 0.55rem;
+  background: rgba(124, 58, 237, 0.15);
+  color: #ddd6fe;
+  cursor: pointer;
+  padding: 0.5rem 0.7rem;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
 
 @media (max-width: 900px) {
-  .batalhaLayout { grid-template-columns:1fr; }
-  .rodapeArena { grid-template-columns:1fr; }
-  .deckJogador { justify-self:stretch; }
-  .logBatalha { position:static;height:20rem; }
+  .batalhaLayout {
+    grid-template-columns: 1fr;
+  }
+  .rodapeArena {
+    grid-template-columns: 1fr;
+  }
+  .deckJogador {
+    justify-self: stretch;
+  }
+  .logBatalha {
+    position: static;
+    height: 20rem;
+  }
 }
 
 @media (max-width: 620px) {
-  .pagina { padding:1rem .6rem 2rem; }
-  .topo { align-items:flex-start;flex-direction:column; }
-  .topo > strong { display:none; }
-  .preparacao > header { flex-direction:column; }
-  .listaDecks { grid-template-columns:1fr; }
-  .mesaCampo { grid-template-columns:1fr 2rem 1fr;gap:.3rem;min-height:22rem;padding:.8rem 0; }
-  .cartaVisual { width:min(8rem,100%); }
-  .statusCarta { padding:.35rem; }.statusCarta > b{grid-column:1/-1;justify-self:start}.statusCarta small{display:none}
-  .atributosCarta { gap:.15rem; }.atributosCarta span{padding:.18rem;font-size:.42rem}.atributosCarta svg{display:none}
-  .passivaCarta { font-size:.47rem; }
-  .arenaTopo span:last-child { display:none; }
-  .gridDeckJogador { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .pagina {
+    padding: 1rem 0.6rem 2rem;
+  }
+  .topo {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .topo > strong {
+    display: none;
+  }
+  .preparacao > header {
+    flex-direction: column;
+  }
+  .listaDecks {
+    grid-template-columns: 1fr;
+  }
+  .deckOpcao {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .miniCartas {
+    grid-column: 1;
+    grid-row: auto;
+    justify-content: center;
+  }
+  .miniCartas > span {
+    width: min(27vw, 5.2rem);
+  }
+  .mesaCampo {
+    grid-template-columns: 1fr 2rem 1fr;
+    gap: 0.3rem;
+    min-height: 22rem;
+    padding: 0.8rem 0;
+  }
+  .cartaVisual {
+    width: min(8rem, 100%);
+  }
+  .statusCarta {
+    padding: 0.35rem;
+  }
+  .statusCarta > b {
+    grid-column: 1/-1;
+    justify-self: start;
+  }
+  .statusCarta small {
+    display: none;
+  }
+  .atributosCarta {
+    gap: 0.15rem;
+  }
+  .atributosCarta span {
+    padding: 0.18rem;
+    font-size: 0.42rem;
+  }
+  .atributosCarta svg {
+    display: none;
+  }
+  .passivaCarta {
+    font-size: 0.47rem;
+  }
+  .arenaTopo span:last-child {
+    display: none;
+  }
+  .gridDeckJogador {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

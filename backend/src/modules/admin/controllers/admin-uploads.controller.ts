@@ -5,10 +5,12 @@ import {
   Patch,
   Post,
   UploadedFiles,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { AdminGuard } from '../../../common/guards/admin.guard';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -52,12 +54,25 @@ const cartaAssetInterceptor = FileFieldsInterceptor(
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminUploadsController {
-  constructor(private readonly cloudinaryService: AdminCloudinaryService) { }
+  constructor(private readonly cloudinaryService: AdminCloudinaryService) {}
 
   @Post('uploads/cartas')
   @UseInterceptors(cartaAssetInterceptor)
   uploadCartaAssets(@UploadedFiles() files: CartaAssetFiles) {
     return this.cloudinaryService.uploadCartaAssets(files);
+  }
+
+  @Post('uploads/noticias')
+  @UseInterceptors(
+    FileInterceptor('imagem', {
+      storage: memoryStorage(),
+      limits: { fileSize: maxAssetSizeBytes },
+      fileFilter: imageFileFilter,
+    }),
+  )
+  uploadNoticiaImagem(@UploadedFile() imagem: Express.Multer.File) {
+    if (!imagem) throw new BadRequestException('Envie a imagem da notícia.');
+    return this.cloudinaryService.uploadNoticiaImagem(imagem);
   }
 
   @Patch('cartas/:id/assets')

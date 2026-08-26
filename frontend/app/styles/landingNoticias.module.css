@@ -56,15 +56,54 @@
 
 .cardNoticia {
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-height: 17rem;
   border: 1px solid var(--corBorda);
   border-radius: 0.85rem;
   background: #0f1118;
   padding: 1.35rem;
-  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+  color: inherit;
+  text-decoration: none;
 }
 
-.cardNoticia:hover { border-color: rgba(190, 242, 100, 0.28); box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.24); transform: translateY(-3px); }
+.cardNoticia::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 8, 12, 0.18) 0%,
+    rgba(7, 8, 12, 0.72) 48%,
+    rgba(7, 8, 12, 0.98) 100%
+  );
+  content: "";
+  pointer-events: none;
+}
+
+.cardNoticia > :not(.imagemNoticia) {
+  position: relative;
+  z-index: 2;
+}
+
+.imagemNoticia {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardNoticia:hover {
+  border-color: rgba(190, 242, 100, 0.28);
+  box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.24);
+  transform: translateY(-3px);
+}
 
 .topoNoticia {
   display: flex;
@@ -141,10 +180,11 @@
   text-transform: uppercase;
 }
 
-.lerMais svg { width: 0.7rem; }
+.lerMais svg {
+  width: 0.7rem;
+}
 
 .cardNoticia time svg {
   width: 0.8rem;
   height: 0.8rem;
 }
-

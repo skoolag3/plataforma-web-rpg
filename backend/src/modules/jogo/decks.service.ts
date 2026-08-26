@@ -240,6 +240,9 @@ export class DecksService {
           foto: item.carta.foto,
           moldura: item.carta.moldura,
           configVisual: item.carta.config_visual,
+          hpBase: item.carta.hp_base,
+          danoBase: item.carta.dano_base,
+          defesaBase: item.carta.defesa_base,
           posicao: item.posicao_slot,
         };
       }),

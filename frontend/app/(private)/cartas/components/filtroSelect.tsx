@@ -1,8 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Flame, Gem, Leaf, Moon, Shapes, Shield, SlidersHorizontal, Waves, Zap } from "lucide-react";
+import Image from "next/image";
+import {
+  Check,
+  ChevronDown,
+  Gem,
+  Shapes,
+  Shield,
+  SlidersHorizontal,
+} from "lucide-react";
 
+import { obterElementoCarta } from "../../../components/elementosCarta";
 import { styles } from "../styles";
 
 type FiltroSelectProps = {
@@ -12,22 +21,34 @@ type FiltroSelectProps = {
   aoAlterar: (valor: string) => void;
 };
 
-const elementos = {
-  natureza: { icone: Leaf, cor: "#7ee757" },
-  agua: { icone: Waves, cor: "#38bdf8" },
-  fogo: { icone: Flame, cor: "#fb7185" },
-  sombra: { icone: Moon, cor: "#c084fc" },
-  luz: { icone: Zap, cor: "#facc15" },
-};
-
 function ValorFiltro({ rotulo, valor }: { rotulo: string; valor: string }) {
-  const elemento = elementos[valor as keyof typeof elementos];
-  const Icone = elemento?.icone
-    ?? (rotulo === "Raridade" ? Gem : rotulo === "Classe" ? Shield : valor === "Todos" || valor === "Todas" ? SlidersHorizontal : Shapes);
+  const elemento = obterElementoCarta(valor);
+  const Icone =
+    rotulo === "Raridade"
+      ? Gem
+      : rotulo === "Classe"
+        ? Shield
+        : valor === "Todos" || valor === "Todas"
+          ? SlidersHorizontal
+          : Shapes;
 
   return (
-    <span className={styles.valorFiltro} style={elemento ? { color: elemento.cor } : undefined} data-raridade={rotulo === "Raridade" ? valor : undefined}>
-      <Icone aria-hidden="true" />
+    <span
+      className={styles.valorFiltro}
+      style={elemento ? { color: elemento.cor } : undefined}
+      data-raridade={rotulo === "Raridade" ? valor : undefined}
+    >
+      {elemento ? (
+        <Image
+          className={styles.iconeElementoFiltro}
+          src={elemento.icone}
+          width={18}
+          height={18}
+          alt=""
+        />
+      ) : (
+        <Icone aria-hidden="true" />
+      )}
       <strong>{valor}</strong>
     </span>
   );

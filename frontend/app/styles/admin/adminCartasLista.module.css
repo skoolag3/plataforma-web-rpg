@@ -1,21 +1,31 @@
-.lineChart .raridadeUR{ background: linear-gradient(180deg, #f9a8d4, #a855f7 58%, #6d28d9); }
+.lineChart .raridadeUR {
+  background: linear-gradient(180deg, #f9a8d4, #a855f7 58%, #6d28d9);
+}
 
-.lineChart .raridadeSSR{ background: linear-gradient(180deg, #fde68a, #f59e0b 58%, #b45309); }
+.lineChart .raridadeSSR {
+  background: linear-gradient(180deg, #fde68a, #f59e0b 58%, #b45309);
+}
 
-.lineChart .raridadeSR{ background: linear-gradient(180deg, #a5f3fc, #06b6d4 58%, #0e7490); }
+.lineChart .raridadeSR {
+  background: linear-gradient(180deg, #a5f3fc, #06b6d4 58%, #0e7490);
+}
 
-.lineChart .raridadeR{ background: linear-gradient(180deg, #c4b5fd, #8b5cf6 58%, #5b21b6); }
+.lineChart .raridadeR {
+  background: linear-gradient(180deg, #c4b5fd, #8b5cf6 58%, #5b21b6);
+}
 
-.lineChart .raridadeN{ background: linear-gradient(180deg, #cbd5e1, #64748b 58%, #334155); }
+.lineChart .raridadeN {
+  background: linear-gradient(180deg, #cbd5e1, #64748b 58%, #334155);
+}
 
-.cartasListaTopo > .cartasListaAcoes{
+.cartasListaTopo > .cartasListaAcoes {
   display: flex;
   grid-auto-flow: initial;
   align-items: center;
   gap: 0.45rem;
 }
 
-.ordenacaoCartas{
+.ordenacaoCartas {
   display: flex;
   min-height: 2.35rem;
   align-items: center;
@@ -27,9 +37,12 @@
   color: #94a3b8;
 }
 
-.ordenacaoCartas svg{ width: 0.82rem; height: 0.82rem; }
+.ordenacaoCartas svg {
+  width: 0.82rem;
+  height: 0.82rem;
+}
 
-.ordenacaoCartas select{
+.ordenacaoCartas select {
   min-height: 2rem;
   border: 0;
   outline: 0;
@@ -40,9 +53,12 @@
   font-weight: 750;
 }
 
-.ordenacaoCartas option{ background: #101827; color: #f8fafc; }
+.ordenacaoCartas option {
+  background: #101827;
+  color: #f8fafc;
+}
 
-.srOnly{
+.srOnly {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -52,7 +68,7 @@
 }
 
 .cartasWorkspace > .cartasToolbar > select,
-.cartasWorkspace > .cartasToolbar > .elementoSelect .elementoSelectTrigger{
+.cartasWorkspace > .cartasToolbar > .elementoSelect .elementoSelectTrigger {
   height: 2rem;
   min-height: 2rem;
   border-color: rgba(148, 163, 184, 0.18) !important;
@@ -66,55 +82,63 @@
     inset 1px 1px rgba(255, 255, 255, 0.06),
     inset -1px -1px rgba(0, 0, 0, 0.48),
     0 1px 2px rgba(0, 0, 0, 0.26);
-  transition: box-shadow 150ms ease, transform 150ms ease, border-color 150ms ease;
+  transition:
+    box-shadow 150ms ease,
+    transform 150ms ease,
+    border-color 150ms ease;
 }
 
-.cartasWorkspace > .cartasToolbar > .elementoSelect .elementoSelectTrigger{
+.cartasWorkspace > .cartasToolbar > .elementoSelect .elementoSelectTrigger {
   padding-right: 0.58rem !important;
   padding-left: 0.78rem !important;
 }
 
-.cartasWorkspace > .cartasToolbar .elementoSelectValor{
+.cartasWorkspace > .cartasToolbar .elementoSelectValor {
   gap: 0.42rem;
   line-height: 1;
 }
 
-.cartasWorkspace > .cartasToolbar .elementoSelectValor strong{
+.cartasWorkspace > .cartasToolbar .elementoSelectValor strong {
   font-size: 0.69rem;
   line-height: 1;
 }
 
-.cartasWorkspace > .cartasToolbar > .elementoSelect{
+.cartasWorkspace > .cartasToolbar > .elementoSelect {
   height: 2rem;
 }
 
 .cartasWorkspace > .cartasToolbar > select:focus,
-.cartasWorkspace > .cartasToolbar .elementoSelect:not(.elementoSelectVazio) .elementoSelectTrigger,
-.cartasWorkspace > .cartasToolbar .elementoSelectTrigger[aria-expanded="true"]{
+.cartasWorkspace
+  > .cartasToolbar
+  .elementoSelect:not(.elementoSelectVazio)
+  .elementoSelectTrigger,
+.cartasWorkspace > .cartasToolbar .elementoSelectTrigger[aria-expanded="true"] {
   box-shadow:
     inset 1px 1px rgba(255, 255, 255, 0.05),
     inset -1px -1px rgba(0, 0, 0, 0.5),
     0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
-.cartasWorkspace > .cartasToolbar > .selectRaridade:not(:has(option:checked[value=""])){
+.cartasWorkspace
+  > .cartasToolbar
+  > .selectRaridade:not(:has(option:checked[value=""])) {
   box-shadow:
     inset 1px 1px rgba(255, 255, 255, 0.05),
     inset -1px -1px rgba(0, 0, 0, 0.5),
     0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
-.cartasWorkspace > .cartasToolbar .elementoSelect .elementoIcone{
+.cartasWorkspace > .cartasToolbar .elementoSelect .elementoIcone {
   width: 1.1rem;
   height: 1.1rem;
 }
 
-.cartasWorkspace > .cartasToolbar .statusSelectIcone{
+.cartasWorkspace > .cartasToolbar .statusSelectIcone {
   width: 1rem;
   height: 1rem;
 }
 
-.periodoFiltro{
+.periodoFiltro {
   display: grid;
   grid-column: 1 / -1;
   gap: 0.45rem;
@@ -122,7 +146,7 @@
   padding: 0.55rem 0.1rem 0.12rem;
 }
 
-.periodoCabecalho{
+.periodoCabecalho {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -132,9 +156,12 @@
   font-weight: 700;
 }
 
-.periodoCabecalho strong{ color: #c4b5fd; font-size: 0.64rem; }
+.periodoCabecalho strong {
+  color: #c4b5fd;
+  font-size: 0.64rem;
+}
 
-.periodoFiltro input[type="range"]{
+.periodoFiltro input[type="range"] {
   width: 100%;
   height: 0.34rem;
   min-height: 0;
@@ -142,11 +169,15 @@
   border: 0;
   border-radius: 999px;
   outline: 0;
-  background: linear-gradient(to right, #8b5cf6 0 var(--periodo-progresso), #273247 var(--periodo-progresso) 100%);
+  background: linear-gradient(
+    to right,
+    #8b5cf6 0 var(--periodo-progresso),
+    #273247 var(--periodo-progresso) 100%
+  );
   cursor: pointer;
 }
 
-.periodoFiltro input[type="range"]::-webkit-slider-thumb{
+.periodoFiltro input[type="range"]::-webkit-slider-thumb {
   width: 0.9rem;
   height: 0.9rem;
   appearance: none;
@@ -156,7 +187,7 @@
   box-shadow: 0 0 0 3px #080d19;
 }
 
-.periodoFiltro input[type="range"]::-moz-range-thumb{
+.periodoFiltro input[type="range"]::-moz-range-thumb {
   width: 0.72rem;
   height: 0.72rem;
   border: 2px solid #ddd6fe;
@@ -165,7 +196,7 @@
   box-shadow: 0 0 0 3px #080d19;
 }
 
-.periodoMetas{
+.periodoMetas {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   color: #66748c;
@@ -175,55 +206,101 @@
   text-align: center;
 }
 
-.periodoMetas span:first-child{ text-align: left; }
+.periodoMetas span:first-child {
+  text-align: left;
+}
 
-.periodoMetas span:last-child{ text-align: right; }
+.periodoMetas span:last-child {
+  text-align: right;
+}
 
-.cartasListaPanel .cardCell{ gap: 0.48rem; }
+.cartasListaPanel .cardCell {
+  gap: 0.48rem;
+}
 
-.cartasListaPanel .cardThumb{ width: 1.8rem; height: 2.2rem; }
+.cartasListaPanel .cardThumb {
+  width: 1.8rem;
+  height: 2.2rem;
+}
 
-.cartasListaPanel .elementoVisual{ gap: 0.38rem; }
+.cartasListaPanel .elementoVisual {
+  gap: 0.38rem;
+}
 
-.cartasListaPanel .elementoVisual .elementoIcone{ width: 1.35rem; height: 1.35rem; }
+.cartasListaPanel .elementoVisual .elementoIcone {
+  width: 1.35rem;
+  height: 1.35rem;
+}
 
-.cartasListaPanel .raridadeBadge{ min-width: 2.2rem; min-height: 1.35rem; padding: 0.12rem 0.4rem; font-size: 0.61rem; }
+.cartasListaPanel .raridadeBadge {
+  min-width: 2.2rem;
+  min-height: 1.35rem;
+  padding: 0.12rem 0.4rem;
+  font-size: 0.61rem;
+}
 
-.selectRaridade{
+.selectRaridade {
   border-color: color-mix(in srgb, currentColor 38%, transparent) !important;
   color: #e2e8f0;
   font-weight: 850 !important;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 8%, transparent);
 }
 
-.selectRaridade.raridadeUR{ color: #f0abfc; background-color: rgba(126, 34, 206, 0.16); }
+.selectRaridade.raridadeUR {
+  color: #f0abfc;
+  background-color: rgba(126, 34, 206, 0.16);
+}
 
-.selectRaridade.raridadeSSR{ color: #fcd34d; background-color: rgba(180, 83, 9, 0.16); }
+.selectRaridade.raridadeSSR {
+  color: #fcd34d;
+  background-color: rgba(180, 83, 9, 0.16);
+}
 
-.selectRaridade.raridadeSR{ color: #67e8f9; background-color: rgba(8, 145, 178, 0.16); }
+.selectRaridade.raridadeSR {
+  color: #67e8f9;
+  background-color: rgba(8, 145, 178, 0.16);
+}
 
-.selectRaridade.raridadeR{ color: #c4b5fd; background-color: rgba(109, 40, 217, 0.14); }
+.selectRaridade.raridadeR {
+  color: #c4b5fd;
+  background-color: rgba(109, 40, 217, 0.14);
+}
 
-.selectRaridade.raridadeN{ color: #cbd5e1; background-color: rgba(71, 85, 105, 0.16); }
+.selectRaridade.raridadeN {
+  color: #cbd5e1;
+  background-color: rgba(71, 85, 105, 0.16);
+}
 
-.selectRaridade option{
+.selectRaridade option {
   background: #111827;
   font-weight: 800;
 }
 
-.selectRaridade option[value=""]{ color: #f8fafc; }
+.selectRaridade option[value=""] {
+  color: #f8fafc;
+}
 
-.selectRaridade option.raridadeUR{ color: #f0abfc; }
+.selectRaridade option.raridadeUR {
+  color: #f0abfc;
+}
 
-.selectRaridade option.raridadeSSR{ color: #fcd34d; }
+.selectRaridade option.raridadeSSR {
+  color: #fcd34d;
+}
 
-.selectRaridade option.raridadeSR{ color: #67e8f9; }
+.selectRaridade option.raridadeSR {
+  color: #67e8f9;
+}
 
-.selectRaridade option.raridadeR{ color: #c4b5fd; }
+.selectRaridade option.raridadeR {
+  color: #c4b5fd;
+}
 
-.selectRaridade option.raridadeN{ color: #cbd5e1; }
+.selectRaridade option.raridadeN {
+  color: #cbd5e1;
+}
 
-.elementoVisual{
+.elementoVisual {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
@@ -231,12 +308,12 @@
 }
 
 .elementoVisual strong,
-.nomeCartaElemento{
+.nomeCartaElemento {
   color: var(--elemento-cor);
   font-weight: 850;
 }
 
-.elementoIcone{
+.elementoIcone {
   display: inline-block;
   width: 1.65rem;
   height: 1.65rem;
@@ -249,18 +326,22 @@
   background-size: contain;
 }
 
-.elementoSelect{
+.elementoSelect {
   position: relative;
   display: block;
   min-width: 0;
 }
 
-.elementoSelect .elementoIcone{
+.elementoSelect:has(.elementoSelectTrigger[aria-expanded="true"]) {
+  z-index: 90;
+}
+
+.elementoSelect .elementoIcone {
   width: 1.55rem;
   height: 1.55rem;
 }
 
-.elementoSelectTrigger{
+.elementoSelectTrigger {
   display: flex;
   width: 100%;
   min-height: 2.65rem;
@@ -278,45 +359,45 @@
   text-align: left;
 }
 
-.elementoSelectTrigger > svg{
+.elementoSelectTrigger > svg {
   width: 1rem;
   flex: 0 0 auto;
   transition: transform 150ms ease;
 }
 
-.elementoSelectTrigger[aria-expanded="true"] > svg{
+.elementoSelectTrigger[aria-expanded="true"] > svg {
   transform: rotate(180deg);
 }
 
-.elementoSelectValor{
+.elementoSelectValor {
   display: flex;
   min-width: 0;
   align-items: center;
   gap: 0.55rem;
 }
 
-.elementoSelectValor strong{
+.elementoSelectValor strong {
   overflow: hidden;
   color: var(--elemento-cor);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.elementoSelectVazio .elementoSelectTrigger{
+.elementoSelectVazio .elementoSelectTrigger {
   color: #cbd5e1 !important;
 }
 
-.cartasToolbar > .elementoSelect{
+.cartasToolbar > .elementoSelect {
   min-width: 0;
 }
 
 .cartasToolbar > .elementoSelect,
-.cartasToolbar > .elementoSelect .elementoSelectTrigger{
+.cartasToolbar > .elementoSelect .elementoSelectTrigger {
   width: 100%;
   height: 2.55rem;
 }
 
-.elementoOpcoes{
+.elementoOpcoes {
   position: absolute;
   z-index: 80;
   top: calc(100% + 0.35rem);
@@ -331,7 +412,7 @@
   padding: 0.3rem;
 }
 
-.elementoOpcoes > button{
+.elementoOpcoes > button {
   display: flex;
   width: 100%;
   min-height: 2.45rem;
@@ -348,35 +429,43 @@
 }
 
 .elementoOpcoes > button:hover,
-.elementoOpcoes > button[aria-selected="true"]{
-  border-color: color-mix(in srgb, var(--elemento-cor, #94a3b8) 38%, transparent);
+.elementoOpcoes > button[aria-selected="true"] {
+  border-color: color-mix(
+    in srgb,
+    var(--elemento-cor, #94a3b8) 38%,
+    transparent
+  );
   background: color-mix(in srgb, var(--elemento-cor, #94a3b8) 12%, transparent);
 }
 
-.elementoOpcoes > button > svg{
+.elementoOpcoes > button > svg {
   width: 1rem;
   flex: 0 0 auto;
 }
 
-.elementoOpcaoNeutra{
+.elementoOpcaoNeutra {
   color: #cbd5e1;
   font-weight: 750;
 }
 
-.statusSelectIcone{
+.statusSelectIcone {
   width: 1.15rem;
   height: 1.15rem;
   flex: 0 0 auto;
   color: var(--elemento-cor);
 }
 
-.nomePersonagemElemento{
-  border-color: color-mix(in srgb, var(--elemento-cor) 38%, rgba(148, 163, 184, 0.2)) !important;
+.nomePersonagemElemento {
+  border-color: color-mix(
+    in srgb,
+    var(--elemento-cor) 38%,
+    rgba(148, 163, 184, 0.2)
+  ) !important;
   color: var(--elemento-cor) !important;
   font-weight: 800 !important;
 }
 
-.raridadeBadge{
+.raridadeBadge {
   display: inline-flex;
   min-width: 2.6rem;
   min-height: 1.55rem;
@@ -391,24 +480,39 @@
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.08);
 }
 
-.raridadeBadge.raridadeUR{ color: #f0abfc; background: rgba(126, 34, 206, 0.2); }
+.raridadeBadge.raridadeUR {
+  color: #f0abfc;
+  background: rgba(126, 34, 206, 0.2);
+}
 
-.raridadeBadge.raridadeSSR{ color: #fcd34d; background: rgba(180, 83, 9, 0.2); }
+.raridadeBadge.raridadeSSR {
+  color: #fcd34d;
+  background: rgba(180, 83, 9, 0.2);
+}
 
-.raridadeBadge.raridadeSR{ color: #67e8f9; background: rgba(8, 145, 178, 0.2); }
+.raridadeBadge.raridadeSR {
+  color: #67e8f9;
+  background: rgba(8, 145, 178, 0.2);
+}
 
-.raridadeBadge.raridadeR{ color: #c4b5fd; background: rgba(109, 40, 217, 0.18); }
+.raridadeBadge.raridadeR {
+  color: #c4b5fd;
+  background: rgba(109, 40, 217, 0.18);
+}
 
-.raridadeBadge.raridadeN{ color: #cbd5e1; background: rgba(71, 85, 105, 0.2); }
+.raridadeBadge.raridadeN {
+  color: #cbd5e1;
+  background: rgba(71, 85, 105, 0.2);
+}
 
-.cardCell{
+.cardCell {
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
   font-weight: 850;
 }
 
-.cardThumb{
+.cardThumb {
   display: inline-block;
   width: 2.25rem;
   height: 2.75rem;
@@ -422,7 +526,12 @@
   background-size: cover;
 }
 
-.cardThumb svg{ width: 1rem; }
+.cardThumb svg {
+  width: 1rem;
+}
 
-@media (max-width: 720px){.cartasListaTopo > .cartasListaAcoes{ justify-content: space-between; }}
-
+@media (max-width: 720px) {
+  .cartasListaTopo > .cartasListaAcoes {
+    justify-content: space-between;
+  }
+}

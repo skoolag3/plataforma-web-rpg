@@ -10,6 +10,7 @@ import {
   Layers,
   LogOut,
   MoreHorizontal,
+  Newspaper,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -26,6 +27,7 @@ const nav = [
   { href: "/admin/decks-npc", label: "Decks NPC", icon: Bot },
   { href: "/admin/usuarios", label: "Usuários", icon: Users },
   { href: "/admin/banners", label: "Gacha (Banners)", icon: ImagePlus },
+  { href: "/admin/noticias", label: "Notícias", icon: Newspaper },
 ];
 
 function Status({ value }: { value: string }) {
