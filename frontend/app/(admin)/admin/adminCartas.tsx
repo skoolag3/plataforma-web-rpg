@@ -38,6 +38,10 @@ import {
   normalizarConfigVisual,
   type ConfigVisualCarta,
 } from "../../components/cartaMontada";
+import {
+  notificarErro,
+  notificarSucesso,
+} from "../../components/notificacoesGlobais";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
 import editorStyles from "../../styles/admin/adminCartaEditor.module.css";
 import visualStyles from "../../styles/admin/adminCartaVisual.module.css";
@@ -132,6 +136,14 @@ export function Cartas() {
   const [erro, setErro] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [editorAlterado, setEditorAlterado] = useState(false);
+
+  useEffect(() => {
+    if (erro) notificarErro(erro);
+  }, [erro]);
+
+  useEffect(() => {
+    if (feedback) notificarSucesso(feedback);
+  }, [feedback]);
 
   function selecionarCarta(carta: AdminCarta | null) {
     if (
@@ -309,10 +321,6 @@ export function Cartas() {
             </div>
           </header>
 
-          {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
-          {feedback ? (
-            <p className={styles.feedbackSuccess}>{feedback}</p>
-          ) : null}
           {carregando ? (
             <p className={styles.feedbackInfo}>Carregando cartas...</p>
           ) : null}
@@ -541,6 +549,12 @@ export function NovaCarta() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  useEffect(() => {
+    if (!feedback) return;
+    if (feedback.type === "success") notificarSucesso(feedback.text);
+    else notificarErro(feedback.text);
+  }, [feedback]);
 
   function updateField<K extends keyof CartaFormState>(
     field: K,
@@ -851,17 +865,6 @@ export function NovaCarta() {
             defesaBase={Number(form.defesaBase) || 0}
             configVisual={form.configVisual}
           />
-          {feedback ? (
-            <p
-              className={
-                feedback.type === "success"
-                  ? styles.feedbackSuccess
-                  : styles.feedbackError
-              }
-            >
-              {feedback.text}
-            </p>
-          ) : null}
           <div className={styles.editorActions}>
             <Link href="/admin/cartas">Cancelar</Link>
             <button

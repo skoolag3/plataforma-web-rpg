@@ -110,34 +110,6 @@
 .btnSecundario:hover { border-color: rgba(190, 242, 100, 0.28); background: rgba(190, 242, 100, 0.06); transform: translateY(-1px); }
 .btnSecundario:focus-visible { outline: 2px solid rgba(190, 242, 100, 0.78); outline-offset: 0.25rem; }
 
-.provaSocial {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
-  color: #8f8c9d;
-  font-size: 0.72rem;
-}
-
-.provaSocial strong { color: #d8d5e0; font-weight: 800; }
-.avatares { display: flex; padding-left: 0.4rem; }
-.avatares i {
-  display: grid;
-  width: 1.8rem;
-  height: 1.8rem;
-  margin-left: -0.4rem;
-  place-items: center;
-  border: 2px solid #0a0a0f;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #a78bfa, #6d28d9);
-  color: #fff;
-  font-size: 0.6rem;
-  font-style: normal;
-  font-weight: 900;
-}
-.avatares i:nth-child(2) { background: linear-gradient(135deg, #22d3ee, #6d28d9); }
-.avatares i:nth-child(3) { background: linear-gradient(135deg, #f59e0b, #9333ea); }
-
 .iconeBtnJogar {
   width: 0.9rem;
   height: 0.9rem;
@@ -160,6 +132,11 @@
 .btnJogar:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
+}
+
+.btnJogar:active,
+.btnSecundario:active {
+  transform: translateY(1px) scale(0.99);
 }
 
 .btnJogar:focus-visible {

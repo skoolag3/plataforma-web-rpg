@@ -21,6 +21,10 @@ import {
 } from "../../lib/admin";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
 import featureStyles from "../../styles/admin/adminHabilidades.module.css";
+import {
+  notificarErro,
+  notificarSucesso,
+} from "../../components/notificacoesGlobais";
 
 import {
   AdminHabilidadeFormulario,
@@ -31,7 +35,6 @@ import { AdminLayout } from "./adminShared";
 import { combinarEstilos } from "./combinarEstilos";
 
 const styles = combinarEstilos(sharedStyles, featureStyles);
-
 
 const formularioVazio: FormHabilidade = {
   nome: "",
@@ -123,6 +126,14 @@ export function Habilidades() {
   const [processandoId, setProcessandoId] = useState("");
   const [erro, setErro] = useState("");
   const [feedback, setFeedback] = useState("");
+
+  useEffect(() => {
+    if (erro) notificarErro(erro);
+  }, [erro]);
+
+  useEffect(() => {
+    if (feedback) notificarSucesso(feedback);
+  }, [feedback]);
 
   useEffect(() => {
     let ativo = true;
@@ -283,8 +294,6 @@ export function Habilidades() {
       title="Habilidades"
       subtitle="Crie e organize as regras executadas pelo servidor."
     >
-      {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
-      {feedback ? <p className={styles.feedbackSuccess}>{feedback}</p> : null}
       <div className={styles.cartasWorkspace}>
         <section
           className={`${styles.cartasListaPanel} ${styles.habilidadesListaPanel}`}

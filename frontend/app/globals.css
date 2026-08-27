@@ -1,10 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap");
 @import "tailwindcss";
 
 :root {
   --fundo: #ffffff;
   --frente: #171717;
-  --fonteSans: Inter, Arial, Helvetica, sans-serif;
+  --fonteSans: var(--fonte-outfit), Arial, Helvetica, sans-serif;
   --fonteMono: "Courier New", Courier, monospace;
 }
 

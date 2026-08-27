@@ -8,6 +8,7 @@ import { NoticiasController } from './noticias.controller';
 import { NoticiasService } from './noticias.service';
 import { VitrineController } from './vitrine.controller';
 import { VitrineService } from './vitrine.service';
+import { BannerRotacaoService } from './banner-rotacao.service';
 
 @Module({
   controllers: [JogoController, NoticiasController, VitrineController],
@@ -18,6 +19,8 @@ import { VitrineService } from './vitrine.service';
     GachaService,
     NoticiasService,
     VitrineService,
+    BannerRotacaoService,
   ],
+  exports: [BannerRotacaoService],
 })
 export class JogoModule {}

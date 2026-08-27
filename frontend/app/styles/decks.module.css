@@ -41,16 +41,6 @@
   cursor: pointer;
 }
 
-.alertaErro, .alertaSucesso {
-  max-width: 1320px;
-  margin: 0 auto 9px;
-  padding: 8px 11px;
-  border: 1px solid;
-  border-radius: 10px;
-}
-.alertaErro { color: #fecaca; border-color: #7f1d1d; background: #450a0a; }
-.alertaSucesso { color: #bbf7d0; border-color: #166534; background: #052e16; }
-
 .layout {
   max-width: 1320px;
   margin: auto;

@@ -257,16 +257,6 @@ export function LandingContent({
               </Link>
             </div>
 
-            <div className={styles.provaSocial}>
-              <span className={styles.avatares} aria-hidden="true">
-                <i>K</i>
-                <i>R</i>
-                <i>N</i>
-              </span>
-              <span>
-                <strong>+2.400 duelistas</strong> já entraram na arena
-              </span>
-            </div>
           </div>
 
           <div id="cartas" className={styles.visualHero}>

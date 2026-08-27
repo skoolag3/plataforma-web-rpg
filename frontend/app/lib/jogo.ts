@@ -218,6 +218,15 @@ export type BannerGacha = {
 
 export type GachaResponse = {
   jogador: { nome: string; nivel: number; rubys: number };
+  probabilidades: {
+    raridade: CartaGachaApi["raridade"];
+    percentual: number;
+  }[];
+  rotacao: {
+    bannerAtualId: string;
+    proximaRotacaoEm: string;
+    forcadoPorAdmin: boolean;
+  } | null;
   banners: BannerGacha[];
 };
 

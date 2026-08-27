@@ -23,6 +23,10 @@ import {
   type SalvarAdminNoticiaPayload,
 } from "../../lib/admin";
 import styles from "../../styles/admin/adminNoticias.module.css";
+import {
+  notificarErro,
+  notificarSucesso,
+} from "../../components/notificacoesGlobais";
 import { AdminLayout } from "./adminShared";
 
 const formularioVazio: SalvarAdminNoticiaPayload = {
@@ -45,6 +49,10 @@ export function AdminNoticias() {
   useEffect(() => {
     void carregar();
   }, []);
+
+  useEffect(() => {
+    if (erro) notificarErro(erro);
+  }, [erro]);
 
   async function carregar() {
     try {
@@ -97,6 +105,7 @@ export function AdminNoticias() {
     setSalvando(true);
     try {
       atualizar("imagem", (await uploadNoticiaImagem(dados)).url);
+      notificarSucesso("Imagem de capa enviada.");
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro no upload.");
     } finally {
@@ -123,6 +132,9 @@ export function AdminNoticias() {
     try {
       if (editando) await atualizarAdminNoticia(editando, form);
       else await criarAdminNoticia(form);
+      notificarSucesso(
+        editando ? "Publicação atualizada." : "Publicação criada.",
+      );
       fecharEditor();
       await carregar();
     } catch (e) {
@@ -135,6 +147,7 @@ export function AdminNoticias() {
   async function remover(id: string) {
     if (!window.confirm("Remover esta notícia definitivamente?")) return;
     await removerAdminNoticia(id);
+    notificarSucesso("Publicação removida.");
     if (editando === id) fecharEditor();
     await carregar();
   }
@@ -331,7 +344,6 @@ export function AdminNoticias() {
               />
               <span>Publicar na página inicial</span>
             </label>
-            {erro ? <p className={styles.erro}>{erro}</p> : null}
             <button
               className={styles.salvar}
               disabled={salvando}

@@ -6,19 +6,28 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
+import { BannerRotacaoService } from './banner-rotacao.service';
+import {
+  LIMITE_PITY,
+  PROBABILIDADES_RARIDADE,
+  type RaridadeGacha,
+} from './gacha.config';
 
-const LIMITE_PITY = 80;
 const PESOS: Record<string, number> = { UR: 1, SSR: 3, SR: 8, R: 18, N: 35 };
 
 @Injectable()
 export class GachaService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly bannerRotacaoService: BannerRotacaoService,
+  ) {}
 
   async listar(idUsuario: string) {
     await this.garantirBannerPadrao();
+    const rotacao = await this.bannerRotacaoService.obterAtual();
     const [banners, usuario] = await Promise.all([
       this.prisma.banner.findMany({
-        where: { ativo: true },
+        where: rotacao ? { id: rotacao.idBanner, ativo: true } : { id: '' },
         include: {
           cartas: { include: { carta: true }, orderBy: { taxa_drop: 'asc' } },
           usuarioColetas: { where: { id_usuario: idUsuario }, take: 1 },
@@ -51,6 +60,16 @@ export class GachaService {
         nivel: usuario.nivel ?? 1,
         rubys: usuario.saldo_rubys_cache ?? 0,
       },
+      rotacao: rotacao
+        ? {
+            bannerAtualId: rotacao.idBanner,
+            proximaRotacaoEm: rotacao.proximaRotacaoEm,
+            forcadoPorAdmin: rotacao.forcadoPorAdmin,
+          }
+        : null,
+      probabilidades: this.calcularProbabilidadesEfetivas(
+        banners[0]?.cartas ?? [],
+      ),
       banners: banners.map((banner) => ({
         id: banner.id,
         nome: banner.nome,
@@ -124,10 +143,7 @@ export class GachaService {
         for (let index = 0; index < quantidade; index += 1) {
           pity += 1;
           const forcarUr = pity >= LIMITE_PITY;
-          const poolUr = banner.cartas.filter(
-            ({ carta }) => carta.raridade === 'UR',
-          );
-          const pool = forcarUr && poolUr.length ? poolUr : banner.cartas;
+          const pool = this.obterPoolSorteio(banner.cartas, forcarUr);
           const sorteada = this.sortear(pool);
           pity = sorteada.carta.raridade === 'UR' ? 0 : pity;
 
@@ -239,6 +255,71 @@ export class GachaService {
       if (alvo <= 0) return item;
     }
     return pool[pool.length - 1];
+  }
+
+  private obterPoolSorteio<
+    T extends { taxa_drop: Prisma.Decimal; carta: { raridade: string } },
+  >(cartas: T[], forcarUr: boolean): T[] {
+    if (forcarUr) {
+      const cartasUr = cartas.filter(({ carta }) => carta.raridade === 'UR');
+      if (cartasUr.length) return cartasUr;
+    }
+
+    const raridadeSorteada = this.sortearRaridade();
+    const raridade = this.obterRaridadeDisponivel(cartas, raridadeSorteada);
+    const poolRaridade = cartas.filter(
+      ({ carta }) => carta.raridade === raridade,
+    );
+    return poolRaridade;
+  }
+
+  private sortearRaridade(): RaridadeGacha {
+    let alvo = Math.random() * 100;
+
+    for (const item of PROBABILIDADES_RARIDADE) {
+      alvo -= item.percentual;
+      if (alvo < 0) return item.raridade;
+    }
+
+    return 'N';
+  }
+
+  private obterRaridadeDisponivel<
+    T extends { carta: { raridade: string } },
+  >(cartas: T[], raridadeSorteada: RaridadeGacha): RaridadeGacha {
+    const raridadesPresentes = new Set(
+      cartas.map(({ carta }) => carta.raridade),
+    );
+    const ordem = PROBABILIDADES_RARIDADE.map((item) => item.raridade);
+    const indice = ordem.indexOf(raridadeSorteada);
+
+    for (let atual = indice; atual < ordem.length; atual += 1) {
+      if (raridadesPresentes.has(ordem[atual])) return ordem[atual];
+    }
+    for (let atual = indice - 1; atual >= 0; atual -= 1) {
+      if (raridadesPresentes.has(ordem[atual])) return ordem[atual];
+    }
+
+    throw new NotFoundException('Banner sem cartas disponíveis.');
+  }
+
+  private calcularProbabilidadesEfetivas<
+    T extends { carta: { raridade: string } },
+  >(cartas: T[]) {
+    if (!cartas.length) return [];
+    const totais = new Map<RaridadeGacha, number>();
+
+    for (const item of PROBABILIDADES_RARIDADE) {
+      const raridade = this.obterRaridadeDisponivel(cartas, item.raridade);
+      totais.set(raridade, (totais.get(raridade) ?? 0) + item.percentual);
+    }
+
+    return PROBABILIDADES_RARIDADE.filter((item) => totais.has(item.raridade)).map(
+      (item) => ({
+        raridade: item.raridade,
+        percentual: totais.get(item.raridade) ?? 0,
+      }),
+    );
   }
 
   private async garantirBannerPadrao() {

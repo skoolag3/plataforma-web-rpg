@@ -280,8 +280,22 @@ model Banner {
   cartas         BannerCarta[]
   gachaLogs      LogGacha[]
   usuarioColetas UsuarioBannerColeta[]
+  rotacoes        BannerRotacao[]
 
   @@map("banner")
+}
+
+model BannerRotacao {
+  id                  Int      @id @default(1)
+  id_banner           String   @db.Uuid
+  proxima_rotacao_em  DateTime @db.Timestamptz(0)
+  forcado_por_admin   Boolean  @default(false)
+  atualizado_em       DateTime @default(now()) @db.Timestamptz(0)
+
+  banner Banner @relation(fields: [id_banner], references: [id], onDelete: Restrict)
+
+  @@index([id_banner])
+  @@map("banner_rotacao")
 }
 
 model BannerCarta {

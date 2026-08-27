@@ -11,7 +11,7 @@ describe('GachaService', () => {
   prisma.$transaction.mockImplementation(
     (operacao: (tx: typeof prisma) => unknown) => operacao(prisma),
   );
-  const service = new GachaService(prisma as never);
+  const service = new GachaService(prisma as never, {} as never);
 
   afterEach(() => jest.restoreAllMocks());
 
@@ -20,6 +20,31 @@ describe('GachaService', () => {
     const primeira = { id: 'ur', taxa_drop: new Prisma.Decimal(1) };
     const segunda = { id: 'n', taxa_drop: new Prisma.Decimal(50) };
     expect(service['sortear']([primeira, segunda])).toBe(primeira);
+  });
+
+  it.each([
+    [0, 'UR'],
+    [0.01, 'SSR'],
+    [0.05, 'SR'],
+    [0.2, 'R'],
+    [0.5, 'N'],
+  ])('sorteia a raridade pela faixa percentual %s', (aleatorio, raridade) => {
+    jest.spyOn(Math, 'random').mockReturnValue(aleatorio);
+    expect(service['sortearRaridade']()).toBe(raridade);
+  });
+
+  it('informa a chance efetiva quando faltam raridades no banner', () => {
+    const cartas = [
+      { carta: { raridade: 'UR' } },
+      { carta: { raridade: 'SSR' } },
+      { carta: { raridade: 'N' } },
+    ];
+
+    expect(service['calcularProbabilidadesEfetivas'](cartas)).toEqual([
+      { raridade: 'UR', percentual: 1 },
+      { raridade: 'SSR', percentual: 4 },
+      { raridade: 'N', percentual: 95 },
+    ]);
   });
 
   it('impede resgate diario antes de 24 horas', async () => {

@@ -4,6 +4,10 @@ import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { PreferenciasConta } from "../../../lib/perfil";
 import styles from "../../../styles/perfil/painelPerfil.module.css";
+import {
+  notificarErro,
+  notificarSucesso,
+} from "../../../components/notificacoesGlobais";
 import { SecaoRecolhivel } from "./secaoRecolhivel";
 
 type PropsPreferenciasPerfil = {
@@ -17,8 +21,6 @@ export function PreferenciasPerfil({
 }: PropsPreferenciasPerfil) {
   const [valores, setValores] = useState(preferencias);
   const [salvando, setSalvando] = useState(false);
-  const [mensagem, setMensagem] = useState("");
-  const [erro, setErro] = useState("");
 
   useEffect(() => setValores(preferencias), [preferencias]);
 
@@ -26,15 +28,13 @@ export function PreferenciasPerfil({
     const novosValores = { ...valores, [chave]: !valores[chave] };
     setValores(novosValores);
     setSalvando(true);
-    setMensagem("");
-    setErro("");
 
     try {
       const resposta = await aoAtualizar(novosValores);
-      setMensagem(resposta);
+      notificarSucesso(resposta, "Preferências atualizadas");
     } catch (erroCapturado) {
       setValores(valores);
-      setErro(
+      notificarErro(
         erroCapturado instanceof Error
           ? erroCapturado.message
           : "Não foi possível salvar.",
@@ -80,10 +80,6 @@ export function PreferenciasPerfil({
         </label>
 
         {salvando ? <small>Salvando...</small> : null}
-        {mensagem ? (
-          <small className={styles.sucessoPreferencia}>{mensagem}</small>
-        ) : null}
-        {erro ? <small className={styles.erroPreferencia}>{erro}</small> : null}
       </div>
     </SecaoRecolhivel>
   );

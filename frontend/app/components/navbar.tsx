@@ -26,15 +26,22 @@ export function Navbar() {
   useEffect(() => {
     if (caminho !== "/") return;
 
-    function atualizarSecaoAtiva() {
-      const secaoNoticias = document.getElementById("noticias");
-      const inicioNoticias = secaoNoticias?.offsetTop ?? Number.POSITIVE_INFINITY;
-      setSecaoAtiva(window.scrollY >= inicioNoticias - window.innerHeight * 0.38 ? "noticias" : "home");
-    }
+    const secoes = linksNav
+      .map((link) => document.getElementById(link.secao))
+      .filter((secao): secao is HTMLElement => Boolean(secao));
+    const observador = new IntersectionObserver(
+      (entradas) => {
+        const secaoVisivel = entradas
+          .filter((entrada) => entrada.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
-    atualizarSecaoAtiva();
-    window.addEventListener("scroll", atualizarSecaoAtiva, { passive: true });
-    return () => window.removeEventListener("scroll", atualizarSecaoAtiva);
+        if (secaoVisivel) setSecaoAtiva(secaoVisivel.target.id);
+      },
+      { rootMargin: "-28% 0px -56%", threshold: [0.08, 0.25, 0.5] },
+    );
+
+    secoes.forEach((secao) => observador.observe(secao));
+    return () => observador.disconnect();
   }, [caminho]);
 
   function navegarParaSecao(evento: MouseEvent<HTMLAnchorElement>, secao: string) {

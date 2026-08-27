@@ -16,6 +16,11 @@ import {
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CartaMontada } from "../../components/cartaMontada";
+import {
+  notificar,
+  notificarErro,
+  notificarSucesso,
+} from "../../components/notificacoesGlobais";
 import { FiltroSelect } from "../cartas/components/filtroSelect";
 import {
   ativarDeck,
@@ -40,7 +45,9 @@ function montarSlots(deck: Deck | undefined, cartas: CartaColecao[]) {
 
   return [
     ...cartasDoDeck,
-    ...Array<CartaColecao | null>(Math.max(0, SLOT_COUNT - cartasDoDeck.length)).fill(null),
+    ...Array<CartaColecao | null>(
+      Math.max(0, SLOT_COUNT - cartasDoDeck.length),
+    ).fill(null),
   ];
 }
 
@@ -61,6 +68,23 @@ export default function DecksPage() {
   const [erro, setErro] = useState("");
   const [mensagem, setMensagem] = useState("");
 
+  useEffect(() => {
+    if (erro) notificarErro(erro);
+  }, [erro]);
+
+  useEffect(() => {
+    if (!mensagem) return;
+    if (mensagem.startsWith("Editando")) {
+      notificar({ mensagem, titulo: "Construtor de decks", tipo: "info" });
+      return;
+    }
+    if (mensagem.includes("cheio")) {
+      notificar({ mensagem, titulo: "Deck completo", tipo: "aviso" });
+      return;
+    }
+    notificarSucesso(mensagem);
+  }, [mensagem]);
+
   const carregar = useCallback(async () => {
     setCarregando(true);
     setErro("");
@@ -77,7 +101,9 @@ export default function DecksPage() {
       setEditandoId(deckEquipado?.id ?? null);
       setNome(deckEquipado?.nome ?? "Meu Deck");
 
-      const cartaInicialId = new URLSearchParams(window.location.search).get("carta");
+      const cartaInicialId = new URLSearchParams(window.location.search).get(
+        "carta",
+      );
       const cartaInicial = colecaoData.itens.find(
         (carta) => carta.id === cartaInicialId && carta.obtida,
       );
@@ -87,15 +113,21 @@ export default function DecksPage() {
           if (primeiroVazio >= 0) {
             slotsIniciais[primeiroVazio] = cartaInicial;
             setSlotSelecionado(primeiroVazio);
-            setMensagem(`${cartaInicial.nome} foi adicionada ao deck equipado.`);
+            setMensagem(
+              `${cartaInicial.nome} foi adicionada ao deck equipado.`,
+            );
           } else {
-            setMensagem("O deck equipado está cheio. Remova uma carta antes de adicionar outra.");
+            setMensagem(
+              "O deck equipado está cheio. Remova uma carta antes de adicionar outra.",
+            );
           }
         }
       }
       setSlots(slotsIniciais);
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Erro ao carregar decks.");
+      setErro(
+        error instanceof Error ? error.message : "Erro ao carregar decks.",
+      );
     } finally {
       setCarregando(false);
     }
@@ -117,8 +149,8 @@ export default function DecksPage() {
     );
   }, [busca, colecao, elemento, raridade]);
 
-  const cartasSelecionadas = slots.filter(
-    (carta): carta is CartaColecao => Boolean(carta),
+  const cartasSelecionadas = slots.filter((carta): carta is CartaColecao =>
+    Boolean(carta),
   );
   const deckCompleto = cartasSelecionadas.length >= 3;
 
@@ -177,7 +209,11 @@ export default function DecksPage() {
     try {
       const ids = cartasSelecionadas.map((carta) => carta.id);
       const resposta = editandoId
-        ? await atualizarDeck(editandoId, { nome: nomeLimpo, cartas: ids, ativar })
+        ? await atualizarDeck(editandoId, {
+            nome: nomeLimpo,
+            cartas: ids,
+            ativar,
+          })
         : await criarDeck(nomeLimpo, ids, ativar);
       setEditandoId(resposta.deck.id);
       setMensagem(ativar ? "Deck salvo e equipado." : resposta.message);
@@ -236,36 +272,52 @@ export default function DecksPage() {
         </div>
       </header>
 
-      {(erro || mensagem) && (
-        <div className={erro ? styles.alertaErro : styles.alertaSucesso} role="status">
-          {erro || mensagem}
-        </div>
-      )}
-
       <div className={styles.layout}>
         <aside className={styles.listaDecks}>
           <div className={styles.listaDecksTopo}>
-            <h2>Meus decks <span>{decks.length}</span></h2>
-            <button type="button" className={styles.novoDeckLista} onClick={novoDeck}>
+            <h2>
+              Meus decks <span>{decks.length}</span>
+            </h2>
+            <button
+              type="button"
+              className={styles.novoDeckLista}
+              onClick={novoDeck}
+            >
               <Plus aria-hidden="true" /> Novo
             </button>
           </div>
-          {!decks.length && <p className={styles.vazio}>Nenhum deck salvo ainda.</p>}
+          {!decks.length && (
+            <p className={styles.vazio}>Nenhum deck salvo ainda.</p>
+          )}
           {decks.map((deck) => (
             <article
               key={deck.id}
               className={`${styles.deckResumo} ${editandoId === deck.id ? styles.selecionado : ""}`}
             >
-              <button type="button" className={styles.editarDeck} onClick={() => editar(deck)}>
-                <span className={styles.deckIcone}><Layers aria-hidden="true" /></span>
+              <button
+                type="button"
+                className={styles.editarDeck}
+                onClick={() => editar(deck)}
+              >
+                <span className={styles.deckIcone}>
+                  <Layers aria-hidden="true" />
+                </span>
                 <span>
                   <strong>{deck.nome}</strong>
                   <small>{deck.cartas.length}/6 cartas</small>
                 </span>
-                {deck.ativo && <em><CheckCircle2 aria-hidden="true" /> Equipado</em>}
+                {deck.ativo && (
+                  <em>
+                    <CheckCircle2 aria-hidden="true" /> Equipado
+                  </em>
+                )}
               </button>
               <div className={styles.deckAcoes}>
-                <button type="button" onClick={() => editar(deck)} aria-label={`Editar ${deck.nome}`}>
+                <button
+                  type="button"
+                  onClick={() => editar(deck)}
+                  aria-label={`Editar ${deck.nome}`}
+                >
                   <Edit3 aria-hidden="true" />
                 </button>
                 {!deck.ativo && (
@@ -274,7 +326,11 @@ export default function DecksPage() {
                     onClick={() => void equiparDeck(deck)}
                     disabled={!deck.completo}
                     aria-label={`Equipar ${deck.nome}`}
-                    title={deck.completo ? "Equipar deck" : "Escolha pelo menos 3 cartas"}
+                    title={
+                      deck.completo
+                        ? "Equipar deck"
+                        : "Escolha pelo menos 3 cartas"
+                    }
                   >
                     <Check aria-hidden="true" />
                   </button>
@@ -284,7 +340,11 @@ export default function DecksPage() {
                   onClick={() => void removerDeck(deck)}
                   disabled={deck.ativo}
                   aria-label={`Excluir ${deck.nome}`}
-                  title={deck.ativo ? "O deck equipado não pode ser excluído" : "Excluir deck"}
+                  title={
+                    deck.ativo
+                      ? "O deck equipado não pode ser excluído"
+                      : "Excluir deck"
+                  }
                 >
                   <Trash2 aria-hidden="true" />
                 </button>
@@ -303,10 +363,16 @@ export default function DecksPage() {
                 maxLength={100}
               />
             </label>
-            <div className={deckCompleto ? styles.validacaoOk : styles.validacaoPendente}>
+            <div
+              className={
+                deckCompleto ? styles.validacaoOk : styles.validacaoPendente
+              }
+            >
               <ShieldCheck aria-hidden="true" />
               <span>
-                <strong>{deckCompleto ? "Deck válido" : "Mínimo de 3 cartas"}</strong>
+                <strong>
+                  {deckCompleto ? "Deck válido" : "Mínimo de 3 cartas"}
+                </strong>
                 {cartasSelecionadas.length}/6 cartas únicas
               </span>
             </div>
@@ -324,11 +390,18 @@ export default function DecksPage() {
                 {carta ? (
                   <>
                     <span className={styles.slotCartaVisual}>
-                      <CartaMontada arte={carta.foto ?? undefined} moldura={carta.moldura ?? undefined} config={carta.configVisual ?? undefined} placeholder={<Layers aria-hidden="true" />} />
+                      <CartaMontada
+                        arte={carta.foto ?? undefined}
+                        moldura={carta.moldura ?? undefined}
+                        config={carta.configVisual ?? undefined}
+                        placeholder={<Layers aria-hidden="true" />}
+                      />
                     </span>
                     <span className={styles.slotCartaInfo}>
                       <strong>{carta.nome}</strong>
-                      <small>{carta.raridade} · {carta.elemento}</small>
+                      <small>
+                        {carta.raridade} · {carta.elemento}
+                      </small>
                       <em>{carta.classe}</em>
                     </span>
                     <span
@@ -340,7 +413,8 @@ export default function DecksPage() {
                         removerCarta(index);
                       }}
                       onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") removerCarta(index);
+                        if (event.key === "Enter" || event.key === " ")
+                          removerCarta(index);
                       }}
                       aria-label={`Remover ${carta.nome}`}
                     >
@@ -389,8 +463,18 @@ export default function DecksPage() {
             />
           </label>
           <div className={styles.filtros}>
-            <FiltroSelect rotulo="Raridade" valor={raridade} opcoes={["Todas", "UR", "SSR", "SR", "R", "N"]} aoAlterar={setRaridade} />
-            <FiltroSelect rotulo="Elemento" valor={elemento} opcoes={["Todos", "natureza", "agua", "fogo", "sombra", "luz"]} aoAlterar={setElemento} />
+            <FiltroSelect
+              rotulo="Raridade"
+              valor={raridade}
+              opcoes={["Todas", "UR", "SSR", "SR", "R", "N"]}
+              aoAlterar={setRaridade}
+            />
+            <FiltroSelect
+              rotulo="Elemento"
+              valor={elemento}
+              opcoes={["Todos", "natureza", "agua", "fogo", "sombra", "luz"]}
+              aoAlterar={setElemento}
+            />
           </div>
           <div className={styles.cartas}>
             {cartasFiltradas.map((carta) => {
@@ -406,18 +490,28 @@ export default function DecksPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={carta.foto} alt="" />
                   ) : (
-                    <span><Layers aria-hidden="true" /></span>
+                    <span>
+                      <Layers aria-hidden="true" />
+                    </span>
                   )}
                   <span>
                     <strong>{carta.nome}</strong>
-                    <small>{carta.raridade} · {carta.classe}</small>
+                    <small>
+                      {carta.raridade} · {carta.classe}
+                    </small>
                   </span>
-                  {usada ? <Check aria-label="Ja adicionada" /> : <Plus aria-label="Adicionar" />}
+                  {usada ? (
+                    <Check aria-label="Ja adicionada" />
+                  ) : (
+                    <Plus aria-label="Adicionar" />
+                  )}
                 </button>
               );
             })}
             {!cartasFiltradas.length && (
-              <p className={styles.vazio}>Nenhuma carta obtida corresponde aos filtros.</p>
+              <p className={styles.vazio}>
+                Nenhuma carta obtida corresponde aos filtros.
+              </p>
             )}
           </div>
         </aside>

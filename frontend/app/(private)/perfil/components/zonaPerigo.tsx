@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import styles from "../../../styles/perfil/painelPerfil.module.css";
 import modalStyles from "../../../styles/perfil/modalPerfil.module.css";
+import {
+  notificarErro,
+  notificarSucesso,
+} from "../../../components/notificacoesGlobais";
 import { ModalEdicao } from "./modalEdicao";
 import { SecaoRecolhivel } from "./secaoRecolhivel";
 
@@ -24,18 +28,18 @@ export function ZonaPerigo({
   const router = useRouter();
   const [acao, setAcao] = useState<"desativar" | "excluir" | null>(null);
   const [erro, setErro] = useState("");
-  const [mensagem, setMensagem] = useState("");
   const [salvando, setSalvando] = useState(false);
 
   function cancelarExclusao() {
     setErro("");
-    setMensagem("");
     setSalvando(true);
     void aoCancelarExclusao()
-      .then(setMensagem)
-      .catch((e) =>
-        setErro(e instanceof Error ? e.message : "Erro na operação."),
-      )
+      .then((mensagem) => notificarSucesso(mensagem))
+      .catch((e) => {
+        const mensagem = e instanceof Error ? e.message : "Erro na operação.";
+        setErro(mensagem);
+        notificarErro(mensagem);
+      })
       .finally(() => setSalvando(false));
   }
 
@@ -53,7 +57,6 @@ export function ZonaPerigo({
               ? `Exclusão agendada para ${exclusaoAgendadaPara}.`
               : "A exclusão é agendada por 30 dias antes da anonimização."}
           </p>
-          {mensagem ? <p>{mensagem}</p> : null}
           {erro && !acao ? <p>{erro}</p> : null}
           <button type="button" onClick={() => setAcao("desativar")}>
             <Ban aria-hidden="true" />

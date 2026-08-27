@@ -13,5 +13,4 @@
 .abas { display:flex;gap:.3rem;overflow-x:auto;border-bottom:1px solid rgba(148,163,184,.13);padding:0 .1rem .35rem; }
 .aba,.abaAtiva { min-height:1.75rem;border:1px solid transparent;border-radius:999px;background:transparent;color:#7f8ba0;cursor:pointer;padding:0 .6rem;font:inherit;font-size:.52rem;font-weight:850;white-space:nowrap; }
 .abaAtiva { border-color:rgba(190,242,100,.2);background:linear-gradient(135deg,rgba(124,58,237,.3),rgba(190,242,100,.07));color:#f5f3ff;box-shadow:inset 0 1px rgba(255,255,255,.04); }
-.erroGacha { margin:.6rem;border:1px solid rgba(248,113,113,.2);border-radius:.55rem;background:rgba(127,29,29,.15);color:#fca5a5;padding:.55rem .7rem;font-size:.62rem; }
 @media (max-width:760px) { .gachaTopo{align-items:flex-start;flex-direction:column}.gachaTopoAcoes{width:100%;justify-content:space-between}.gachaPrincipal{padding:.5rem} }

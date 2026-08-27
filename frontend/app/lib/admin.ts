@@ -251,6 +251,30 @@ export type UploadCartaAssetsResponse = {
   moldura: UploadedAsset | null;
 };
 
+export type ProbabilidadeGacha = {
+  raridade: "UR" | "SSR" | "SR" | "R" | "N";
+  percentual: number;
+};
+
+export type AdminBanner = {
+  id: string;
+  nome: string;
+  custoGiro: number;
+  ativo: boolean;
+  totalCartas: number;
+  raridades: { raridade: string; total: number }[];
+};
+
+export type AdminBannersResponse = {
+  probabilidades: ProbabilidadeGacha[];
+  rotacao: {
+    bannerAtualId: string;
+    proximaRotacaoEm: string;
+    forcadoPorAdmin: boolean;
+  } | null;
+  banners: AdminBanner[];
+};
+
 async function adminRequest<T>(path: string, options: RequestInit = {}) {
   const token = getToken();
   const response = await fetch(`${API_URL}${path}`, {
@@ -442,6 +466,21 @@ export function uploadNoticiaImagem(formData: FormData) {
   return adminRequest<UploadedAsset>("/admin/uploads/noticias", {
     method: "POST",
     body: formData,
+  });
+}
+
+export function listarAdminBanners() {
+  return adminRequest<AdminBannersResponse>("/admin/banners");
+}
+
+export function forcarAdminBanner(idBanner: string) {
+  return adminRequest<{
+    message: string;
+    bannerAtualId: string;
+    proximaRotacaoEm: string;
+  }>("/admin/banners/forcar", {
+    method: "POST",
+    body: JSON.stringify({ idBanner }),
   });
 }
 
