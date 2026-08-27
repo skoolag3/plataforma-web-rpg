@@ -1,4 +1,10 @@
-import { IsString, Length, MinLength } from 'class-validator';
+import { IsString, Length, Matches, MinLength } from 'class-validator';
+import {
+  mensagemSenhaForte,
+  senhaForteRegex,
+  TAMANHO_MAXIMO_SENHA,
+  TAMANHO_MINIMO_SENHA,
+} from '../../../common/validation/senha.validation';
 
 export class AtualizarSenhaDto {
   @IsString()
@@ -6,10 +12,12 @@ export class AtualizarSenhaDto {
   senhaAtual!: string;
 
   @IsString()
-  @Length(6, 50)
+  @Length(TAMANHO_MINIMO_SENHA, TAMANHO_MAXIMO_SENHA)
+  @Matches(senhaForteRegex, { message: mensagemSenhaForte })
   novaSenha!: string;
 
   @IsString()
-  @Length(6, 50)
+  @Length(TAMANHO_MINIMO_SENHA, TAMANHO_MAXIMO_SENHA)
+  @Matches(senhaForteRegex, { message: mensagemSenhaForte })
   confirmarSenha!: string;
 }

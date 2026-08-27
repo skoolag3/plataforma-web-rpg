@@ -22,7 +22,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
 import { useState } from "react";
+import { IndicadorSenha } from "../components/indicadorSenha";
 import { login, register, solicitarRedefinicaoSenha } from "../lib/auth";
+import {
+  avaliarSenha,
+  TAMANHO_MAXIMO_SENHA,
+  TAMANHO_MINIMO_SENHA,
+} from "../lib/senha";
 import styles from "../styles/authPanel.module.css";
 
 type TipoModal = "login" | "cadastro" | "forgot" | null;
@@ -255,6 +261,11 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
     setErro("");
     setSucesso("");
 
+    if (!avaliarSenha(senha).valida) {
+      setErro("Crie uma senha que atenda a todos os requisitos.");
+      return;
+    }
+
     if (senha !== confirmarSenha) {
       setErro("As senhas não conferem.");
       return;
@@ -339,9 +350,11 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
                 type={mostrarSenha ? "text" : "password"}
                 value={senha}
                 onChange={(event) => setSenha(event.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Crie uma senha segura"
                 autoComplete="new-password"
-                minLength={6}
+                minLength={TAMANHO_MINIMO_SENHA}
+                maxLength={TAMANHO_MAXIMO_SENHA}
+                aria-describedby="requisitos-senha-cadastro"
                 required
               />
               <button
@@ -365,12 +378,15 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
                 onChange={(event) => setConfirmarSenha(event.target.value)}
                 placeholder="Repita a senha"
                 autoComplete="new-password"
-                minLength={6}
+                minLength={TAMANHO_MINIMO_SENHA}
+                maxLength={TAMANHO_MAXIMO_SENHA}
                 required
               />
             </span>
           </Campo>
         </div>
+
+        <IndicadorSenha id="requisitos-senha-cadastro" senha={senha} />
 
         <label className={styles.rotuloCheck}>
           <input

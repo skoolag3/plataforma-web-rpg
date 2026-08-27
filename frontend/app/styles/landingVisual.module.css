@@ -14,10 +14,14 @@
   inset: -3rem -8rem -2rem -8rem;
   z-index: 0;
   border-radius: 1rem;
-  background:
-    radial-gradient(circle at 48% 28%, rgba(167, 139, 250, 0.12), transparent 12rem),
-    radial-gradient(circle at 50% 42%, rgba(167, 139, 250, 0.5), transparent 19rem),
-    radial-gradient(circle at 54% 64%, rgba(124, 58, 237, 0.3), transparent 27rem);
+
+  /*
+   * Glows roxos antigos atrás do personagem.
+   * background:
+   *   radial-gradient(circle at 48% 28%, rgba(167, 139, 250, 0.12), transparent 12rem),
+   *   radial-gradient(circle at 50% 42%, rgba(167, 139, 250, 0.5), transparent 19rem),
+   *   radial-gradient(circle at 54% 64%, rgba(124, 58, 237, 0.3), transparent 27rem);
+   */
 }
 
 .personagemHero::before {
@@ -29,26 +33,28 @@
   background-repeat: no-repeat;
   background-size: auto min(116%, 49rem);
   content: "";
-  filter:
-    drop-shadow(0 2.8rem 3.2rem rgba(0, 0, 0, 0.78))
-    drop-shadow(0 0 2.4rem rgba(124, 58, 237, 0.52));
+  filter: drop-shadow(0 2.8rem 3.2rem rgba(0, 0, 0, 0.78));
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 84%,
+    rgba(0, 0, 0, 0.82) 90%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 84%,
+    rgba(0, 0, 0, 0.82) 90%,
+    transparent 100%
+  );
   animation: respirarPersonagem 7s ease-in-out infinite alternate;
 }
 
-.personagemHero::after {
-  position: absolute;
-  right: 50%;
-  bottom: 5.8rem;
-  z-index: 0;
-  width: min(58vw, 35rem);
-  height: min(58vw, 35rem);
-  border: 1px solid rgba(167, 139, 250, 0.12);
-  border-radius: 999px;
-  background: radial-gradient(circle, transparent 52%, rgba(167, 139, 250, 0.055) 53%, transparent 55%);
-  filter: blur(0.2rem);
-  transform: translateX(50%);
-  content: "";
-}
+/*
+ * Anel de glow antigo atrás do personagem.
+ * .personagemHero::after { ... }
+ */
 
 @keyframes respirarPersonagem {
   from {

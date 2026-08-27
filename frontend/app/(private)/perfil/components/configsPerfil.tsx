@@ -2,7 +2,13 @@
 
 import { Eye, EyeOff, KeyRound, Mail, Pencil, ShieldCheck } from "lucide-react";
 import { useState } from "react";
+import { IndicadorSenha } from "../../../components/indicadorSenha";
 import type { PerfilConta } from "../../../lib/perfil";
+import {
+  avaliarSenha,
+  TAMANHO_MAXIMO_SENHA,
+  TAMANHO_MINIMO_SENHA,
+} from "../../../lib/senha";
 import styles from "../../../styles/perfil/segurancaPerfil.module.css";
 import modalStyles from "../../../styles/perfil/modalPerfil.module.css";
 import { ModalEdicao } from "./modalEdicao";
@@ -32,10 +38,12 @@ export function ConfigsPerfil({
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
   const [mostrarSenhas, setMostrarSenhas] = useState(false);
+  const [novaSenha, setNovaSenha] = useState("");
 
   function abrirModal(modal: Exclude<ModalAberto, null>) {
     setErro("");
     setSucesso("");
+    setNovaSenha("");
     setModalAberto(modal);
   }
 
@@ -196,18 +204,24 @@ export function ConfigsPerfil({
               const formularioElemento = evento.currentTarget;
               const formulario = new FormData(evento.currentTarget);
               const senhaAtual = String(formulario.get("senhaAtual") ?? "");
-              const novaSenha = String(formulario.get("novaSenha") ?? "");
               const confirmarSenha = String(
                 formulario.get("confirmarSenha") ?? "",
               );
 
               setErro("");
               setSucesso("");
+
+              if (!avaliarSenha(novaSenha).valida) {
+                setErro("Crie uma senha que atenda a todos os requisitos.");
+                return;
+              }
+
               setSalvando(true);
               aoAtualizarSenha(senhaAtual, novaSenha, confirmarSenha)
                 .then((mensagem) => {
                   setSucesso(mensagem);
                   formularioElemento.reset();
+                  setNovaSenha("");
                   window.setTimeout(() => setModalAberto(null), 1200);
                 })
                 .catch((erroCapturado) =>
@@ -244,8 +258,12 @@ export function ConfigsPerfil({
                 <input
                   type={mostrarSenhas ? "text" : "password"}
                   name="novaSenha"
-                  minLength={6}
+                  value={novaSenha}
+                  onChange={(evento) => setNovaSenha(evento.target.value)}
+                  minLength={TAMANHO_MINIMO_SENHA}
+                  maxLength={TAMANHO_MAXIMO_SENHA}
                   autoComplete="new-password"
+                  aria-describedby="requisitos-senha-perfil"
                   required
                 />
                 <button
@@ -257,13 +275,15 @@ export function ConfigsPerfil({
                 </button>
               </span>
             </label>
+            <IndicadorSenha id="requisitos-senha-perfil" senha={novaSenha} />
             <label>
               Confirme a nova senha
               <span className={modalStyles.campoSenhaModal}>
                 <input
                   type={mostrarSenhas ? "text" : "password"}
                   name="confirmarSenha"
-                  minLength={6}
+                  minLength={TAMANHO_MINIMO_SENHA}
+                  maxLength={TAMANHO_MAXIMO_SENHA}
                   autoComplete="new-password"
                   required
                 />

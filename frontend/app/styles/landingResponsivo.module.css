@@ -3,10 +3,6 @@
     min-height: auto;
   }
 
-  .hero::after {
-    height: max(40%, clamp(16rem, 46vw, 24rem));
-  }
-
   .gradeHero {
     grid-template-columns: 1fr;
     grid-template-rows: auto;
@@ -69,10 +65,6 @@
 }
 
 @media (max-width: 640px) {
-  .hero::after {
-    height: max(40%, clamp(14rem, 58vw, 20rem));
-  }
-
   .gradeHero {
     display: flex;
     flex-direction: column;

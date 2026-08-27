@@ -11,7 +11,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
+import { IndicadorSenha } from "../../components/indicadorSenha";
 import { redefinirSenha } from "../../lib/auth";
+import {
+  avaliarSenha,
+  TAMANHO_MAXIMO_SENHA,
+  TAMANHO_MINIMO_SENHA,
+} from "../../lib/senha";
 import { Alerta, Campo } from "../authModal";
 import styles from "../../styles/authPanel.module.css";
 
@@ -32,6 +38,11 @@ function ConteudoAlterarSenha() {
 
     if (!token) {
       setErro("Link de redefinicao invalido.");
+      return;
+    }
+
+    if (!avaliarSenha(senha).valida) {
+      setErro("Crie uma senha que atenda a todos os requisitos.");
       return;
     }
 
@@ -84,8 +95,10 @@ function ConteudoAlterarSenha() {
                   value={senha}
                   onChange={(event) => setSenha(event.target.value)}
                   className={[styles.entrada, styles.entradaComIcone].join(" ")}
-                  placeholder="Minimo de 6 caracteres"
-                  minLength={6}
+                  placeholder="Crie uma senha segura"
+                  minLength={TAMANHO_MINIMO_SENHA}
+                  maxLength={TAMANHO_MAXIMO_SENHA}
+                  aria-describedby="requisitos-nova-senha"
                   required
                   disabled={!token}
                 />
@@ -99,6 +112,8 @@ function ConteudoAlterarSenha() {
                 </button>
               </span>
             </Campo>
+
+            <IndicadorSenha id="requisitos-nova-senha" senha={senha} />
 
             <Campo rotulo="Confirmar senha">
               <span className={styles.campoIcone}>
@@ -114,7 +129,8 @@ function ConteudoAlterarSenha() {
                   onChange={(event) => setConfirmarSenha(event.target.value)}
                   className={[styles.entrada, styles.entradaComIcone].join(" ")}
                   placeholder="Repita a nova senha"
-                  minLength={6}
+                  minLength={TAMANHO_MINIMO_SENHA}
+                  maxLength={TAMANHO_MAXIMO_SENHA}
                   required
                   disabled={!token}
                 />

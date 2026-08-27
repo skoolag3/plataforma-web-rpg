@@ -1,5 +1,11 @@
 import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 import { emailRegex } from './email.regex';
+import {
+  mensagemSenhaForte,
+  senhaForteRegex,
+  TAMANHO_MAXIMO_SENHA,
+  TAMANHO_MINIMO_SENHA,
+} from '../../../common/validation/senha.validation';
 
 export class RegisterDto {
   @IsString()
@@ -12,6 +18,7 @@ export class RegisterDto {
   email!: string;
 
   @IsString()
-  @Length(6, 50)
+  @Length(TAMANHO_MINIMO_SENHA, TAMANHO_MAXIMO_SENHA)
+  @Matches(senhaForteRegex, { message: mensagemSenhaForte })
   senha!: string;
 }

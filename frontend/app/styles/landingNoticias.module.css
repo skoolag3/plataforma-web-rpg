@@ -1,50 +1,14 @@
 .secaoNoticias {
   position: relative;
-  z-index: 2;
   scroll-margin-top: 1rem;
-  overflow: hidden;
-  border-top: 1px solid rgba(139, 92, 246, 0.1);
-  background:
-    radial-gradient(
-      circle at 12% 30%,
-      rgba(190, 242, 100, 0.08),
-      transparent 25rem
-    ),
-    radial-gradient(
-      circle at 78% 18%,
-      rgba(124, 58, 237, 0.2),
-      transparent 34rem
-    ),
-    linear-gradient(145deg, #0b0913 0%, #080910 48%, #07080c 100%);
+  border-top: 0;
+  background: transparent;
   padding: clamp(3.5rem, 7vw, 6rem) 0 clamp(4rem, 8vw, 7rem);
 }
 
-.secaoNoticias::before {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-  background-size: 4rem 4rem;
-  mask-image: linear-gradient(to bottom, black, transparent 82%);
-  content: "";
-  pointer-events: none;
-}
+/* A grade própria de Notícias também marcava o início da seção. */
 
-.secaoNoticias::after {
-  position: absolute;
-  top: -12rem;
-  right: -9rem;
-  width: 32rem;
-  height: 32rem;
-  border: 1px solid rgba(190, 242, 100, 0.08);
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 5rem rgba(124, 58, 237, 0.025),
-    0 0 0 10rem rgba(124, 58, 237, 0.018);
-  content: "";
-  pointer-events: none;
-}
+/* Círculos antigos removidos para não marcar a transição entre as seções. */
 
 .cabecalhoNoticias {
   position: relative;

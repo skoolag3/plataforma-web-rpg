@@ -23,6 +23,7 @@ import Image from "next/image";
 import type { CSSProperties, PointerEvent } from "react";
 import { useEffect, useState } from "react";
 import { CartaMontada } from "../components/cartaMontada";
+import { ShaderBackground } from "../components/ui/shaderBackground";
 import { listarNoticias, type NoticiaPublica } from "../lib/noticias";
 import { listarCartasVitrine, type CartaVitrine } from "../lib/vitrine";
 import { ModalEsqueciSenha, ModalLogin, ModalCadastro } from "./authModal";
@@ -222,6 +223,7 @@ export function LandingContent({
 
   return (
     <main className={styles.pagina}>
+      <ShaderBackground className={styles.shaderHero} />
       <section id="home" className={styles.hero}>
         <div className={styles.particulas} aria-hidden="true">
           {Array.from({ length: 18 }).map((_, indice) => (
