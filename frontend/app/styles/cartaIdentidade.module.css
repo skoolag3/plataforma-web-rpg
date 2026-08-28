@@ -4,51 +4,48 @@
   display: block;
   pointer-events: none;
 }
-.titulo[data-elemento="natureza"] {
-  --cor-elemento: #7ee757;
+
+.elemento {
+  position: absolute;
+  top: 5.5%;
+  left: 5.5%;
+  display: grid;
+  width: clamp(1.65rem, 16cqw, 2.7rem);
+  aspect-ratio: 1;
+  place-items: center;
+  border: clamp(1px, 0.8cqw, 2px) solid color-mix(in srgb, var(--cor-elemento) 78%, white 12%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.18), transparent 38%),
+    rgba(3, 6, 15, 0.9);
+  box-shadow:
+    0 0 0 clamp(0.14rem, 1.4cqw, 0.28rem) rgba(3, 6, 15, 0.78),
+    0 0 clamp(0.5rem, 5cqw, 1rem) color-mix(in srgb, var(--cor-elemento) 48%, transparent);
 }
-.titulo[data-elemento="agua"] {
-  --cor-elemento: #38bdf8;
+
+.elemento img {
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 0.22rem var(--cor-elemento));
 }
-.titulo[data-elemento="fogo"] {
-  --cor-elemento: #ef4444;
-}
-.titulo[data-elemento="sombra"] {
-  --cor-elemento: #a855f7;
-}
-.titulo[data-elemento="luz"] {
-  --cor-elemento: #facc15;
-}
+
 .titulo {
   position: absolute;
-  z-index: 0;
-  isolation: isolate;
-  right: 8%;
-  bottom: 8%;
-  left: 8%;
+  right: 12%;
+  bottom: 7%;
+  left: 7%;
   display: grid;
-  justify-items: center;
-  gap: 0.28rem;
-  padding: 0.45rem 0.7rem;
-  text-align: center;
-}
-.titulo::before {
-  position: absolute;
-  inset: -0.4rem -1rem;
-  z-index: -1;
-  background: radial-gradient(
-    ellipse,
-    rgba(2, 6, 18, 0.9),
-    rgba(2, 6, 18, 0.55) 48%,
-    transparent 72%
-  );
-  content: "";
+  justify-items: start;
+  gap: 0.2rem;
+  padding: 0.45rem 0.55rem;
+  text-align: left;
 }
 .titulo strong {
   max-width: 100%;
   overflow: hidden;
   color: #fff;
-  font-size: clamp(0.7rem, 7cqw, 1.1rem);
+  font-size: clamp(0.72rem, 8cqw, 1.2rem);
   line-height: 1.05;
   text-overflow: ellipsis;
   text-shadow: 0 2px 4px #000;
@@ -57,22 +54,13 @@
 .titulo small {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
   border: 1px solid #94a3b8;
   border-radius: 999px;
   background: rgba(2, 6, 18, 0.84);
   color: #e2e8f0;
-  padding: 0.16rem 0.45rem;
+  padding: 0.14rem 0.42rem;
   font-size: clamp(0.42rem, 3.5cqw, 0.62rem);
   font-weight: 950;
-}
-.titulo small::before {
-  width: 0.32rem;
-  height: 0.32rem;
-  border-radius: 50%;
-  background: var(--cor-elemento);
-  box-shadow: 0 0 0.35rem var(--cor-elemento);
-  content: "";
 }
 .titulo small[data-raridade="UR"] {
   border-color: #c084fc;

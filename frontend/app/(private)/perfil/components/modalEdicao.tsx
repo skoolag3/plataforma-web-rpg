@@ -18,8 +18,9 @@ export function ModalEdicao({
   children,
 }: PropsModalEdicao) {
   return (
-    <div className={styles.fundoModal} role="presentation" onMouseDown={aoFechar}>
+    <div className={styles.fundoModal} data-modal-overlay role="presentation" onMouseDown={aoFechar}>
       <section
+        data-modal-panel
         className={styles.modalEdicao}
         role="dialog"
         aria-modal="true"

@@ -116,6 +116,7 @@ const cartas = [
     id: "flare-esquerda",
     nome: "Flare",
     funcao: "UR",
+    elemento: "fogo",
     imagem: imagemFlare,
     moldura: molduraFlare,
     classe: styles.cartaUm,
@@ -124,6 +125,7 @@ const cartas = [
     id: "flare-centro",
     nome: "Flare",
     funcao: "UR",
+    elemento: "fogo",
     imagem: imagemFlare,
     moldura: molduraFlare,
     classe: styles.cartaDois,
@@ -132,6 +134,7 @@ const cartas = [
     id: "flare-direita",
     nome: "Flare",
     funcao: "UR",
+    elemento: "fogo",
     imagem: imagemFlare,
     moldura: molduraFlare,
     classe: styles.cartaTres,
@@ -272,6 +275,7 @@ export function LandingContent({
                     id: carta.id,
                     nome: carta.nome,
                     funcao: carta.raridade,
+                    elemento: carta.elemento,
                     imagem: carta.foto ?? "",
                     moldura: carta.moldura ?? "",
                     configVisual: carta.config_visual ?? undefined,
@@ -287,15 +291,13 @@ export function LandingContent({
                   <CartaMontada
                     arte={carta.imagem}
                     moldura={carta.moldura}
+                    nome={carta.nome}
+                    raridade={carta.funcao}
+                    elemento={carta.elemento}
                     config={
                       "configVisual" in carta ? carta.configVisual : undefined
                     }
-                  >
-                    <span className={styles.infoCarta}>
-                      <strong>{carta.nome}</strong>
-                      <span>{carta.funcao}</span>
-                    </span>
-                  </CartaMontada>
+                  />
                 </article>
               ))}
             </div>
@@ -335,11 +337,14 @@ export function LandingContent({
 
       <section id="noticias" className={styles.secaoNoticias}>
         <div className={styles.cabecalhoNoticias}>
-          <h2>
-            <FontAwesomeIcon icon={faNewspaper} aria-hidden="true" />
-            Notícias
-          </h2>
-          <p>Atualizações de temporada, balanceamento e eventos especiais.</p>
+          <div>
+            <span className={styles.seloNoticias}>Central da arena</span>
+            <h2>
+              <FontAwesomeIcon icon={faNewspaper} aria-hidden="true" />
+              Notícias
+            </h2>
+          </div>
+          <p>Novidades do jogo, mudanças de balanceamento e eventos para acompanhar sem sair da arena.</p>
         </div>
         <div className={styles.gradeNoticias}>
           {(noticiasPublicadas.length
@@ -352,10 +357,10 @@ export function LandingContent({
                 : noticia.tag.toUpperCase();
             const visual =
               categoria === "BALANCE"
-                ? { icone: faBolt, classe: styles.tagBalanceamento }
+                ? { icone: faBolt, classe: styles.tagBalanceamento, card: styles.cardBalanceamento }
                 : categoria === "EVENTO"
-                  ? { icone: faWandMagicSparkles, classe: styles.tagEvento }
-                  : { icone: faTrophy, classe: styles.tagTemporada };
+                  ? { icone: faWandMagicSparkles, classe: styles.tagEvento, card: styles.cardEvento }
+                  : { icone: faTrophy, classe: styles.tagTemporada, card: styles.cardAviso };
             const data =
               "criado_em" in noticia
                 ? new Date(noticia.criado_em).toLocaleDateString("pt-BR", {
@@ -389,26 +394,28 @@ export function LandingContent({
                 </div>
                 <h3>{noticia.titulo}</h3>
                 <p>{noticia.resumo}</p>
-                <time>
-                  <FontAwesomeIcon icon={faCalendarDays} aria-hidden="true" />
-                  {data}
-                </time>
-                <span className={styles.lerMais}>
-                  Ler novidade{" "}
-                  <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
+                <span className={styles.rodapeNoticia}>
+                  <time>
+                    <FontAwesomeIcon icon={faCalendarDays} aria-hidden="true" />
+                    {data}
+                  </time>
+                  <span className={styles.lerMais}>
+                    Ler novidade{" "}
+                    <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
+                  </span>
                 </span>
               </>
             );
             return "id" in noticia ? (
               <Link
-                className={styles.cardNoticia}
+                className={`${styles.cardNoticia} ${visual.card}`}
                 href={`/noticias/${noticia.id}`}
                 key={noticia.id}
               >
                 {conteudo}
               </Link>
             ) : (
-              <article className={styles.cardNoticia} key={noticia.titulo}>
+              <article className={`${styles.cardNoticia} ${visual.card}`} key={noticia.titulo}>
                 {conteudo}
               </article>
             );

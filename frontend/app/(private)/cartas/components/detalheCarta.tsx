@@ -54,9 +54,7 @@ export function DetalheCarta({
       <div className={styles.detalheTopo}>
         <article className={styles.cardGrande} style={cardStyle(carta)}>
           {carta.foto || carta.moldura ? (
-            <CartaMontada arte={carta.foto ?? undefined} moldura={carta.moldura ?? undefined} config={carta.configVisual ?? undefined} placeholder={<PackagePlus />}>
-              <span className={styles.previewInfo}><b>{carta.raridade}</b><strong>{carta.nome}</strong></span>
-            </CartaMontada>
+            <CartaMontada arte={carta.foto ?? undefined} moldura={carta.moldura ?? undefined} nome={carta.nome} raridade={carta.raridade} elemento={carta.elemento} config={carta.configVisual ?? undefined} placeholder={<PackagePlus />} />
           ) : (
             <><span className={styles.arte} aria-hidden="true" /><span className={styles.raridade}>{carta.raridade}</span><span className={styles.elemento}><Elemento aria-label={carta.elemento} /></span></>
           )}

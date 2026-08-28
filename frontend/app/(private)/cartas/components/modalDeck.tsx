@@ -33,11 +33,12 @@ export function ModalDeck({
   return (
     <div
       className={styles.modalOverlay}
+      data-modal-overlay
       role="dialog"
       aria-modal="true"
       aria-labelledby="equipar-deck-titulo"
     >
-      <section className={styles.modalDeck}>
+      <section className={styles.modalDeck} data-modal-panel>
         <header className={styles.modalTopo}>
           <div>
             <span>Escolher slot</span>

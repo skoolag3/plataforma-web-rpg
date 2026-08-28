@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import { Navbar } from "./components/navbar";
 import { NotificacoesGlobais } from "./components/notificacoesGlobais";
 import "./globals.css";
+import "./styles/modalMotion.css";
 
 const fontePrincipal = Outfit({
   subsets: ["latin"],

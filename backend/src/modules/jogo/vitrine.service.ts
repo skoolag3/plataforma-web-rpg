@@ -14,6 +14,7 @@ export class VitrineService {
         id: true,
         nome: true,
         raridade: true,
+        elemento: true,
         foto: true,
         moldura: true,
         config_visual: true,

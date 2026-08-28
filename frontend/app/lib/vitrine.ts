@@ -6,6 +6,7 @@ export type CartaVitrine = {
   id: string;
   nome: string;
   raridade: string;
+  elemento: string;
   foto: string | null;
   moldura: string | null;
   config_visual: ConfigVisualCarta | null;

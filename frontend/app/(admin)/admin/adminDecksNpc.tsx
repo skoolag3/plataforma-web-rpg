@@ -141,8 +141,8 @@ export function DecksNpc() {
       </div>
 
       {form ? (
-        <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setForm(null); }}>
-          <form className={`${styles.usuarioEditor} ${styles.habilidadeEditor} ${styles.habilidadeModal}`} onSubmit={salvar} role="dialog" aria-modal="true" aria-labelledby="deck-modal-titulo">
+        <div className={styles.modalBackdrop} data-modal-overlay role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setForm(null); }}>
+          <form className={`${styles.usuarioEditor} ${styles.habilidadeEditor} ${styles.habilidadeModal}`} data-modal-panel onSubmit={salvar} role="dialog" aria-modal="true" aria-labelledby="deck-modal-titulo">
             <header><div><h2 id="deck-modal-titulo">{form.id ? "Editando deck" : "Novo deck"}</h2><p>Configuração do baralho utilizado pelo bot.</p></div><button type="button" onClick={() => setForm(null)} aria-label="Fechar formulário"><X aria-hidden="true" /></button></header>
             <label>Nome<input value={form.nome} onChange={(event) => atualizar("nome", event.target.value)} required autoFocus /></label>
             <label>Dificuldade<select value={form.dificuldade} onChange={(event) => atualizar("dificuldade", event.target.value)}><option>Fácil</option><option>Normal</option><option>Difícil</option><option>Extremo</option></select></label>

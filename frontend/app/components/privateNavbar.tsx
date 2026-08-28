@@ -24,9 +24,14 @@ import {
   criarEstiloMolduraPerfil,
   type ConfigVisualCarta,
 } from "./cartaMontada";
+import {
+  ExpandableTabs,
+  type AbaExpansivel,
+  type SeparadorAbas,
+} from "./ui/expandableTabs";
 
 const links = [
-  { href: "/dashboard", label: "Início", icon: Home },
+  { href: "/home", label: "Início", icon: Home },
   { href: "/cartas", label: "Coleção", icon: Layers },
   { href: "/decks", label: "Decks", icon: Boxes },
   { href: "/gacha", label: "Gacha", icon: Sparkles },
@@ -77,24 +82,43 @@ export function PrivateNavbar() {
     router.replace("/");
   }
 
+  const itensNavegacao: Array<AbaExpansivel | SeparadorAbas> = links.map(
+    (item) => ({
+      titulo: item.label,
+      icone: item.icon,
+      href: item.href,
+      ativa: pathname === item.href,
+      aoClicar: () => setAberto(false),
+    }),
+  );
+
+  if (usuario?.is_admin) {
+    itensNavegacao.push(
+      { tipo: "separador" },
+      {
+        titulo: "Admin",
+        icone: ShieldCheck,
+        href: "/admin",
+        aoClicar: () => setAberto(false),
+      },
+    );
+  }
+
   return (
     <header className={styles.header}>
       <nav className={styles.nav}>
-        <Link href="/dashboard" className={styles.brand} onClick={() => setAberto(false)}>
+        <Link href="/home" className={styles.brand} onClick={() => setAberto(false)}>
           <span><Gem aria-hidden="true" /></span>
           <strong>Anime<em>Cards</em></strong>
         </Link>
         <button className={styles.menu} type="button" onClick={() => setAberto((valor) => !valor)} aria-label="Abrir menu">
           {aberto ? <X /> : <Menu />}
         </button>
-        <div className={`${styles.links} ${aberto ? styles.linksAbertos : ""}`}>
-          {links.map((item) => {
-            const Icon = item.icon;
-            const ativo = pathname === item.href;
-            return <Link key={item.href} href={item.href} className={ativo ? styles.ativo : ""} onClick={() => setAberto(false)}><Icon /><span>{item.label}</span></Link>;
-          })}
-          {usuario?.is_admin ? <Link href="/admin" onClick={() => setAberto(false)}><ShieldCheck /><span>Admin</span></Link> : null}
-        </div>
+        <ExpandableTabs
+          className={`${styles.links} ${aberto ? styles.linksAbertos : ""}`}
+          ariaLabel="Navegação do jogador"
+          itens={itensNavegacao}
+        />
         <div className={styles.usuario}>
           <div className={styles.saldos} aria-label="Saldos do jogador">
             <span title="Rubys"><IconeRuby />{resumoPerfil.rubys.toLocaleString("pt-BR")}</span>

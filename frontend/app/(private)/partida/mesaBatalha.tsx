@@ -10,7 +10,6 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { CartaIdentidade } from "../../components/cartaIdentidade";
 import { CartaMontada } from "../../components/cartaMontada";
 import { CartaVerso } from "../../components/cartaVerso";
 import { IconeRuby } from "../../components/iconeRuby";
@@ -61,6 +60,9 @@ function CartaNaMesa({
         <CartaMontada
           arte={carta.foto ?? undefined}
           moldura={carta.moldura ?? undefined}
+          nome={carta.nome}
+          raridade={carta.raridade}
+          elemento={carta.elemento}
           config={carta.configVisual ?? undefined}
           placeholder={<Sparkles />}
           verso={
@@ -73,15 +75,7 @@ function CartaNaMesa({
               defesa={carta.defesa}
             />
           }
-        >
-          <CartaIdentidade
-            nome={carta.nome}
-            raridade={carta.raridade}
-            elemento={
-              carta.elemento as "natureza" | "agua" | "fogo" | "sombra" | "luz"
-            }
-          />
-        </CartaMontada>
+        />
       </div>
       <div className={styles.atributosCarta}>
         <span
@@ -191,6 +185,9 @@ function DeckJogador({
               <CartaMontada
                 arte={carta.foto ?? undefined}
                 moldura={carta.moldura ?? undefined}
+                nome={carta.nome}
+                raridade={carta.raridade}
+                elemento={carta.elemento}
                 config={carta.configVisual ?? undefined}
                 placeholder={<Sparkles />}
               />

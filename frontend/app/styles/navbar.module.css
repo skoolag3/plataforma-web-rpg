@@ -72,41 +72,6 @@
   padding: 0;
 }
 
-.link {
-  position: relative;
-  border: 0;
-  border-radius: 0.4rem;
-  background: transparent;
-  color: rgba(226, 232, 240, 0.86);
-  font-size: 0.74rem;
-  font-weight: 900;
-  min-height: 2.25rem;
-  padding: 0.55rem 0.85rem;
-  text-decoration: none;
-  text-transform: uppercase;
-  transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
-}
-
-.link:hover,
-.linkAtivo {
-  background: rgba(255, 255, 255, 0.055);
-  color: #fff;
-}
-
-.linkAtivo::after {
-  position: absolute;
-  right: 0.85rem;
-  bottom: 0.3rem;
-  left: 0.85rem;
-  height: 2px;
-  border-radius: 999px;
-  background: #8b5cf6;
-  content: "";
-}
-
 .acoes {
   display: flex;
   gap: 0.55rem;
@@ -172,7 +137,6 @@
 }
 
 .marca:focus-visible,
-.link:focus-visible,
 .btn:focus-visible,
 .btnPrimario:focus-visible {
   outline: 2px solid rgba(190, 242, 100, 0.78);

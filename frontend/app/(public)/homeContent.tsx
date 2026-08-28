@@ -15,7 +15,7 @@ export function HomeContent() {
 
   useEffect(() => {
     if (estaAutenticado) {
-      router.replace("/dashboard");
+      router.replace("/home");
     }
   }, [estaAutenticado, router]);
 

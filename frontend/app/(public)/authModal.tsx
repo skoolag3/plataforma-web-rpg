@@ -30,6 +30,7 @@ import {
   TAMANHO_MINIMO_SENHA,
 } from "../lib/senha";
 import styles from "../styles/authPanel.module.css";
+import { AuthTabs } from "./authTabs";
 
 type TipoModal = "login" | "cadastro" | "forgot" | null;
 
@@ -94,8 +95,9 @@ function EstruturaModal({
   }
 
   return (
-    <div className={styles.fundoModal} onMouseDown={fechar}>
+    <div className={styles.fundoModal} data-modal-overlay onMouseDown={fechar}>
       <section
+        data-modal-panel
         className={[styles.modal, variante === "cadastro" ? styles.modalCadastro : ""].join(" ")}
         aria-modal="true"
         role="dialog"
@@ -140,7 +142,7 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
 
     try {
       await login(email, senha);
-      router.push("/dashboard");
+      router.push("/home");
       router.refresh();
     } catch (erroCapturado) {
       setErro(
@@ -160,6 +162,8 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
         <h2 className={styles.titulo}>Entre na arena</h2>
         <p className={styles.subtitulo}>Acesse seus decks e continue sua jornada.</p>
       </header>
+
+      <AuthTabs ativa="login" aoTrocar={aoTrocar} />
 
       <form className={styles.form} onSubmit={aoEnviar}>
         <Campo rotulo="Email">
@@ -235,12 +239,6 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
         Continuar com Google
       </button>
 
-      <p className={styles.rodape}>
-        Não tem uma conta?{" "}
-        <button type="button" onClick={() => aoTrocar("cadastro")}>
-          Registrar
-        </button>
-      </p>
     </EstruturaModal>
   );
 }
@@ -299,6 +297,8 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
         <h2 className={styles.titulo}>Crie sua conta</h2>
         <p className={styles.subtitulo}>Monte seu primeiro deck e entre na arena gratuitamente.</p>
       </header>
+
+      <AuthTabs ativa="cadastro" aoTrocar={aoTrocar} />
 
       <form className={styles.form} onSubmit={aoEnviar}>
         <Campo rotulo="Nome no jogo">
@@ -410,12 +410,6 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
         </button>
       </form>
 
-      <p className={styles.rodape}>
-        Já tem uma conta?{" "}
-        <button type="button" onClick={() => aoTrocar("login")}>
-          Entrar
-        </button>
-      </p>
     </EstruturaModal>
   );
 }

@@ -30,14 +30,12 @@ function VisualCarta({ carta }: { carta: AdminUsuarioCarta }) {
     <CartaMontada
       arte={carta.foto ?? undefined}
       moldura={carta.moldura ?? undefined}
+      nome={carta.nome}
+      raridade={carta.raridade}
+      elemento={carta.elemento}
       config={carta.configVisual ?? undefined}
       placeholder={<Layers aria-hidden="true" />}
-    >
-      <span className={styles.usuarioCartaInfo}>
-        <span><b>{carta.raridade}</b><small>{carta.elemento}</small></span>
-        <strong>{carta.nome}</strong>
-      </span>
-    </CartaMontada>
+    />
   );
 }
 

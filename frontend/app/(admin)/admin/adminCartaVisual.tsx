@@ -25,7 +25,6 @@ import {
   type ConfigVisualCarta,
   type DimensoesImagem,
 } from "../../components/cartaMontada";
-import { CartaIdentidade } from "../../components/cartaIdentidade";
 import { CartaVerso } from "../../components/cartaVerso";
 import { elementosCarta } from "../../components/elementosCarta";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
@@ -427,6 +426,9 @@ export function PreviewCarta({
         <CartaMontada
           arte={arte}
           moldura={moldura}
+          nome={mostrarTextos ? nome : undefined}
+          raridade={mostrarTextos ? raridade : undefined}
+          elemento={mostrarTextos ? elemento : undefined}
           config={configVisual}
           placeholder={<ImagePlus aria-label="Sem arte" />}
           onDimensoesArte={setDimensoesArte}
@@ -442,15 +444,7 @@ export function PreviewCarta({
               defesa={defesaBase}
             />
           }
-        >
-          {mostrarTextos ? (
-            <CartaIdentidade
-              nome={nome}
-              raridade={raridade}
-              elemento={elemento}
-            />
-          ) : null}
-        </CartaMontada>
+        />
       </div>
       {proporcoesDiferentes ? (
         <small className={styles.avisoProporcao}>

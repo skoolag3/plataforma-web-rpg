@@ -42,19 +42,11 @@ export function GradeCartas({
               <CartaMontada
                 arte={card.foto ?? undefined}
                 moldura={card.moldura ?? undefined}
+                nome={card.nome}
+                raridade={card.raridade}
+                elemento={card.elemento}
                 config={card.configVisual ?? undefined}
-              >
-                <span className={styles.cardMontadaInfo}>
-                  <span className={styles.cardMontadaTopo}>
-                    <span>{card.raridade}</span>
-                    <IconeElemento aria-label={card.elemento} />
-                  </span>
-                  <strong>{card.nome}</strong>
-                  <small>
-                    <PackagePlus aria-hidden="true" /> {card.copias}
-                  </small>
-                </span>
-              </CartaMontada>
+              />
             </button>
           );
         }

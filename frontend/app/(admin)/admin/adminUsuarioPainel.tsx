@@ -117,8 +117,8 @@ export function AdminUsuarioPainel({ usuario, onClose, onUpdateUsuario }: Props)
   }
 
   return (
-    <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <section className={`${styles.usuarioPainel} ${styles.usuarioModal}`} role="dialog" aria-modal="true" aria-labelledby="usuario-painel-titulo">
+    <div className={styles.modalBackdrop} data-modal-overlay role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <section className={`${styles.usuarioPainel} ${styles.usuarioModal}`} data-modal-panel role="dialog" aria-modal="true" aria-labelledby="usuario-painel-titulo">
         <header className={styles.usuarioPainelTopo}>
           <span className={styles.usuarioAvatar}><UserRound aria-hidden="true" /></span>
           <div><h2 id="usuario-painel-titulo">{usuario.nome}</h2><p>{usuario.email}</p></div>

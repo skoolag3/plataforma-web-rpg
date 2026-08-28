@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { ExpandableTabs } from "../../components/ui/expandableTabs";
 import styles from "../../styles/admin/adminShared.module.css";
 import layoutStyles from "../../styles/admin/adminLayout.module.css";
 
@@ -63,27 +64,19 @@ export function AdminLayout({
           </div>
         </div>
 
-        <nav className={layoutStyles.nav} aria-label="Navegação administrativa">
-          {nav.map((item) => {
-            const Icon = item.icon;
-            const active =
+        <ExpandableTabs
+          className={layoutStyles.nav}
+          ariaLabel="Navegação administrativa"
+          itens={nav.map((item) => ({
+            titulo: item.label,
+            icone: item.icon,
+            href: item.href,
+            ativa:
               item.href === "/admin"
                 ? pathname === item.href
-                : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={
-                  active ? layoutStyles.navActive : layoutStyles.navItem
-                }
-              >
-                <Icon aria-hidden="true" />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+                : pathname.startsWith(item.href),
+          }))}
+        />
 
         <div className={layoutStyles.navAcoes}>
           <Link href="/perfil" className={layoutStyles.adminUser}>
@@ -96,7 +89,7 @@ export function AdminLayout({
             </div>
           </Link>
           <Link
-            href="/dashboard"
+            href="/home"
             className={layoutStyles.logout}
             title="Voltar ao jogo"
           >

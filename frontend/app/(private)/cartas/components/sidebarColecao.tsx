@@ -16,7 +16,7 @@ import Link from "next/link";
 import { styles } from "../styles";
 
 const navItems = [
-  { href: "/dashboard", label: "Início", icon: Home },
+  { href: "/home", label: "Início", icon: Home },
   { href: "/cartas", label: "Coleção", icon: Layers, ativo: true },
   { href: "/decks", label: "Decks", icon: Boxes },
   { href: "#", label: "Loja", icon: Shirt },

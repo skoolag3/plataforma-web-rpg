@@ -49,12 +49,14 @@ export function AdminHabilidadeFormulario({
   return (
     <div
       className={styles.modalBackdrop}
+      data-modal-overlay
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) aoFechar();
       }}
     >
       <form
+        data-modal-panel
         className={`${styles.usuarioEditor} ${styles.habilidadeEditor} ${styles.habilidadeModal}`}
         onSubmit={aoSalvar}
         role="dialog"

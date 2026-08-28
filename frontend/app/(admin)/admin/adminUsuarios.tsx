@@ -184,8 +184,8 @@ export function Usuarios() {
         <AdminUsuarioPainel usuario={selecionado} onClose={() => setSelecionado(null)} onUpdateUsuario={sincronizarUsuario} />
       ) : null}
       {editando ? (
-        <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) fecharEdicao(); }}>
-          <form className={`${styles.usuarioEditor} ${styles.usuarioModal}`} onSubmit={salvarUsuario} role="dialog" aria-modal="true" aria-labelledby="usuario-editor-titulo">
+        <div className={styles.modalBackdrop} data-modal-overlay role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) fecharEdicao(); }}>
+          <form className={`${styles.usuarioEditor} ${styles.usuarioModal}`} data-modal-panel onSubmit={salvarUsuario} role="dialog" aria-modal="true" aria-labelledby="usuario-editor-titulo">
             <header><div><h2 id="usuario-editor-titulo">Editar usuário</h2><p>{editando.email}</p></div><button type="button" onClick={fecharEdicao} aria-label="Fechar editor"><X aria-hidden="true" /></button></header>
             <label>Nome<input value={nomeEdicao} onChange={(event) => setNomeEdicao(event.target.value)} required minLength={2} maxLength={100} autoFocus /></label>
             <label>Nível<input type="number" min={1} max={9999} value={nivelEdicao} onChange={(event) => setNivelEdicao(event.target.value)} required /></label>

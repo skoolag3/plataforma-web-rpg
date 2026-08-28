@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import styles from "../styles/cartaMontada.module.css";
+import { CartaIdentidade } from "./cartaIdentidade";
 
 export const PROPORCAO_CARTA = 2 / 3;
 
@@ -102,6 +103,9 @@ function imagemLocalTemporaria(url: string) {
 type PropsCartaMontada = {
   arte?: string;
   moldura?: string;
+  nome?: string;
+  raridade?: string;
+  elemento?: string;
   children?: ReactNode;
   placeholder?: ReactNode;
   verso?: ReactNode;
@@ -113,6 +117,9 @@ type PropsCartaMontada = {
 export function CartaMontada({
   arte,
   moldura,
+  nome,
+  raridade,
+  elemento,
   children,
   placeholder,
   verso,
@@ -189,7 +196,6 @@ export function CartaMontada({
             ) : (
               <span className={styles.placeholder}>{placeholder}</span>
             )}
-            <span className={styles.sombra} aria-hidden="true" />
           </span>
           {moldura ? (
             <span className={styles.camadaMoldura} style={estiloMoldura}>
@@ -209,8 +215,17 @@ export function CartaMontada({
               />
             </span>
           ) : null}
-          {children ? (
-            <span className={styles.conteudo}>{children}</span>
+          {children || (nome && raridade && elemento) ? (
+            <span className={styles.conteudo}>
+              {nome && raridade && elemento ? (
+                <CartaIdentidade
+                  nome={nome}
+                  raridade={raridade}
+                  elemento={elemento}
+                />
+              ) : null}
+              {children}
+            </span>
           ) : null}
         </span>
         {verso ? <span className={styles.verso}>{verso}</span> : null}

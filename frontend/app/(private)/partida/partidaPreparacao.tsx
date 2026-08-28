@@ -2,7 +2,6 @@
 
 import { Check, Layers3, Swords } from "lucide-react";
 import Link from "next/link";
-import { CartaIdentidade } from "../../components/cartaIdentidade";
 import { CartaMontada } from "../../components/cartaMontada";
 import { CartaVerso } from "../../components/cartaVerso";
 import type { Deck } from "../../lib/jogo";
@@ -69,6 +68,9 @@ export function PartidaPreparacao({
                     <CartaMontada
                       arte={carta.foto ?? undefined}
                       moldura={carta.moldura ?? undefined}
+                      nome={carta.nome}
+                      raridade={carta.raridade}
+                      elemento={carta.elemento}
                       config={carta.configVisual ?? undefined}
                       placeholder={<Layers3 aria-hidden="true" />}
                       verso={
@@ -82,13 +84,7 @@ export function PartidaPreparacao({
                           defesa={carta.defesaBase}
                         />
                       }
-                    >
-                      <CartaIdentidade
-                        nome={carta.nome}
-                        raridade={carta.raridade}
-                        elemento={carta.elemento}
-                      />
-                    </CartaMontada>
+                    />
                   </span>
                 ))}
               </span>

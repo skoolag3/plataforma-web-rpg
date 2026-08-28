@@ -62,12 +62,14 @@ export function AdminHabilidadeTeste({
   return (
     <div
       className={stylesAdmin.modalBackdrop}
+      data-modal-overlay
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) aoFechar();
       }}
     >
       <form
+        data-modal-panel
         className={`${stylesAdmin.usuarioEditor} ${stylesAdmin.habilidadeEditor} ${stylesAdmin.habilidadeModal}`}
         onSubmit={testar}
         role="dialog"

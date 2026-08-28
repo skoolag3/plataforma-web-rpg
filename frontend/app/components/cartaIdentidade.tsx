@@ -1,6 +1,7 @@
+import Image from "next/image";
+import type { CSSProperties } from "react";
+import { obterElementoCarta } from "./elementosCarta";
 import styles from "../styles/cartaIdentidade.module.css";
-
-type ElementoCarta = "natureza" | "agua" | "fogo" | "sombra" | "luz";
 
 export function CartaIdentidade({
   nome,
@@ -9,11 +10,27 @@ export function CartaIdentidade({
 }: {
   nome: string;
   raridade: string;
-  elemento: ElementoCarta;
+  elemento: string;
 }) {
+  const elementoVisual = obterElementoCarta(elemento);
+
   return (
-    <span className={styles.identidade}>
-      <span className={styles.titulo} data-elemento={elemento}>
+    <span className={styles.identidade} data-elemento={elemento}>
+      {elementoVisual ? (
+        <span
+          className={styles.elemento}
+          title={elementoVisual.label}
+          style={{ "--cor-elemento": elementoVisual.cor } as CSSProperties}
+        >
+          <Image
+            src={elementoVisual.icone}
+            alt={elementoVisual.label}
+            width={40}
+            height={40}
+          />
+        </span>
+      ) : null}
+      <span className={styles.titulo}>
         <strong>{nome}</strong>
         <small data-raridade={raridade}>{raridade}</small>
       </span>

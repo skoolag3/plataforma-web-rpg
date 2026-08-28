@@ -1,0 +1,166 @@
+.abas {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.18rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 0.8rem;
+  background: rgba(4, 7, 14, 0.42);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.045);
+  padding: 0.22rem;
+}
+
+.indicador {
+  position: absolute;
+  top: 0.22rem;
+  bottom: 0.22rem;
+  left: 0;
+  width: var(--indicadorLargura, 0);
+  border: 1px solid rgba(190, 242, 100, 0.18);
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    rgba(124, 58, 237, 0.34),
+    rgba(190, 242, 100, 0.07)
+  );
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 -2px rgba(190, 242, 100, 0.74);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(var(--indicadorX, 0));
+  transition:
+    width 440ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 440ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 120ms ease;
+}
+
+.indicador::after {
+  position: absolute;
+  inset: 0.18rem;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.2), transparent 68%);
+  content: "";
+}
+
+.indicadorVisivel {
+  opacity: 1;
+}
+
+.indicadorMovendo::after {
+  animation: viajarBolha 440ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes viajarBolha {
+  0%, 100% {
+    border-radius: 999px;
+    transform: scale(1);
+  }
+
+  45% {
+    border-radius: 42% 58% 55% 45%;
+    transform: scaleX(0.7) scaleY(1.12);
+  }
+}
+
+.aba {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  min-width: 2.35rem;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 0.62rem;
+  color: #8993a7;
+  padding: 0 0.62rem;
+  font-size: 0.7rem;
+  font-weight: 820;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    gap 220ms ease,
+    padding 220ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.aba svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: 0 0 auto;
+  stroke-width: 2;
+}
+
+.aba span {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(-0.25rem);
+  transition:
+    max-width 360ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 180ms ease,
+    transform 260ms ease;
+}
+
+.aba:hover {
+  background: rgba(255, 255, 255, 0.045);
+  color: #eef2ff;
+  transform: translateY(-1px);
+}
+
+.abaAtiva {
+  gap: 0.48rem;
+  color: #fff;
+  padding-inline: 0.78rem;
+}
+
+.abaAtiva span {
+  max-width: 9rem;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.aba:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.aba:focus-visible {
+  outline: 2px solid rgba(190, 242, 100, 0.82);
+  outline-offset: 0.18rem;
+}
+
+.separador {
+  width: 1px;
+  height: 1.4rem;
+  flex: 0 0 auto;
+  margin: 0 0.18rem;
+  background: rgba(148, 163, 184, 0.18);
+}
+
+@media (max-width: 520px) {
+  .abas {
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .abas::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aba,
+  .aba span,
+  .indicador {
+    transition-duration: 0.01ms;
+  }
+}

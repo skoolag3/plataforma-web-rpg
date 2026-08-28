@@ -156,17 +156,12 @@ function CartaVisualGacha({ carta }: { carta: CartaGacha }) {
     <CartaMontada
       arte={carta.foto ?? undefined}
       moldura={carta.moldura ?? undefined}
+      nome={carta.nome}
+      raridade={carta.raridade}
+      elemento={carta.elemento}
       config={carta.configVisual ?? undefined}
       placeholder={<Icone aria-hidden="true" />}
-    >
-      <span className={styles.cartaGachaInfo}>
-        <span>
-          <b>{carta.raridade}</b>
-          <Icone aria-hidden="true" />
-        </span>
-        <strong>{carta.nome}</strong>
-      </span>
-    </CartaMontada>
+    />
   );
 }
 

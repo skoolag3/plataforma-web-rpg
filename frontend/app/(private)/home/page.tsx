@@ -7,9 +7,9 @@ import { CartaMontada } from "../../components/cartaMontada";
 import { getToken } from "../../lib/auth";
 import { listarDecks, type Deck } from "../../lib/jogo";
 import { buscarPerfilApi, type PerfilConta } from "../../lib/perfil";
-import styles from "../../styles/dashboard.module.css";
+import styles from "../../styles/home.module.css";
 
-export default function DashboardPage() {
+export default function HomePage() {
   const [perfil, setPerfil] = useState<PerfilConta | null>(null);
   const [decks, setDecks] = useState<Deck[]>([]);
   const [erro, setErro] = useState("");
@@ -91,11 +91,12 @@ export default function DashboardPage() {
                     <CartaMontada
                       arte={carta.foto ?? undefined}
                       moldura={carta.moldura ?? undefined}
+                      nome={carta.nome}
+                      raridade={carta.raridade}
+                      elemento={carta.elemento}
                       config={carta.configVisual ?? undefined}
                       placeholder={<Sparkles />}
-                    >
-                      <span className={styles.nomeCarta}>{carta.nome}</span>
-                    </CartaMontada>
+                    />
                   </div>
                 ))
               ) : (

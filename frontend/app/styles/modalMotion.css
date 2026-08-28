@@ -1,0 +1,76 @@
+[data-modal-overlay][data-modal-overlay] {
+  animation: modalBackdropEntrada 180ms ease-out both;
+}
+
+[data-modal-panel][data-modal-panel] {
+  transform-origin: 50% 42%;
+  animation: modalPainelEntrada 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-modal-panel][data-modal-panel] > header {
+  animation: modalConteudoEntrada 340ms 45ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes modalBackdropEntrada {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalPainelEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(-0.9rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modalConteudoEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(-0.55rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  [data-modal-overlay][data-modal-overlay] {
+    padding: 0.5rem !important;
+  }
+
+  [data-modal-panel][data-modal-panel] {
+    width: 100% !important;
+    max-height: calc(100dvh - 1rem) !important;
+    border-radius: 0.9rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-modal-overlay][data-modal-overlay] {
+    animation: modalBackdropEntrada 120ms ease-out both;
+  }
+
+  [data-modal-panel][data-modal-panel] {
+    animation: modalPainelEntradaReduzida 150ms ease-out both;
+  }
+
+  [data-modal-panel][data-modal-panel] > header {
+    animation: modalConteudoEntrada 160ms ease-out both;
+  }
+}
+
+@keyframes modalPainelEntradaReduzida {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

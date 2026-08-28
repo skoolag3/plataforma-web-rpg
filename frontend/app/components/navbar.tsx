@@ -2,16 +2,23 @@
 
 import { faGaugeHigh, faRightToBracket, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Home, Newspaper } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { MouseEvent } from "react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { isAuthenticated, subscribeAuthChange } from "../lib/auth";
 import styles from "../styles/navbar.module.css";
+import { ExpandableTabs } from "./ui/expandableTabs";
 
 const linksNav = [
-  { href: "/#home", label: "Home", secao: "home" },
-  { href: "/#noticias", label: "Notícias", secao: "noticias" },
+  { href: "/#home", label: "Home", secao: "home", icon: Home },
+  {
+    href: "/#noticias",
+    label: "Notícias",
+    secao: "noticias",
+    icon: Newspaper,
+  },
 ];
 
 export function Navbar() {
@@ -58,7 +65,7 @@ export function Navbar() {
   }
 
   if (
-    ["/dashboard", "/perfil", "/cartas", "/decks", "/gacha", "/partida"].some(
+    ["/home", "/perfil", "/cartas", "/decks", "/gacha", "/partida"].some(
       (rota) => caminho === rota || caminho.startsWith(`${rota}/`),
     ) ||
     caminho.startsWith("/admin")
@@ -78,28 +85,22 @@ export function Navbar() {
           </span>
         </Link>
 
-        <div className={styles.linksNav}>
-          {linksNav.map((link) => {
-            const estaAtivo = caminho === "/" && secaoAtiva === link.secao;
-
-            return (
-            <Link
-              key={`${link.href}-${link.label}`}
-              href={link.href}
-              onClick={(evento) => navegarParaSecao(evento, link.secao)}
-              className={[styles.link, estaAtivo ? styles.linkAtivo : ""].join(" ")}
-              aria-current={estaAtivo ? "page" : undefined}
-            >
-              {link.label}
-            </Link>
-            );
-          })}
-        </div>
+        <ExpandableTabs
+          className={styles.linksNav}
+          ariaLabel="Navegação principal"
+          itens={linksNav.map((link) => ({
+            titulo: link.label,
+            icone: link.icon,
+            href: link.href,
+            ativa: caminho === "/" && secaoAtiva === link.secao,
+            aoClicar: (evento) => navegarParaSecao(evento, link.secao),
+          }))}
+        />
 
         <div className={styles.acoes}>
           {estaAutenticado ? (
             <Link
-              href="/dashboard"
+              href="/home"
               className={styles.btn}
             >
               <FontAwesomeIcon icon={faGaugeHigh} aria-hidden="true" />

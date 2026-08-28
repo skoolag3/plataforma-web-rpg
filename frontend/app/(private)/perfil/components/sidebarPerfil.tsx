@@ -17,7 +17,7 @@ import { clearSession } from "../../../lib/auth";
 import styles from "../../../styles/perfil/perfilLayout.module.css";
 
 const linksMenu = [
-  { href: "/dashboard", rotulo: "Início", icone: House },
+  { href: "/home", rotulo: "Início", icone: House },
   { href: "/cartas", rotulo: "Coleção", icone: Layers3 },
   { href: "/decks", rotulo: "Decks", icone: Layers3 },
   { href: "#loja", rotulo: "Loja", icone: ShoppingCart },
@@ -39,7 +39,7 @@ export function SidebarPerfil() {
 
   return (
     <aside className={styles.sidebarPerfil}>
-      <Link href="/dashboard" className={styles.marcaPerfil}>
+      <Link href="/home" className={styles.marcaPerfil}>
         <span className={styles.simboloMarca}>
           <Gem aria-hidden="true" />
         </span>

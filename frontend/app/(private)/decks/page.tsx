@@ -393,6 +393,9 @@ export default function DecksPage() {
                       <CartaMontada
                         arte={carta.foto ?? undefined}
                         moldura={carta.moldura ?? undefined}
+                        nome={carta.nome}
+                        raridade={carta.raridade}
+                        elemento={carta.elemento}
                         config={carta.configVisual ?? undefined}
                         placeholder={<Layers aria-hidden="true" />}
                       />
