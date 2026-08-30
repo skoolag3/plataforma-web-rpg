@@ -79,13 +79,13 @@
   border: 0;
   border-radius: 0.45rem;
   background: transparent;
-  color: #8f98aa;
+  color: #fb7185;
   cursor: pointer;
 }
 
 .notificacao button:hover {
   background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  color: #fecdd3;
 }
 .notificacao button:focus-visible {
   outline: 2px solid var(--corNotificacao);

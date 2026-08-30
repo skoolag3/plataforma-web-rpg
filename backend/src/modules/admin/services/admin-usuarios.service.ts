@@ -24,6 +24,7 @@ const usuarioSelect = {
   criado_em: true,
   ultimo_login_em: true,
   _count: { select: { partidas: true } },
+  perfil: { select: { avatar_url: true, id_moldura: true, id_carta_moldura: true } },
 } satisfies Prisma.UsuarioSelect;
 
 type UsuarioSelecionado = Prisma.UsuarioGetPayload<{
@@ -474,9 +475,9 @@ export class AdminUsuariosService {
       REEMBOLSO: 'Reembolso',
       ESTORNO: 'Estorno',
       PERFIL_ATUALIZADO: 'Conta atualizada',
-      CARTA_ADICIONADA: 'Carta adicionada',
-      CARTA_REMOVIDA: 'Carta removida',
-      SALDO_AJUSTADO: 'Saldo ajustado',
+      CARTA_ADICIONADA: 'Ação administrativa: carta adicionada',
+      CARTA_REMOVIDA: 'Ação administrativa: carta removida',
+      SALDO_AJUSTADO: 'Ação administrativa: saldo ajustado',
     };
     return titulos[motivo] ?? fallback;
   }
@@ -495,6 +496,8 @@ export class AdminUsuariosService {
       emailVerificado: usuario.email_verificado,
       criadoEm: usuario.criado_em,
       ultimoLoginEm: usuario.ultimo_login_em,
+      avatarUrl: usuario.perfil?.avatar_url ?? null,
+      molduraId: usuario.perfil?.id_moldura ?? usuario.perfil?.id_carta_moldura ?? null,
     };
   }
 }

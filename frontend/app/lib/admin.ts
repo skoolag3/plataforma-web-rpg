@@ -150,6 +150,8 @@ export type AdminUsuario = {
   emailVerificado: boolean;
   criadoEm: string | null;
   ultimoLoginEm: string | null;
+  avatarUrl: string | null;
+  molduraId: string | null;
 };
 
 export type UpdateAdminUsuarioPayload = {

@@ -122,7 +122,7 @@ export class GachaService {
           data: {
             id_usuario: idUsuario,
             quantidade: -custo,
-            motivo: 'GACHA',
+            motivo: 'GIRO_BANNER',
             id_referencia: idBanner,
             descricao: `${quantidade} giro(s) em ${banner.nome}`,
           },
@@ -233,7 +233,7 @@ export class GachaService {
           data: {
             id_usuario: idUsuario,
             quantidade: banner.custo_giro,
-            motivo: 'RECOMPENSA_DIARIA',
+            motivo: 'GIRO_BANNER',
             id_referencia: idBanner,
             descricao: 'Giro diario',
           },

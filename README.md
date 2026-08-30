@@ -19,13 +19,18 @@ Plataforma web de RPG de cartas desenvolvida como Trabalho de Conclusão de Curs
 - criação, teste, publicação e vínculo de habilidades às cartas;
 - notícias públicas com imagem, conteúdo, anexos e página por ID;
 - landing page alimentada pelas cartas e notícias publicadas no banco.
+- loja de Rubys com pacotes, Checkout hospedado pelo Stripe e crédito confirmado por webhook idempotente;
+- ranking público de jogadores com pontuação positiva e histórico paginado de partidas no perfil;
+- rotação automática do banner de gacha a cada 30 minutos, com opção administrativa para forçar o banner;
+- painel administrativo de usuários com busca, filtros, edição, bloqueio, coleção, ajuste de saldo e auditoria;
+- notificações globais temporárias com fechamento manual e indicador de duração.
 
 ### Parcial ou demonstrativo
 
 - o motor de batalha executa passivas do formato legado salvo na carta; o catálogo novo de habilidades já possui validação, simulação, testes e vínculo, mas ainda precisa ser consumido integralmente pela batalha;
 - o adversário atual é básico e a dificuldade é calculada no servidor, sem IA avançada;
-- a tela administrativa de banners do gacha ainda usa dados demonstrativos e não possui CRUD próprio;
-- pacotes e transações de rubys estão modelados no banco, mas o pagamento por Pix/Stripe ainda não foi integrado;
+- a tela administrativa de banners permite consultar a rotação e forçar um banner, mas ainda não possui CRUD completo de banners e pacotes;
+- o pagamento por Stripe está integrado em modo de teste; Pix e operação em produção ainda não foram configurados;
 - não existe PvP em tempo real;
 - não existe MongoDB ou Redis: auditoria, economia e batalha usam PostgreSQL.
 
@@ -133,8 +138,30 @@ Principais variáveis do backend:
 | `CLOUDINARY_*`                               | imagens de cartas e notícias    |
 | `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` | avatar e banner do perfil       |
 | `GOOGLE_*`                                   | OAuth opcional com Google       |
+| `STRIPE_SECRET_KEY`                          | criação das sessões de Checkout |
+| `STRIPE_WEBHOOK_SECRET`                      | validação dos eventos do Stripe |
 
 No frontend, `BACKEND_URL` define o destino interno do proxy `/api`. `NEXT_PUBLIC_API_URL` é opcional e deve ser usado apenas quando o navegador precisar acessar outra origem diretamente.
+
+Para testar pagamentos localmente, mantenha o backend ativo e encaminhe os eventos do Stripe CLI:
+
+```powershell
+stripe listen --forward-to http://localhost:3001/loja/stripe/webhook
+```
+
+Copie o segredo `whsec_...` exibido pela CLI para `STRIPE_WEBHOOK_SECRET` e reinicie o backend. Chaves secretas e segredos de webhook não devem ser versionados.
+
+## Atualizações recentes
+
+- correção dos motivos do ledger usados pelo gacha para respeitar as constraints do PostgreSQL;
+- animação de invocação e revelação das cartas no gacha;
+- retorno da compra do Stripe direcionado à loja, sem interferir na rota do gacha;
+- reorganização do painel administrativo de usuários, com modal compacto, coleção pesquisável e confirmação antes de remover cartas;
+- histórico financeiro administrativo limitado a 10 registros por página, com filtros e autoria explícita;
+- mensagens administrativas movidas para notificações globais em vez de alertas fixos dentro do painel;
+- scroll único e personalizado no modal de gerenciamento de usuários;
+- avatar e resumo rápido do usuário exibidos no cabeçalho administrativo.
+- editor administrativo de cartas e estilos do gerenciamento de usuários divididos em módulos menores, sem arquivos da aplicação acima de 1.000 linhas.
 
 ## Segurança aplicada
 

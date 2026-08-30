@@ -1,6 +1,7 @@
 "use client";
 
 import { Layers, ReceiptText, UserRound, X } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import {
   ajustarColecaoAdminUsuario,
@@ -14,15 +15,25 @@ import {
 } from "../../lib/admin";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
 import featureStyles from "../../styles/admin/adminUsuarios.module.css";
+import colecaoStyles from "../../styles/admin/adminUsuarioColecao.module.css";
+import financeiroStyles from "../../styles/admin/adminUsuarioFinanceiro.module.css";
 
 import { AdminUsuarioColecao } from "./adminUsuarioColecao";
 import { AdminUsuarioFinanceiro } from "./adminUsuarioFinanceiro";
 import { combinarEstilos } from "./combinarEstilos";
+import {
+  notificarErro,
+  notificarSucesso,
+} from "../../components/notificacoesGlobais";
 
-const styles = combinarEstilos(sharedStyles, featureStyles);
+const styles = combinarEstilos(
+  sharedStyles,
+  featureStyles,
+  colecaoStyles,
+  financeiroStyles,
+);
 
-
-type AbaUsuario = "resumo" | "colecao" | "financeiro";
+type AbaUsuario = "colecao" | "financeiro";
 
 type Props = {
   usuario: AdminUsuario;
@@ -34,17 +45,12 @@ function formatNumber(value: number) {
   return new Intl.NumberFormat("pt-BR").format(value);
 }
 
-function formatDate(value: string | null) {
-  if (!value) return "-";
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(value));
-}
-
-export function AdminUsuarioPainel({ usuario, onClose, onUpdateUsuario }: Props) {
-  const [aba, setAba] = useState<AbaUsuario>("resumo");
+export function AdminUsuarioPainel({
+  usuario,
+  onClose,
+  onUpdateUsuario,
+}: Props) {
+  const [aba, setAba] = useState<AbaUsuario>("colecao");
   const [colecao, setColecao] = useState<AdminUsuarioCarta[]>([]);
   const [atividades, setAtividades] = useState<AdminUsuarioAtividade[]>([]);
   const [colecaoCarregada, setColecaoCarregada] = useState(false);
@@ -52,7 +58,6 @@ export function AdminUsuarioPainel({ usuario, onClose, onUpdateUsuario }: Props)
   const [carregando, setCarregando] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     if (aba !== "colecao" || colecaoCarregada) return;
@@ -60,10 +65,26 @@ export function AdminUsuarioPainel({ usuario, onClose, onUpdateUsuario }: Props)
     setCarregando(true);
     setErro(null);
     obterColecaoAdminUsuario(usuario.id)
-      .then((res) => { if (ativo) { setColecao(res); setColecaoCarregada(true); } })
-      .catch((error) => { if (ativo) setErro(error instanceof Error ? error.message : "Não foi possível carregar o inventário."); })
-      .finally(() => { if (ativo) setCarregando(false); });
-    return () => { ativo = false; };
+      .then((res) => {
+        if (ativo) {
+          setColecao(res);
+          setColecaoCarregada(true);
+        }
+      })
+      .catch((error) => {
+        if (ativo)
+          setErro(
+            error instanceof Error
+              ? error.message
+              : "Não foi possível carregar o inventário.",
+          );
+      })
+      .finally(() => {
+        if (ativo) setCarregando(false);
+      });
+    return () => {
+      ativo = false;
+    };
   }, [aba, colecaoCarregada, usuario.id]);
 
   useEffect(() => {
@@ -72,22 +93,48 @@ export function AdminUsuarioPainel({ usuario, onClose, onUpdateUsuario }: Props)
     setCarregando(true);
     setErro(null);
     obterAtividadeAdminUsuario(usuario.id)
-      .then((res) => { if (ativo) { setAtividades(res); setAtividadeCarregada(true); } })
-      .catch((error) => { if (ativo) setErro(error instanceof Error ? error.message : "Não foi possível carregar o histórico."); })
-      .finally(() => { if (ativo) setCarregando(false); });
-    return () => { ativo = false; };
+      .then((res) => {
+        if (ativo) {
+          setAtividades(res);
+          setAtividadeCarregada(true);
+        }
+      })
+      .catch((error) => {
+        if (ativo)
+          setErro(
+            error instanceof Error
+              ? error.message
+              : "Não foi possível carregar o histórico.",
+          );
+      })
+      .finally(() => {
+        if (ativo) setCarregando(false);
+      });
+    return () => {
+      ativo = false;
+    };
   }, [aba, atividadeCarregada, usuario.id]);
 
   async function ajustarCarta(carta: AdminUsuarioCarta, quantidade: number) {
     setSalvando(true);
     setErro(null);
-    setFeedback(null);
     try {
-      setColecao(await ajustarColecaoAdminUsuario(usuario.id, carta.id, quantidade));
+      setColecao(
+        await ajustarColecaoAdminUsuario(usuario.id, carta.id, quantidade),
+      );
       setAtividadeCarregada(false);
-      setFeedback(quantidade > 0 ? `${carta.nome} adicionada ao inventário.` : `Uma cópia de ${carta.nome} foi removida.`);
+      notificarSucesso(
+        quantidade > 0
+          ? `${carta.nome} adicionada ao inventário.`
+          : `Uma cópia de ${carta.nome} foi removida.`,
+        "Ação administrativa concluída",
+      );
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Não foi possível ajustar o inventário.");
+      notificarErro(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível ajustar o inventário.",
+      );
     } finally {
       setSalvando(false);
     }
@@ -100,16 +147,22 @@ export function AdminUsuarioPainel({ usuario, onClose, onUpdateUsuario }: Props)
     }
     setSalvando(true);
     setErro(null);
-    setFeedback(null);
     try {
       const atualizado = await ajustarSaldoAdminUsuario(usuario.id, payload);
       onUpdateUsuario(atualizado);
       setAtividades(await obterAtividadeAdminUsuario(usuario.id));
       setAtividadeCarregada(true);
-      setFeedback("Saldo atualizado com autoria registrada.");
+      notificarSucesso(
+        "Saldo atualizado com autoria registrada.",
+        "Ação administrativa concluída",
+      );
       return true;
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Não foi possível ajustar o saldo.");
+      notificarErro(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível ajustar o saldo.",
+      );
       return false;
     } finally {
       setSalvando(false);
@@ -117,35 +170,92 @@ export function AdminUsuarioPainel({ usuario, onClose, onUpdateUsuario }: Props)
   }
 
   return (
-    <div className={styles.modalBackdrop} data-modal-overlay role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <section className={`${styles.usuarioPainel} ${styles.usuarioModal}`} data-modal-panel role="dialog" aria-modal="true" aria-labelledby="usuario-painel-titulo">
+    <div
+      className={styles.modalBackdrop}
+      data-modal-overlay
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        className={`${styles.usuarioPainel} ${styles.usuarioModal}`}
+        data-modal-panel
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="usuario-painel-titulo"
+      >
         <header className={styles.usuarioPainelTopo}>
-          <span className={styles.usuarioAvatar}><UserRound aria-hidden="true" /></span>
-          <div><h2 id="usuario-painel-titulo">{usuario.nome}</h2><p>{usuario.email}</p></div>
-          <button type="button" onClick={onClose} aria-label="Fechar gerenciamento"><X aria-hidden="true" /></button>
+          <span className={styles.usuarioAvatar}>
+            {usuario.avatarUrl ? (
+              <Image
+                src={usuario.avatarUrl}
+                alt=""
+                width={40}
+                height={40}
+                unoptimized
+              />
+            ) : (
+              <UserRound aria-hidden="true" />
+            )}
+          </span>
+          <div>
+            <h2 id="usuario-painel-titulo">{usuario.nome}</h2>
+            <p>{usuario.email}</p>
+          </div>
+          <div
+            className={styles.usuarioCabecalhoResumo}
+            aria-label="Resumo rápido do usuário"
+          >
+            <span>Nv. {usuario.nivel}</span>
+            <span>{formatNumber(usuario.rubys)} Rubys</span>
+            <span>{formatNumber(usuario.partidas)} partidas</span>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fechar gerenciamento"
+          >
+            <X aria-hidden="true" />
+          </button>
         </header>
 
         <nav className={styles.usuarioTabs} aria-label="Opções do usuário">
-          <button type="button" className={aba === "resumo" ? styles.usuarioTabAtiva : ""} onClick={() => setAba("resumo")}><UserRound /> Resumo</button>
-          <button type="button" className={aba === "colecao" ? styles.usuarioTabAtiva : ""} onClick={() => setAba("colecao")}><Layers /> Coleção</button>
-          <button type="button" className={aba === "financeiro" ? styles.usuarioTabAtiva : ""} onClick={() => setAba("financeiro")}><ReceiptText /> Financeiro</button>
+          <button
+            type="button"
+            className={aba === "colecao" ? styles.usuarioTabAtiva : ""}
+            onClick={() => setAba("colecao")}
+          >
+            <Layers /> Coleção
+          </button>
+          <button
+            type="button"
+            className={aba === "financeiro" ? styles.usuarioTabAtiva : ""}
+            onClick={() => setAba("financeiro")}
+          >
+            <ReceiptText /> Financeiro
+          </button>
         </nav>
 
         {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
-        {feedback ? <p className={styles.feedbackSuccess}>{feedback}</p> : null}
 
-        {aba === "resumo" ? (
-          <div className={styles.usuarioResumo}>
-            <span><small>Nível</small><strong>{usuario.nivel}</strong></span>
-            <span><small>Partidas</small><strong>{formatNumber(usuario.partidas)}</strong></span>
-            <span><small>Rubys</small><strong>{formatNumber(usuario.rubys)}</strong></span>
-            <span><small>E-mail</small><strong>{usuario.emailVerificado ? "Verificado" : "Pendente"}</strong></span>
-            <span><small>Último login</small><strong>{formatDate(usuario.ultimoLoginEm)}</strong></span>
-          </div>
+        {aba === "colecao" ? (
+          <AdminUsuarioColecao
+            colecao={colecao}
+            carregando={carregando}
+            salvando={salvando}
+            onAjustar={ajustarCarta}
+          />
         ) : null}
-
-        {aba === "colecao" ? <AdminUsuarioColecao colecao={colecao} carregando={carregando} salvando={salvando} onAjustar={ajustarCarta} /> : null}
-        {aba === "financeiro" ? <AdminUsuarioFinanceiro usuario={usuario} atividades={atividades} carregando={carregando} salvando={salvando} onAjustarSaldo={ajustarSaldo} /> : null}
+        {aba === "financeiro" ? (
+          <AdminUsuarioFinanceiro
+            usuario={usuario}
+            atividades={atividades}
+            carregando={carregando}
+            salvando={salvando}
+            onAjustarSaldo={ajustarSaldo}
+          />
+        ) : null}
       </section>
     </div>
   );

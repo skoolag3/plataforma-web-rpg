@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Flame, Gift, Leaf, Moon, Sparkles, Waves, Zap } from "lucide-react";
 import {
@@ -219,8 +219,13 @@ export default function GachaPage() {
     setInvocando(true);
     setResultado([]);
     setErro("");
+    const inicioInvocacao = Date.now();
     try {
       const resposta = await girarGacha(bannerAtivo.id, qtd);
+      const tempoRestante = Math.max(0, 3600 - (Date.now() - inicioInvocacao));
+      if (tempoRestante) {
+        await new Promise((resolve) => setTimeout(resolve, tempoRestante));
+      }
       setResultado(resposta.cartas.map(mapearCarta));
       setPity(resposta.pity);
       setRubys(resposta.rubys);
@@ -283,8 +288,12 @@ export default function GachaPage() {
             {invocando ? (
               <div className={styles.invocando}>
                 <div className={styles.portal} aria-hidden="true">
-                  <div className={styles.cartaPortal}>
-                    <IconeRuby tamanho={56} />
+                  <div className={styles.cartasInvocacao}>
+                    {[0, 1, 2, 3, 4].map((indice) => (
+                      <div className={[styles.cartaPortal, indice === 2 ? styles.cartaPortalCentral : ""].join(" ")} style={{ "--indice": indice } as CSSProperties} key={indice}>
+                        <IconeRuby tamanho={38} />
+                      </div>
+                    ))}
                   </div>
                 </div>
                 <strong>Invocando...</strong>
@@ -310,6 +319,7 @@ export default function GachaPage() {
                                 ? styles.cartaObtidaDestaque
                                 : "",
                             ].join(" ")}
+                            style={{ "--indice": index } as CSSProperties}
                             key={`${carta.nome}-${index}`}
                           >
                             <CartaVisualGacha carta={carta} />
