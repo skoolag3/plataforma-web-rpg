@@ -111,18 +111,6 @@ const cartasPool: CartaGacha[] = [
   },
 ];
 
-function estrelas(raridade: CartaGacha["raridade"]) {
-  return raridade === "UR"
-    ? 5
-    : raridade === "SSR"
-      ? 4
-      : raridade === "SR"
-        ? 3
-        : raridade === "R"
-          ? 2
-          : 1;
-}
-
 function mapearCarta(carta: CartaGachaApi): CartaGacha {
   const base =
     cartasPool.find((item) => item.elemento === carta.elemento) ??
@@ -222,7 +210,7 @@ export default function GachaPage() {
     const inicioInvocacao = Date.now();
     try {
       const resposta = await girarGacha(bannerAtivo.id, qtd);
-      const tempoRestante = Math.max(0, 3600 - (Date.now() - inicioInvocacao));
+      const tempoRestante = Math.max(0, 1500 - (Date.now() - inicioInvocacao));
       if (tempoRestante) {
         await new Promise((resolve) => setTimeout(resolve, tempoRestante));
       }
@@ -289,15 +277,12 @@ export default function GachaPage() {
               <div className={styles.invocando}>
                 <div className={styles.portal} aria-hidden="true">
                   <div className={styles.cartasInvocacao}>
-                    {[0, 1, 2, 3, 4].map((indice) => (
-                      <div className={[styles.cartaPortal, indice === 2 ? styles.cartaPortalCentral : ""].join(" ")} style={{ "--indice": indice } as CSSProperties} key={indice}>
-                        <IconeRuby tamanho={38} />
-                      </div>
-                    ))}
+                    <div className={styles.cartaPortal}>
+                      <IconeRuby tamanho={38} />
+                    </div>
                   </div>
                 </div>
                 <strong>Invocando...</strong>
-                <span>Toque para pular</span>
               </div>
             ) : resultado.length ? (
               <div
@@ -357,9 +342,6 @@ export default function GachaPage() {
                     <article className={styles.cartaObtida}>
                       <CartaVisualGacha carta={destaque} />
                     </article>
-                    <span className={styles.estrelasResultado}>
-                      {"★".repeat(estrelas(destaque.raridade))}
-                    </span>
                     <p>Novo herói adicionado à sua coleção!</p>
                     <div className={styles.resultadoBotoes}>
                       <button type="button" className={styles.btnPrimario}>
@@ -408,7 +390,12 @@ export default function GachaPage() {
                     </p>
                     {proximaRotacaoEm ? (
                       <small className={styles.rotacaoAviso}>
-                        Próxima rotação automática às {new Date(proximaRotacaoEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}.
+                        Próxima rotação automática às{" "}
+                        {new Date(proximaRotacaoEm).toLocaleTimeString(
+                          "pt-BR",
+                          { hour: "2-digit", minute: "2-digit" },
+                        )}
+                        .
                       </small>
                     ) : null}
                     <div className={styles.pityPainel}>
@@ -444,7 +431,9 @@ export default function GachaPage() {
                         type="button"
                         onClick={() =>
                           setPainelInfo((atual) =>
-                            atual === "probabilidades" ? null : "probabilidades",
+                            atual === "probabilidades"
+                              ? null
+                              : "probabilidades",
                           )
                         }
                       >
@@ -455,7 +444,11 @@ export default function GachaPage() {
                       <div className={styles.painelInfoBanner}>
                         {painelInfo === "detalhes" ? (
                           <p>
-                            O servidor escolhe a raridade, sorteia uma carta do grupo e registra o resultado. Se uma faixa não tiver cartas, ela passa para a próxima raridade disponível. A UR é garantida no giro {bannerAtivo?.limitePity ?? 80}.
+                            O servidor escolhe a raridade, sorteia uma carta do
+                            grupo e registra o resultado. Se uma faixa não tiver
+                            cartas, ela passa para a próxima raridade
+                            disponível. A UR é garantida no giro{" "}
+                            {bannerAtivo?.limitePity ?? 80}.
                           </p>
                         ) : (
                           probabilidades.map((item) => (

@@ -27,7 +27,6 @@
     rgba(76, 29, 149, 0.04) 52%,
     transparent 53%
   );
-  animation: pulsarPortal 1.2s ease-in-out infinite alternate;
 }
 .cartasInvocacao {
   position: relative;
@@ -37,7 +36,6 @@
   place-items: center;
 }
 .cartaPortal {
-  position: absolute;
   display: grid;
   width: 6.2rem;
   aspect-ratio: 2/3;
@@ -48,10 +46,7 @@
   box-shadow:
     0 0 2.5rem rgba(168, 85, 247, 0.32),
     inset 0 0 1rem rgba(192, 132, 252, 0.18);
-  transform: rotate(calc((var(--indice) - 2) * 9deg))
-    translateX(calc((var(--indice) - 2) * 2.2rem));
-  animation: convergirCarta 3.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  animation-delay: calc(var(--indice) * 70ms);
+  animation: bounceCarta 0.75s ease-in-out infinite alternate;
 }
 .cartaPortal::before {
   content: "";
@@ -65,18 +60,19 @@
   color: #d8b4fe;
   z-index: 1;
 }
-.cartaPortalCentral {
-  animation: convergirCartaCentral 3.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  animation-delay: 140ms;
-}
 .resultadoUnico {
   position: relative;
 }
 .resultadoUnico .cartaObtida {
+  width: clamp(11rem, 18vw, 14rem);
+  min-width: 11rem;
+  filter: drop-shadow(0 1rem 2rem rgba(0, 0, 0, 0.35));
   animation: revelarCarta 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
+.resultadoUnico .cartaObtida > div {
+  width: 100%;
+}
 .resultadoUnico .raridadeGrande,
-.resultadoUnico .estrelasResultado,
 .resultadoUnico > p,
 .resultadoUnico .resultadoBotoes {
   animation: subirResultado 0.45s ease 0.22s both;
@@ -86,11 +82,6 @@
   font-size: clamp(2.2rem, 7vw, 4rem);
   line-height: 1;
   text-shadow: 0 0 1.5rem rgba(168, 85, 247, 0.22);
-}
-.estrelasResultado {
-  color: #bef264;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
 }
 .resultadoUnico > p {
   margin: 0;
@@ -131,41 +122,13 @@
 .resultadoAcoes svg {
   width: 0.8rem;
 }
-@keyframes pulsarPortal {
+@keyframes bounceCarta {
+  from {
+    transform: translateY(0) scale(1);
+  }
   to {
-    filter: brightness(1.18);
-    transform: scale(1.025);
-  }
-}
-@keyframes convergirCarta {
-  0% {
-    opacity: 1;
-    transform: rotate(calc((var(--indice) - 2) * 9deg))
-      translateX(calc((var(--indice) - 2) * 2.2rem)) scale(0.8);
-  }
-  65% {
-    opacity: 1;
-    transform: rotate(calc((var(--indice) - 2) * 5deg))
-      translateX(calc((var(--indice) - 2) * 1rem)) translateY(-0.5rem);
-  }
-  100% {
-    transform: rotate(0) translateX(0) translateY(0) scale(0.92);
-    opacity: 0;
-  }
-}
-@keyframes convergirCartaCentral {
-  0% {
-    opacity: 1;
-    transform: scale(0.8);
-  }
-  70% {
-    transform: scale(1.08);
-    filter: brightness(1.35);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-    filter: brightness(1.1);
+    transform: translateY(-0.65rem) scale(1.025);
+    filter: brightness(1.12);
   }
 }
 @keyframes revelarCarta {
