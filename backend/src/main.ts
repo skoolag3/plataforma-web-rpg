@@ -59,7 +59,7 @@ function formatValidationErrors(
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const allowedOrigins = getAllowedOrigins();
 
   app.useGlobalFilters(new HttpExceptionFilter());

@@ -4,11 +4,12 @@ import { AdminModule } from '../../modules/admin/admin.module';
 import { AuthModule } from '../../modules/auth/auth.module';
 import { PerfilModule } from '../../modules/perfil/perfil.module';
 import { JogoModule } from '../../modules/jogo/jogo.module';
+import { LojaModule } from '../../modules/loja/loja.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
-  imports: [DatabaseModule, AuthModule, PerfilModule, AdminModule, JogoModule],
+  imports: [DatabaseModule, AuthModule, PerfilModule, AdminModule, JogoModule, LojaModule],
   controllers: [AppController],
   providers: [AppService],
 })

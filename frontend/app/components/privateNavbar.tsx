@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Sparkles,
   Swords,
+  ShoppingBag,
   Trophy,
   User,
   X,
@@ -36,6 +37,7 @@ const links = [
   { href: "/cartas", label: "Coleção", icon: Layers },
   { href: "/decks", label: "Decks", icon: Boxes },
   { href: "/gacha", label: "Gacha", icon: Sparkles },
+  { href: "/loja", label: "Loja", icon: ShoppingBag },
   { href: "/partida", label: "Arena", icon: Swords },
   { href: "/ranking", label: "Ranking", icon: Trophy },
 ];
