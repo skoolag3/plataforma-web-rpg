@@ -179,6 +179,21 @@ export function buscarPartidaAtual() {
   return jogoRequest<EstadoPartida | null>("/partidas/atual");
 }
 
+export type HistoricoPartida = {
+  id: string;
+  resultado: "VITORIA" | "DERROTA" | "EMPATE";
+  turnos_jogados: number;
+  variacao_pontos: number | null;
+  recompensa_rubys: number;
+  timestamp_inicio: string | null;
+  timestamp_fim: string | null;
+  deck: { nome: string } | null;
+};
+
+export function buscarHistoricoPartidas() {
+  return jogoRequest<HistoricoPartida[]>("/partidas");
+}
+
 export type JogadorRanking = {
   posicao: number;
   id: string;
