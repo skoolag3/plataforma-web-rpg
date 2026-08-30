@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { ListarColecaoDto } from './dto/listar-colecao.dto';
+import { obterValorVendaPorRaridade } from './valor-venda-raridade';
 
 @Injectable()
 export class ColecaoService {
@@ -44,7 +45,7 @@ export class ColecaoService {
           elemento: carta.elemento,
           classe:
             typeof passiva.classe === 'string' ? passiva.classe : 'Sem classe',
-          custo: typeof passiva.custo === 'number' ? passiva.custo : 0,
+          custo: obterValorVendaPorRaridade(carta.raridade),
           hpBase: carta.hp_base,
           danoBase: carta.dano_base,
           defesaBase: carta.defesa_base,
@@ -62,6 +63,7 @@ export class ColecaoService {
           carta.classe.toLocaleLowerCase('pt-BR') ===
             filtros.classe.toLocaleLowerCase('pt-BR'),
       )
+      .filter((carta) => !filtros.custo || carta.custo === filtros.custo)
       .filter((carta) => {
         if (filtros.posse === 'obtidas') return carta.obtida;
         if (filtros.posse === 'nao-obtidas') return !carta.obtida;

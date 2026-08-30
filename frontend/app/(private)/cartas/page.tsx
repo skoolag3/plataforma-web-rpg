@@ -4,11 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { buscarColecao } from "../../lib/jogo";
-import {
-  CARTAS_POR_PAGINA,
-  FALLBACK_CARDS,
-  mapearCarta,
-} from "./cardData";
+import { CARTAS_POR_PAGINA, FALLBACK_CARDS, mapearCarta } from "./cardData";
 import { CabecalhoColecao } from "./components/cabecalhoColecao";
 import { DetalheCarta } from "./components/detalheCarta";
 import { FiltrosColecao } from "./components/filtrosColecao";
@@ -34,6 +30,7 @@ export default function CartasPage() {
   const [raridade, setRaridade] = useState("Todas");
   const [elemento, setElemento] = useState("Todos");
   const [classe, setClasse] = useState("Todas");
+  const [custo, setCusto] = useState("Todos");
   const [busca, setBusca] = useState("");
   const [somenteFavoritas, setSomenteFavoritas] = useState(false);
 
@@ -79,10 +76,20 @@ export default function CartasPage() {
         (raridade === "Todas" || card.raridade === raridade) &&
         (elemento === "Todos" || card.elemento === elemento) &&
         (classe === "Todas" || card.classe === classe) &&
+        (custo === "Todos" || card.custo === Number(custo)) &&
         (!somenteFavoritas || favoritas.has(card.nome))
       );
     });
-  }, [busca, cards, classe, elemento, favoritas, raridade, somenteFavoritas]);
+  }, [
+    busca,
+    cards,
+    classe,
+    custo,
+    elemento,
+    favoritas,
+    raridade,
+    somenteFavoritas,
+  ]);
 
   const totalPaginas = Math.max(
     1,
@@ -97,10 +104,7 @@ export default function CartasPage() {
     ? cards.find((card) => card.nome === selecionada)
     : undefined;
 
-  function atualizarFiltro(
-    setter: (valor: string) => void,
-    valor: string,
-  ) {
+  function atualizarFiltro(setter: (valor: string) => void, valor: string) {
     setter(valor);
     setPagina(1);
   }
@@ -190,6 +194,7 @@ export default function CartasPage() {
                 raridade={raridade}
                 elemento={elemento}
                 classe={classe}
+                custo={custo}
                 busca={busca}
                 somenteFavoritas={somenteFavoritas}
                 aoAlterarRaridade={(valor) =>
@@ -199,6 +204,7 @@ export default function CartasPage() {
                   atualizarFiltro(setElemento, valor)
                 }
                 aoAlterarClasse={(valor) => atualizarFiltro(setClasse, valor)}
+                aoAlterarCusto={(valor) => atualizarFiltro(setCusto, valor)}
                 aoAlterarBusca={(valor) => atualizarFiltro(setBusca, valor)}
                 aoAlterarSomenteFavoritas={(valor) => {
                   setSomenteFavoritas(valor);
@@ -222,15 +228,11 @@ export default function CartasPage() {
             <DetalheCarta
               carta={cartaSelecionada}
               favorita={
-                cartaSelecionada
-                  ? favoritas.has(cartaSelecionada.nome)
-                  : false
+                cartaSelecionada ? favoritas.has(cartaSelecionada.nome) : false
               }
               detalhesAbertos={detalhesAbertos}
               aoAlternarFavorita={alternarFavorita}
-              aoAlternarDetalhes={() =>
-                setDetalhesAbertos((aberto) => !aberto)
-              }
+              aoAlternarDetalhes={() => setDetalhesAbertos((aberto) => !aberto)}
               aoAdicionarAoDeck={adicionarAoDeck}
             />
           </div>

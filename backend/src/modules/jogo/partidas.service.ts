@@ -77,7 +77,10 @@ export class PartidasService {
     );
 
     const jogadores = usuarios
-      .filter((usuario) => usuario.perfil == null || usuario.perfil.mostrar_no_ranking)
+      .filter(
+        (usuario) =>
+          usuario.perfil == null || usuario.perfil.mostrar_no_ranking,
+      )
       .map((usuario) => {
         const pontuacao = porUsuario.get(usuario.id);
         return {
@@ -85,7 +88,8 @@ export class PartidasService {
           id: usuario.id,
           nome: usuario.nome,
           nivel: usuario.nivel ?? 1,
-          pontos: pontuacao?._sum.variacao_pontos ?? usuario.pontos_experiencia ?? 0,
+          pontos:
+            pontuacao?._sum.variacao_pontos ?? usuario.pontos_experiencia ?? 0,
           partidas: pontuacao?._count.id ?? 0,
           avatarUrl: usuario.perfil?.avatar_url ?? null,
         };
@@ -432,7 +436,7 @@ export class PartidasService {
       velocidade:
         typeof passiva.velocidade === 'number'
           ? Math.max(1, passiva.velocidade)
-          : 10 + (typeof passiva.custo === 'number' ? passiva.custo : 0),
+          : 10,
       elemento: carta.elemento,
       passiva,
     };

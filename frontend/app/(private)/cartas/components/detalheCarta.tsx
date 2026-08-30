@@ -1,4 +1,5 @@
 import {
+  Gem,
   Heart,
   PackagePlus,
   Search,
@@ -54,9 +55,23 @@ export function DetalheCarta({
       <div className={styles.detalheTopo}>
         <article className={styles.cardGrande} style={cardStyle(carta)}>
           {carta.foto || carta.moldura ? (
-            <CartaMontada arte={carta.foto ?? undefined} moldura={carta.moldura ?? undefined} nome={carta.nome} raridade={carta.raridade} elemento={carta.elemento} config={carta.configVisual ?? undefined} placeholder={<PackagePlus />} />
+            <CartaMontada
+              arte={carta.foto ?? undefined}
+              moldura={carta.moldura ?? undefined}
+              nome={carta.nome}
+              raridade={carta.raridade}
+              elemento={carta.elemento}
+              config={carta.configVisual ?? undefined}
+              placeholder={<PackagePlus />}
+            />
           ) : (
-            <><span className={styles.arte} aria-hidden="true" /><span className={styles.raridade}>{carta.raridade}</span><span className={styles.elemento}><Elemento aria-label={carta.elemento} /></span></>
+            <>
+              <span className={styles.arte} aria-hidden="true" />
+              <span className={styles.raridade}>{carta.raridade}</span>
+              <span className={styles.elemento}>
+                <Elemento aria-label={carta.elemento} />
+              </span>
+            </>
           )}
         </article>
 
@@ -117,6 +132,11 @@ export function DetalheCarta({
               DEF
               <strong className={styles.azul}>{carta.defesaBase ?? 0}</strong>
             </span>
+            <span className={styles.atributo}>
+              <Gem className={styles.roxo} aria-hidden="true" />
+              VENDA
+              <strong className={styles.roxo}>{carta.custo} Rubys</strong>
+            </span>
           </div>
         </div>
       </div>
@@ -143,8 +163,8 @@ export function DetalheCarta({
       <section className={styles.secaoDetalhe}>
         <h3>Descrição</h3>
         <p>
-          Carta de raridade {carta.raridade} ligada ao elemento {carta.elemento} e
-          à classe {carta.classe}.
+          Carta de raridade {carta.raridade} ligada ao elemento {carta.elemento}{" "}
+          e à classe {carta.classe}.
         </p>
       </section>
 

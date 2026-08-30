@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
+import { obterValorVendaPorRaridade } from '../../jogo/valor-venda-raridade';
 import {
   CreateAdminCartaDto,
   UpdateAdminCartaDto,
@@ -156,7 +157,7 @@ export class AdminCartasService {
     const carta = await this.prisma.carta.update({
       where: { id },
       data: {
-        ...this.toUpdateData(dto),
+        ...this.toUpdateData(dto, atual.raridade, atual.passiva),
         atualizado_em: new Date(),
       },
       include: cartaInclude,
@@ -204,7 +205,7 @@ export class AdminCartasService {
       hp_base: dto.hpBase,
       dano_base: dto.danoBase,
       defesa_base: dto.defesaBase,
-      passiva: this.buildPassiva(dto),
+      passiva: this.buildPassiva(dto, dto.raridade),
       foto: dto.foto,
       moldura: dto.moldura,
       config_visual: dto.configVisual as Prisma.InputJsonValue | undefined,
@@ -213,7 +214,11 @@ export class AdminCartasService {
     };
   }
 
-  private toUpdateData(dto: UpdateAdminCartaDto): Prisma.CartaUpdateInput {
+  private toUpdateData(
+    dto: UpdateAdminCartaDto,
+    raridadeAtual: string,
+    passivaAtual: Record<string, unknown>,
+  ): Prisma.CartaUpdateInput {
     return {
       ...(dto.nome !== undefined ? { nome: dto.nome.trim() } : {}),
       ...(dto.elemento !== undefined ? { elemento: dto.elemento } : {}),
@@ -223,8 +228,15 @@ export class AdminCartasService {
       ...(dto.defesaBase !== undefined ? { defesa_base: dto.defesaBase } : {}),
       ...(dto.passiva !== undefined ||
       dto.classe !== undefined ||
-      dto.custo !== undefined
-        ? { passiva: this.buildPassiva(dto) }
+      dto.custo !== undefined ||
+      dto.raridade !== undefined
+        ? {
+            passiva: this.buildPassiva(
+              dto,
+              dto.raridade ?? raridadeAtual,
+              passivaAtual,
+            ),
+          }
         : {}),
       ...(dto.foto !== undefined ? { foto: dto.foto } : {}),
       ...(dto.moldura !== undefined ? { moldura: dto.moldura } : {}),
@@ -273,15 +285,19 @@ export class AdminCartasService {
     }));
   }
 
-  private buildPassiva(dto: {
-    passiva?: Record<string, unknown>;
-    classe?: string;
-    custo?: number;
-  }) {
+  private buildPassiva(
+    dto: {
+      passiva?: Record<string, unknown>;
+      classe?: string;
+    },
+    raridade = 'N',
+    passivaAtual: Record<string, unknown> = {},
+  ) {
     return {
+      ...passivaAtual,
       ...(dto.passiva ?? {}),
       ...(dto.classe !== undefined ? { classe: dto.classe } : {}),
-      ...(dto.custo !== undefined ? { custo: dto.custo } : {}),
+      custo: obterValorVendaPorRaridade(raridade),
     };
   }
 
@@ -299,7 +315,7 @@ export class AdminCartasService {
       elemento: carta.elemento,
       raridade: carta.raridade,
       classe: typeof passiva.classe === 'string' ? passiva.classe : null,
-      custo: typeof passiva.custo === 'number' ? passiva.custo : null,
+      custo: obterValorVendaPorRaridade(carta.raridade),
       hpBase: carta.hp_base,
       danoBase: carta.dano_base,
       defesaBase: carta.defesa_base,

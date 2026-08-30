@@ -1,4 +1,13 @@
-import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 const raridades = ['UR', 'SSR', 'SR', 'R', 'N'] as const;
 const elementos = ['natureza', 'agua', 'fogo', 'sombra', 'luz'] as const;
@@ -21,6 +30,13 @@ export class ListarColecaoDto {
   @IsString()
   @MaxLength(80)
   classe?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(50)
+  @Max(800)
+  custo?: number;
 
   @IsOptional()
   @IsIn(['todas', 'obtidas', 'nao-obtidas'])

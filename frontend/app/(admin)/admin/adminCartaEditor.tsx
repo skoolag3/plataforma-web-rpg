@@ -19,6 +19,7 @@ import {
   normalizarConfigVisual,
   type ConfigVisualCarta,
 } from "../../components/cartaMontada";
+import { obterValorVendaCarta } from "../../lib/valorVendaCarta";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
 import editorStyles from "../../styles/admin/adminCartaEditor.module.css";
 import visualStyles from "../../styles/admin/adminCartaVisual.module.css";
@@ -113,6 +114,14 @@ export function CartaEditor({
     setForm((current) => ({ ...current, [field]: value }));
   }
 
+  function alterarRaridade(raridade: CartaFormState["raridade"]) {
+    setForm((atual) => ({
+      ...atual,
+      raridade,
+      custo: String(obterValorVendaCarta(raridade)),
+    }));
+  }
+
   function restaurarInformacoesSalvas() {
     const salvo = cartaToForm(carta);
     setForm((atual) => ({
@@ -165,7 +174,7 @@ export function CartaEditor({
         raridade: form.raridade,
         elemento: form.elemento,
         classe: form.classe.trim() || undefined,
-        custo: toNumber(form.custo, "Custo"),
+        custo: toNumber(form.custo, "Valor de venda"),
         hpBase: toNumber(form.hpBase, "HP"),
         danoBase: toNumber(form.danoBase, "ATK"),
         defesaBase: toNumber(form.defesaBase, "DEF"),
@@ -319,8 +328,7 @@ export function CartaEditor({
                   className={`${styles.selectRaridade} ${classeRaridade(form.raridade)}`}
                   value={form.raridade}
                   onChange={(event) =>
-                    updateField(
-                      "raridade",
+                    alterarRaridade(
                       event.target.value as CartaFormState["raridade"],
                     )
                   }
@@ -372,7 +380,7 @@ export function CartaEditor({
             <summary>
               <span>
                 <strong>Estatísticas</strong>
-                <small>Custo, vida, ataque e defesa</small>
+                <small>Valor de venda, vida, ataque e defesa</small>
               </span>
               <ChevronDown aria-hidden="true" />
             </summary>
@@ -383,11 +391,12 @@ export function CartaEditor({
                 </button>
               </div>
               <label>
-                Custo
+                Valor de venda em Rubys
                 <input
                   inputMode="numeric"
                   value={form.custo}
-                  onChange={(event) => updateField("custo", event.target.value)}
+                  readOnly
+                  title="Valor de venda definido automaticamente pela raridade"
                 />
               </label>
               <label>
@@ -634,7 +643,7 @@ function cartaToForm(carta: AdminCarta): CartaFormState {
     raridade: carta.raridade,
     elemento: carta.elemento,
     classe: carta.classe ?? "",
-    custo: carta.custo?.toString() ?? "0",
+    custo: String(carta.custo ?? obterValorVendaCarta(carta.raridade)),
     hpBase: carta.hpBase.toString(),
     danoBase: carta.danoBase.toString(),
     defesaBase: carta.defesaBase.toString(),

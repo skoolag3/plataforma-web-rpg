@@ -70,9 +70,26 @@
   background: none;
 }
 
-.previewInfo { display:grid;width:100%;gap:.1rem;color:#fff;text-shadow:0 2px 4px #000; }
-.previewInfo b { width:max-content;border-radius:999px;background:rgba(76,29,149,.75);padding:.08rem .25rem;font-size:.42rem; }
-.previewInfo strong { overflow:hidden;font-size:.62rem;text-overflow:ellipsis;white-space:nowrap; }
+.previewInfo {
+  display: grid;
+  width: 100%;
+  gap: 0.1rem;
+  color: #fff;
+  text-shadow: 0 2px 4px #000;
+}
+.previewInfo b {
+  width: max-content;
+  border-radius: 999px;
+  background: rgba(76, 29, 149, 0.75);
+  padding: 0.08rem 0.25rem;
+  font-size: 0.42rem;
+}
+.previewInfo strong {
+  overflow: hidden;
+  font-size: 0.62rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .cardGrande::before,
 .deckCartaPreview::before {
@@ -85,7 +102,10 @@
     linear-gradient(315deg, rgba(147, 51, 234, 0.24), transparent 28%);
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 100% 100%, cover, cover;
+  background-size:
+    100% 100%,
+    cover,
+    cover;
   content: "";
   pointer-events: none;
 }
@@ -201,7 +221,7 @@
 
 .atributos {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.3rem;
   margin-top: 0.55rem;
 }
@@ -239,6 +259,10 @@
 
 .azul {
   color: #60a5fa;
+}
+
+.roxo {
+  color: #c084fc;
 }
 
 .secaoDetalhe {
@@ -553,7 +577,11 @@
   right: 0.6rem;
   top: 0.55rem;
   border-radius: 0.28rem;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.96), rgba(91, 33, 182, 0.96));
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.96),
+    rgba(91, 33, 182, 0.96)
+  );
   color: #fff;
   font-size: 0.74rem;
   font-weight: 950;
@@ -603,7 +631,10 @@
 }
 
 @media (max-width: 760px) {
-  .detalhe { position:static;max-height:none; }
+  .detalhe {
+    position: static;
+    max-height: none;
+  }
 
   .deckSlots,
   .modalAcoes {

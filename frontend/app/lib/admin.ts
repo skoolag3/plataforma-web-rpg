@@ -1,6 +1,6 @@
 "use client";
 
-import { getToken } from "./auth";
+import { clearSession, getToken } from "./auth";
 import type { ConfigVisualCarta } from "../components/cartaMontada";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
@@ -293,6 +293,13 @@ async function adminRequest<T>(path: string, options: RequestInit = {}) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
+    if (typeof window !== "undefined" && response.status === 401) {
+      clearSession();
+      window.location.replace("/login");
+    } else if (typeof window !== "undefined" && response.status === 403) {
+      window.location.replace("/home");
+    }
+
     throw new Error(formatApiError(data));
   }
 

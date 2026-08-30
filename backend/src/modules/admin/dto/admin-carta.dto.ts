@@ -36,7 +36,7 @@ export class CreateAdminCartaDto {
   @IsOptional()
   @IsInt()
   @Min(0)
-  @Max(20)
+  @Max(10000)
   custo?: number;
 
   @IsInt()
@@ -106,7 +106,7 @@ export class UpdateAdminCartaDto {
   @IsOptional()
   @IsInt()
   @Min(0)
-  @Max(20)
+  @Max(10000)
   custo?: number;
 
   @IsOptional()

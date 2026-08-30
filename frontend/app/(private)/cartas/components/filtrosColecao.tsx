@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 
-import { CLASSES, ELEMENTOS, RARIDADES } from "../cardData";
+import { CLASSES, ELEMENTOS, RARIDADES, VALORES_VENDA } from "../cardData";
 import { styles } from "../styles";
 import { FiltroSelect } from "./filtroSelect";
 
@@ -8,11 +8,13 @@ type FiltrosColecaoProps = {
   raridade: string;
   elemento: string;
   classe: string;
+  custo: string;
   busca: string;
   somenteFavoritas: boolean;
   aoAlterarRaridade: (valor: string) => void;
   aoAlterarElemento: (valor: string) => void;
   aoAlterarClasse: (valor: string) => void;
+  aoAlterarCusto: (valor: string) => void;
   aoAlterarBusca: (valor: string) => void;
   aoAlterarSomenteFavoritas: (valor: boolean) => void;
 };
@@ -20,33 +22,39 @@ type FiltrosColecaoProps = {
 export function FiltrosColecao(props: FiltrosColecaoProps) {
   return (
     <div className={styles.filtros}>
-        <label className={styles.busca}>
-          <Search aria-hidden="true" />
-          <input
-            type="search"
-            value={props.busca}
-            onChange={(evento) => props.aoAlterarBusca(evento.target.value)}
-            placeholder="Buscar carta..."
-          />
-        </label>
-        <FiltroSelect
-          rotulo="Raridade"
-          valor={props.raridade}
-          opcoes={RARIDADES}
-          aoAlterar={props.aoAlterarRaridade}
+      <label className={styles.busca}>
+        <Search aria-hidden="true" />
+        <input
+          type="search"
+          value={props.busca}
+          onChange={(evento) => props.aoAlterarBusca(evento.target.value)}
+          placeholder="Buscar carta..."
         />
-        <FiltroSelect
-          rotulo="Elemento"
-          valor={props.elemento}
-          opcoes={ELEMENTOS}
-          aoAlterar={props.aoAlterarElemento}
-        />
-        <FiltroSelect
-          rotulo="Classe"
-          valor={props.classe}
-          opcoes={CLASSES}
-          aoAlterar={props.aoAlterarClasse}
-        />
+      </label>
+      <FiltroSelect
+        rotulo="Raridade"
+        valor={props.raridade}
+        opcoes={RARIDADES}
+        aoAlterar={props.aoAlterarRaridade}
+      />
+      <FiltroSelect
+        rotulo="Elemento"
+        valor={props.elemento}
+        opcoes={ELEMENTOS}
+        aoAlterar={props.aoAlterarElemento}
+      />
+      <FiltroSelect
+        rotulo="Classe"
+        valor={props.classe}
+        opcoes={CLASSES}
+        aoAlterar={props.aoAlterarClasse}
+      />
+      <FiltroSelect
+        rotulo="Valor de venda"
+        valor={props.custo}
+        opcoes={VALORES_VENDA}
+        aoAlterar={props.aoAlterarCusto}
+      />
 
       <label className={styles.favoritos}>
         <input

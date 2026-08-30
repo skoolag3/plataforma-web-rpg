@@ -21,3 +21,6 @@ node_modules/
 
 # Anotações privadas de desenvolvimento (não versionar)
 NOTAS_PRIVADAS_DESENVOLVIMENTO.md
+
+# Logs locais usados para manter os servidores de desenvolvimento ativos
+.codex-runtime/

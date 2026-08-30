@@ -42,6 +42,7 @@ import sharedStyles from "../../styles/admin/adminShared.module.css";
 import editorStyles from "../../styles/admin/adminCartaEditor.module.css";
 import visualStyles from "../../styles/admin/adminCartaVisual.module.css";
 import listaStyles from "../../styles/admin/adminCartasLista.module.css";
+import { obterValorVendaCarta } from "../../lib/valorVendaCarta";
 
 import {
   CampoArquivo,
@@ -97,7 +98,7 @@ function criarFormularioNovaCarta(): CartaFormState {
     raridade: "N",
     elemento: "natureza",
     classe: "",
-    custo: "1",
+    custo: String(obterValorVendaCarta("N")),
     hpBase: "100",
     danoBase: "20",
     defesaBase: "10",
@@ -329,7 +330,7 @@ export function Cartas() {
                   <th>Raridade</th>
                   <th>Elemento</th>
                   <th>Classe</th>
-                  <th>Custo</th>
+                  <th>Venda</th>
                   <th>Status</th>
                   <th>Ações</th>
                 </tr>
@@ -560,6 +561,14 @@ export function NovaCarta() {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
+  function alterarRaridade(raridade: CartaFormState["raridade"]) {
+    setForm((atual) => ({
+      ...atual,
+      raridade,
+      custo: String(obterValorVendaCarta(raridade)),
+    }));
+  }
+
   function resetarInformacoes() {
     const padrao = criarFormularioNovaCarta();
     setForm((atual) => ({
@@ -613,7 +622,7 @@ export function NovaCarta() {
         raridade: form.raridade,
         elemento: form.elemento,
         classe: form.classe.trim() || undefined,
-        custo: toNumber(form.custo, "Custo"),
+        custo: toNumber(form.custo, "Valor de venda"),
         hpBase: toNumber(form.hpBase, "HP"),
         danoBase: toNumber(form.danoBase, "ATK"),
         defesaBase: toNumber(form.defesaBase, "DEF"),
@@ -720,8 +729,7 @@ export function NovaCarta() {
                   className={`${styles.selectRaridade} ${classeRaridade(form.raridade)}`}
                   value={form.raridade}
                   onChange={(event) =>
-                    updateField(
-                      "raridade",
+                    alterarRaridade(
                       event.target.value as CartaFormState["raridade"],
                     )
                   }
@@ -766,7 +774,7 @@ export function NovaCarta() {
             <summary>
               <span>
                 <strong>Estatísticas</strong>
-                <small>Custo, vida, ataque e defesa</small>
+                <small>Valor de venda, vida, ataque e defesa</small>
               </span>
               <ChevronDown aria-hidden="true" />
             </summary>
@@ -777,11 +785,12 @@ export function NovaCarta() {
                 </button>
               </div>
               <label>
-                Custo
+                Valor de venda em Rubys
                 <input
                   inputMode="numeric"
                   value={form.custo}
-                  onChange={(event) => updateField("custo", event.target.value)}
+                  readOnly
+                  title="Valor de venda definido automaticamente pela raridade"
                 />
               </label>
               <label>

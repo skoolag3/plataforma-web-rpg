@@ -190,6 +190,7 @@ Copie o segredo `whsec_...` exibido pela CLI para `STRIPE_WEBHOOK_SECRET` e rein
 
 ```powershell
 npm --prefix backend test -- --runInBand
+npm --prefix backend run test:e2e -- --runInBand
 npm --prefix backend run build
 npm --prefix frontend run lint
 npm --prefix frontend exec tsc -- --noEmit
@@ -198,7 +199,7 @@ npm --prefix backend audit --omit=dev
 npm --prefix frontend audit --omit=dev
 ```
 
-Os testes atuais cobrem o motor básico de batalha, validação e simulação de habilidades, regras administrativas de cartas, perfil e partes do gacha. A cobertura ainda não representa todos os fluxos HTTP do sistema.
+Os testes unitários cobrem o motor básico de batalha, validação e simulação de habilidades, regras administrativas de cartas, perfil e partes do gacha. A suíte E2E de rotas críticas valida login e sessão, criação e validação de decks, início e turno de partida, checkout e corpo bruto do webhook Stripe, ranking e histórico. Esses testes HTTP usam services isolados para serem rápidos e não alterarem o banco ou criarem pagamentos reais.
 
 ## Regra econômica
 

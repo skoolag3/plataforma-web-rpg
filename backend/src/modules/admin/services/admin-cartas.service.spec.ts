@@ -179,6 +179,7 @@ describe('AdminCartasService', () => {
     });
     expect(prisma.carta.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
+        passiva: expect.objectContaining({ custo: 800 }),
         habilidades: {
           create: [
             {
@@ -191,6 +192,25 @@ describe('AdminCartasService', () => {
             },
           ],
         },
+      }),
+      include: expect.any(Object),
+    });
+  });
+
+  it('recalcula o valor de venda automaticamente quando a raridade muda', async () => {
+    prisma.carta.update.mockResolvedValue({
+      ...carta,
+      raridade: 'R',
+      passiva: { custo: 100 },
+    });
+
+    await service.atualizar(carta.id, { raridade: 'R' });
+
+    expect(prisma.carta.update).toHaveBeenCalledWith({
+      where: { id: carta.id },
+      data: expect.objectContaining({
+        raridade: 'R',
+        passiva: expect.objectContaining({ custo: 100 }),
       }),
       include: expect.any(Object),
     });

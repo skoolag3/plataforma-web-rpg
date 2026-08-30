@@ -9,6 +9,7 @@ export type Card = {
   raridade: "UR" | "SSR" | "SR" | "R" | "N";
   elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
   classe: string;
+  custo: number;
   elementoIcone: LucideIcon;
   copias: string;
   borda: string;
