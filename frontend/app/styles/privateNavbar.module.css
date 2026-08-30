@@ -33,6 +33,8 @@
 .links { display: flex; align-items: center; justify-content: center; gap: .2rem; }
 
 .usuario { display:flex; align-items:center; gap:.4rem; }
+.perfilUsuarioAtivo { background:transparent !important; }
+.perfilUsuarioAtivo .avatarVisual { filter:drop-shadow(0 0 .35rem rgba(190,242,100,.42)); }
 .saldos { display:flex; align-items:center; gap:.25rem; margin-right:.2rem; padding-right:.55rem; border-right:1px solid rgba(148,163,184,.16); }
 .saldos span { display:inline-flex; min-height:2.2rem; align-items:center; gap:.38rem; border-radius:.65rem; color:#d8deea; padding:.35rem .48rem; font-size:.7rem; font-weight:850; }
 .saldos span:hover { background:rgba(255,255,255,.04); }

@@ -2,6 +2,7 @@
   position: relative;
   isolation: isolate;
   container-type: inline-size;
+  perspective: 1000px;
   width: 100%;
   aspect-ratio: 2 / 3;
   overflow: visible;
@@ -29,8 +30,16 @@
   transition: transform 140ms ease;
 }
 
-.cartaInterativa:active .miolo {
+/* Teste antigo de pressão mantido como referência; o efeito novo usa hover. */
+/* .cartaInterativa:active .miolo {
   transform: scale(0.985);
+} */
+
+@media (hover: hover) and (pointer: fine) {
+  .carta:hover .miolo {
+    transform: rotate3d(1, 1, 0, 3deg) translateY(-0.12rem);
+  }
+
 }
 
 .frente,

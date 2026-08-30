@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Sparkles,
   Swords,
+  Trophy,
   User,
   X,
 } from "lucide-react";
@@ -36,7 +37,7 @@ const links = [
   { href: "/decks", label: "Decks", icon: Boxes },
   { href: "/gacha", label: "Gacha", icon: Sparkles },
   { href: "/partida", label: "Arena", icon: Swords },
-  { href: "/perfil", label: "Perfil", icon: User },
+  { href: "/ranking", label: "Ranking", icon: Trophy },
 ];
 
 export function PrivateNavbar() {
@@ -123,7 +124,12 @@ export function PrivateNavbar() {
           <div className={styles.saldos} aria-label="Saldos do jogador">
             <span title="Rubys"><IconeRuby />{resumoPerfil.rubys.toLocaleString("pt-BR")}</span>
           </div>
-          <Link href="/perfil">
+          <Link
+            href="/perfil"
+            className={pathname === "/perfil" ? styles.perfilUsuarioAtivo : undefined}
+            aria-label="Abrir perfil"
+            aria-current={pathname === "/perfil" ? "page" : undefined}
+          >
             <span className={`${styles.avatarVisual} ${styles[resumoPerfil.molduraClasse] ?? ""}`}>
               <span
                 className={styles.fotoAvatar}

@@ -45,6 +45,63 @@ const recompensaVitoria = { pontos: 10, rubys: 25 };
 export class PartidasService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async ranking(limite = 100) {
+    const usuarios = await this.prisma.usuario.findMany({
+      where: {
+        is_admin: false,
+        ativo: true,
+        excluido_em: null,
+      },
+      select: {
+        id: true,
+        nome: true,
+        nivel: true,
+        pontos_experiencia: true,
+        perfil: { select: { avatar_url: true, mostrar_no_ranking: true } },
+      },
+    });
+
+    if (!usuarios.length) return { jogadores: [] };
+
+    const pontuacoes = await this.prisma.logPartida.groupBy({
+      by: ['id_usuario'],
+      where: {
+        id_usuario: { in: usuarios.map((usuario) => usuario.id) },
+        resultado: { not: 'EM_ANDAMENTO' },
+      },
+      _sum: { variacao_pontos: true },
+      _count: { id: true },
+    });
+    const porUsuario = new Map(
+      pontuacoes.map((item) => [item.id_usuario, item]),
+    );
+
+    const jogadores = usuarios
+      .filter((usuario) => usuario.perfil == null || usuario.perfil.mostrar_no_ranking)
+      .map((usuario) => {
+        const pontuacao = porUsuario.get(usuario.id);
+        return {
+          posicao: 0,
+          id: usuario.id,
+          nome: usuario.nome,
+          nivel: usuario.nivel ?? 1,
+          pontos: pontuacao?._sum.variacao_pontos ?? usuario.pontos_experiencia ?? 0,
+          partidas: pontuacao?._count.id ?? 0,
+          avatarUrl: usuario.perfil?.avatar_url ?? null,
+        };
+      })
+      .filter((jogador) => jogador.pontos > 0)
+      .sort((a, b) => b.pontos - a.pontos || b.partidas - a.partidas)
+      .slice(0, Math.min(Math.max(limite, 1), 100));
+
+    return {
+      jogadores: jogadores.map((jogador, indice) => ({
+        ...jogador,
+        posicao: indice + 1,
+      })),
+    };
+  }
+
   async iniciar(idUsuario: string, idDeck: string) {
     const existente = await this.prisma.logPartida.findFirst({
       where: { id_usuario: idUsuario, resultado: 'EM_ANDAMENTO' },

@@ -86,6 +86,11 @@ export class JogoController {
     return this.partidasService.historico(usuario.id);
   }
 
+  @Get('ranking')
+  ranking() {
+    return this.partidasService.ranking();
+  }
+
   @Get('colecao')
   listarColecao(
     @CurrentUser() usuario: AuthenticatedUser,

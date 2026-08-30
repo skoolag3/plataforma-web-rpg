@@ -47,7 +47,11 @@ function ValorFiltro({ rotulo, valor }: { rotulo: string; valor: string }) {
           alt=""
         />
       ) : (
-        <Icone aria-hidden="true" />
+        <Icone
+          className={styles.iconeFiltro}
+          strokeWidth={2.25}
+          aria-hidden="true"
+        />
       )}
       <strong>{valor}</strong>
     </span>

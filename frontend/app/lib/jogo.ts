@@ -179,6 +179,20 @@ export function buscarPartidaAtual() {
   return jogoRequest<EstadoPartida | null>("/partidas/atual");
 }
 
+export type JogadorRanking = {
+  posicao: number;
+  id: string;
+  nome: string;
+  nivel: number;
+  pontos: number;
+  partidas: number;
+  avatarUrl: string | null;
+};
+
+export function buscarRanking() {
+  return jogoRequest<{ jogadores: JogadorRanking[] }>('/ranking');
+}
+
 export function iniciarPartida(idDeck: string) {
   return jogoRequest<EstadoPartida>("/partidas", {
     method: "POST",

@@ -74,15 +74,15 @@
   gap: 0.3rem;
   color: #dbe4f4;
 }
-.valorFiltro svg {
+.valorFiltro .iconeFiltro {
   width: 0.72rem !important;
   height: 0.72rem !important;
   flex: 0 0 auto;
   color: currentColor !important;
 }
 .valorFiltro .iconeElementoFiltro {
-  width: 0.9rem;
-  height: 0.9rem;
+  width: 0.82rem;
+  height: 0.82rem;
   flex: 0 0 auto;
   object-fit: contain;
   filter: drop-shadow(0 0 0.22rem currentColor);
