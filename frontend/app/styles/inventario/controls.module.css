@@ -1,7 +1,9 @@
 .filtros {
   display: grid;
-  grid-template-columns: minmax(12rem, 1.5fr) repeat(3, minmax(7rem, 1fr)) auto;
-  gap: 0.45rem;
+  grid-template-columns:
+    minmax(9rem, 1.45fr) repeat(5, minmax(5.7rem, 0.82fr))
+    auto;
+  gap: 0.35rem;
   align-items: center;
   margin-bottom: 0.55rem;
 }
@@ -11,12 +13,12 @@
   position: relative;
   display: grid;
   min-width: 0;
-  min-height: 2.55rem;
+  min-height: 2.25rem;
   border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 0.58rem;
   background: rgba(7, 9, 15, 0.68);
   color: #e2e8f0;
-  padding: 0.32rem 0.55rem;
+  padding: 0.25rem 0.48rem;
 }
 
 .selectVisual:focus-within,
@@ -215,6 +217,10 @@
   cursor: pointer;
   font-size: 0;
   user-select: none;
+}
+
+.filtros > .favoritos {
+  justify-self: start;
 }
 
 .favoritos input {

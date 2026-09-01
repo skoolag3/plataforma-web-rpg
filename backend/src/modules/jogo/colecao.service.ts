@@ -21,7 +21,7 @@ export class ColecaoService {
       include: {
         inventarios: {
           where: { id_usuario: idUsuario },
-          select: { quantidade: true },
+          select: { quantidade: true, criado_em: true },
           take: 1,
         },
       },
@@ -55,6 +55,7 @@ export class ColecaoService {
           configVisual: carta.config_visual,
           quantidade,
           obtida: quantidade > 0,
+          obtidaEm: carta.inventarios[0]?.criado_em ?? null,
         };
       })
       .filter(

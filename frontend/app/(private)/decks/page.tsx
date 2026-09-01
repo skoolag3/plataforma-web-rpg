@@ -5,11 +5,14 @@ import {
   Check,
   CheckCircle2,
   Edit3,
+  Heart,
   Layers,
   Plus,
   Save,
   Search,
+  Shield,
   ShieldCheck,
+  Swords,
   Trash2,
   X,
 } from "lucide-react";
@@ -401,11 +404,27 @@ export default function DecksPage() {
                       />
                     </span>
                     <span className={styles.slotCartaInfo}>
-                      <strong>{carta.nome}</strong>
-                      <small>
-                        {carta.raridade} · {carta.elemento}
-                      </small>
-                      <em>{carta.classe}</em>
+                      <span className={styles.slotCartaNome}>
+                        <strong>{carta.nome}</strong>
+                        <small>
+                          {carta.raridade} · {carta.elemento}
+                        </small>
+                      </span>
+                      <span className={styles.slotCartaStats}>
+                        <span title="Pontos de vida">
+                          <Heart aria-hidden="true" />
+                          <b>{carta.hpBase}</b>
+                        </span>
+                        <span title="Ataque">
+                          <Swords aria-hidden="true" />
+                          <b>{carta.danoBase}</b>
+                        </span>
+                        <span title="Defesa">
+                          <Shield aria-hidden="true" />
+                          <b>{carta.defesaBase}</b>
+                        </span>
+                      </span>
+                      <small>{carta.classe}</small>
                     </span>
                     <span
                       role="button"

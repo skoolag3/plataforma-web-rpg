@@ -24,7 +24,9 @@ const usuarioSelect = {
   criado_em: true,
   ultimo_login_em: true,
   _count: { select: { partidas: true } },
-  perfil: { select: { avatar_url: true, id_moldura: true, id_carta_moldura: true } },
+  perfil: {
+    select: { avatar_url: true, id_moldura: true, id_carta_moldura: true },
+  },
 } satisfies Prisma.UsuarioSelect;
 
 type UsuarioSelecionado = Prisma.UsuarioGetPayload<{
@@ -470,6 +472,7 @@ export class AdminUsuariosService {
       AJUSTE_ADMIN: 'Ajuste administrativo',
       GIRO_BANNER: 'Gasto no gacha',
       RECOMPENSA_DIARIA: 'Recompensa diária',
+      RECOMPENSA_SEMANAL: 'Recompensa semanal',
       COMPRA: 'Compra de Rubys',
       BONUS_ADMIN: 'Bônus administrativo',
       REEMBOLSO: 'Reembolso',
@@ -497,7 +500,8 @@ export class AdminUsuariosService {
       criadoEm: usuario.criado_em,
       ultimoLoginEm: usuario.ultimo_login_em,
       avatarUrl: usuario.perfil?.avatar_url ?? null,
-      molduraId: usuario.perfil?.id_moldura ?? usuario.perfil?.id_carta_moldura ?? null,
+      molduraId:
+        usuario.perfil?.id_moldura ?? usuario.perfil?.id_carta_moldura ?? null,
     };
   }
 }

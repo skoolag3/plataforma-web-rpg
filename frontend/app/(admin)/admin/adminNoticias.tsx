@@ -251,6 +251,7 @@ export function AdminNoticias() {
                   <option>NOVIDADE</option>
                   <option>BALANCE</option>
                   <option>EVENTO</option>
+                  <option>PROMOCAO</option>
                   <option>AVISO</option>
                 </select>
               </label>

@@ -20,6 +20,9 @@ import { IniciarPartidaDto } from './dto/iniciar-partida.dto';
 import { PartidasService } from './partidas.service';
 import { BannerGachaDto, GirarGachaDto } from './dto/gacha.dto';
 import { GachaService } from './gacha.service';
+import { RecompensasService } from './recompensas.service';
+import { CorreioService } from './correio.service';
+import { LerCorreioDto } from './dto/ler-correio.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller()
@@ -29,7 +32,32 @@ export class JogoController {
     private readonly decksService: DecksService,
     private readonly partidasService: PartidasService,
     private readonly gachaService: GachaService,
+    private readonly recompensasService: RecompensasService,
+    private readonly correioService: CorreioService,
   ) {}
+
+  @Get('correio')
+  listarCorreio(@CurrentUser() usuario: AuthenticatedUser) {
+    return this.correioService.listar(usuario.id);
+  }
+
+  @Post('correio/ler')
+  marcarCorreioComoLido(
+    @CurrentUser() usuario: AuthenticatedUser,
+    @Body() dto: LerCorreioDto,
+  ) {
+    return this.correioService.marcarComoLida(usuario.id, dto.chave);
+  }
+
+  @Get('recompensas')
+  obterRecompensas(@CurrentUser() usuario: AuthenticatedUser) {
+    return this.recompensasService.obterStatus(usuario.id);
+  }
+
+  @Post('recompensas/semanal')
+  resgatarRecompensaSemanal(@CurrentUser() usuario: AuthenticatedUser) {
+    return this.recompensasService.resgatarSemanal(usuario.id);
+  }
 
   @Get('gacha/banners')
   listarBanners(@CurrentUser() usuario: AuthenticatedUser) {

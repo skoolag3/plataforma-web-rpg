@@ -1,6 +1,11 @@
 import { ConflictException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { GachaService } from './gacha.service';
+import {
+  giroGratuitoDisponivel,
+  obterProximaRotacaoBanner,
+  obterProximoGiroGratuito,
+} from './gacha.config';
 
 describe('GachaService', () => {
   const prisma = {
@@ -47,13 +52,38 @@ describe('GachaService', () => {
     ]);
   });
 
-  it('impede resgate diario antes de 24 horas', async () => {
-    prisma.banner.findFirst.mockResolvedValue({ id: 'banner', custo_giro: 300 });
+  it('impede giro gratuito antes de 12 horas', async () => {
+    prisma.banner.findFirst.mockResolvedValue({
+      id: 'banner',
+      custo_giro: 300,
+    });
     prisma.usuarioBannerColeta.findUnique.mockResolvedValue({
       ultima_coleta: new Date(),
     });
-    await expect(service.resgatarDiario('usuario', 'banner')).rejects.toBeInstanceOf(
-      ConflictException,
+    await expect(
+      service.resgatarDiario('usuario', 'banner'),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('renova o giro gratuito nas janelas globais de 01:00 e 13:00 UTC', () => {
+    const antesDaJanela = new Date('2026-08-30T12:59:59.999Z').getTime();
+    const inicioDaJanela = new Date('2026-08-30T13:00:00.000Z').getTime();
+    const coletaAnterior = new Date('2026-08-30T01:00:00.000Z');
+
+    expect(giroGratuitoDisponivel(coletaAnterior, antesDaJanela)).toBe(false);
+    expect(giroGratuitoDisponivel(coletaAnterior, inicioDaJanela)).toBe(true);
+    expect(obterProximoGiroGratuito(inicioDaJanela)).toEqual(
+      new Date('2026-08-31T01:00:00.000Z'),
+    );
+  });
+
+  it.each([
+    ['2026-08-30T12:02:15.000Z', '2026-08-30T12:30:00.000Z'],
+    ['2026-08-30T12:30:00.000Z', '2026-08-30T13:00:00.000Z'],
+    ['2026-08-30T23:48:00.000Z', '2026-08-31T00:00:00.000Z'],
+  ])('alinha a rotação global de %s para %s', (agora, proxima) => {
+    expect(obterProximaRotacaoBanner(new Date(agora).getTime())).toEqual(
+      new Date(proxima),
     );
   });
 });

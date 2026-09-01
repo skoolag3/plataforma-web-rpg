@@ -2,17 +2,31 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Flame, Gift, Leaf, Moon, Sparkles, Waves, Zap } from "lucide-react";
+import {
+  CalendarDays,
+  Flame,
+  Gift,
+  Leaf,
+  Moon,
+  Sparkles,
+  Waves,
+  Zap,
+} from "lucide-react";
 import {
   CartaMontada,
   type ConfigVisualCarta,
 } from "../../components/cartaMontada";
 import { IconeRuby } from "../../components/iconeRuby";
-import { notificarErro } from "../../components/notificacoesGlobais";
+import {
+  notificarErro,
+  notificarSucesso,
+} from "../../components/notificacoesGlobais";
 import {
   buscarGacha,
+  buscarRecompensas,
   girarGacha,
   resgatarGiroDiario,
+  resgatarRecompensaSemanal,
   type BannerGacha,
   type CartaGachaApi,
 } from "../../lib/jogo";
@@ -161,6 +175,9 @@ export default function GachaPage() {
   const [invocando, setInvocando] = useState(false);
   const [resultado, setResultado] = useState<CartaGacha[]>([]);
   const [resgatado, setResgatado] = useState(false);
+  const [semanalDisponivel, setSemanalDisponivel] = useState(false);
+  const [rubysSemanais, setRubysSemanais] = useState(500);
+  const [resgatandoSemanal, setResgatandoSemanal] = useState(false);
   const [erro, setErro] = useState("");
   const [probabilidades, setProbabilidades] = useState<
     { raridade: CartaGachaApi["raridade"]; percentual: number }[]
@@ -177,8 +194,8 @@ export default function GachaPage() {
   const bannerAtivo = banners.find((banner) => banner.id === aba) ?? banners[0];
 
   useEffect(() => {
-    buscarGacha()
-      .then((dados) => {
+    Promise.all([buscarGacha(), buscarRecompensas()])
+      .then(([dados, recompensas]) => {
         setBanners(dados.banners);
         setAba(dados.banners[0]?.id ?? "");
         setRubys(dados.jogador.rubys);
@@ -186,6 +203,8 @@ export default function GachaPage() {
         setResgatado(!dados.banners[0]?.diarioDisponivel);
         setProbabilidades(dados.probabilidades);
         setProximaRotacaoEm(dados.rotacao?.proximaRotacaoEm ?? null);
+        setSemanalDisponivel(recompensas.semanal.disponivel);
+        setRubysSemanais(recompensas.semanal.rubys);
       })
       .catch((e) =>
         setErro(e instanceof Error ? e.message : "Erro ao carregar gacha."),
@@ -243,6 +262,25 @@ export default function GachaPage() {
     }
   }
 
+  async function resgatarSemanal() {
+    setErro("");
+    setResgatandoSemanal(true);
+    try {
+      const resposta = await resgatarRecompensaSemanal();
+      setRubys((atual) => atual + resposta.rubysRecebidos);
+      setSemanalDisponivel(false);
+      notificarSucesso(
+        `Você recebeu ${resposta.rubysRecebidos.toLocaleString("pt-BR")} Rubys.`,
+        "Recompensa semanal",
+      );
+      window.dispatchEvent(new Event("perfil-atualizado"));
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Erro ao resgatar recompensa.");
+    } finally {
+      setResgatandoSemanal(false);
+    }
+  }
+
   return (
     <main className={styles.pagina}>
       <div className={styles.shellSemSidebar}>
@@ -256,18 +294,26 @@ export default function GachaPage() {
               <p>Invoque cartas e expanda suas possibilidades.</p>
             </div>
             <div className={styles.gachaTopoAcoes}>
-              <span className={styles.saldoTopo}>
-                <IconeRuby tamanho={24} />
-                <small>Seu saldo</small>
-                <strong>{rubys.toLocaleString("pt-BR")}</strong>
-              </span>
+              <button
+                type="button"
+                onClick={() => void resgatarSemanal()}
+                disabled={!semanalDisponivel || resgatandoSemanal}
+                title="Renova toda segunda-feira às 13:00 UTC"
+              >
+                <CalendarDays aria-hidden="true" />
+                {semanalDisponivel
+                  ? `Semanal +${rubysSemanais.toLocaleString("pt-BR")}`
+                  : "Semanal resgatada"}
+              </button>
               <button
                 type="button"
                 onClick={() => void resgatarDiario()}
                 disabled={resgatado || !bannerAtivo}
               >
                 <Gift aria-hidden="true" />
-                {resgatado ? "Diário resgatado" : "Resgatar diário"}
+                {resgatado
+                  ? "Giro gratuito resgatado"
+                  : "Resgatar giro gratuito"}
               </button>
             </div>
           </header>
@@ -477,13 +523,6 @@ export default function GachaPage() {
                 </section>
 
                 <section className={styles.painelInvocacao}>
-                  <div>
-                    <small>Rubys disponíveis</small>
-                    <strong>
-                      <IconeRuby /> {rubys.toLocaleString("pt-BR")}
-                    </strong>
-                    <button type="button">Obter Rubys</button>
-                  </div>
                   <div className={styles.invocacoes}>
                     <button
                       type="button"

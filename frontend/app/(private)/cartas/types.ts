@@ -18,6 +18,7 @@ export type Card = {
   artB: string;
   quantidade?: number;
   obtida?: boolean;
+  obtidaEm?: string | null;
   foto?: string | null;
   moldura?: string | null;
   configVisual?: ConfigVisualCarta | null;

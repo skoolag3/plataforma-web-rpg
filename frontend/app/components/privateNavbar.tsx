@@ -18,10 +18,16 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { clearSession, getStoredUser, getToken, subscribeAuthChange } from "../lib/auth";
+import {
+  clearSession,
+  getStoredUser,
+  getToken,
+  subscribeAuthChange,
+} from "../lib/auth";
 import { buscarPerfilApi } from "../lib/perfil";
 import styles from "../styles/privateNavbar.module.css";
 import { IconeRuby } from "./iconeRuby";
+import { Correio } from "./correio";
 import {
   criarEstiloMolduraPerfil,
   type ConfigVisualCarta,
@@ -65,19 +71,22 @@ export function PrivateNavbar() {
       if (!token) return;
 
       void buscarPerfilApi(token)
-        .then((perfil) => setResumoPerfil({
-          rubys: perfil.rubys,
-          avatarUrl: perfil.avatarUrl ?? null,
-          molduraUrl: perfil.molduraUrl ?? null,
-          molduraConfig: perfil.molduraConfig ?? null,
-          molduraClasse: perfil.molduraClasse,
-        }))
+        .then((perfil) =>
+          setResumoPerfil({
+            rubys: perfil.rubys,
+            avatarUrl: perfil.avatarUrl ?? null,
+            molduraUrl: perfil.molduraUrl ?? null,
+            molduraConfig: perfil.molduraConfig ?? null,
+            molduraClasse: perfil.molduraClasse,
+          }),
+        )
         .catch(() => undefined);
     }
 
     carregarResumoPerfil();
     window.addEventListener("perfil-atualizado", carregarResumoPerfil);
-    return () => window.removeEventListener("perfil-atualizado", carregarResumoPerfil);
+    return () =>
+      window.removeEventListener("perfil-atualizado", carregarResumoPerfil);
   }, [usuario?.id]);
 
   function sair() {
@@ -110,11 +119,24 @@ export function PrivateNavbar() {
   return (
     <header className={styles.header}>
       <nav className={styles.nav}>
-        <Link href="/home" className={styles.brand} onClick={() => setAberto(false)}>
-          <span><Gem aria-hidden="true" /></span>
-          <strong>Anime<em>Cards</em></strong>
+        <Link
+          href="/home"
+          className={styles.brand}
+          onClick={() => setAberto(false)}
+        >
+          <span>
+            <Gem aria-hidden="true" />
+          </span>
+          <strong>
+            Anime<em>Cards</em>
+          </strong>
         </Link>
-        <button className={styles.menu} type="button" onClick={() => setAberto((valor) => !valor)} aria-label="Abrir menu">
+        <button
+          className={styles.menu}
+          type="button"
+          onClick={() => setAberto((valor) => !valor)}
+          aria-label="Abrir menu"
+        >
           {aberto ? <X /> : <Menu />}
         </button>
         <ExpandableTabs
@@ -124,18 +146,32 @@ export function PrivateNavbar() {
         />
         <div className={styles.usuario}>
           <div className={styles.saldos} aria-label="Saldos do jogador">
-            <span title="Rubys"><IconeRuby />{resumoPerfil.rubys.toLocaleString("pt-BR")}</span>
+            <span title="Rubys">
+              <IconeRuby />
+              {resumoPerfil.rubys.toLocaleString("pt-BR")}
+            </span>
+          </div>
+          <div className={styles.correioArea}>
+            <Correio />
           </div>
           <Link
             href="/perfil"
-            className={pathname === "/perfil" ? styles.perfilUsuarioAtivo : undefined}
+            className={
+              pathname === "/perfil" ? styles.perfilUsuarioAtivo : undefined
+            }
             aria-label="Abrir perfil"
             aria-current={pathname === "/perfil" ? "page" : undefined}
           >
-            <span className={`${styles.avatarVisual} ${styles[resumoPerfil.molduraClasse] ?? ""}`}>
+            <span
+              className={`${styles.avatarVisual} ${styles[resumoPerfil.molduraClasse] ?? ""}`}
+            >
               <span
                 className={styles.fotoAvatar}
-                style={resumoPerfil.avatarUrl ? { backgroundImage: `url("${resumoPerfil.avatarUrl}")` } : undefined}
+                style={
+                  resumoPerfil.avatarUrl
+                    ? { backgroundImage: `url("${resumoPerfil.avatarUrl}")` }
+                    : undefined
+                }
               >
                 {!resumoPerfil.avatarUrl ? <User aria-hidden="true" /> : null}
               </span>
@@ -150,9 +186,14 @@ export function PrivateNavbar() {
                 />
               ) : null}
             </span>
-            <div><strong>{usuario?.nome ?? "Jogador"}</strong><small>Nível {usuario?.nivel ?? 1}</small></div>
+            <div>
+              <strong>{usuario?.nome ?? "Jogador"}</strong>
+              <small>Nível {usuario?.nivel ?? 1}</small>
+            </div>
           </Link>
-          <button type="button" onClick={sair} title="Sair"><LogOut /></button>
+          <button type="button" onClick={sair} title="Sair">
+            <LogOut />
+          </button>
         </div>
       </nav>
     </header>

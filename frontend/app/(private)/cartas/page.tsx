@@ -20,6 +20,14 @@ const resumoInicial: ResumoColecao = {
   percentual: 0,
 };
 
+const pesoRaridade: Record<Card["raridade"], number> = {
+  UR: 5,
+  SSR: 4,
+  SR: 3,
+  R: 2,
+  N: 1,
+};
+
 export default function CartasPage() {
   const router = useRouter();
   const [cards, setCards] = useState<Card[]>(FALLBACK_CARDS);
@@ -31,6 +39,7 @@ export default function CartasPage() {
   const [elemento, setElemento] = useState("Todos");
   const [classe, setClasse] = useState("Todas");
   const [custo, setCusto] = useState("Todos");
+  const [ordenacao, setOrdenacao] = useState("Raridade");
   const [busca, setBusca] = useState("");
   const [somenteFavoritas, setSomenteFavoritas] = useState(false);
 
@@ -64,7 +73,7 @@ export default function CartasPage() {
   const filtradas = useMemo(() => {
     const texto = busca.trim().toLowerCase();
 
-    return cards.filter((card) => {
+    const res = cards.filter((card) => {
       const combinaBusca =
         !texto ||
         card.nome.toLowerCase().includes(texto) ||
@@ -80,6 +89,24 @@ export default function CartasPage() {
         (!somenteFavoritas || favoritas.has(card.nome))
       );
     });
+
+    return [...res].sort((a, b) => {
+      if (ordenacao === "Raridade") {
+        return pesoRaridade[b.raridade] - pesoRaridade[a.raridade];
+      }
+      if (ordenacao === "HP") return (b.hpBase ?? 0) - (a.hpBase ?? 0);
+      if (ordenacao === "Ataque") {
+        return (b.danoBase ?? 0) - (a.danoBase ?? 0);
+      }
+      if (ordenacao === "Defesa") {
+        return (b.defesaBase ?? 0) - (a.defesaBase ?? 0);
+      }
+      if (ordenacao === "Valor de venda") return b.custo - a.custo;
+
+      const dataA = a.obtidaEm ? new Date(a.obtidaEm).getTime() : 0;
+      const dataB = b.obtidaEm ? new Date(b.obtidaEm).getTime() : 0;
+      return ordenacao === "Mais recentes" ? dataB - dataA : dataA - dataB;
+    });
   }, [
     busca,
     cards,
@@ -87,6 +114,7 @@ export default function CartasPage() {
     custo,
     elemento,
     favoritas,
+    ordenacao,
     raridade,
     somenteFavoritas,
   ]);
@@ -195,6 +223,7 @@ export default function CartasPage() {
                 elemento={elemento}
                 classe={classe}
                 custo={custo}
+                ordenacao={ordenacao}
                 busca={busca}
                 somenteFavoritas={somenteFavoritas}
                 aoAlterarRaridade={(valor) =>
@@ -205,6 +234,9 @@ export default function CartasPage() {
                 }
                 aoAlterarClasse={(valor) => atualizarFiltro(setClasse, valor)}
                 aoAlterarCusto={(valor) => atualizarFiltro(setCusto, valor)}
+                aoAlterarOrdenacao={(valor) =>
+                  atualizarFiltro(setOrdenacao, valor)
+                }
                 aoAlterarBusca={(valor) => atualizarFiltro(setBusca, valor)}
                 aoAlterarSomenteFavoritas={(valor) => {
                   setSomenteFavoritas(valor);

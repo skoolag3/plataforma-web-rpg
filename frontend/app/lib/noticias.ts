@@ -6,7 +6,7 @@ export type NoticiaPublica = {
   resumo: string;
   conteudo?: string;
   imagem: string | null;
-  categoria: "NOVIDADE" | "BALANCE" | "EVENTO" | "AVISO";
+  categoria: "NOVIDADE" | "BALANCE" | "EVENTO" | "PROMOCAO" | "AVISO";
   anexos?: { titulo: string; url: string }[] | null;
   criado_em: string;
 };

@@ -32,6 +32,7 @@ model Usuario {
   atualizado_em                    DateTime? @default(now()) @db.Timestamptz(0)
   excluido_em                      DateTime? @db.Timestamptz(0)
   ultimo_login_em                  DateTime? @db.Timestamptz(0)
+  ultima_recompensa_semanal_em     DateTime? @db.Timestamptz(0)
   desativado_em                    DateTime? @db.Timestamptz(0)
   exclusao_agendada_em             DateTime? @db.Timestamptz(0)
 
@@ -43,6 +44,7 @@ model Usuario {
   ledgerRubys          LedgerRuby[]
   gachaLogs            LogGacha[]
   bannerColetas        UsuarioBannerColeta[]
+  correioLeituras      CorreioLeitura[]
   inventarios          Inventario[]
   decks                Deck[]
   partidas             LogPartida[]          @relation("PartidasUsuario")
@@ -51,6 +53,18 @@ model Usuario {
   logsAdminComoAlvo    LogAdminUsuario[]     @relation("LogAdminAlvo")
 
   @@map("usuario")
+}
+
+model CorreioLeitura {
+  id_usuario String   @db.Uuid
+  chave      String   @db.VarChar(150)
+  lido_em    DateTime @default(now()) @db.Timestamptz(0)
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+
+  @@id([id_usuario, chave])
+  @@index([id_usuario, lido_em(sort: Desc)])
+  @@map("correio_leitura")
 }
 
 model PerfilUsuario {

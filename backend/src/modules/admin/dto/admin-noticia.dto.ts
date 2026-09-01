@@ -43,7 +43,7 @@ export class SalvarAdminNoticiaDto {
   @MaxLength(500)
   imagem?: string;
 
-  @IsIn(['NOVIDADE', 'BALANCE', 'EVENTO', 'AVISO'])
+  @IsIn(['NOVIDADE', 'BALANCE', 'EVENTO', 'PROMOCAO', 'AVISO'])
   categoria: string;
 
   @IsArray()

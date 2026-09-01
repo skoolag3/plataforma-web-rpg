@@ -1,5 +1,4 @@
 import {
-  Gem,
   Heart,
   PackagePlus,
   Search,
@@ -106,16 +105,6 @@ export function DetalheCarta({
             </span>
           </div>
 
-          <div className={styles.nivel}>
-            <strong>Nível 1 / 60</strong>
-            <div className={styles.nivelLinha}>
-              <span className={styles.barra} aria-hidden="true">
-                <span />
-              </span>
-              <span>0 / 100</span>
-            </div>
-          </div>
-
           <div className={styles.atributos}>
             <span className={styles.atributo}>
               <Heart className={styles.verde} aria-hidden="true" />
@@ -131,11 +120,6 @@ export function DetalheCarta({
               <Shield className={styles.azul} aria-hidden="true" />
               DEF
               <strong className={styles.azul}>{carta.defesaBase ?? 0}</strong>
-            </span>
-            <span className={styles.atributo}>
-              <Gem className={styles.roxo} aria-hidden="true" />
-              VENDA
-              <strong className={styles.roxo}>{carta.custo} Rubys</strong>
             </span>
           </div>
         </div>

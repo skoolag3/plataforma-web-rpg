@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
-import { INTERVALO_ROTACAO_BANNER_MS } from './gacha.config';
+import { obterProximaRotacaoBanner } from './gacha.config';
 
 @Injectable()
 export class BannerRotacaoService {
@@ -52,6 +52,20 @@ export class BannerRotacaoService {
     );
 
     if (rotacao && atualAtivo && rotacao.proxima_rotacao_em > agora) {
+      const proxima = rotacao.proxima_rotacao_em;
+      const estaAlinhada =
+        proxima.getUTCMinutes() % 30 === 0 &&
+        proxima.getUTCSeconds() === 0 &&
+        proxima.getUTCMilliseconds() === 0;
+
+      if (!estaAlinhada) {
+        return this.salvar(
+          tx,
+          rotacao.id_banner,
+          rotacao.forcado_por_admin,
+          agora,
+        );
+      }
       return this.mapear(rotacao);
     }
 
@@ -69,9 +83,7 @@ export class BannerRotacaoService {
     forcadoPorAdmin: boolean,
     agora: Date,
   ) {
-    const proximaRotacaoEm = new Date(
-      agora.getTime() + INTERVALO_ROTACAO_BANNER_MS,
-    );
+    const proximaRotacaoEm = obterProximaRotacaoBanner(agora.getTime());
     const rotacao = await tx.bannerRotacao.upsert({
       where: { id: 1 },
       create: {

@@ -9,12 +9,14 @@ type FiltrosColecaoProps = {
   elemento: string;
   classe: string;
   custo: string;
+  ordenacao: string;
   busca: string;
   somenteFavoritas: boolean;
   aoAlterarRaridade: (valor: string) => void;
   aoAlterarElemento: (valor: string) => void;
   aoAlterarClasse: (valor: string) => void;
   aoAlterarCusto: (valor: string) => void;
+  aoAlterarOrdenacao: (valor: string) => void;
   aoAlterarBusca: (valor: string) => void;
   aoAlterarSomenteFavoritas: (valor: boolean) => void;
 };
@@ -54,6 +56,20 @@ export function FiltrosColecao(props: FiltrosColecaoProps) {
         valor={props.custo}
         opcoes={VALORES_VENDA}
         aoAlterar={props.aoAlterarCusto}
+      />
+      <FiltroSelect
+        rotulo="Ordenar por"
+        valor={props.ordenacao}
+        opcoes={[
+          "Raridade",
+          "HP",
+          "Ataque",
+          "Defesa",
+          "Valor de venda",
+          "Mais recentes",
+          "Mais antigas",
+        ]}
+        aoAlterar={props.aoAlterarOrdenacao}
       />
 
       <label className={styles.favoritos}>

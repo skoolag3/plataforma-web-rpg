@@ -21,6 +21,7 @@ export type CartaColecao = {
   configVisual: ConfigVisualCarta | null;
   quantidade: number;
   obtida: boolean;
+  obtidaEm: string | null;
 };
 
 export type ColecaoResponse = {
@@ -205,7 +206,7 @@ export type JogadorRanking = {
 };
 
 export function buscarRanking() {
-  return jogoRequest<{ jogadores: JogadorRanking[] }>('/ranking');
+  return jogoRequest<{ jogadores: JogadorRanking[] }>("/ranking");
 }
 
 export function iniciarPartida(idDeck: string) {
@@ -246,6 +247,7 @@ export type BannerGacha = {
 };
 
 export type GachaResponse = {
+  proximoGiroGratuitoEm: string;
   jogador: { nome: string; nivel: number; rubys: number };
   probabilidades: {
     raridade: CartaGachaApi["raridade"];
@@ -283,4 +285,25 @@ export function resgatarGiroDiario(idBanner: string) {
       body: JSON.stringify({ idBanner }),
     },
   );
+}
+
+export type RecompensasResponse = {
+  semanal: {
+    disponivel: boolean;
+    rubys: number;
+    proximaRenovacaoEm: string;
+  };
+  saldoRubys: number;
+};
+
+export function buscarRecompensas() {
+  return jogoRequest<RecompensasResponse>("/recompensas");
+}
+
+export function resgatarRecompensaSemanal() {
+  return jogoRequest<{
+    message: string;
+    rubysRecebidos: number;
+    proximaRenovacaoEm: string;
+  }>("/recompensas/semanal", { method: "POST" });
 }

@@ -224,7 +224,7 @@ export type AdminNoticia = {
   resumo: string;
   conteudo: string;
   imagem: string | null;
-  categoria: "NOVIDADE" | "BALANCE" | "EVENTO" | "AVISO";
+  categoria: "NOVIDADE" | "BALANCE" | "EVENTO" | "PROMOCAO" | "AVISO";
   anexos: AnexoNoticia[] | null;
   publicada: boolean;
   criado_em: string;

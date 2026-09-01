@@ -8,7 +8,9 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { BannerRotacaoService } from './banner-rotacao.service';
 import {
+  giroGratuitoDisponivel,
   LIMITE_PITY,
+  obterProximoGiroGratuito,
   PROBABILIDADES_RARIDADE,
   type RaridadeGacha,
 } from './gacha.config';
@@ -70,6 +72,7 @@ export class GachaService {
       probabilidades: this.calcularProbabilidadesEfetivas(
         banners[0]?.cartas ?? [],
       ),
+      proximoGiroGratuitoEm: obterProximoGiroGratuito(agora),
       banners: banners.map((banner) => ({
         id: banner.id,
         nome: banner.nome,
@@ -78,10 +81,10 @@ export class GachaService {
         pity:
           logs.find((log) => log.id_banner === banner.id)?.pity_contador ?? 0,
         limitePity: LIMITE_PITY,
-        diarioDisponivel:
-          !banner.usuarioColetas[0]?.ultima_coleta ||
-          agora - banner.usuarioColetas[0].ultima_coleta.getTime() >=
-            86_400_000,
+        diarioDisponivel: giroGratuitoDisponivel(
+          banner.usuarioColetas[0]?.ultima_coleta,
+          agora,
+        ),
         cartas: banner.cartas.map(({ carta, taxa_drop }) => ({
           id: carta.id,
           nome: carta.nome,
@@ -209,11 +212,11 @@ export class GachaService {
           }),
         ]);
         if (!banner) throw new NotFoundException('Banner indisponível.');
-        if (
-          coleta?.ultima_coleta &&
-          Date.now() - coleta.ultima_coleta.getTime() < 86_400_000
-        ) {
-          throw new ConflictException('A recompensa diária já foi resgatada.');
+        const agora = new Date();
+        if (!giroGratuitoDisponivel(coleta?.ultima_coleta, agora.getTime())) {
+          throw new ConflictException(
+            'O giro gratuito ainda não está disponível.',
+          );
         }
         await tx.usuarioBannerColeta.upsert({
           where: {
@@ -225,9 +228,9 @@ export class GachaService {
           create: {
             id_usuario: idUsuario,
             id_banner: idBanner,
-            ultima_coleta: new Date(),
+            ultima_coleta: agora,
           },
-          update: { ultima_coleta: new Date() },
+          update: { ultima_coleta: agora },
         });
         await tx.ledgerRuby.create({
           data: {
@@ -235,11 +238,11 @@ export class GachaService {
             quantidade: banner.custo_giro,
             motivo: 'GIRO_BANNER',
             id_referencia: idBanner,
-            descricao: 'Giro diario',
+            descricao: 'Giro gratuito',
           },
         });
         return {
-          message: 'Recompensa diaria resgatada.',
+          message: 'Giro gratuito resgatado.',
           rubysRecebidos: banner.custo_giro,
         };
       },
@@ -284,9 +287,10 @@ export class GachaService {
     return 'N';
   }
 
-  private obterRaridadeDisponivel<
-    T extends { carta: { raridade: string } },
-  >(cartas: T[], raridadeSorteada: RaridadeGacha): RaridadeGacha {
+  private obterRaridadeDisponivel<T extends { carta: { raridade: string } }>(
+    cartas: T[],
+    raridadeSorteada: RaridadeGacha,
+  ): RaridadeGacha {
     const raridadesPresentes = new Set(
       cartas.map(({ carta }) => carta.raridade),
     );
@@ -314,12 +318,12 @@ export class GachaService {
       totais.set(raridade, (totais.get(raridade) ?? 0) + item.percentual);
     }
 
-    return PROBABILIDADES_RARIDADE.filter((item) => totais.has(item.raridade)).map(
-      (item) => ({
-        raridade: item.raridade,
-        percentual: totais.get(item.raridade) ?? 0,
-      }),
-    );
+    return PROBABILIDADES_RARIDADE.filter((item) =>
+      totais.has(item.raridade),
+    ).map((item) => ({
+      raridade: item.raridade,
+      percentual: totais.get(item.raridade) ?? 0,
+    }));
   }
 
   private async garantirBannerPadrao() {

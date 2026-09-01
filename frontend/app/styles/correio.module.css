@@ -1,0 +1,421 @@
+.raiz {
+  position: relative;
+}
+
+.gatilho {
+  position: relative;
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  place-items: center;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  border-radius: 0.72rem;
+  color: #c4b5fd;
+  background: rgba(91, 54, 168, 0.13);
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.gatilho:hover,
+.gatilho[aria-expanded="true"] {
+  border-color: rgba(190, 242, 100, 0.32);
+  color: #e9d5ff;
+  background: rgba(91, 54, 168, 0.28);
+}
+
+.gatilho:active {
+  transform: translateY(1px);
+}
+
+.gatilho:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 3px;
+}
+
+.gatilho svg {
+  width: 1rem;
+}
+
+.gatilho b {
+  position: absolute;
+  top: -0.3rem;
+  right: -0.3rem;
+  display: grid;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  place-items: center;
+  border: 2px solid #0d0f17;
+  border-radius: 999px;
+  color: #16180d;
+  background: #bef264;
+  padding: 0 0.18rem;
+  font-size: 0.55rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.painel {
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  right: 0;
+  z-index: 20;
+  width: min(26rem, calc(100vw - 1.5rem));
+  overflow: hidden;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  border-radius: 1rem;
+  background: rgba(9, 11, 18, 0.98);
+  box-shadow:
+    0 1.5rem 4rem rgba(0, 0, 0, 0.48),
+    inset 0 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(1.2rem);
+}
+
+.painel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.13);
+  padding: 0.82rem 0.9rem 0.75rem;
+}
+
+.painel > header small,
+.painel > header strong {
+  display: block;
+}
+
+.painel > header small {
+  margin-top: 0.18rem;
+  color: #788399;
+  font-size: 0.58rem;
+}
+
+.painel > header strong {
+  color: #f5f3ff;
+  font-size: 0.92rem;
+}
+
+.painel > header div {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.painel > header button {
+  display: grid;
+  width: 1.9rem;
+  height: 1.9rem;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.55rem;
+  color: #9ca3af;
+  background: transparent;
+  cursor: pointer;
+}
+
+.painel > header button:hover {
+  color: #ddd6fe;
+  background: rgba(124, 58, 237, 0.13);
+}
+
+.painel > header button svg {
+  width: 0.9rem;
+}
+
+.filtros {
+  display: flex;
+  align-items: center;
+  gap: 0.22rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.11);
+  padding: 0.45rem 0.62rem;
+}
+
+.filtros button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.85rem;
+  gap: 0.3rem;
+  border: 1px solid transparent;
+  border-radius: 0.52rem;
+  color: #7f8ba0;
+  background: transparent;
+  padding: 0.3rem 0.55rem;
+  font: inherit;
+  font-size: 0.58rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.filtros button[aria-selected="true"] {
+  border-color: rgba(167, 139, 250, 0.24);
+  color: #f5f3ff;
+  background: rgba(124, 58, 237, 0.16);
+}
+
+.filtros button:hover {
+  color: #ddd6fe;
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.filtros button:focus-visible,
+.vazio button:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 2px;
+}
+
+.filtros button b {
+  display: grid;
+  min-width: 1rem;
+  height: 1rem;
+  place-items: center;
+  border-radius: 999px;
+  color: #16180d;
+  background: #bef264;
+  padding: 0 0.2rem;
+  font-size: 0.48rem;
+}
+
+.filtros .marcarTodas {
+  margin-left: auto;
+  color: #a78bfa;
+  padding-right: 0.3rem;
+}
+
+.marcarTodas svg {
+  width: 0.8rem;
+}
+
+.lista {
+  display: grid;
+  max-height: min(31rem, calc(100dvh - 7rem));
+  overflow-y: auto;
+  scrollbar-color: #6d28d9 #111421;
+  scrollbar-width: thin;
+  padding: 0.38rem;
+}
+
+.lista::-webkit-scrollbar {
+  width: 0.38rem;
+}
+
+.lista::-webkit-scrollbar-track {
+  background: #111421;
+}
+
+.lista::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #6d28d9;
+}
+
+.mensagem {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: start;
+  border-radius: 0.7rem;
+  color: inherit;
+  padding: 0.68rem 0.55rem;
+  text-decoration: none;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.mensagem + .mensagem {
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 0;
+}
+
+.mensagem:hover {
+  background: rgba(124, 58, 237, 0.1);
+  transform: translateX(2px);
+}
+
+.mensagem[data-lida="false"] {
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.13), transparent 72%);
+}
+
+.icone {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(167, 139, 250, 0.18);
+  border-radius: 0.6rem;
+  color: #c4b5fd;
+  background: rgba(91, 54, 168, 0.15);
+}
+
+.mensagem[data-tipo="RECOMPENSA"] .icone {
+  border-color: rgba(190, 242, 100, 0.2);
+  color: #bef264;
+  background: rgba(101, 163, 13, 0.1);
+}
+
+.icone svg {
+  width: 0.92rem;
+}
+
+.conteudo {
+  display: block;
+  min-width: 0;
+}
+
+.conteudo > span {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.conteudo > span small {
+  color: #7f8ba0;
+  font-size: 0.48rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.conteudo i {
+  color: #bef264;
+  font-size: 0.48rem;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.conteudo strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 0.12rem;
+  color: #eef2ff;
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conteudo p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0.2rem 0 0;
+  color: #8994a8;
+  font-size: 0.59rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.rodapeMensagem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.conteudo .rodapeMensagem em {
+  color: #a78bfa;
+  font-size: 0.55rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.rodapeMensagem time {
+  color: #626d80;
+  font-size: 0.5rem;
+  white-space: nowrap;
+}
+
+.mensagem > svg {
+  align-self: center;
+  width: 0.78rem;
+  color: #596276;
+}
+
+.carregando,
+.vazio {
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.carregando {
+  gap: 0.42rem;
+}
+
+.carregando span {
+  width: 100%;
+  height: 2.9rem;
+  border-radius: 0.6rem;
+  background: linear-gradient(90deg, #111522 25%, #1a2030 50%, #111522 75%);
+  background-size: 200% 100%;
+  animation: brilho 1.2s linear infinite;
+}
+
+.vazio svg {
+  width: 1.4rem;
+  color: #7c3aed;
+}
+
+.vazio strong {
+  margin-top: 0.5rem;
+  color: #e5e7eb;
+  font-size: 0.72rem;
+}
+
+.vazio p {
+  margin: 0.18rem 0 0;
+  color: #7f8ba0;
+  font-size: 0.59rem;
+}
+
+.vazio button {
+  margin-top: 0.75rem;
+  border: 1px solid rgba(167, 139, 250, 0.24);
+  border-radius: 0.55rem;
+  color: #ddd6fe;
+  background: rgba(124, 58, 237, 0.14);
+  padding: 0.4rem 0.7rem;
+  font: inherit;
+  font-size: 0.58rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+@keyframes brilho {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .painel {
+    position: fixed;
+    top: 4.65rem;
+    right: 0.55rem;
+    left: 0.55rem;
+    width: auto;
+  }
+
+  .filtros .marcarTodas {
+    width: 1.85rem;
+    overflow: hidden;
+    padding: 0;
+    white-space: nowrap;
+  }
+
+  .marcarTodas svg {
+    min-width: 1.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mensagem,
+  .gatilho {
+    transition: none;
+  }
+
+  .carregando span {
+    animation: none;
+  }
+}
