@@ -15,7 +15,7 @@ const servers = [
     healthUrl: "http://127.0.0.1:3001",
     healthCheck: (response, body) => response.ok && body === "Hello World!",
     environment: { PORT: "3001" },
-    command: "npm run start:dev",
+    command: "& 'npm.cmd' run start:dev",
   },
   {
     name: "Frontend RPG",
@@ -23,7 +23,7 @@ const servers = [
     port: 3000,
     healthUrl: "http://127.0.0.1:3000",
     healthCheck: (response) => response.ok,
-    command: "npm run dev -- --port 3000",
+    command: "& 'npm.cmd' run dev -- --port 3000",
   },
 ];
 
@@ -68,20 +68,69 @@ async function isExpectedServer(server) {
   }
 }
 
-function describePortOwner(port) {
+function getPortOwner(port) {
   const command = [
     `$connection = Get-NetTCPConnection -State Listen -LocalPort ${port}`,
     "if ($connection) {",
-    "$process = Get-CimInstance Win32_Process -Filter \"ProcessId = $($connection[0].OwningProcess)\"",
-    "Write-Output \"PID $($process.ProcessId): $($process.CommandLine)\"",
+    '$process = Get-CimInstance Win32_Process -Filter "ProcessId = $($connection[0].OwningProcess)"',
+    "[PSCustomObject]@{ pid = $process.ProcessId; parentPid = $process.ParentProcessId; commandLine = $process.CommandLine } | ConvertTo-Json -Compress",
     "}",
   ].join("; ");
-  const result = spawnSync("powershell.exe", ["-NoProfile", "-Command", command], {
-    encoding: "utf8",
-    windowsHide: true,
-  });
+  const result = spawnSync(
+    "powershell.exe",
+    ["-NoProfile", "-Command", command],
+    {
+      encoding: "utf8",
+      windowsHide: true,
+    },
+  );
 
-  return result.stdout?.trim() || "processo nao identificado";
+  try {
+    return JSON.parse(result.stdout?.trim() || "null");
+  } catch {
+    return null;
+  }
+}
+
+function describePortOwner(port) {
+  const owner = getPortOwner(port);
+  return owner
+    ? `PID ${owner.pid}: ${owner.commandLine}`
+    : "processo nao identificado";
+}
+
+function isProjectProcess(owner) {
+  return owner?.commandLine
+    ?.toLocaleLowerCase()
+    .includes(projectRoot.toLocaleLowerCase());
+}
+
+function stopProjectProcess(owner, server) {
+  if (!owner?.pid || !isProjectProcess(owner)) return false;
+
+  const result = spawnSync(
+    "taskkill.exe",
+    ["/PID", String(owner.pid), "/T", "/F"],
+    { encoding: "utf8", windowsHide: true },
+  );
+
+  if (result.status !== 0) {
+    throw new Error(
+      `Nao foi possivel reiniciar ${server.name}: ${result.stderr?.trim() || "falha ao encerrar o processo travado"}.`,
+    );
+  }
+
+  console.log(`${server.name} travado foi encerrado (PID ${owner.pid}).`);
+  return true;
+}
+
+async function waitUntilPortIsFree(port, timeoutMs = 10_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (!(await isPortInUse(port))) return true;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+  return false;
 }
 
 function startServer(server) {
@@ -109,7 +158,14 @@ function startServer(server) {
 
   const result = spawnSync(
     "powershell.exe",
-    ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", startProcessScript],
+    [
+      "-NoLogo",
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-Command",
+      startProcessScript,
+    ],
     { encoding: "utf8", windowsHide: true },
   );
 
@@ -154,9 +210,18 @@ async function main() {
         continue;
       }
 
-      throw new Error(
-        `A porta ${server.port} esta ocupada por outro processo (${describePortOwner(server.port)}).`,
-      );
+      const owner = getPortOwner(server.port);
+      if (stopProjectProcess(owner, server)) {
+        if (!(await waitUntilPortIsFree(server.port))) {
+          throw new Error(
+            `A porta ${server.port} continuou ocupada apos reiniciar ${server.name}.`,
+          );
+        }
+      } else {
+        throw new Error(
+          `A porta ${server.port} esta ocupada por outro processo (${describePortOwner(server.port)}).`,
+        );
+      }
     }
 
     startServer(server);
