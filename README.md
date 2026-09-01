@@ -125,6 +125,10 @@ npm --prefix frontend run dev
 - Frontend: http://localhost:3000
 - Backend: http://localhost:3001
 
+## Publicação
+
+O frontend está preparado para a Vercel, o backend para o Render e o PostgreSQL para o Supabase. O passo a passo completo e as variáveis necessárias estão em [`DEPLOY.md`](DEPLOY.md).
+
 ## Variáveis de ambiente
 
 Principais variáveis do backend:

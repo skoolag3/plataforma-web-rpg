@@ -36,7 +36,9 @@ export function ExpandableTabs({
   ariaLabel,
 }: PropsAbasExpansiveis) {
   const refAbas = useRef<HTMLElement>(null);
-  const hrefAtivo = itens.find((item) => item.tipo !== "separador" && item.ativa)?.href;
+  const hrefAtivo = itens.find(
+    (item) => item.tipo !== "separador" && item.ativa,
+  )?.href;
   const hrefAnterior = useRef(hrefAtivo);
   const [indicador, setIndicador] = useState({ x: 0, largura: 0 });
   const [indicadorMovendo, setIndicadorMovendo] = useState(false);
@@ -48,12 +50,16 @@ export function ExpandableTabs({
     }
 
     hrefAnterior.current = hrefAtivo;
-    setIndicadorMovendo(false);
-    const quadro = requestAnimationFrame(() => setIndicadorMovendo(true));
+    let quadroEntrada = 0;
+    const quadroSaida = requestAnimationFrame(() => {
+      setIndicadorMovendo(false);
+      quadroEntrada = requestAnimationFrame(() => setIndicadorMovendo(true));
+    });
     const tempo = window.setTimeout(() => setIndicadorMovendo(false), 480);
 
     return () => {
-      cancelAnimationFrame(quadro);
+      cancelAnimationFrame(quadroSaida);
+      cancelAnimationFrame(quadroEntrada);
       window.clearTimeout(tempo);
     };
   }, [hrefAtivo]);
@@ -75,9 +81,9 @@ export function ExpandableTabs({
     atualizarIndicador();
     const observador = new ResizeObserver(atualizarIndicador);
     observador.observe(abas);
-    abas.querySelectorAll(`.${styles.aba}`).forEach((aba) =>
-      observador.observe(aba),
-    );
+    abas
+      .querySelectorAll(`.${styles.aba}`)
+      .forEach((aba) => observador.observe(aba));
 
     return () => observador.disconnect();
   }, [itens]);
