@@ -611,7 +611,7 @@
   }
 }
 
-@media (max-width: 430px) {
+@media (max-width: 520px) {
   .slots {
     grid-template-columns: 1fr;
   }

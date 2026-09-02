@@ -98,7 +98,7 @@ export function ExpandableTabs({
             className={`${styles.aba} ${item.ativa ? styles.abaAtiva : ""}`}
             aria-label={item.titulo}
             aria-current={item.ativa ? "page" : undefined}
-            title={!item.ativa ? item.titulo : undefined}
+            title={item.titulo}
             key={item.href}
           >
             <Icone aria-hidden="true" />

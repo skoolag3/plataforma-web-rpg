@@ -114,7 +114,7 @@
   }
 
   .conjuntoCartas {
-    display: none;
+    display: none !important;
   }
 
   .conjuntoCartas article:nth-child(3) {
@@ -179,5 +179,11 @@
   .personagemHero::before {
     inset: 0 -0.8rem -0.4rem;
     background-size: auto min(108%, 27rem);
+  }
+}
+
+@media (max-width: 760px) {
+  .conjuntoCartas {
+    display: none !important;
   }
 }
