@@ -160,6 +160,7 @@ export function PrivateNavbar() {
               pathname === "/perfil" ? styles.perfilUsuarioAtivo : undefined
             }
             aria-label="Abrir perfil"
+            title="Abrir perfil"
             aria-current={pathname === "/perfil" ? "page" : undefined}
           >
             <span

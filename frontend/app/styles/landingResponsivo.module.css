@@ -114,11 +114,13 @@
   }
 
   .conjuntoCartas {
-    display: none !important;
-  }
-
-  .conjuntoCartas article:nth-child(3) {
-    display: none;
+    right: auto;
+    bottom: 2.8rem;
+    left: 58%;
+    display: flex !important;
+    pointer-events: none;
+    transform: translateX(-50%) scale(2);
+    transform-origin: center bottom;
   }
 
   .metricas {
@@ -184,6 +186,12 @@
 
 @media (max-width: 760px) {
   .conjuntoCartas {
-    display: none !important;
+    right: auto;
+    bottom: 2.8rem;
+    left: 58%;
+    display: flex !important;
+    pointer-events: none;
+    transform: translateX(-50%) scale(2);
+    transform-origin: center bottom;
   }
 }

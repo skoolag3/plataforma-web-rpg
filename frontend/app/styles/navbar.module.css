@@ -157,7 +157,7 @@
   }
 
   .linksNav {
-    display: none;
+    display: none !important;
     grid-column: 1 / -1;
     grid-row: 2;
     justify-content: start;
@@ -202,6 +202,7 @@
   }
 
   .linksNav {
+    display: none !important;
     width: 100%;
     max-width: 100%;
     overflow-x: auto;
