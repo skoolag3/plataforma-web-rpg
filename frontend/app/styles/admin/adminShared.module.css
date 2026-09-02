@@ -26,10 +26,9 @@
 
 .toolbar {
   display: grid;
-  grid-template-columns: minmax(16rem, 1fr) repeat(
-      3,
-      minmax(8rem, 10rem)
-    ) auto auto;
+  grid-template-columns:
+    minmax(16rem, 1fr) repeat(3, minmax(8rem, 10rem))
+    auto auto;
   gap: 0.65rem;
   align-items: center;
   margin-bottom: 1rem;
@@ -689,5 +688,36 @@
   }
   .toolbar label {
     min-width: 0;
+  }
+
+  .toolbar,
+  .cartasToolbar,
+  .usuarioEditor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .toolbar > *,
+  .cartasToolbar > *,
+  .usuarioEditor > * {
+    min-width: 0;
+    grid-column: auto;
+  }
+
+  .toolbar > button,
+  .toolbar > .primaryBtn,
+  .cartasToolbar > button,
+  .cartasToolbar > .primaryBtn {
+    width: 100%;
+  }
+
+  .tableWrap {
+    max-width: 100%;
+    overscroll-behavior-inline: contain;
+    scrollbar-color: #6d28d9 #111421;
+    scrollbar-width: thin;
+  }
+
+  .editorActions {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

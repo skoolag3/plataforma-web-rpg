@@ -119,9 +119,17 @@
   }
   .gachaTopoAcoes {
     width: 100%;
+    flex-wrap: wrap;
     justify-content: space-between;
   }
+  .gachaTopoAcoes > button {
+    flex: 1 1 9rem;
+    justify-content: center;
+  }
   .gachaPrincipal {
-    padding: 0.5rem;
+    padding: 0.4rem;
+  }
+  .gachaPainel {
+    min-height: 0;
   }
 }

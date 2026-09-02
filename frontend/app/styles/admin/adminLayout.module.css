@@ -1,6 +1,6 @@
 .adminPage {
   display: block;
-  min-height: 100vh;
+  min-height: 100dvh;
   background:
     radial-gradient(
       circle at 76% -15%,
@@ -176,8 +176,15 @@
   }
 }
 @media (max-width: 760px) {
+  .adminPage {
+    width: 100%;
+    overflow-x: clip;
+  }
   .adminNavbar {
+    width: 100%;
     height: auto;
+    grid-template-columns: minmax(0, 1fr) auto;
+    border-radius: 0 0 0.7rem 0.7rem;
     padding: 0.45rem;
   }
   .brand div,
@@ -186,13 +193,25 @@
     display: none;
   }
   .content {
-    padding: 1rem 0.7rem 2.5rem;
+    width: 100%;
+    overflow-x: clip;
+    padding: 0.85rem 0.6rem 2.5rem;
   }
   .topbar {
     align-items: flex-start;
     flex-direction: column;
   }
   .areaTag {
+    display: none;
+  }
+
+  .nav {
+    width: 100%;
+    padding-bottom: 0.12rem;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
     display: none;
   }
 }

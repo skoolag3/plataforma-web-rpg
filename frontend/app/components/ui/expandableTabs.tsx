@@ -3,7 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import type { CSSProperties, MouseEvent } from "react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import styles from "./expandableTabs.module.css";
 
 export type AbaExpansivel = {
@@ -36,33 +36,7 @@ export function ExpandableTabs({
   ariaLabel,
 }: PropsAbasExpansiveis) {
   const refAbas = useRef<HTMLElement>(null);
-  const hrefAtivo = itens.find(
-    (item) => item.tipo !== "separador" && item.ativa,
-  )?.href;
-  const hrefAnterior = useRef(hrefAtivo);
   const [indicador, setIndicador] = useState({ x: 0, largura: 0 });
-  const [indicadorMovendo, setIndicadorMovendo] = useState(false);
-
-  useEffect(() => {
-    if (!hrefAnterior.current || hrefAnterior.current === hrefAtivo) {
-      hrefAnterior.current = hrefAtivo;
-      return;
-    }
-
-    hrefAnterior.current = hrefAtivo;
-    let quadroEntrada = 0;
-    const quadroSaida = requestAnimationFrame(() => {
-      setIndicadorMovendo(false);
-      quadroEntrada = requestAnimationFrame(() => setIndicadorMovendo(true));
-    });
-    const tempo = window.setTimeout(() => setIndicadorMovendo(false), 480);
-
-    return () => {
-      cancelAnimationFrame(quadroSaida);
-      cancelAnimationFrame(quadroEntrada);
-      window.clearTimeout(tempo);
-    };
-  }, [hrefAtivo]);
 
   useLayoutEffect(() => {
     const abas = refAbas.current;
@@ -100,7 +74,7 @@ export function ExpandableTabs({
       aria-label={ariaLabel}
     >
       <span
-        className={`${styles.indicador} ${indicador.largura ? styles.indicadorVisivel : ""} ${indicadorMovendo ? styles.indicadorMovendo : ""}`}
+        className={`${styles.indicador} ${indicador.largura ? styles.indicadorVisivel : ""}`}
         style={estiloIndicador}
         aria-hidden="true"
       />

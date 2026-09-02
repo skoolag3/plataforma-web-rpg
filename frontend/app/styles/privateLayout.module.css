@@ -9,27 +9,114 @@
   --member-purple: #9b7cf7;
   --member-lime: #c8f77a;
   --member-radius: 1.15rem;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--member-bg);
   color: var(--member-text);
 }
 
-.privateContent { min-width: 0; }
-.privateContent :global(*) { box-sizing: border-box; }
-.privateContent :global(button), .privateContent :global(a), .privateContent :global(input), .privateContent :global(select), .privateContent :global(textarea) { -webkit-tap-highlight-color: transparent; }
-.privateContent :global(button:focus-visible), .privateContent :global(a:focus-visible), .privateContent :global(input:focus-visible), .privateContent :global(select:focus-visible), .privateContent :global(textarea:focus-visible) { outline: 2px solid var(--member-lime); outline-offset: 3px; }
-.privateContent :global(::selection) { background: rgba(155, 124, 247, 0.42); color: white; }
+.privateContent {
+  min-width: 0;
+}
+.privateContent :global(*) {
+  box-sizing: border-box;
+}
+.privateContent :global(button),
+.privateContent :global(a),
+.privateContent :global(input),
+.privateContent :global(select),
+.privateContent :global(textarea) {
+  -webkit-tap-highlight-color: transparent;
+}
+.privateContent :global(button:focus-visible),
+.privateContent :global(a:focus-visible),
+.privateContent :global(input:focus-visible),
+.privateContent :global(select:focus-visible),
+.privateContent :global(textarea:focus-visible) {
+  outline: 2px solid var(--member-lime);
+  outline-offset: 3px;
+}
+.privateContent :global(::selection) {
+  background: rgba(155, 124, 247, 0.42);
+  color: white;
+}
 .privateContent :global(aside[aria-label="Menu do inventario"]),
-.privateContent :global(aside[aria-label="Menu do gacha"]) { display: none; }
+.privateContent :global(aside[aria-label="Menu do gacha"]) {
+  display: none;
+}
 .privateContent :global(aside[aria-label="Menu do inventario"]) + section,
-.privateContent :global(aside[aria-label="Menu do gacha"]) + section { min-width: 0; }
+.privateContent :global(aside[aria-label="Menu do gacha"]) + section {
+  min-width: 0;
+}
 
-.loadingPage { display:grid; min-height:100vh; place-items:center; background:#070910;color:#f5f3fa;padding:1rem; }
-.loadingCard { display:grid; justify-items:center; text-align:center; }
-.loadingCard > span { width:2.4rem;height:2.4rem;margin-bottom:1rem;border:2px solid rgba(167,139,250,.16);border-top-color:#bef264;border-radius:50%;animation:girar .8s linear infinite; }
-.loadingCard strong { font-size:1rem; }.loadingCard p{margin:.4rem 0 0;color:#8f97a8;font-size:.8rem}
-@keyframes girar { to { transform:rotate(360deg); } }
+.privateContent :global(img),
+.privateContent :global(video),
+.privateContent :global(canvas) {
+  max-width: 100%;
+}
+
+@media (max-width: 760px) {
+  .privateShell,
+  .privateContent {
+    width: 100%;
+    overflow-x: clip;
+  }
+
+  .privateContent :global(main),
+  .privateContent :global(section),
+  .privateContent :global(article),
+  .privateContent :global(form),
+  .privateContent :global(header),
+  .privateContent :global(div) {
+    min-width: 0;
+  }
+
+  .privateContent :global(button),
+  .privateContent :global(a) {
+    touch-action: manipulation;
+  }
+}
+
+.loadingPage {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  background: #070910;
+  color: #f5f3fa;
+  padding: 1rem;
+}
+.loadingCard {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+.loadingCard > span {
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-bottom: 1rem;
+  border: 2px solid rgba(167, 139, 250, 0.16);
+  border-top-color: #bef264;
+  border-radius: 50%;
+  animation: girar 0.8s linear infinite;
+}
+.loadingCard strong {
+  font-size: 1rem;
+}
+.loadingCard p {
+  margin: 0.4rem 0 0;
+  color: #8f97a8;
+  font-size: 0.8rem;
+}
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .privateContent :global(*) { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  .privateContent :global(*) {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

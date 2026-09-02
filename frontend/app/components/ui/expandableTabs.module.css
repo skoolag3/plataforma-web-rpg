@@ -32,8 +32,8 @@
   pointer-events: none;
   transform: translateX(var(--indicadorX, 0));
   transition:
-    width 440ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 440ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 120ms ease;
 }
 
@@ -41,28 +41,16 @@
   position: absolute;
   inset: 0.18rem;
   border-radius: inherit;
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.2), transparent 68%);
+  background: radial-gradient(
+    circle,
+    rgba(167, 139, 250, 0.2),
+    transparent 68%
+  );
   content: "";
 }
 
 .indicadorVisivel {
   opacity: 1;
-}
-
-.indicadorMovendo::after {
-  animation: viajarBolha 440ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes viajarBolha {
-  0%, 100% {
-    border-radius: 999px;
-    transform: scale(1);
-  }
-
-  45% {
-    border-radius: 42% 58% 55% 45%;
-    transform: scaleX(0.7) scaleY(1.12);
-  }
 }
 
 .aba {
@@ -154,6 +142,11 @@
 
   .abas::-webkit-scrollbar {
     display: none;
+  }
+
+  .aba {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
   }
 }
 

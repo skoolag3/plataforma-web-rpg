@@ -11,12 +11,12 @@ As imagens continuam no Cloudinary. Nunca envie os arquivos `.env` para o Git.
 ## 1. Preparar o Supabase
 
 1. Crie um projeto no Supabase.
-2. Abra **Connect** e copie as duas URLs do PostgreSQL:
-   - conexão pelo pooler para `DATABASE_URL`;
-   - conexão direta para `DIRECT_DATABASE_URL`.
-3. Mantenha `sslmode=require` nas URLs fornecidas pelo Supabase.
+2. Abra **Connect** e selecione **Session pooler**.
+3. Copie a URL que usa o host `*.pooler.supabase.com` e a porta `5432`.
+4. Use essa URL em `DATABASE_URL` e `DIRECT_DATABASE_URL` no Render.
+5. Mantenha `sslmode=require` na URL fornecida pelo Supabase.
 
-O backend usa `DATABASE_URL` durante a aplicação e `DIRECT_DATABASE_URL` para executar as migrations.
+O Render não alcança a conexão direta gratuita `db.*.supabase.co`, pois ela depende de IPv6. O Session Pooler funciona por IPv4 e é compatível tanto com o backend persistente quanto com as migrations do Prisma.
 
 ## 2. Publicar o backend no Render
 
@@ -35,7 +35,7 @@ O backend usa `DATABASE_URL` durante a aplicação e `DIRECT_DATABASE_URL` para 
    - `STRIPE_SECRET_KEY` e `STRIPE_WEBHOOK_SECRET`, se testar pagamentos;
    - variáveis `SMTP_*` e `MAIL_FROM`, se o provedor/ambiente permitir SMTP.
 
-O build gera o Prisma Client, aplica `prisma migrate deploy` e compila o NestJS. Depois do deploy, confirme:
+O build instala temporariamente as ferramentas de desenvolvimento, gera o Prisma Client, aplica `prisma migrate deploy`, compila o NestJS e remove as dependências usadas somente na compilação. Depois do deploy, confirme:
 
 ```text
 https://animecards-api.onrender.com/
