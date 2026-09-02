@@ -1,6 +1,10 @@
 "use client";
 
-import { faGaugeHigh, faRightToBracket, faUserPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faGaugeHigh,
+  faRightToBracket,
+  faUserPlus,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Home, Newspaper } from "lucide-react";
 import Link from "next/link";
@@ -51,23 +55,37 @@ export function Navbar() {
     return () => observador.disconnect();
   }, [caminho]);
 
-  function navegarParaSecao(evento: MouseEvent<HTMLAnchorElement>, secao: string) {
+  function navegarParaSecao(
+    evento: MouseEvent<HTMLAnchorElement>,
+    secao: string,
+  ) {
     if (caminho !== "/") return;
 
     const destino = document.getElementById(secao);
     if (!destino) return;
 
     evento.preventDefault();
-    const reduzirMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    destino.scrollIntoView({ behavior: reduzirMovimento ? "auto" : "smooth", block: "start" });
+    const reduzirMovimento = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    destino.scrollIntoView({
+      behavior: reduzirMovimento ? "auto" : "smooth",
+      block: "start",
+    });
     window.history.replaceState(null, "", "/");
     setSecaoAtiva(secao);
   }
 
   if (
-    ["/home", "/perfil", "/cartas", "/decks", "/gacha", "/partida"].some(
-      (rota) => caminho === rota || caminho.startsWith(`${rota}/`),
-    ) ||
+    [
+      "/home",
+      "/perfil",
+      "/cartas",
+      "/decks",
+      "/gacha",
+      "/expedicao",
+      "/partida",
+    ].some((rota) => caminho === rota || caminho.startsWith(`${rota}/`)) ||
     caminho.startsWith("/admin")
   ) {
     return null;
@@ -77,9 +95,7 @@ export function Navbar() {
     <header className={styles.cabecalho}>
       <nav className={styles.nav}>
         <Link href="/" className={styles.marca}>
-          <span className={styles.seloMarca}>
-            RPG
-          </span>
+          <span className={styles.seloMarca}>RPG</span>
           <span className={styles.nomeMarca}>
             Anime<span className={styles.destaqueMarca}>Cards</span>
           </span>
@@ -99,26 +115,17 @@ export function Navbar() {
 
         <div className={styles.acoes}>
           {estaAutenticado ? (
-            <Link
-              href="/home"
-              className={styles.btn}
-            >
+            <Link href="/home" className={styles.btn}>
               <FontAwesomeIcon icon={faGaugeHigh} aria-hidden="true" />
               <span className={styles.textoAcao}>Meu painel</span>
             </Link>
           ) : (
             <>
-              <Link
-                href="/login"
-                className={styles.btn}
-              >
+              <Link href="/login" className={styles.btn}>
                 <FontAwesomeIcon icon={faRightToBracket} aria-hidden="true" />
                 <span className={styles.textoAcao}>Entrar</span>
               </Link>
-              <Link
-                href="/cadastro"
-                className={styles.btnPrimario}
-              >
+              <Link href="/cadastro" className={styles.btnPrimario}>
                 <FontAwesomeIcon icon={faUserPlus} aria-hidden="true" />
                 <span className={styles.textoAcao}>Registrar</span>
               </Link>

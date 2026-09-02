@@ -49,6 +49,7 @@ model Usuario {
   decks                Deck[]
   partidas             LogPartida[]          @relation("PartidasUsuario")
   partidasComoOponente LogPartida[]          @relation("PartidasOponente")
+  expedicoes           Expedicao[]
   logsAdminComoAutor   LogAdminUsuario[]     @relation("LogAdminAutor")
   logsAdminComoAlvo    LogAdminUsuario[]     @relation("LogAdminAlvo")
 
@@ -294,17 +295,17 @@ model Banner {
   cartas         BannerCarta[]
   gachaLogs      LogGacha[]
   usuarioColetas UsuarioBannerColeta[]
-  rotacoes        BannerRotacao[]
+  rotacoes       BannerRotacao[]
 
   @@map("banner")
 }
 
 model BannerRotacao {
-  id                  Int      @id @default(1)
-  id_banner           String   @db.Uuid
-  proxima_rotacao_em  DateTime @db.Timestamptz(0)
-  forcado_por_admin   Boolean  @default(false)
-  atualizado_em       DateTime @default(now()) @db.Timestamptz(0)
+  id                 Int      @id @default(1)
+  id_banner          String   @db.Uuid
+  proxima_rotacao_em DateTime @db.Timestamptz(0)
+  forcado_por_admin  Boolean  @default(false)
+  atualizado_em      DateTime @default(now()) @db.Timestamptz(0)
 
   banner Banner @relation(fields: [id_banner], references: [id], onDelete: Restrict)
 
@@ -381,9 +382,10 @@ model Deck {
   atualizado_em DateTime? @default(now()) @db.Timestamptz(0)
   excluido_em   DateTime? @db.Timestamptz(0)
 
-  usuario  Usuario?     @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
-  cartas   DeckCarta[]
-  partidas LogPartida[]
+  usuario    Usuario?     @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+  cartas     DeckCarta[]
+  partidas   LogPartida[]
+  expedicoes Expedicao[]
 
   @@map("deck")
 }
@@ -407,6 +409,8 @@ model LogPartida {
   id_usuario          String?   @db.Uuid
   id_usuario_oponente String?   @db.Uuid
   id_deck_usado       String?   @db.Uuid
+  id_expedicao        String?   @db.Uuid
+  etapa_expedicao     Int?
   resultado           String    @db.VarChar(20)
   turnos_jogados      Int       @default(0)
   variacao_pontos     Int?      @default(0)
@@ -414,16 +418,40 @@ model LogPartida {
   timestamp_inicio    DateTime? @default(now()) @db.Timestamptz(0)
   timestamp_fim       DateTime? @db.Timestamptz(0)
 
-  usuario  Usuario?        @relation("PartidasUsuario", fields: [id_usuario], references: [id])
-  oponente Usuario?        @relation("PartidasOponente", fields: [id_usuario_oponente], references: [id])
-  deck     Deck?           @relation(fields: [id_deck_usado], references: [id])
-  cartas   PartidaCarta[]
-  eventos  EventoPartida[]
+  usuario   Usuario?        @relation("PartidasUsuario", fields: [id_usuario], references: [id])
+  oponente  Usuario?        @relation("PartidasOponente", fields: [id_usuario_oponente], references: [id])
+  deck      Deck?           @relation(fields: [id_deck_usado], references: [id])
+  expedicao Expedicao?      @relation(fields: [id_expedicao], references: [id], onDelete: SetNull)
+  cartas    PartidaCarta[]
+  eventos   EventoPartida[]
 
   @@index([id_usuario], map: "idx_log_partida_usuario")
   @@index([id_usuario_oponente], map: "idx_log_partida_oponente")
   @@index([timestamp_inicio(sort: Desc)], map: "idx_log_partida_timestamp")
+  @@index([id_expedicao, etapa_expedicao])
   @@map("log_partida")
+}
+
+model Expedicao {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id_usuario    String    @db.Uuid
+  id_deck       String    @db.Uuid
+  seed          Int
+  status        String    @default("EM_ANDAMENTO") @db.VarChar(20)
+  etapa_atual   Int       @default(0)
+  trilha        Json
+  escolhas      String[]  @default([])
+  escolha_atual String?   @db.VarChar(80)
+  criado_em     DateTime  @default(now()) @db.Timestamptz(0)
+  atualizado_em DateTime  @default(now()) @db.Timestamptz(0)
+  finalizado_em DateTime? @db.Timestamptz(0)
+
+  usuario  Usuario      @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+  deck     Deck         @relation(fields: [id_deck], references: [id], onDelete: Restrict)
+  partidas LogPartida[]
+
+  @@index([id_usuario, criado_em(sort: Desc)])
+  @@map("expedicao")
 }
 
 model PartidaCarta {

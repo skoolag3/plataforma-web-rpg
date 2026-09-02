@@ -23,6 +23,8 @@ import { GachaService } from './gacha.service';
 import { RecompensasService } from './recompensas.service';
 import { CorreioService } from './correio.service';
 import { LerCorreioDto } from './dto/ler-correio.dto';
+import { EscolherRotaDto, IniciarExpedicaoDto } from './dto/expedicao.dto';
+import { ExpedicoesService } from './expedicoes.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller()
@@ -34,7 +36,38 @@ export class JogoController {
     private readonly gachaService: GachaService,
     private readonly recompensasService: RecompensasService,
     private readonly correioService: CorreioService,
+    private readonly expedicoesService: ExpedicoesService,
   ) {}
+
+  @Get('expedicoes/atual')
+  buscarExpedicaoAtual(@CurrentUser() usuario: AuthenticatedUser) {
+    return this.expedicoesService.buscarAtual(usuario.id);
+  }
+
+  @Post('expedicoes')
+  iniciarExpedicao(
+    @CurrentUser() usuario: AuthenticatedUser,
+    @Body() dto: IniciarExpedicaoDto,
+  ) {
+    return this.expedicoesService.criar(usuario.id, dto.idDeck);
+  }
+
+  @Post('expedicoes/:id/escolhas')
+  escolherRota(
+    @CurrentUser() usuario: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: EscolherRotaDto,
+  ) {
+    return this.expedicoesService.escolher(usuario.id, id, dto.idEscolha);
+  }
+
+  @Post('expedicoes/:id/abandonar')
+  abandonarExpedicao(
+    @CurrentUser() usuario: AuthenticatedUser,
+    @Param('id') id: string,
+  ) {
+    return this.expedicoesService.abandonar(usuario.id, id);
+  }
 
   @Get('correio')
   listarCorreio(@CurrentUser() usuario: AuthenticatedUser) {

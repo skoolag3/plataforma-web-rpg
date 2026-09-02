@@ -1,0 +1,419 @@
+.pagina {
+  min-height: calc(100dvh - 4.7rem);
+  color: var(--member-text);
+  background:
+    radial-gradient(
+      circle at 72% 8%,
+      rgba(124, 58, 237, 0.13),
+      transparent 29rem
+    ),
+    transparent;
+  padding: clamp(1.2rem, 3vw, 2.5rem) 1rem 4rem;
+}
+
+.container {
+  width: min(76rem, 100%);
+  margin: auto;
+}
+
+.estado {
+  display: grid;
+  min-height: calc(100dvh - 4.7rem);
+  place-items: center;
+  color: var(--member-muted);
+}
+
+.topo,
+.mapa > header,
+.rotas > header,
+.batalhaPendente,
+.resumoNova {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.topo {
+  margin-bottom: 1rem;
+}
+
+.topo span,
+.mapa > header span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #c4b5fd;
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.topo svg,
+.mapa > header svg {
+  width: 1rem;
+}
+
+.topo h1 {
+  margin: 0.25rem 0 0;
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  letter-spacing: -0.055em;
+}
+
+.topo p,
+.rotas p,
+.novaExpedicao p,
+.batalhaPendente p {
+  margin: 0.2rem 0 0;
+  color: var(--member-muted);
+  font-size: 0.76rem;
+}
+
+.btnAbandonar {
+  border: 1px solid rgba(248, 113, 113, 0.24);
+  border-radius: 0.65rem;
+  color: #fca5a5;
+  background: rgba(127, 29, 29, 0.12);
+  padding: 0.6rem 0.8rem;
+  font: inherit;
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+
+.erro {
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  border-radius: 0.75rem;
+  color: #fecaca;
+  background: rgba(69, 10, 10, 0.28);
+  padding: 0.7rem 0.8rem;
+  font-size: 0.72rem;
+}
+
+.mapa,
+.rotas,
+.novaExpedicao,
+.batalhaPendente {
+  border: 1px solid var(--member-border);
+  border-radius: var(--member-radius);
+  background: var(--member-surface);
+}
+
+.mapa {
+  padding: 1rem;
+}
+
+.mapa > header {
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--member-border);
+}
+
+.mapa > header strong {
+  font-size: 0.78rem;
+}
+
+.trilha {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  padding: 1.5rem 1rem 0.5rem;
+}
+
+.trilha::before {
+  position: absolute;
+  top: 2.55rem;
+  right: 12.5%;
+  left: 12.5%;
+  height: 2px;
+  background: rgba(148, 163, 184, 0.16);
+  content: "";
+}
+
+.ponto {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+}
+
+.ponto > span {
+  z-index: 1;
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  place-items: center;
+  border: 1px solid #31394a;
+  border-radius: 50%;
+  color: #7f8ba0;
+  background: #0b0e17;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.ponto svg {
+  width: 0.95rem;
+}
+
+.ponto[data-status="ATUAL"] > span {
+  border-color: #8b5cf6;
+  color: white;
+  background: #5b21b6;
+  box-shadow: 0 0 0 0.28rem rgba(139, 92, 246, 0.12);
+}
+
+.ponto[data-status="CONCLUIDA"] > span {
+  border-color: #65a30d;
+  color: #18220b;
+  background: #bef264;
+}
+
+.ponto small {
+  color: #8d96a8;
+  font-size: 0.62rem;
+}
+
+.rotas {
+  margin-top: 0.85rem;
+  padding: 1rem;
+}
+
+.rotas > header {
+  align-items: end;
+  margin-bottom: 0.85rem;
+}
+
+.rotas > header span {
+  color: #bef264;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.rotas h2,
+.novaExpedicao h2 {
+  margin: 0.2rem 0 0;
+  font-size: 1.25rem;
+}
+
+.gradeRotas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.gradeRotas > button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.7rem;
+  align-items: center;
+  border: 1px solid #293143;
+  border-radius: 0.85rem;
+  color: inherit;
+  background: rgba(7, 10, 17, 0.7);
+  padding: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+  transition: 180ms ease;
+}
+
+.gradeRotas > button:hover {
+  border-color: rgba(167, 139, 250, 0.45);
+  background: rgba(124, 58, 237, 0.1);
+  transform: translateY(-2px);
+}
+
+.gradeRotas > button:disabled,
+.btnIniciar:disabled,
+.btnAbandonar:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.gradeRotas > button > svg {
+  width: 0.9rem;
+  color: #6f788b;
+}
+
+.iconeRota {
+  display: grid;
+  width: 2.45rem;
+  height: 2.45rem;
+  place-items: center;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  border-radius: 0.7rem;
+  color: #c4b5fd;
+  background: rgba(91, 54, 168, 0.15);
+}
+
+.iconeRota svg {
+  width: 1.05rem;
+}
+
+.gradeRotas small,
+.gradeRotas strong {
+  display: block;
+}
+
+.gradeRotas small {
+  color: #a78bfa;
+  font-size: 0.56rem;
+  text-transform: uppercase;
+}
+
+.gradeRotas strong {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+}
+
+.gradeRotas p {
+  line-height: 1.45;
+}
+
+.batalhaPendente {
+  margin-top: 0.85rem;
+  padding: 1rem;
+}
+
+.batalhaPendente > svg {
+  width: 1.5rem;
+  color: #a78bfa;
+}
+
+.batalhaPendente > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.batalhaPendente button,
+.btnIniciar {
+  display: inline-flex;
+  min-height: 2.65rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(190, 242, 100, 0.2);
+  border-radius: 0.7rem;
+  color: white;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  padding: 0.65rem 0.9rem;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.batalhaPendente button svg,
+.btnIniciar svg {
+  width: 0.95rem;
+}
+
+.novaExpedicao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(13rem, 0.4fr) auto;
+  gap: 1rem;
+  align-items: end;
+  padding: 1.1rem;
+}
+
+.resumoNova {
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.resumoNova > svg {
+  width: 2rem;
+  color: #a78bfa;
+}
+
+.resumoNova > span {
+  flex: 1;
+}
+
+.resumoNova small {
+  color: #bef264;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.resumoNova > strong {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #ddd6fe;
+  font-size: 0.68rem;
+}
+
+.resumoNova > strong svg {
+  width: 0.85rem;
+}
+
+.novaExpedicao label {
+  color: #9ca3af;
+  font-size: 0.65rem;
+  font-weight: 750;
+}
+
+.novaExpedicao select {
+  width: 100%;
+  min-height: 2.65rem;
+  margin-top: 0.35rem;
+  border: 1px solid #30384a;
+  border-radius: 0.7rem;
+  color: white;
+  background: #0b0e17;
+  padding: 0 0.7rem;
+}
+
+@media (max-width: 820px) {
+  .gradeRotas,
+  .novaExpedicao {
+    grid-template-columns: 1fr;
+  }
+
+  .resumoNova {
+    flex-wrap: wrap;
+  }
+
+  .resumoNova > strong {
+    width: 100%;
+    padding-left: 3rem;
+  }
+}
+
+@media (max-width: 540px) {
+  .pagina {
+    padding: 1rem 0.65rem 3rem;
+  }
+
+  .topo {
+    align-items: flex-start;
+  }
+
+  .topo p {
+    max-width: 15rem;
+  }
+
+  .trilha {
+    gap: 0.25rem;
+    padding-inline: 0;
+  }
+
+  .ponto small {
+    font-size: 0.54rem;
+  }
+
+  .batalhaPendente {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .batalhaPendente button,
+  .btnIniciar {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gradeRotas > button {
+    transition: none;
+  }
+}

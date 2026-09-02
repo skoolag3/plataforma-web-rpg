@@ -7,6 +7,7 @@ import {
   Layers,
   LogOut,
   Menu,
+  Route,
   ShieldCheck,
   Sparkles,
   Swords,
@@ -44,6 +45,7 @@ const links = [
   { href: "/decks", label: "Decks", icon: Boxes },
   { href: "/gacha", label: "Gacha", icon: Sparkles },
   { href: "/loja", label: "Loja", icon: ShoppingBag },
+  { href: "/expedicao", label: "Expedição", icon: Route },
   { href: "/partida", label: "Arena", icon: Swords },
   { href: "/ranking", label: "Ranking", icon: Trophy },
 ];

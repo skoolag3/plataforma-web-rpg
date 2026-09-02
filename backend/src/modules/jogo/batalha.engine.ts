@@ -1,4 +1,4 @@
-export type Dificuldade = 'FACIL' | 'MEDIA' | 'DIFICIL';
+export type Dificuldade = 'FACIL' | 'MEDIA' | 'DIFICIL' | 'CHEFE';
 export type Lado = 'JOGADOR' | 'BOT';
 
 export type CartaBatalhaBase = {
@@ -41,6 +41,7 @@ const multiplicadorDificuldade: Record<Dificuldade, number> = {
   FACIL: 0.86,
   MEDIA: 1,
   DIFICIL: 1.18,
+  CHEFE: 1.35,
 };
 
 export function analisarResposta(resposta: string): Dificuldade {

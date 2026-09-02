@@ -65,8 +65,8 @@ export default function HomePage() {
               Entre na arena, enfrente o adversário e conquiste rubys para novas
               invocações.
             </p>
-            <Link href="/partida" className={styles.btnJogar}>
-              <Swords /> Entrar na arena <ChevronRight />
+            <Link href="/expedicao" className={styles.btnJogar}>
+              <Swords /> Iniciar expedição <ChevronRight />
             </Link>
             <small>O jogador sempre inicia o primeiro turno</small>
           </div>

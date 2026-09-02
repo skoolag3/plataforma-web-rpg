@@ -161,6 +161,7 @@ export type EstadoPartida = {
   turno: number;
   vez: "JOGADOR" | null;
   deck: { id: string; nome: string } | null;
+  expedicao: { id: string; etapa: number } | null;
   recompensas: { pontos: number; rubys: number };
   jogador: { ativa: number; cartas: CartaPartida[] };
   bot: { ativa: number; cartas: CartaPartida[] };
@@ -218,6 +219,65 @@ export function iniciarPartida(idDeck: string) {
 
 export function executarTurno(idPartida: string) {
   return jogoRequest<EstadoPartida>(`/partidas/${idPartida}/turnos`, {
+    method: "POST",
+  });
+}
+
+export type OpcaoExpedicao = {
+  id: string;
+  titulo: string;
+  descricao: string;
+  dificuldade: "FACIL" | "MEDIA" | "DIFICIL" | "CHEFE";
+  risco: string;
+};
+
+export type EstadoExpedicao = {
+  id: string;
+  status: "EM_ANDAMENTO" | "CONCLUIDA" | "FALHOU" | "ABANDONADA";
+  seed: number;
+  etapaAtual: number;
+  totalEtapas: number;
+  deck: { id: string; nome: string };
+  escolhas: string[];
+  etapas: Array<{
+    indice: number;
+    status: "CONCLUIDA" | "ATUAL" | "BLOQUEADA";
+    opcoes: OpcaoExpedicao[];
+  }>;
+  chefe: OpcaoExpedicao & {
+    status: "CONCLUIDA" | "ATUAL" | "BLOQUEADA";
+  };
+  opcoesAtuais: OpcaoExpedicao[];
+  partidaAtual: {
+    id: string;
+    status: "EM_ANDAMENTO" | "FINALIZADA";
+    resultado: "VITORIA" | "DERROTA" | "EMPATE" | null;
+  } | null;
+  recompensaFinal: number;
+  criadoEm: string;
+  finalizadoEm: string | null;
+};
+
+export function buscarExpedicaoAtual() {
+  return jogoRequest<EstadoExpedicao | null>("/expedicoes/atual");
+}
+
+export function iniciarExpedicao(idDeck: string) {
+  return jogoRequest<EstadoExpedicao>("/expedicoes", {
+    method: "POST",
+    body: JSON.stringify({ idDeck }),
+  });
+}
+
+export function escolherRotaExpedicao(idExpedicao: string, idEscolha: string) {
+  return jogoRequest<EstadoExpedicao>(`/expedicoes/${idExpedicao}/escolhas`, {
+    method: "POST",
+    body: JSON.stringify({ idEscolha }),
+  });
+}
+
+export function abandonarExpedicao(idExpedicao: string) {
+  return jogoRequest<EstadoExpedicao>(`/expedicoes/${idExpedicao}/abandonar`, {
     method: "POST",
   });
 }

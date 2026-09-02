@@ -22,6 +22,7 @@ type Props = {
   erro: string;
   onAtacar: () => void;
   onNovaBatalha: () => void;
+  textoFinal?: string;
 };
 
 function percentualHp(carta: CartaPartida) {
@@ -261,6 +262,7 @@ export function MesaBatalha({
   erro,
   onAtacar,
   onNovaBatalha,
+  textoFinal = "Escolher outro deck",
 }: Props) {
   const cartaJogador = partida.jogador.cartas[partida.jogador.ativa];
   const cartaBot = partida.bot.cartas[partida.bot.ativa];
@@ -271,7 +273,10 @@ export function MesaBatalha({
       <div className={styles.arena}>
         <header className={styles.arenaTopo}>
           <span>
-            <Bot /> Adversário básico
+            <Bot />{" "}
+            {partida.expedicao?.etapa === 3
+              ? "Chefe da Expedição"
+              : "Adversário da rota"}
           </span>
           <strong>Turno {partida.turno}</strong>
           <span>{partida.deck?.nome}</span>
@@ -305,7 +310,7 @@ export function MesaBatalha({
                 <p>Prepare o deck e tente novamente.</p>
               )}
               <button type="button" onClick={onNovaBatalha}>
-                Escolher outro deck
+                {textoFinal}
               </button>
             </div>
           ) : (

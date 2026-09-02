@@ -11,6 +11,7 @@ import { VitrineService } from './vitrine.service';
 import { BannerRotacaoService } from './banner-rotacao.service';
 import { RecompensasService } from './recompensas.service';
 import { CorreioService } from './correio.service';
+import { ExpedicoesService } from './expedicoes.service';
 
 @Module({
   controllers: [JogoController, NoticiasController, VitrineController],
@@ -24,6 +25,7 @@ import { CorreioService } from './correio.service';
     BannerRotacaoService,
     RecompensasService,
     CorreioService,
+    ExpedicoesService,
   ],
   exports: [BannerRotacaoService],
 })

@@ -12,11 +12,13 @@ import {
   type CartaBatalha,
   type CartaBatalhaBase,
   type EstadoBatalha,
+  type Dificuldade,
   type Lado,
 } from './batalha.engine';
 
 const partidaInclude = {
   deck: { select: { id: true, nome: true } },
+  expedicao: { select: { id: true, etapa_atual: true } },
   cartas: { orderBy: [{ lado: 'asc' as const }, { posicao: 'asc' as const }] },
   eventos: { orderBy: { sequencia: 'asc' as const } },
 } satisfies Prisma.LogPartidaInclude;
@@ -106,7 +108,15 @@ export class PartidasService {
     };
   }
 
-  async iniciar(idUsuario: string, idDeck: string) {
+  async iniciar(
+    idUsuario: string,
+    idDeck: string,
+    contexto?: {
+      idExpedicao: string;
+      etapa: number;
+      dificuldade: Dificuldade;
+    },
+  ) {
     const existente = await this.prisma.logPartida.findFirst({
       where: { id_usuario: idUsuario, resultado: 'EM_ANDAMENTO' },
       include: partidaInclude,
@@ -157,7 +167,7 @@ export class PartidasService {
     const estado = iniciarBatalha(
       cartasJogador.map((carta) => this.mapearCarta(carta)),
       cartasBot.map((carta) => this.mapearCarta(carta)),
-      'MEDIA',
+      contexto?.dificuldade ?? 'MEDIA',
     );
 
     try {
@@ -165,6 +175,8 @@ export class PartidasService {
         data: {
           id_usuario: idUsuario,
           id_deck_usado: deck.id,
+          id_expedicao: contexto?.idExpedicao,
+          etapa_expedicao: contexto?.etapa,
           resultado: 'EM_ANDAMENTO',
           turnos_jogados: 0,
           variacao_pontos: 0,
@@ -488,6 +500,12 @@ export class PartidasService {
       turno: partida.turnos_jogados,
       vez: partida.resultado === 'EM_ANDAMENTO' ? 'JOGADOR' : null,
       deck: partida.deck,
+      expedicao: partida.expedicao
+        ? {
+            id: partida.expedicao.id,
+            etapa: partida.etapa_expedicao ?? partida.expedicao.etapa_atual,
+          }
+        : null,
       recompensas: {
         pontos: partida.variacao_pontos ?? 0,
         rubys: partida.recompensa_rubys,
