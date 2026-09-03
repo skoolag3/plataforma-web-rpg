@@ -10,6 +10,7 @@ import {
   listarDecks,
   type Deck,
   type EstadoPartida,
+  type AcaoTurno,
 } from "../../lib/jogo";
 import styles from "../../styles/partida.module.css";
 import { MesaBatalha } from "./mesaBatalha";
@@ -61,12 +62,12 @@ export default function PartidaPage() {
     }
   }
 
-  async function atacar() {
+  async function executarAcao(acao: AcaoTurno) {
     if (!partida) return;
     setProcessando(true);
     setErro("");
     try {
-      setPartida(await executarTurno(partida.id));
+      setPartida(await executarTurno(partida.id, acao));
     } catch (error) {
       setErro(
         error instanceof Error
@@ -103,7 +104,7 @@ export default function PartidaPage() {
             partida={partida}
             processando={processando}
             erro={erro}
-            onAtacar={atacar}
+            onExecutarAcao={(acao) => void executarAcao(acao)}
             textoFinal={partida.expedicao ? "Voltar à expedição" : undefined}
             onNovaBatalha={() => {
               if (partida.expedicao) {

@@ -85,6 +85,8 @@ export type AdminCarta = {
   elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
   raridade: "UR" | "SSR" | "SR" | "R" | "N";
   classe: string | null;
+  idClasse: string | null;
+  classeDetalhes: AdminClasse | null;
   custo: number | null;
   hpBase: number;
   danoBase: number;
@@ -117,6 +119,7 @@ export type CreateAdminCartaPayload = {
   elemento: AdminCarta["elemento"];
   raridade: AdminCarta["raridade"];
   classe?: string;
+  idClasse?: string | null;
   custo?: number;
   hpBase: number;
   danoBase: number;
@@ -135,6 +138,28 @@ export type UpdateAdminCartaPayload = Partial<CreateAdminCartaPayload> & {
 
 export type AdminCartaImpacto = {
   usuariosComCarta: number;
+};
+
+export type AdminClasse = {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  prioridadeAtaque: number;
+  modificadorHp: number;
+  modificadorAtaque: number;
+  modificadorDefesa: number;
+  ativo: boolean;
+  totalCartas: number;
+};
+
+export type SalvarAdminClassePayload = {
+  nome: string;
+  descricao?: string;
+  prioridadeAtaque: number;
+  modificadorHp: number;
+  modificadorAtaque: number;
+  modificadorDefesa: number;
+  ativo?: boolean;
 };
 
 export type AdminUsuario = {
@@ -400,6 +425,27 @@ export function listarAdminCartas(
 
   const query = params.toString();
   return adminRequest<AdminCarta[]>(`/admin/cartas${query ? `?${query}` : ""}`);
+}
+
+export function listarAdminClasses() {
+  return adminRequest<AdminClasse[]>("/admin/classes");
+}
+
+export function criarAdminClasse(payload: SalvarAdminClassePayload) {
+  return adminRequest<AdminClasse>("/admin/classes", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function atualizarAdminClasse(
+  id: string,
+  payload: SalvarAdminClassePayload,
+) {
+  return adminRequest<AdminClasse>(`/admin/classes/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
 }
 
 export function criarAdminCarta(payload: CreateAdminCartaPayload) {

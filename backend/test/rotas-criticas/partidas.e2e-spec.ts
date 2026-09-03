@@ -52,12 +52,24 @@ describe('Rotas críticas - fluxo HTTP da partida', () => {
     await request(app.getHttpServer())
       .post('/partidas/partida-1/turnos')
       .set(comToken)
+      .send({ acao: 'DEFENDER' })
       .expect(201)
       .expect({ id: 'partida-1', turno: 2, status: 'EM_ANDAMENTO' });
 
     expect(partidasService.executarTurno).toHaveBeenCalledWith(
       usuarioTeste.id,
       'partida-1',
+      'DEFENDER',
     );
+  });
+
+  it('rejeita uma ação de batalha desconhecida', async () => {
+    await request(app.getHttpServer())
+      .post('/partidas/partida-1/turnos')
+      .set(comToken)
+      .send({ acao: 'FUGIR' })
+      .expect(400);
+
+    expect(partidasService.executarTurno).not.toHaveBeenCalled();
   });
 });

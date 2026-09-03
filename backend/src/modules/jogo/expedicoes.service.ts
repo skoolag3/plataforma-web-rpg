@@ -7,7 +7,11 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { PartidasService } from './partidas.service';
-import { gerarTrilhaExpedicao, type TrilhaExpedicao } from './expedicao.trilha';
+import {
+  gerarSeedExpedicao,
+  gerarTrilhaExpedicao,
+  type TrilhaExpedicao,
+} from './expedicao.trilha';
 
 const expedicaoInclude = {
   deck: { select: { id: true, nome: true } },
@@ -50,9 +54,7 @@ export class ExpedicoesService {
       throw new BadRequestException('Selecione um deck com 3 a 6 cartas.');
     }
 
-    const seed = Math.abs(
-      Math.trunc(Date.now() + this.hashTexto(`${idUsuario}:${idDeck}`)),
-    );
+    const seed = gerarSeedExpedicao(`${idUsuario}:${idDeck}`);
     await this.prisma.expedicao.create({
       data: {
         id_usuario: idUsuario,
@@ -296,12 +298,5 @@ export class ExpedicoesService {
       criadoEm: expedicao.criado_em,
       finalizadoEm: expedicao.finalizado_em,
     };
-  }
-
-  private hashTexto(texto: string) {
-    return [...texto].reduce(
-      (hash, caractere) => (hash * 31 + caractere.charCodeAt(0)) | 0,
-      0,
-    );
   }
 }

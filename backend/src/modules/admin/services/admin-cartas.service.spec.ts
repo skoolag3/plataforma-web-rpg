@@ -128,7 +128,9 @@ describe('AdminCartasService', () => {
     expect(prisma.carta.findMany).toHaveBeenCalledWith({
       where: expect.objectContaining({
         excluido_em: null,
-        passiva: { path: ['classe'], equals: 'Mago' },
+        classe: {
+          nome: { equals: 'Mago', mode: 'insensitive' },
+        },
         criado_em: { gte: expect.any(Date) },
       }),
       orderBy: [{ nome: 'asc' }],

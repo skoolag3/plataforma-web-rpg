@@ -18,10 +18,13 @@ import { AdminDashboardService } from '../../src/modules/admin/services/admin-da
 import { AuthController } from '../../src/modules/auth/controllers/auth.controller';
 import { AuthService } from '../../src/modules/auth/services/auth.service';
 import { ColecaoService } from '../../src/modules/jogo/colecao.service';
+import { CorreioService } from '../../src/modules/jogo/correio.service';
 import { DecksService } from '../../src/modules/jogo/decks.service';
+import { ExpedicoesService } from '../../src/modules/jogo/expedicoes.service';
 import { GachaService } from '../../src/modules/jogo/gacha.service';
 import { JogoController } from '../../src/modules/jogo/jogo.controller';
 import { PartidasService } from '../../src/modules/jogo/partidas.service';
+import { RecompensasService } from '../../src/modules/jogo/recompensas.service';
 import { LojaController } from '../../src/modules/loja/loja.controller';
 import { LojaService } from '../../src/modules/loja/loja.service';
 
@@ -101,6 +104,20 @@ export async function criarAppRotasCriticas() {
     girar: jest.fn(),
     resgatarDiario: jest.fn(),
   };
+  const recompensasService = {
+    obterStatus: jest.fn(),
+    resgatarSemanal: jest.fn(),
+  };
+  const correioService = {
+    listar: jest.fn(),
+    marcarComoLida: jest.fn(),
+  };
+  const expedicoesService = {
+    buscarAtual: jest.fn(),
+    criar: jest.fn(),
+    escolher: jest.fn(),
+    abandonar: jest.fn(),
+  };
   const lojaService = {
     pacotes: jest.fn(),
     criarCheckout: jest.fn(),
@@ -122,6 +139,9 @@ export async function criarAppRotasCriticas() {
       { provide: DecksService, useValue: decksService },
       { provide: PartidasService, useValue: partidasService },
       { provide: GachaService, useValue: gachaService },
+      { provide: RecompensasService, useValue: recompensasService },
+      { provide: CorreioService, useValue: correioService },
+      { provide: ExpedicoesService, useValue: expedicoesService },
       { provide: LojaService, useValue: lojaService },
       { provide: AdminDashboardService, useValue: adminDashboardService },
     ],
@@ -156,6 +176,9 @@ export async function criarAppRotasCriticas() {
       decksService,
       partidasService,
       gachaService,
+      recompensasService,
+      correioService,
+      expedicoesService,
       lojaService,
       adminDashboardService,
     },

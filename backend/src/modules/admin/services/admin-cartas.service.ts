@@ -12,6 +12,7 @@ import {
 } from '../dto/admin-carta.dto';
 
 const cartaInclude = {
+  classe: true,
   habilidades: {
     orderBy: { ordem: 'asc' as const },
     include: { habilidade: true },
@@ -47,7 +48,9 @@ export class AdminCartasService {
           : { excluido_em: null }),
         ...(filtros.raridade ? { raridade: filtros.raridade } : {}),
         ...(filtros.elemento ? { elemento: filtros.elemento } : {}),
-        ...(classe ? { passiva: { path: ['classe'], equals: classe } } : {}),
+        ...(classe
+          ? { classe: { nome: { equals: classe, mode: 'insensitive' } } }
+          : {}),
         ...(criadoDepoisDe ? { criado_em: { gte: criadoDepoisDe } } : {}),
         ...(status === 'ativas' ? { ativo: true } : {}),
         ...(status === 'inativas' ? { ativo: false } : {}),
@@ -136,8 +139,9 @@ export class AdminCartasService {
 
   async criar(dto: CreateAdminCartaDto) {
     await this.validarHabilidades(dto.habilidadesIds);
+    const classe = await this.resolverClasse(dto.idClasse, dto.classe);
     const carta = await this.prisma.carta.create({
-      data: this.toCreateData(dto),
+      data: this.toCreateData(dto, classe),
       include: cartaInclude,
     });
 
@@ -147,6 +151,10 @@ export class AdminCartasService {
   async atualizar(id: string, dto: UpdateAdminCartaDto) {
     const atual = await this.buscar(id);
     await this.validarHabilidades(dto.habilidadesIds);
+    const classe =
+      dto.idClasse !== undefined || dto.classe !== undefined
+        ? await this.resolverClasse(dto.idClasse, dto.classe)
+        : undefined;
 
     if (atual.ativo && dto.ativo === false && !dto.confirmarImpacto) {
       throw new BadRequestException(
@@ -157,7 +165,7 @@ export class AdminCartasService {
     const carta = await this.prisma.carta.update({
       where: { id },
       data: {
-        ...this.toUpdateData(dto, atual.raridade, atual.passiva),
+        ...this.toUpdateData(dto, atual.raridade, atual.passiva, classe),
         atualizado_em: new Date(),
       },
       include: cartaInclude,
@@ -197,7 +205,10 @@ export class AdminCartasService {
     };
   }
 
-  private toCreateData(dto: CreateAdminCartaDto): Prisma.CartaCreateInput {
+  private toCreateData(
+    dto: CreateAdminCartaDto,
+    classe: { id: string; nome: string } | null,
+  ): Prisma.CartaCreateInput {
     return {
       nome: dto.nome.trim(),
       elemento: dto.elemento,
@@ -205,7 +216,8 @@ export class AdminCartasService {
       hp_base: dto.hpBase,
       dano_base: dto.danoBase,
       defesa_base: dto.defesaBase,
-      passiva: this.buildPassiva(dto, dto.raridade),
+      passiva: this.buildPassiva(dto, dto.raridade, {}, classe?.nome),
+      ...(classe ? { classe: { connect: { id: classe.id } } } : {}),
       foto: dto.foto,
       moldura: dto.moldura,
       config_visual: dto.configVisual as Prisma.InputJsonValue | undefined,
@@ -218,6 +230,7 @@ export class AdminCartasService {
     dto: UpdateAdminCartaDto,
     raridadeAtual: string,
     passivaAtual: Record<string, unknown>,
+    classe?: { id: string; nome: string } | null,
   ): Prisma.CartaUpdateInput {
     return {
       ...(dto.nome !== undefined ? { nome: dto.nome.trim() } : {}),
@@ -228,6 +241,7 @@ export class AdminCartasService {
       ...(dto.defesaBase !== undefined ? { defesa_base: dto.defesaBase } : {}),
       ...(dto.passiva !== undefined ||
       dto.classe !== undefined ||
+      dto.idClasse !== undefined ||
       dto.custo !== undefined ||
       dto.raridade !== undefined
         ? {
@@ -235,8 +249,14 @@ export class AdminCartasService {
               dto,
               dto.raridade ?? raridadeAtual,
               passivaAtual,
+              classe?.nome,
             ),
           }
+        : {}),
+      ...(classe !== undefined
+        ? classe
+          ? { classe: { connect: { id: classe.id } } }
+          : { classe: { disconnect: true } }
         : {}),
       ...(dto.foto !== undefined ? { foto: dto.foto } : {}),
       ...(dto.moldura !== undefined ? { moldura: dto.moldura } : {}),
@@ -289,14 +309,18 @@ export class AdminCartasService {
     dto: {
       passiva?: Record<string, unknown>;
       classe?: string;
+      idClasse?: string | null;
     },
     raridade = 'N',
     passivaAtual: Record<string, unknown> = {},
+    nomeClasse?: string,
   ) {
     return {
       ...passivaAtual,
       ...(dto.passiva ?? {}),
-      ...(dto.classe !== undefined ? { classe: dto.classe } : {}),
+      ...(dto.classe !== undefined || dto.idClasse !== undefined
+        ? { classe: nomeClasse ?? null }
+        : {}),
       custo: obterValorVendaPorRaridade(raridade),
     };
   }
@@ -314,7 +338,20 @@ export class AdminCartasService {
       nome: carta.nome,
       elemento: carta.elemento,
       raridade: carta.raridade,
-      classe: typeof passiva.classe === 'string' ? passiva.classe : null,
+      classe:
+        carta.classe?.nome ??
+        (typeof passiva.classe === 'string' ? passiva.classe : null),
+      idClasse: carta.id_classe,
+      classeDetalhes: carta.classe
+        ? {
+            id: carta.classe.id,
+            nome: carta.classe.nome,
+            prioridadeAtaque: carta.classe.prioridade_ataque,
+            modificadorHp: carta.classe.modificador_hp,
+            modificadorAtaque: carta.classe.modificador_ataque,
+            modificadorDefesa: carta.classe.modificador_defesa,
+          }
+        : null,
       custo: obterValorVendaPorRaridade(carta.raridade),
       hpBase: carta.hp_base,
       danoBase: carta.dano_base,
@@ -339,5 +376,20 @@ export class AdminCartasService {
         ordem: vinculo.ordem,
       })),
     };
+  }
+
+  private async resolverClasse(idClasse?: string | null, nomeClasse?: string) {
+    if (!idClasse && !nomeClasse?.trim()) return null;
+    const classe = await this.prisma.classeCarta.findFirst({
+      where: idClasse
+        ? { id: idClasse, ativo: true }
+        : {
+            nome: { equals: nomeClasse!.trim(), mode: 'insensitive' },
+            ativo: true,
+          },
+      select: { id: true, nome: true },
+    });
+    if (!classe) throw new BadRequestException('Selecione uma classe ativa.');
+    return classe;
   }
 }

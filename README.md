@@ -11,12 +11,16 @@ Plataforma web de RPG de cartas desenvolvida como Trabalho de Conclusão de Curs
 - coleção do jogador e construção de decks com 3 a 6 cartas únicas;
 - seleção de deck equipado;
 - gacha com custo em rubys, giro unitário ou de dez, pity e recompensa diária;
-- batalha 1x1 por turnos contra adversário controlado pelo servidor;
+- recompensa semanal e mensagens periódicas disponíveis na caixa de entrada;
+- batalha 1x1 por turnos contra adversário controlado pelo servidor, com decisões de atacar ou defender;
 - persistência de partidas, snapshots das cartas e eventos de auditoria por turno;
 - recompensas em rubys registradas em ledger relacional;
+- expedição procedural com três etapas de escolhas, confronto final e recompensa própria;
 - painel administrativo de usuários, cartas, habilidades e notícias;
 - ajuste administrativo de coleção e rubys com motivo e log de autoria;
-- criação, teste, publicação e vínculo de habilidades às cartas;
+- criação, teste, publicação e vínculo de habilidades automáticas às cartas;
+- execução das habilidades publicadas pelo motor de batalha, incluindo dano, cura, buff, debuff, escudo, evasão e roubo de vida;
+- classes de cartas configuráveis pelo painel, com prioridade de ataque e modificadores de HP, ataque e defesa;
 - notícias públicas com imagem, conteúdo, anexos e página por ID;
 - landing page alimentada pelas cartas e notícias publicadas no banco.
 - loja de Rubys com pacotes, Checkout hospedado pelo Stripe e crédito confirmado por webhook idempotente;
@@ -27,7 +31,6 @@ Plataforma web de RPG de cartas desenvolvida como Trabalho de Conclusão de Curs
 
 ### Parcial ou demonstrativo
 
-- o motor de batalha executa passivas do formato legado salvo na carta; o catálogo novo de habilidades já possui validação, simulação, testes e vínculo, mas ainda precisa ser consumido integralmente pela batalha;
 - o adversário atual é básico e a dificuldade é calculada no servidor, sem IA avançada;
 - a tela administrativa de banners permite consultar a rotação e forçar um banner, mas ainda não possui CRUD completo de banners e pacotes;
 - o pagamento por Stripe está integrado em modo de teste; Pix e operação em produção ainda não foram configurados;
@@ -70,7 +73,7 @@ backend/
   src/common/             guards, decorators e filtro HTTP
   src/modules/auth/       autenticação e recuperação de conta
   src/modules/perfil/     dados e mídia do jogador
-  src/modules/jogo/       coleção, decks, gacha, batalha e notícias públicas
+  src/modules/jogo/       coleção, decks, gacha, expedição, batalha e notícias públicas
   src/modules/admin/      manutenção e auditoria administrativa
 frontend/
   app/(public)/           landing e autenticação
@@ -106,6 +109,12 @@ Preencha ao menos `DATABASE_URL` e `JWT_SECRET` em `backend/.env`. A API não in
 npm --prefix backend run prisma:generate
 npm --prefix backend run prisma:migrate
 npm --prefix backend run seed:habilidades
+```
+
+Em ambientes publicados, aplique as migrações já versionadas sem criar uma nova:
+
+```powershell
+npm --prefix backend run prisma:deploy
 ```
 
 Para iniciar frontend e backend juntos:
@@ -157,6 +166,15 @@ Copie o segredo `whsec_...` exibido pela CLI para `STRIPE_WEBHOOK_SECRET` e rein
 
 ## Atualizações recentes
 
+- criação da Expedição com trilha procedural, três decisões, chefe final, integração com batalhas e recompensa de 100 Rubys;
+- ações de atacar e defender adicionadas ao combate, com redução de dano na postura defensiva;
+- cadastro e edição de classes no painel administrativo, com prioridade para definir quem ataca primeiro e modificadores percentuais de atributos;
+- habilidades publicadas integradas ao motor de batalha por meio de snapshots, gatilhos, requisitos, escalas e duração de efeitos;
+- passivas funcionais para dano, cura, buff, debuff, escudo, evasão, roubo de vida e substituição do ataque comum;
+- nomes e descrições das habilidades vinculadas exibidos na coleção e durante a batalha;
+- correção da recompensa final da Expedição no ledger, incluindo o motivo `EXPEDICAO_CONCLUIDA` na restrição do PostgreSQL;
+- senha fortalecida com mínimo de oito caracteres, letra maiúscula, número e caractere especial;
+- relatório de autenticação criado em `RELATORIO_TESTES_AUTENTICACAO.md`;
 - correção dos motivos do ledger usados pelo gacha para respeitar as constraints do PostgreSQL;
 - animação de invocação e revelação das cartas no gacha;
 - retorno da compra do Stripe direcionado à loja, sem interferir na rota do gacha;
@@ -166,6 +184,34 @@ Copie o segredo `whsec_...` exibido pela CLI para `STRIPE_WEBHOOK_SECRET` e rein
 - scroll único e personalizado no modal de gerenciamento de usuários;
 - avatar e resumo rápido do usuário exibidos no cabeçalho administrativo.
 - editor administrativo de cartas e estilos do gerenciamento de usuários divididos em módulos menores, sem arquivos da aplicação acima de 1.000 linhas.
+
+## Regras atuais de combate
+
+- cada deck válido possui de 3 a 6 cartas únicas;
+- a prioridade de ataque vem da classe da carta: o menor número age primeiro e o jogador vence empates;
+- a classe pode modificar HP, ataque e defesa da carta antes do início da batalha;
+- defender reduz o dano do ataque inimigo naquele turno;
+- habilidades são automáticas e podem reagir à entrada em campo, ao ataque, ao recebimento de dano e ao início ou fim do turno;
+- requisitos podem considerar HP atual, turno mínimo ou quantidade de ataques realizados;
+- efeitos temporários e escudos expiram conforme a duração configurada;
+- estado, efeitos e eventos são persistidos pelo backend, sem confiar em cálculos do navegador.
+
+## Fluxo da Expedição
+
+1. O jogador seleciona um deck válido e inicia uma jornada.
+2. Uma trilha reproduzível é gerada por seed, com três etapas de rotas aleatórias.
+3. Cada escolha inicia uma batalha com a dificuldade indicada pela rota.
+4. Uma vitória libera a próxima etapa; uma derrota encerra a Expedição.
+5. Após as três etapas, o jogador enfrenta o chefe final.
+6. A primeira conclusão registra 100 Rubys no ledger e finaliza a jornada.
+
+## Versionamento de trabalho
+
+- `master`: base estável do projeto;
+- `backup-pre-aprovacao`: cópia preservada do estado anterior às mudanças de progressão;
+- `progresso`: desenvolvimento atual da Expedição, classes e habilidades de combate.
+
+Alterações novas devem continuar em `progresso`. A branch de backup não deve receber mudanças comuns de desenvolvimento.
 
 ## Segurança aplicada
 
@@ -203,7 +249,7 @@ npm --prefix backend audit --omit=dev
 npm --prefix frontend audit --omit=dev
 ```
 
-Os testes unitários cobrem o motor básico de batalha, validação e simulação de habilidades, regras administrativas de cartas, perfil e partes do gacha. A suíte E2E de rotas críticas valida login e sessão, criação e validação de decks, início e turno de partida, checkout e corpo bruto do webhook Stripe, ranking e histórico. Esses testes HTTP usam services isolados para serem rápidos e não alterarem o banco ou criarem pagamentos reais.
+Os testes unitários cobrem o motor de batalha, prioridade das classes, decisões do turno, execução das habilidades, validação e simulação de efeitos, regras administrativas de cartas e classes, perfil, recompensas e partes do gacha. A suíte E2E de rotas críticas valida login e sessão, regras de senha, criação e validação de decks, início e turno de partida, checkout e corpo bruto do webhook Stripe, ranking e histórico. Esses testes HTTP usam services isolados para serem rápidos e não alterarem o banco ou criarem pagamentos reais.
 
 ## Regra econômica
 

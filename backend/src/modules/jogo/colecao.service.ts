@@ -19,6 +19,11 @@ export class ColecaoService {
           : {}),
       },
       include: {
+        habilidades: {
+          where: { habilidade: { status: 'PUBLICADA' } },
+          include: { habilidade: true },
+          orderBy: { ordem: 'asc' },
+        },
         inventarios: {
           where: { id_usuario: idUsuario },
           select: { quantidade: true, criado_em: true },
@@ -37,6 +42,20 @@ export class ColecaoService {
             ? (carta.passiva as Record<string, unknown>)
             : {};
         const quantidade = carta.inventarios[0]?.quantidade ?? 0;
+        const habilidades = carta.habilidades.map((item) => item.habilidade);
+        const passivaExibicao =
+          typeof passiva.nome === 'string' || !habilidades.length
+            ? passiva
+            : {
+                ...passiva,
+                nome: habilidades
+                  .map((habilidade) => habilidade.nome)
+                  .join(', '),
+                descricao: habilidades
+                  .map((habilidade) => habilidade.descricao)
+                  .filter(Boolean)
+                  .join(' '),
+              };
 
         return {
           id: carta.id,
@@ -49,7 +68,7 @@ export class ColecaoService {
           hpBase: carta.hp_base,
           danoBase: carta.dano_base,
           defesaBase: carta.defesa_base,
-          passiva,
+          passiva: passivaExibicao,
           foto: carta.foto,
           moldura: carta.moldura,
           configVisual: carta.config_visual,

@@ -227,7 +227,9 @@ model Carta {
   criado_em     DateTime? @default(now()) @db.Timestamptz(0)
   atualizado_em DateTime? @default(now()) @db.Timestamptz(0)
   excluido_em   DateTime? @db.Timestamptz(0)
+  id_classe     String?   @db.Uuid
 
+  classe           ClasseCarta?      @relation(fields: [id_classe], references: [id], onDelete: SetNull)
   banners          BannerCarta[]
   gachaLogs        LogGacha[]
   inventarios      Inventario[]
@@ -236,7 +238,26 @@ model Carta {
   partidasCartas   PartidaCarta[]
   perfisComMoldura PerfilUsuario[]   @relation("CartaMolduraPerfil")
 
+  @@index([id_classe])
   @@map("carta")
+}
+
+model ClasseCarta {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome               String   @unique @db.VarChar(80)
+  descricao          String?  @db.VarChar(255)
+  prioridade_ataque  Int      @default(3)
+  modificador_hp     Int      @default(0)
+  modificador_ataque Int      @default(0)
+  modificador_defesa Int      @default(0)
+  ativo              Boolean  @default(true)
+  criado_em          DateTime @default(now()) @db.Timestamptz(0)
+  atualizado_em      DateTime @default(now()) @db.Timestamptz(0)
+
+  cartas Carta[]
+
+  @@index([ativo, prioridade_ataque])
+  @@map("classe_carta")
 }
 
 model Habilidade {

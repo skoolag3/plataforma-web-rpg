@@ -24,9 +24,11 @@ import {
   atualizarAdminCarta,
   criarAdminCarta,
   listarAdminCartas,
+  listarAdminClasses,
   removerAdminCarta,
   uploadCartaAssets,
   type AdminCarta,
+  type AdminClasse,
   type CreateAdminCartaPayload,
   type UpdateAdminCartaPayload,
 } from "../../lib/admin";
@@ -52,7 +54,6 @@ import {
   PreviewCarta,
   Raridade,
   StatusSelect,
-  classesCarta,
   classeRaridade,
   obterElementoVisual,
   raridades,
@@ -61,6 +62,7 @@ import { AdminLayout } from "./adminShared";
 import { AdminCartaHabilidades } from "./adminCartaHabilidades";
 import { CartaEditor } from "./adminCartaEditor";
 import { combinarEstilos } from "./combinarEstilos";
+import { AdminClasseSelect } from "./adminClasseSelect";
 
 const styles = combinarEstilos(
   sharedStyles,
@@ -74,6 +76,7 @@ type CartaFormState = {
   raridade: CreateAdminCartaPayload["raridade"];
   elemento: CreateAdminCartaPayload["elemento"];
   classe: string;
+  idClasse: string;
   custo: string;
   hpBase: string;
   danoBase: string;
@@ -98,6 +101,7 @@ function criarFormularioNovaCarta(): CartaFormState {
     raridade: "N",
     elemento: "natureza",
     classe: "",
+    idClasse: "",
     custo: String(obterValorVendaCarta("N")),
     hpBase: "100",
     danoBase: "20",
@@ -128,6 +132,7 @@ export function Cartas() {
   const [filtroPeriodo, setFiltroPeriodo] = useState("");
   const [ordem, setOrdem] = useState("recentes");
   const [cartasApi, setCartasApi] = useState<AdminCarta[]>([]);
+  const [classesApi, setClassesApi] = useState<AdminClasse[]>([]);
   const [selecionada, setSelecionada] = useState<AdminCarta | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
@@ -142,6 +147,17 @@ export function Cartas() {
   useEffect(() => {
     if (feedback) notificarSucesso(feedback);
   }, [feedback]);
+
+  useEffect(() => {
+    const carregarClasses = () =>
+      listarAdminClasses()
+        .then(setClassesApi)
+        .catch(() => setClassesApi([]));
+    void carregarClasses();
+    window.addEventListener("admin-classes-updated", carregarClasses);
+    return () =>
+      window.removeEventListener("admin-classes-updated", carregarClasses);
+  }, []);
 
   function selecionarCarta(carta: AdminCarta | null) {
     if (
@@ -468,9 +484,9 @@ export function Cartas() {
             onChange={(event) => setFiltroClasse(event.target.value)}
           >
             <option value="">Classe</option>
-            {classesCarta.map((classe) => (
-              <option key={classe} value={classe}>
-                {classe}
+            {classesApi.map((classe) => (
+              <option key={classe.id} value={classe.nome}>
+                {classe.nome}
               </option>
             ))}
           </select>
@@ -577,6 +593,7 @@ export function NovaCarta() {
       raridade: padrao.raridade,
       elemento: padrao.elemento,
       classe: padrao.classe,
+      idClasse: padrao.idClasse,
       habilidadesIds: padrao.habilidadesIds,
       ativo: padrao.ativo,
     }));
@@ -622,6 +639,7 @@ export function NovaCarta() {
         raridade: form.raridade,
         elemento: form.elemento,
         classe: form.classe.trim() || undefined,
+        idClasse: form.idClasse || null,
         custo: toNumber(form.custo, "Valor de venda"),
         hpBase: toNumber(form.hpBase, "HP"),
         danoBase: toNumber(form.danoBase, "ATK"),
@@ -750,20 +768,16 @@ export function NovaCarta() {
                   }}
                 />
               </label>
-              <label>
-                Classe
-                <select
-                  value={form.classe}
-                  onChange={(event) =>
-                    updateField("classe", event.target.value)
-                  }
-                >
-                  <option value="">Selecione</option>
-                  {classesCarta.map((classe) => (
-                    <option key={classe}>{classe}</option>
-                  ))}
-                </select>
-              </label>
+              <AdminClasseSelect
+                idClasse={form.idClasse}
+                aoSelecionar={(classe) =>
+                  setForm((atual) => ({
+                    ...atual,
+                    idClasse: classe?.id ?? "",
+                    classe: classe?.nome ?? "",
+                  }))
+                }
+              />
               <AdminCartaHabilidades
                 selecionadasIds={form.habilidadesIds}
                 aoAlterar={(ids) => updateField("habilidadesIds", ids)}

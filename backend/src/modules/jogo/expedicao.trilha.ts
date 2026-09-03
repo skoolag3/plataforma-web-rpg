@@ -13,6 +13,20 @@ export type TrilhaExpedicao = {
   chefe: OpcaoRota;
 };
 
+const maiorInteiroPostgres = 2_147_483_647;
+
+export function gerarSeedExpedicao(
+  referencia: string,
+  timestamp = Date.now(),
+) {
+  const hash = [...referencia].reduce(
+    (valor, caractere) =>
+      (valor * 31 + caractere.charCodeAt(0)) % maiorInteiroPostgres,
+    0,
+  );
+  return Math.abs((timestamp + hash) % maiorInteiroPostgres) || 1;
+}
+
 export function gerarTrilhaExpedicao(seed: number): TrilhaExpedicao {
   const random = criarRandom(seed);
   const modelos: Omit<OpcaoRota, 'id'>[] = [

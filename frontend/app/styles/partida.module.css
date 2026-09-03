@@ -662,36 +662,74 @@
 .acoesBatalha {
   display: grid;
   justify-items: center;
+  gap: 0.45rem;
   padding: 0.35rem 0.5rem 0.1rem;
 }
-.acoesBatalha button {
-  display: flex;
-  width: min(18rem, 100%);
+
+.gradeAcoes {
+  display: grid;
+  width: min(34rem, 100%);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.gradeAcoes button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   min-height: 2.6rem;
   align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  border: 1px solid rgba(190, 242, 100, 0.28);
+  gap: 0.5rem;
+  border: 1px solid rgba(167, 139, 250, 0.25);
   border-radius: 0.7rem;
-  background: linear-gradient(135deg, #6d28d9, #8b5cf6 58%, #84cc16);
-  color: #fff;
+  background: rgba(91, 33, 182, 0.13);
+  color: #e9e3ff;
+  padding: 0.5rem 0.65rem;
+  text-align: left;
   cursor: pointer;
   font: inherit;
-  font-size: 0.72rem;
-  font-weight: 900;
+  transition: 160ms ease;
 }
-.acoesBatalha button:disabled {
+
+.gradeAcoes button:hover:not(:disabled) {
+  border-color: #8b5cf6;
+  background: rgba(109, 40, 217, 0.24);
+  transform: translateY(-1px);
+}
+
+.gradeAcoes button[data-acao="DEFENDER"] {
+  border-color: rgba(96, 165, 250, 0.25);
+  background: rgba(30, 64, 175, 0.12);
+}
+
+.gradeAcoes button:disabled {
   cursor: wait;
   filter: saturate(0.25);
   opacity: 0.55;
 }
-.acoesBatalha button svg {
-  width: 0.9rem;
+
+.gradeAcoes button svg {
+  width: 1rem;
+  color: #a78bfa;
 }
-.acoesBatalha small {
-  margin-top: 0.35rem;
+
+.gradeAcoes button span,
+.gradeAcoes button strong,
+.gradeAcoes button small {
+  display: block;
+}
+
+.gradeAcoes button strong {
+  font-size: 0.65rem;
+}
+
+.gradeAcoes button small,
+.dicaAcoes {
   color: #657087;
   font-size: 0.5rem;
+}
+
+.gradeAcoes button small {
+  margin-top: 0.08rem;
 }
 
 .logBatalha {

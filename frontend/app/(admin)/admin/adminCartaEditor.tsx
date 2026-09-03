@@ -29,13 +29,13 @@ import {
   ControleVisualCarta,
   ElementoSelect,
   PreviewCarta,
-  classesCarta,
   classeRaridade,
   obterElementoVisual,
   raridades,
 } from "./adminCartaVisual";
 import { AdminCartaHabilidades } from "./adminCartaHabilidades";
 import { combinarEstilos } from "./combinarEstilos";
+import { AdminClasseSelect } from "./adminClasseSelect";
 
 const styles = combinarEstilos(
   sharedStyles,
@@ -49,6 +49,7 @@ type CartaFormState = {
   raridade: CreateAdminCartaPayload["raridade"];
   elemento: CreateAdminCartaPayload["elemento"];
   classe: string;
+  idClasse: string;
   custo: string;
   hpBase: string;
   danoBase: string;
@@ -130,6 +131,7 @@ export function CartaEditor({
       raridade: salvo.raridade,
       elemento: salvo.elemento,
       classe: salvo.classe,
+      idClasse: salvo.idClasse,
       habilidadesIds: salvo.habilidadesIds,
       ativo: salvo.ativo,
     }));
@@ -174,6 +176,7 @@ export function CartaEditor({
         raridade: form.raridade,
         elemento: form.elemento,
         classe: form.classe.trim() || undefined,
+        idClasse: form.idClasse || null,
         custo: toNumber(form.custo, "Valor de venda"),
         hpBase: toNumber(form.hpBase, "HP"),
         danoBase: toNumber(form.danoBase, "ATK"),
@@ -349,26 +352,17 @@ export function CartaEditor({
                   }}
                 />
               </label>
-              <label>
-                Classe
-                <select
-                  value={form.classe}
-                  onChange={(event) =>
-                    updateField("classe", event.target.value)
-                  }
-                >
-                  <option value="">Selecione</option>
-                  {form.classe &&
-                  !classesCarta.includes(
-                    form.classe as (typeof classesCarta)[number],
-                  ) ? (
-                    <option value={form.classe}>{form.classe} (legada)</option>
-                  ) : null}
-                  {classesCarta.map((classe) => (
-                    <option key={classe}>{classe}</option>
-                  ))}
-                </select>
-              </label>
+              <AdminClasseSelect
+                idClasse={form.idClasse}
+                classeLegada={form.classe}
+                aoSelecionar={(classe) =>
+                  setForm((atual) => ({
+                    ...atual,
+                    idClasse: classe?.id ?? "",
+                    classe: classe?.nome ?? "",
+                  }))
+                }
+              />
               <AdminCartaHabilidades
                 selecionadasIds={form.habilidadesIds}
                 habilidadesIniciais={carta.habilidades}
@@ -643,6 +637,7 @@ function cartaToForm(carta: AdminCarta): CartaFormState {
     raridade: carta.raridade,
     elemento: carta.elemento,
     classe: carta.classe ?? "",
+    idClasse: carta.idClasse ?? "",
     custo: String(carta.custo ?? obterValorVendaCarta(carta.raridade)),
     hpBase: carta.hpBase.toString(),
     danoBase: carta.danoBase.toString(),

@@ -1,6 +1,13 @@
-import { gerarTrilhaExpedicao } from './expedicao.trilha';
+import { gerarSeedExpedicao, gerarTrilhaExpedicao } from './expedicao.trilha';
 
 describe('trilha da expedição', () => {
+  it('gera um seed compatível com INTEGER do PostgreSQL', () => {
+    const seed = gerarSeedExpedicao('usuario:deck', 1_756_857_600_000);
+
+    expect(seed).toBeGreaterThan(0);
+    expect(seed).toBeLessThanOrEqual(2_147_483_647);
+  });
+
   it('gera três escolhas em cada uma das três etapas e um chefe', () => {
     const trilha = gerarTrilhaExpedicao(12345);
 

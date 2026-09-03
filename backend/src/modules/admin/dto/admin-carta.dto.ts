@@ -34,6 +34,10 @@ export class CreateAdminCartaDto {
   classe?: string;
 
   @IsOptional()
+  @IsUUID('4')
+  idClasse?: string | null;
+
+  @IsOptional()
   @IsInt()
   @Min(0)
   @Max(10000)
@@ -102,6 +106,10 @@ export class UpdateAdminCartaDto {
   @IsString()
   @MaxLength(80)
   classe?: string;
+
+  @IsOptional()
+  @IsUUID('4')
+  idClasse?: string | null;
 
   @IsOptional()
   @IsInt()

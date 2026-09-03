@@ -24,6 +24,7 @@ import { RecompensasService } from './recompensas.service';
 import { CorreioService } from './correio.service';
 import { LerCorreioDto } from './dto/ler-correio.dto';
 import { EscolherRotaDto, IniciarExpedicaoDto } from './dto/expedicao.dto';
+import { ExecutarTurnoDto } from './dto/executar-turno.dto';
 import { ExpedicoesService } from './expedicoes.service';
 
 @UseGuards(JwtAuthGuard)
@@ -138,8 +139,9 @@ export class JogoController {
   executarTurno(
     @CurrentUser() usuario: AuthenticatedUser,
     @Param('id') id: string,
+    @Body() dto: ExecutarTurnoDto,
   ) {
-    return this.partidasService.executarTurno(usuario.id, id);
+    return this.partidasService.executarTurno(usuario.id, id, dto.acao);
   }
 
   @Get('partidas')

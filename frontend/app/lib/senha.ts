@@ -1,10 +1,10 @@
-export const TAMANHO_MINIMO_SENHA = 12;
+export const TAMANHO_MINIMO_SENHA = 8;
 export const TAMANHO_MAXIMO_SENHA = 72;
 
 export const requisitosSenha = [
   {
     id: "tamanho",
-    texto: "12 caracteres ou mais",
+    texto: "8 caracteres ou mais",
     validar: (senha: string) => senha.length >= TAMANHO_MINIMO_SENHA,
   },
   {

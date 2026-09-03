@@ -7,20 +7,19 @@ import {
   Sparkles,
   Swords,
   Trophy,
-  Zap,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { CartaMontada } from "../../components/cartaMontada";
 import { CartaVerso } from "../../components/cartaVerso";
 import { IconeRuby } from "../../components/iconeRuby";
-import type { CartaPartida, EstadoPartida } from "../../lib/jogo";
+import type { AcaoTurno, CartaPartida, EstadoPartida } from "../../lib/jogo";
 import styles from "../../styles/partida.module.css";
 
 type Props = {
   partida: EstadoPartida;
   processando: boolean;
   erro: string;
-  onAtacar: () => void;
+  onExecutarAcao: (acao: AcaoTurno) => void;
   onNovaBatalha: () => void;
   textoFinal?: string;
 };
@@ -38,6 +37,8 @@ function CartaNaMesa({
 }) {
   const passiva =
     typeof carta.passiva.nome === "string" ? carta.passiva.nome : "Sem passiva";
+  const classe =
+    typeof carta.passiva.classe === "string" ? carta.passiva.classe : null;
   return (
     <article className={`${styles.cartaCampo} ${styles[lado]}`}>
       <span className={styles.donoCarta} data-lado={lado}>
@@ -48,6 +49,7 @@ function CartaNaMesa({
           <strong>{carta.nome}</strong>
           <small>
             {carta.raridade} · {carta.elemento}
+            {classe ? ` · ${classe}` : ""} · prioridade {carta.prioridadeAtaque}
           </small>
         </span>
         <b>
@@ -102,21 +104,6 @@ function CartaNaMesa({
             <em>
               {carta.defesa > carta.defesaBase ? "+" : ""}
               {carta.defesa - carta.defesaBase}
-            </em>
-          ) : null}
-        </span>
-        <span
-          className={
-            carta.velocidade !== carta.velocidadeBase
-              ? styles.atributoAlterado
-              : ""
-          }
-        >
-          <Zap /> VEL <b>{carta.velocidade}</b>
-          {carta.velocidade !== carta.velocidadeBase ? (
-            <em>
-              {carta.velocidade > carta.velocidadeBase ? "+" : ""}
-              {carta.velocidade - carta.velocidadeBase}
             </em>
           ) : null}
         </span>
@@ -260,7 +247,7 @@ export function MesaBatalha({
   partida,
   processando,
   erro,
-  onAtacar,
+  onExecutarAcao,
   onNovaBatalha,
   textoFinal = "Escolher outro deck",
 }: Props) {
@@ -316,11 +303,35 @@ export function MesaBatalha({
           ) : (
             <div className={styles.acoesBatalha}>
               {erro ? <p className={styles.erro}>{erro}</p> : null}
-              <button type="button" onClick={onAtacar} disabled={processando}>
-                <Swords />{" "}
-                {processando ? "Servidor processando turno..." : "Atacar"}
-              </button>
-              <small>Você inicia. O adversário responde automaticamente.</small>
+              <div className={styles.gradeAcoes}>
+                <button
+                  type="button"
+                  data-acao="ATACAR"
+                  onClick={() => onExecutarAcao("ATACAR")}
+                  disabled={processando}
+                >
+                  <Swords />
+                  <span>
+                    <strong>Atacar</strong>
+                    <small>Dano normal</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-acao="DEFENDER"
+                  onClick={() => onExecutarAcao("DEFENDER")}
+                  disabled={processando}
+                >
+                  <Shield />
+                  <span>
+                    <strong>Defender</strong>
+                    <small>Reduz 55% do dano</small>
+                  </span>
+                </button>
+              </div>
+              <small className={styles.dicaAcoes}>
+                Escolha sua ação. O adversário responde automaticamente.
+              </small>
             </div>
           )}
         </div>

@@ -37,6 +37,41 @@ describe('Rotas críticas - login e autenticação', () => {
     });
   });
 
+  it('aceita cadastro com senha de 8 caracteres e todos os requisitos', async () => {
+    authService.registrar.mockResolvedValue({ message: 'Cadastro realizado.' });
+
+    const cadastro = {
+      nome: 'Usuário Teste',
+      email: 'cadastro@animecards.com',
+      senha: 'Abcde1#x',
+    };
+
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(cadastro)
+      .expect(201);
+
+    expect(authService.registrar).toHaveBeenCalledWith(cadastro);
+  });
+
+  it.each([
+    ['menos de 8 caracteres', 'Abcd1#x'],
+    ['sem letra maiúscula', 'abcdef1#'],
+    ['sem número', 'Abcdefg#'],
+    ['sem caractere especial', 'Abcdefg1'],
+  ])('rejeita cadastro com senha %s', async (_caso, senha) => {
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        nome: 'Usuário Teste',
+        email: 'cadastro@animecards.com',
+        senha,
+      })
+      .expect(400);
+
+    expect(authService.registrar).not.toHaveBeenCalled();
+  });
+
   it('rejeita dados de login inválidos antes de chamar o service', async () => {
     await request(app.getHttpServer())
       .post('/auth/login')

@@ -146,10 +146,9 @@ export type CartaPartida = {
   hpAtual: number;
   ataqueBase: number;
   defesaBase: number;
-  velocidadeBase: number;
   ataque: number;
   defesa: number;
-  velocidade: number;
+  prioridadeAtaque: number;
   derrotada: boolean;
   posicao: number;
 };
@@ -176,6 +175,8 @@ export type EstadoPartida = {
     criadoEm: string;
   }[];
 };
+
+export type AcaoTurno = "ATACAR" | "DEFENDER";
 
 export function buscarPartidaAtual() {
   return jogoRequest<EstadoPartida | null>("/partidas/atual");
@@ -217,9 +218,10 @@ export function iniciarPartida(idDeck: string) {
   });
 }
 
-export function executarTurno(idPartida: string) {
+export function executarTurno(idPartida: string, acao: AcaoTurno) {
   return jogoRequest<EstadoPartida>(`/partidas/${idPartida}/turnos`, {
     method: "POST",
+    body: JSON.stringify({ acao }),
   });
 }
 

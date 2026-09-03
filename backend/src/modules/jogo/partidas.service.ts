@@ -14,7 +14,9 @@ import {
   type EstadoBatalha,
   type Dificuldade,
   type Lado,
+  type AcaoTurno,
 } from './batalha.engine';
+import type { ConfiguracaoHabilidade } from './habilidades/habilidade.types';
 
 const partidaInclude = {
   deck: { select: { id: true, nome: true } },
@@ -39,7 +41,45 @@ type CartaCompleta = {
   foto: string | null;
   moldura: string | null;
   config_visual: Prisma.JsonValue | null;
+  classe: {
+    nome: string;
+    prioridade_ataque: number;
+    modificador_hp: number;
+    modificador_ataque: number;
+    modificador_defesa: number;
+  } | null;
+  habilidades: {
+    ordem: number;
+    habilidade: {
+      nome: string;
+      descricao: string | null;
+      modo_execucao: string;
+      tipo_efeito: string;
+      gatilho: string;
+      alvo: string;
+      atributo: string | null;
+      unidade: string;
+      valor_base: number;
+      forma_aplicacao: string;
+      requisito_tipo: string;
+      requisito_valor: number | null;
+      escala_tipo: string;
+      escala_valor: number | null;
+      escala_limite: number | null;
+      duracao_turnos: number | null;
+      status: string;
+    };
+  }[];
 };
+
+const cartaBatalhaInclude = {
+  classe: true,
+  habilidades: {
+    where: { habilidade: { status: 'PUBLICADA' } },
+    include: { habilidade: true },
+    orderBy: { ordem: 'asc' as const },
+  },
+} satisfies Prisma.CartaInclude;
 
 const recompensaVitoria = { pontos: 10, rubys: 25 };
 
@@ -128,7 +168,7 @@ export class PartidasService {
       where: { id: idDeck, id_usuario: idUsuario, excluido_em: null },
       include: {
         cartas: {
-          include: { carta: true },
+          include: { carta: { include: cartaBatalhaInclude } },
           orderBy: { posicao_slot: 'asc' },
         },
       },
@@ -156,6 +196,7 @@ export class PartidasService {
       where: { ativo: true, excluido_em: null },
       orderBy: [{ raridade: 'asc' }, { nome: 'asc' }],
       take: deck.cartas.length,
+      include: cartaBatalhaInclude,
     });
     if (cartasBot.length !== deck.cartas.length) {
       throw new BadRequestException(
@@ -240,14 +281,20 @@ export class PartidasService {
     return this.formatar(partida);
   }
 
-  async executarTurno(idUsuario: string, idPartida: string) {
+  async executarTurno(idUsuario: string, idPartida: string, acao: AcaoTurno) {
     const partida = await this.buscarPartida(idUsuario, idPartida);
     if (partida.resultado !== 'EM_ANDAMENTO') {
       throw new BadRequestException('Esta batalha já foi finalizada.');
     }
 
     const estado = this.montarEstado(partida);
-    executarTurnoMotor(estado);
+    try {
+      executarTurnoMotor(estado, acao);
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : 'Ação inválida.',
+      );
+    }
     const resultado =
       estado.status === 'EM_ANDAMENTO'
         ? 'EM_ANDAMENTO'
@@ -297,6 +344,7 @@ export class PartidasService {
               ataque_atual: carta.ataqueAtual,
               defesa_atual: carta.defesaAtual,
               velocidade_atual: carta.velocidadeAtual,
+              passiva: carta.passiva as Prisma.InputJsonValue,
               derrotada: carta.derrotada,
               atualizado_em: new Date(),
             },
@@ -424,7 +472,7 @@ export class PartidasService {
       foto: original.foto,
       moldura: original.moldura,
       config_visual: original.config_visual ?? undefined,
-      passiva: original.passiva ?? undefined,
+      passiva: carta.passiva as Prisma.InputJsonValue,
       hp_base: carta.hp,
       ataque_base: carta.ataque,
       defesa_base: carta.defesa,
@@ -439,25 +487,106 @@ export class PartidasService {
 
   private mapearCarta(carta: CartaCompleta): CartaBatalhaBase {
     const passiva = this.normalizarPassiva(carta.passiva);
+    const classe = carta.classe;
+    const habilidades = carta.habilidades.map(({ habilidade }) =>
+      this.mapearHabilidade(habilidade),
+    );
     return {
       id: carta.id,
       nome: carta.nome,
-      hp: Math.max(1, carta.hp_base),
-      ataque: Math.max(1, carta.dano_base),
-      defesa: Math.max(0, carta.defesa_base),
-      velocidade:
-        typeof passiva.velocidade === 'number'
-          ? Math.max(1, passiva.velocidade)
-          : 10,
+      hp: this.aplicarModificador(carta.hp_base, classe?.modificador_hp),
+      ataque: this.aplicarModificador(
+        carta.dano_base,
+        classe?.modificador_ataque,
+      ),
+      defesa: this.aplicarModificador(
+        carta.defesa_base,
+        classe?.modificador_defesa,
+        true,
+      ),
+      velocidade: classe?.prioridade_ataque ?? 50,
       elemento: carta.elemento,
-      passiva,
+      passiva: {
+        ...passiva,
+        classe: classe?.nome ?? passiva.classe,
+        ...(typeof passiva.nome === 'string' || !habilidades.length
+          ? {}
+          : {
+              nome: habilidades.map((habilidade) => habilidade.nome).join(', '),
+            }),
+        habilidades,
+      },
     };
+  }
+
+  private aplicarModificador(
+    valor: number,
+    percentual = 0,
+    aceitaZero = false,
+  ) {
+    const calculado = Math.round(valor * (1 + percentual / 100));
+    return Math.max(aceitaZero ? 0 : 1, calculado);
   }
 
   private normalizarPassiva(passiva: unknown) {
     return passiva && typeof passiva === 'object' && !Array.isArray(passiva)
       ? (passiva as Record<string, unknown>)
       : {};
+  }
+
+  private mapearHabilidade(
+    habilidade: CartaCompleta['habilidades'][number]['habilidade'],
+  ): ConfiguracaoHabilidade {
+    const requisito =
+      habilidade.requisito_tipo === 'CONTADOR_ATAQUES'
+        ? {
+            tipo: 'CONTADOR_ATAQUES' as const,
+            quantidade: habilidade.requisito_valor ?? 1,
+          }
+        : habilidade.requisito_tipo === 'HP_ABAIXO'
+          ? {
+              tipo: 'HP_ABAIXO' as const,
+              percentual: habilidade.requisito_valor ?? 1,
+            }
+          : habilidade.requisito_tipo === 'TURNO_MINIMO'
+            ? {
+                tipo: 'TURNO_MINIMO' as const,
+                turno: habilidade.requisito_valor ?? 1,
+              }
+            : { tipo: 'NENHUM' as const };
+    const escala =
+      habilidade.escala_tipo === 'POR_TURNO' ||
+      habilidade.escala_tipo === 'POR_ATAQUE'
+        ? {
+            tipo: habilidade.escala_tipo as 'POR_TURNO' | 'POR_ATAQUE',
+            valor: habilidade.escala_valor ?? 0,
+            limite: habilidade.escala_limite ?? habilidade.valor_base,
+          }
+        : { tipo: 'NENHUMA' as const };
+    return {
+      nome: habilidade.nome,
+      ...(habilidade.descricao ? { descricao: habilidade.descricao } : {}),
+      modoExecucao: 'AUTOMATICA',
+      tipoEfeito:
+        habilidade.tipo_efeito as ConfiguracaoHabilidade['tipoEfeito'],
+      gatilho: habilidade.gatilho as ConfiguracaoHabilidade['gatilho'],
+      alvo: habilidade.alvo as ConfiguracaoHabilidade['alvo'],
+      ...(habilidade.atributo
+        ? {
+            atributo: habilidade.atributo as ConfiguracaoHabilidade['atributo'],
+          }
+        : {}),
+      unidade: habilidade.unidade as ConfiguracaoHabilidade['unidade'],
+      valorBase: habilidade.valor_base,
+      formaAplicacao:
+        habilidade.forma_aplicacao as ConfiguracaoHabilidade['formaAplicacao'],
+      requisito,
+      escala,
+      ...(habilidade.duracao_turnos
+        ? { duracaoTurnos: habilidade.duracao_turnos }
+        : {}),
+      status: 'PUBLICADA',
+    };
   }
 
   private formatar(partida: PartidaPersistida) {
@@ -477,10 +606,9 @@ export class PartidasService {
           hpAtual: carta.hp_atual,
           ataqueBase: carta.ataque_base,
           defesaBase: carta.defesa_base,
-          velocidadeBase: carta.velocidade_base,
           ataque: carta.ataque_atual,
           defesa: carta.defesa_atual,
-          velocidade: carta.velocidade_atual,
+          prioridadeAtaque: carta.velocidade_atual,
           derrotada: carta.derrotada,
           posicao: carta.posicao,
         }));
