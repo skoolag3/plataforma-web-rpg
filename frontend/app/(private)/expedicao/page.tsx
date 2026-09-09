@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Check,
-  ChevronRight,
-  Flag,
-  Map,
-  Route,
-  Shield,
-  Skull,
-  Swords,
-} from "lucide-react";
+import { ChevronRight, Map, Route, Swords } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IconeRuby } from "../../components/iconeRuby";
@@ -24,13 +15,7 @@ import {
   type OpcaoExpedicao,
 } from "../../lib/jogo";
 import styles from "../../styles/expedicao.module.css";
-
-const iconeDificuldade = {
-  FACIL: Shield,
-  MEDIA: Swords,
-  DIFICIL: Skull,
-  CHEFE: Flag,
-};
+import { MapaExpedicao } from "./mapaExpedicao";
 
 export default function ExpedicaoPage() {
   const router = useRouter();
@@ -172,107 +157,6 @@ export default function ExpedicaoPage() {
         )}
       </section>
     </main>
-  );
-}
-
-function MapaExpedicao({
-  expedicao,
-  processando,
-  onEscolher,
-}: {
-  expedicao: EstadoExpedicao;
-  processando: boolean;
-  onEscolher: (opcao: OpcaoExpedicao) => void;
-}) {
-  const batalhaEmAndamento = expedicao.partidaAtual?.status === "EM_ANDAMENTO";
-
-  return (
-    <section className={styles.mapa}>
-      <header>
-        <div>
-          <span>
-            <Route /> Mapa #{expedicao.seed.toString().slice(-6)}
-          </span>
-          <h2>
-            {expedicao.etapaAtual === 3
-              ? "O chefe bloqueia a saída"
-              : "Escolha o próximo caminho"}
-          </h2>
-        </div>
-        <div className={styles.infoMapa}>
-          <small>Deck</small>
-          <strong>{expedicao.deck.nome}</strong>
-          <small>Etapa {expedicao.etapaAtual + 1} de 4</small>
-        </div>
-      </header>
-      <div className={styles.tabuleiro}>
-        {expedicao.etapas.map((etapa) => (
-          <div className={styles.camadaMapa} key={etapa.indice}>
-            <span className={styles.labelEtapa}>Etapa {etapa.indice + 1}</span>
-            <div className={styles.linhaRotas}>
-              {etapa.opcoes.map((opcao) => {
-                const Icone = iconeDificuldade[opcao.dificuldade];
-                const escolhida = expedicao.escolhas.includes(opcao.id);
-                const disponivel =
-                  etapa.status === "ATUAL" &&
-                  !batalhaEmAndamento &&
-                  expedicao.opcoesAtuais.some((item) => item.id === opcao.id);
-                return (
-                  <button
-                    type="button"
-                    className={styles.noRota}
-                    data-status={etapa.status}
-                    data-escolhida={escolhida || undefined}
-                    data-dificuldade={opcao.dificuldade}
-                    disabled={!disponivel || processando}
-                    onClick={() => onEscolher(opcao)}
-                    key={opcao.id}
-                  >
-                    <span className={styles.iconeNo}>
-                      {escolhida ? <Check /> : <Icone />}
-                    </span>
-                    <span>
-                      <small>{opcao.risco}</small>
-                      <strong>{opcao.titulo}</strong>
-                    </span>
-                    {disponivel ? <ChevronRight /> : null}
-                  </button>
-                );
-              })}
-            </div>
-            <span className={styles.conectorMapa} aria-hidden="true" />
-          </div>
-        ))}
-        <div className={styles.camadaChefe}>
-          <span className={styles.labelEtapa}>Destino final</span>
-          <button
-            type="button"
-            className={`${styles.noRota} ${styles.noChefe}`}
-            data-status={expedicao.chefe.status}
-            data-escolhida={
-              expedicao.escolhas.includes(expedicao.chefe.id) || undefined
-            }
-            disabled={
-              expedicao.chefe.status !== "ATUAL" ||
-              batalhaEmAndamento ||
-              processando
-            }
-            onClick={() => onEscolher(expedicao.chefe)}
-          >
-            <span className={styles.iconeNo}>
-              {expedicao.chefe.status === "CONCLUIDA" ? <Check /> : <Flag />}
-            </span>
-            <span>
-              <small>Chefe</small>
-              <strong>{expedicao.chefe.titulo}</strong>
-            </span>
-            {expedicao.chefe.status === "ATUAL" && !batalhaEmAndamento ? (
-              <ChevronRight />
-            ) : null}
-          </button>
-        </div>
-      </div>
-    </section>
   );
 }
 
