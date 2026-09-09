@@ -1,14 +1,13 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
-import type { CSSProperties, MouseEvent } from "react";
+import type { ComponentType, CSSProperties, MouseEvent, SVGProps } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
 import styles from "./expandableTabs.module.css";
 
 export type AbaExpansivel = {
   titulo: string;
-  icone: LucideIcon;
+  icone: ComponentType<SVGProps<SVGSVGElement>>;
   href: string;
   ativa?: boolean;
   aoClicar?: (evento: MouseEvent<HTMLAnchorElement>) => void;

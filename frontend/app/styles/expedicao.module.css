@@ -142,16 +142,81 @@
   white-space: nowrap;
 }
 
-.areaTrilha {
-  position: relative;
-  width: min(64rem, calc(100% - 2rem));
-  height: clamp(34rem, 63vw, 45rem);
-  max-height: 45rem;
-  min-height: 34rem;
-  margin: 0 auto;
-  isolation: isolate;
+.barraMapa {
+  display: flex;
+  min-height: 2.65rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--member-border);
+  padding: 0.4rem 0.75rem;
+  color: #727c90;
+  font-size: 0.54rem;
 }
-.areaTrilha::before {
+
+.controlesZoom {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.controlesZoom button {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  border-radius: 0.45rem;
+  color: #bba9f8;
+  background: rgba(124, 58, 237, 0.08);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.controlesZoom button:hover:not(:disabled) {
+  border-color: rgba(167, 139, 250, 0.55);
+  background: rgba(124, 58, 237, 0.18);
+}
+
+.controlesZoom button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.controlesZoom button:focus-visible {
+  outline: 2px solid var(--member-lime);
+  outline-offset: 2px;
+}
+
+.controlesZoom svg {
+  width: 0.8rem;
+}
+
+.controlesZoom output {
+  width: 2.6rem;
+  color: #9ba5b8;
+  font-size: 0.56rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.viewportTrilha {
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  overscroll-behavior: contain;
+  isolation: isolate;
+  user-select: none;
+}
+
+.viewportTrilha[data-arrastando="true"] {
+  cursor: grabbing;
+}
+
+.viewportTrilha::before {
   position: absolute;
   z-index: -3;
   inset: 0;
@@ -173,7 +238,7 @@
     );
   content: "";
 }
-.areaTrilha::after {
+.viewportTrilha::after {
   position: absolute;
   z-index: -2;
   inset: 0;
@@ -192,9 +257,22 @@
   );
   content: "";
 }
+
+.areaTrilha {
+  position: relative;
+  z-index: 1;
+  width: min(61rem, calc(100% - 2rem));
+  height: clamp(28rem, 50vw, 35rem);
+  max-height: 35rem;
+  min-height: 28rem;
+  margin: 0 auto;
+  transform: translate(var(--pan-x), var(--pan-y)) scale(var(--zoom-trilha));
+  transform-origin: center;
+  transition: transform 160ms ease-out;
+}
 .nevoaTrilha {
   position: absolute;
-  z-index: -1;
+  z-index: 0;
   top: 0;
   right: 0;
   left: 0;
@@ -225,6 +303,10 @@
   stroke: rgba(167, 139, 250, 0.72);
   stroke-dasharray: 4 5;
   animation: fluxoRota 18s linear infinite;
+}
+.conexoesTrilha path[data-estado="futura"] {
+  stroke: rgba(139, 118, 192, 0.2);
+  stroke-dasharray: 2 6;
 }
 .conexoesTrilha path[data-estado="percorrido"] {
   stroke: #c8f77a;
@@ -261,8 +343,8 @@
   top: 0;
   left: var(--no-x);
   display: grid;
-  width: clamp(8.8rem, 18vw, 11.5rem);
-  min-height: 4.6rem;
+  width: clamp(8rem, 16vw, 10.5rem);
+  min-height: 4.15rem;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.55rem;
@@ -270,7 +352,7 @@
   border-radius: 0.8rem;
   color: var(--member-text);
   background: rgba(10, 13, 22, 0.94);
-  padding: 0.58rem;
+  padding: 0.5rem;
   text-align: left;
   transform: translate(-50%, -50%);
   box-shadow: 0 0.7rem 1.5rem rgba(3, 5, 12, 0.35);
@@ -319,6 +401,18 @@
 .noConfronto[data-descartada="true"] {
   opacity: 0.22;
   filter: saturate(0.25);
+}
+.noConfronto[data-desconhecido="true"] {
+  --cor-no: #8173a6;
+  border-color: rgba(135, 116, 181, 0.18);
+  color: #aaa2bd;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(124, 96, 179, 0.035) 0 0.35rem,
+      transparent 0.35rem 0.7rem
+    ),
+    rgba(10, 13, 22, 0.91);
 }
 .iconeConfronto {
   display: grid;
@@ -513,6 +607,10 @@
 .legendaMapa i[data-cor="bloqueado"] {
   opacity: 0.38;
 }
+.legendaMapa i[data-cor="futuro"] {
+  border: 1px solid #8173a6;
+  background: transparent;
+}
 
 .batalhaPendente {
   margin-top: 0.85rem;
@@ -669,12 +767,18 @@
   }
   .areaTrilha {
     width: 100%;
-    height: 37rem;
-    min-height: 37rem;
+    height: 31rem;
+    min-height: 31rem;
+  }
+  .barraMapa > span {
+    display: none;
+  }
+  .barraMapa {
+    justify-content: flex-end;
   }
   .noConfronto {
-    width: 5.65rem;
-    min-height: 4.15rem;
+    width: 5.35rem;
+    min-height: 3.8rem;
     grid-template-columns: 1fr;
     justify-items: center;
     gap: 0.25rem;
@@ -719,7 +823,8 @@
   .noConfronto,
   .noChefe,
   .btnAbandonar,
-  .btnIniciar {
+  .btnIniciar,
+  .areaTrilha {
     animation: none;
     transition: none;
   }

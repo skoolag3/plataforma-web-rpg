@@ -6,17 +6,18 @@ import {
   faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Home, Newspaper } from "lucide-react";
+import { Newspaper } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { MouseEvent } from "react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { isAuthenticated, subscribeAuthChange } from "../lib/auth";
 import styles from "../styles/navbar.module.css";
+import { IconeInicio } from "./iconesNavbar";
 import { ExpandableTabs } from "./ui/expandableTabs";
 
 const linksNav = [
-  { href: "/#home", label: "Home", secao: "home", icon: Home },
+  { href: "/#home", label: "Home", secao: "home", icon: IconeInicio },
   {
     href: "/#noticias",
     label: "Notícias",

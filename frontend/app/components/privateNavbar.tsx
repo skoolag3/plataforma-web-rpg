@@ -1,21 +1,6 @@
 "use client";
 
-import {
-  Boxes,
-  Gem,
-  Home,
-  Layers,
-  LogOut,
-  Menu,
-  Route,
-  ShieldCheck,
-  Sparkles,
-  Swords,
-  ShoppingBag,
-  Trophy,
-  User,
-  X,
-} from "lucide-react";
+import { Gem, LogOut, Menu, ShieldCheck, Swords, User, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -30,6 +15,15 @@ import styles from "../styles/privateNavbar.module.css";
 import { IconeRuby } from "./iconeRuby";
 import { Correio } from "./correio";
 import {
+  IconeColecao,
+  IconeDecks,
+  IconeExpedicao,
+  IconeGacha,
+  IconeInicio,
+  IconeLoja,
+  IconeRanking,
+} from "./iconesNavbar";
+import {
   criarEstiloMolduraPerfil,
   type ConfigVisualCarta,
 } from "./cartaMontada";
@@ -40,14 +34,14 @@ import {
 } from "./ui/expandableTabs";
 
 const links = [
-  { href: "/home", label: "Início", icon: Home },
-  { href: "/cartas", label: "Coleção", icon: Layers },
-  { href: "/decks", label: "Decks", icon: Boxes },
-  { href: "/gacha", label: "Gacha", icon: Sparkles },
-  { href: "/loja", label: "Loja", icon: ShoppingBag },
-  { href: "/expedicao", label: "Expedição", icon: Route },
+  { href: "/home", label: "Início", icon: IconeInicio },
+  { href: "/cartas", label: "Coleção", icon: IconeColecao },
+  { href: "/decks", label: "Decks", icon: IconeDecks },
+  { href: "/gacha", label: "Gacha", icon: IconeGacha },
+  { href: "/loja", label: "Loja", icon: IconeLoja },
+  { href: "/expedicao", label: "Expedição", icon: IconeExpedicao },
   { href: "/partida", label: "Arena", icon: Swords },
-  { href: "/ranking", label: "Ranking", icon: Trophy },
+  { href: "/ranking", label: "Ranking", icon: IconeRanking },
 ];
 
 export function PrivateNavbar() {
