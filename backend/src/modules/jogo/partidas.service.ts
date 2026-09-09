@@ -105,17 +105,31 @@ export class PartidasService {
 
     if (!usuarios.length) return { jogadores: [] };
 
-    const pontuacoes = await this.prisma.logPartida.groupBy({
-      by: ['id_usuario'],
-      where: {
-        id_usuario: { in: usuarios.map((usuario) => usuario.id) },
-        resultado: { not: 'EM_ANDAMENTO' },
-      },
-      _sum: { variacao_pontos: true },
-      _count: { id: true },
-    });
+    const idsUsuarios = usuarios.map((usuario) => usuario.id);
+    const [pontuacoes, colecoes] = await Promise.all([
+      this.prisma.logPartida.groupBy({
+        by: ['id_usuario'],
+        where: {
+          id_usuario: { in: idsUsuarios },
+          resultado: { not: 'EM_ANDAMENTO' },
+        },
+        _sum: { variacao_pontos: true },
+        _count: { id: true },
+      }),
+      this.prisma.inventario.groupBy({
+        by: ['id_usuario'],
+        where: {
+          id_usuario: { in: idsUsuarios },
+          quantidade: { gt: 0 },
+        },
+        _count: { id: true },
+      }),
+    ]);
     const porUsuario = new Map(
       pontuacoes.map((item) => [item.id_usuario, item]),
+    );
+    const colecaoPorUsuario = new Map(
+      colecoes.map((item) => [item.id_usuario, item._count.id]),
     );
 
     const jogadores = usuarios
@@ -133,11 +147,17 @@ export class PartidasService {
           pontos:
             pontuacao?._sum.variacao_pontos ?? usuario.pontos_experiencia ?? 0,
           partidas: pontuacao?._count.id ?? 0,
+          cartasColecionadas: colecaoPorUsuario.get(usuario.id) ?? 0,
           avatarUrl: usuario.perfil?.avatar_url ?? null,
         };
       })
-      .filter((jogador) => jogador.pontos > 0)
-      .sort((a, b) => b.pontos - a.pontos || b.partidas - a.partidas)
+      .sort(
+        (a, b) =>
+          b.pontos - a.pontos ||
+          b.partidas - a.partidas ||
+          b.cartasColecionadas - a.cartasColecionadas ||
+          a.nome.localeCompare(b.nome, 'pt-BR'),
+      )
       .slice(0, Math.min(Math.max(limite, 1), 100));
 
     return {

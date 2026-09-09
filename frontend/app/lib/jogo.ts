@@ -204,6 +204,7 @@ export type JogadorRanking = {
   nivel: number;
   pontos: number;
   partidas: number;
+  cartasColecionadas: number;
   avatarUrl: string | null;
 };
 
