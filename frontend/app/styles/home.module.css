@@ -280,6 +280,85 @@
   transform: translate(calc(-50% + var(--xCarta)), -58%) rotate(0) scale(1.07);
   filter: drop-shadow(0 1.2rem 1.2rem rgba(0, 0, 0, 0.55));
 }
+.cartaPlaceholder {
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  border: 1px dashed rgba(184, 190, 207, 0.38);
+  border-radius: 0.8rem;
+  background:
+    linear-gradient(145deg, rgba(118, 126, 145, 0.15), rgba(35, 39, 52, 0.86)),
+    #171a24;
+  color: #9ba2b3;
+  text-decoration: none;
+}
+.cartaPlaceholder::before {
+  position: absolute;
+  inset: 0.45rem;
+  border: 1px solid rgba(213, 218, 229, 0.08);
+  border-radius: 0.55rem;
+  content: "";
+}
+.cartaPlaceholder > span {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: center;
+}
+.cartaPlaceholder svg {
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid rgba(196, 181, 253, 0.18);
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.08);
+  color: #c4b5fd;
+  padding: 0.38rem;
+}
+.cartaPlaceholder strong {
+  color: #d6d9e2;
+  font-size: 0.62rem;
+}
+.cartaPlaceholder small {
+  color: #747c8f;
+  font-size: 0.5rem;
+}
+.cartaPlaceholder:hover {
+  border-color: rgba(196, 181, 253, 0.58);
+  background:
+    linear-gradient(145deg, rgba(139, 92, 246, 0.2), rgba(35, 39, 52, 0.9)),
+    #171a24;
+  color: #ddd6fe;
+}
+.cartaPlaceholder:focus-visible {
+  z-index: 9;
+  outline: 2px solid var(--member-lime);
+  outline-offset: 3px;
+}
+.cartaPlaceholder:active {
+  transform: translate(calc(-50% + var(--xCarta)), -55%) rotate(0) scale(0.99);
+}
+.cartaCarregando {
+  overflow: hidden;
+  border: 1px solid rgba(184, 190, 207, 0.12);
+  border-radius: 0.8rem;
+  background: #191c27;
+}
+.cartaCarregando::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 25%,
+    rgba(221, 214, 254, 0.09) 43%,
+    transparent 62%
+  );
+  content: "";
+  animation: carregarCarta 1.25s ease-in-out infinite;
+  transform: translateX(-100%);
+}
 .nomeCarta {
   position: absolute;
   right: 0.45rem;
@@ -412,6 +491,11 @@
     transform: translate(-50%, 0) scale(0.82);
   }
 }
+@keyframes carregarCarta {
+  to {
+    transform: translateX(100%);
+  }
+}
 @media (max-width: 900px) {
   .palco {
     grid-template-columns: 1fr;
@@ -512,5 +596,8 @@
   .btnJogar,
   .caminhos > a {
     transition: none;
+  }
+  .cartaCarregando::after {
+    animation: none;
   }
 }

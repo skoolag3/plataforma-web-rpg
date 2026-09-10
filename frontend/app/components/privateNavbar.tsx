@@ -1,6 +1,6 @@
 "use client";
 
-import { Gem, LogOut, Menu, ShieldCheck, Swords, User, X } from "lucide-react";
+import { Gem, LogOut, Menu, ShieldCheck, User, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -40,7 +40,6 @@ const links = [
   { href: "/gacha", label: "Gacha", icon: IconeGacha },
   { href: "/loja", label: "Loja", icon: IconeLoja },
   { href: "/expedicao", label: "Expedição", icon: IconeExpedicao },
-  { href: "/partida", label: "Arena", icon: Swords },
   { href: "/ranking", label: "Ranking", icon: IconeRanking },
 ];
 

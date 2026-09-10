@@ -6,6 +6,7 @@ import {
   CircleHelp,
   Flag,
   Footprints,
+  Gem,
   LockKeyhole,
   Minus,
   Plus,
@@ -32,7 +33,6 @@ const iconeDificuldade = {
   CHEFE: Flag,
 };
 
-const posicoesY = [73, 50, 27];
 const zoomMinimo = 0.72;
 const zoomMaximo = 1.24;
 const passoZoom = 0.08;
@@ -45,6 +45,9 @@ type PropsMapaExpedicao = {
 
 type LayoutTrilha = {
   posicoesX: number[][];
+  posicoesY: number[];
+  checkpointsX: number[];
+  checkpointsY: number[];
 };
 
 type EstadoConexao = "futura" | "disponivel" | "percorrida" | "descartada";
@@ -58,6 +61,7 @@ export function MapaExpedicao({
   const [deslocamento, setDeslocamento] = useState({ x: 0, y: 0 });
   const [arrastando, setArrastando] = useState(false);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const areaRef = useRef<HTMLDivElement>(null);
   const arrasteRef = useRef({
     ativo: false,
     inicioX: 0,
@@ -92,9 +96,33 @@ export function MapaExpedicao({
   function moverPan(event: ReactPointerEvent<HTMLDivElement>) {
     const arraste = arrasteRef.current;
     if (!arraste.ativo) return;
+    const viewport = viewportRef.current;
+    const area = areaRef.current;
+    const limiteX =
+      viewport && area
+        ? Math.max(
+            80,
+            (area.offsetWidth * zoom - viewport.clientWidth) / 2 + 40,
+          )
+        : 180;
+    const limiteY =
+      viewport && area
+        ? Math.max(
+            60,
+            (area.offsetHeight * zoom - viewport.clientHeight) / 2 + 32,
+          )
+        : 100;
     setDeslocamento({
-      x: limitar(arraste.origemX + event.clientX - arraste.inicioX, -180, 180),
-      y: limitar(arraste.origemY + event.clientY - arraste.inicioY, -100, 100),
+      x: limitar(
+        arraste.origemX + event.clientX - arraste.inicioX,
+        -limiteX,
+        limiteX,
+      ),
+      y: limitar(
+        arraste.origemY + event.clientY - arraste.inicioY,
+        -limiteY,
+        limiteY,
+      ),
     });
   }
 
@@ -151,7 +179,7 @@ export function MapaExpedicao({
             {Math.min(expedicao.etapaAtual + 1, expedicao.totalEtapas)} de{" "}
             {expedicao.totalEtapas}
           </strong>
-          <span>{expedicao.deck.nome}</span>
+          <span>{expedicao.rubysAssegurados} Rubys assegurados</span>
         </div>
       </header>
 
@@ -200,6 +228,7 @@ export function MapaExpedicao({
         <div className={styles.nevoaTrilha} aria-hidden="true" />
         <div
           className={styles.areaTrilha}
+          ref={areaRef}
           style={
             {
               "--zoom-trilha": zoom,
@@ -211,7 +240,6 @@ export function MapaExpedicao({
           <ConexoesTrilha expedicao={expedicao} layout={layout} />
 
           <div className={styles.destinoTrilha}>
-            <span>Destino final</span>
             <NoChefe
               expedicao={expedicao}
               processando={processando}
@@ -227,14 +255,11 @@ export function MapaExpedicao({
                 className={styles.fileiraEtapa}
                 style={
                   {
-                    "--etapa-y": `${posicoesY[etapa.indice]}%`,
+                    "--etapa-y": `${layout.posicoesY[etapa.indice]}%`,
                   } as CSSProperties
                 }
                 key={etapa.indice}
               >
-                <span className={styles.labelEtapa}>
-                  Stage {etapa.indice + 1}
-                </span>
                 {etapa.opcoes.map((opcao, indiceOpcao) => {
                   const escolhida = expedicao.escolhas.includes(opcao.id);
                   const descartada = etapa.status === "CONCLUIDA" && !escolhida;
@@ -247,6 +272,13 @@ export function MapaExpedicao({
                     <NoConfronto
                       opcao={opcao}
                       posicao={layout.posicoesX[etapa.indice][indiceOpcao]}
+                      lado={
+                        indiceOpcao === 0
+                          ? "direita"
+                          : indiceOpcao === etapa.opcoes.length - 1
+                            ? "esquerda"
+                            : "centro"
+                      }
                       conteudoVisivel={conteudoVisivel}
                       escolhida={escolhida}
                       descartada={descartada}
@@ -260,6 +292,17 @@ export function MapaExpedicao({
               </div>
             );
           })}
+
+          {layout.checkpointsX.map((posicaoX, indice) => (
+            <CheckpointTrilha
+              key={`checkpoint-${indice}`}
+              indice={indice}
+              posicaoX={posicaoX}
+              posicaoY={layout.checkpointsY[indice]}
+              concluido={expedicao.etapaAtual > indice}
+              atual={expedicao.etapaAtual === indice + 1}
+            />
+          ))}
 
           <div className={styles.entradaTrilha}>
             <span className={styles.marcaEntrada}>
@@ -285,9 +328,41 @@ export function MapaExpedicao({
   );
 }
 
+function CheckpointTrilha({
+  indice,
+  posicaoX,
+  posicaoY,
+  concluido,
+  atual,
+}: {
+  indice: number;
+  posicaoX: number;
+  posicaoY: number;
+  concluido: boolean;
+  atual: boolean;
+}) {
+  return (
+    <div
+      className={styles.checkpointTrilha}
+      data-concluido={concluido || undefined}
+      data-atual={atual || undefined}
+      style={
+        {
+          "--checkpoint-x": `${posicaoX}%`,
+          "--checkpoint-y": `${posicaoY}%`,
+        } as CSSProperties
+      }
+    >
+      <span>{concluido ? <Check /> : <Gem />}</span>
+      <small>Checkpoint {indice + 1}</small>
+    </div>
+  );
+}
+
 function NoConfronto({
   opcao,
   posicao,
+  lado,
   conteudoVisivel,
   escolhida,
   descartada,
@@ -297,6 +372,7 @@ function NoConfronto({
 }: {
   opcao: OpcaoExpedicao;
   posicao: number;
+  lado: "direita" | "centro" | "esquerda";
   conteudoVisivel: boolean;
   escolhida: boolean;
   descartada: boolean;
@@ -307,7 +383,7 @@ function NoConfronto({
   const Icone = conteudoVisivel
     ? iconeDificuldade[opcao.dificuldade]
     : CircleHelp;
-  const titulo = conteudoVisivel ? opcao.titulo : "Confronto desconhecido";
+  const titulo = conteudoVisivel ? opcao.titulo : "Desconhecido";
 
   return (
     <button
@@ -318,6 +394,7 @@ function NoConfronto({
       data-disponivel={disponivel || undefined}
       data-desconhecido={!conteudoVisivel || undefined}
       data-dificuldade={conteudoVisivel ? opcao.dificuldade : undefined}
+      data-lado={lado}
       style={{ "--no-x": `${posicao}%` } as CSSProperties}
       disabled={!disponivel || processando}
       onClick={() => onEscolher(opcao)}
@@ -333,9 +410,6 @@ function NoConfronto({
           {conteudoVisivel ? `Risco ${opcao.risco}` : "Não explorado"}
         </small>
         <strong>{titulo}</strong>
-        <em>
-          {conteudoVisivel ? opcao.descricao : "Aproxime-se para revelar"}
-        </em>
       </span>
       {disponivel ? <ChevronRight className={styles.setaConfronto} /> : null}
     </button>
@@ -377,9 +451,7 @@ function NoChefe({
               ? "Chefe da expedição"
               : "Destino oculto"}
         </small>
-        <strong>
-          {revelado ? expedicao.chefe.titulo : "Presença desconhecida"}
-        </strong>
+        <strong>{revelado ? expedicao.chefe.titulo : "Chefe oculto"}</strong>
       </span>
       {disponivel ? <ChevronRight /> : null}
     </button>
@@ -406,37 +478,58 @@ function ConexoesTrilha({
     conexoes.push({
       id: `entrada-${indiceDestino}`,
       inicioX: 50,
-      inicioY: 92,
+      inicioY: 94,
       fimX,
-      fimY: posicoesY[0] + 3,
+      fimY: layout.posicoesY[0] + 3,
       estado: estadoConexao(expedicao, -1, indiceDestino),
     });
   });
 
-  for (let etapa = 0; etapa < layout.posicoesX.length - 1; etapa += 1) {
-    layout.posicoesX[etapa].forEach((inicioX, indiceOrigem) => {
-      layout.posicoesX[etapa + 1].forEach((fimX, indiceDestino) => {
-        conexoes.push({
-          id: `${etapa}-${indiceOrigem}-${indiceDestino}`,
-          inicioX,
-          inicioY: posicoesY[etapa] - 3,
-          fimX,
-          fimY: posicoesY[etapa + 1] + 3,
-          estado: estadoConexao(expedicao, etapa, indiceDestino, indiceOrigem),
-        });
+  layout.posicoesX.forEach((posicoesEtapa, etapa) => {
+    posicoesEtapa.forEach((inicioX, indiceOrigem) => {
+      conexoes.push({
+        id: `etapa-${etapa}-${indiceOrigem}`,
+        inicioX,
+        inicioY: layout.posicoesY[etapa] - 3,
+        fimX: layout.checkpointsX[etapa],
+        fimY: layout.checkpointsY[etapa] + 2,
+        estado: estadoConexaoCheckpoint(expedicao, etapa, indiceOrigem),
       });
     });
-  }
 
-  layout.posicoesX.at(-1)?.forEach((inicioX, indiceOrigem) => {
-    conexoes.push({
-      id: `chefe-${indiceOrigem}`,
-      inicioX,
-      inicioY: posicoesY.at(-1)! - 3,
-      fimX: 50,
-      fimY: 13,
-      estado: estadoConexaoChefe(expedicao, indiceOrigem),
-    });
+    const proximaEtapa = etapa + 1;
+    if (proximaEtapa < layout.posicoesX.length) {
+      layout.posicoesX[proximaEtapa].forEach((fimX, indiceDestino) => {
+        conexoes.push({
+          id: `checkpoint-${etapa}-${indiceDestino}`,
+          inicioX: layout.checkpointsX[etapa],
+          inicioY: layout.checkpointsY[etapa] - 2,
+          fimX,
+          fimY: layout.posicoesY[proximaEtapa] + 3,
+          estado: estadoConexao(
+            expedicao,
+            etapa,
+            indiceDestino,
+            buscarIndiceEscolhido(expedicao, etapa),
+          ),
+        });
+      });
+    }
+  });
+
+  const ultimoCheckpoint = layout.checkpointsX.length - 1;
+  conexoes.push({
+    id: "checkpoint-chefe",
+    inicioX: layout.checkpointsX[ultimoCheckpoint],
+    inicioY: layout.checkpointsY[ultimoCheckpoint] - 2,
+    fimX: 50,
+    fimY: 8,
+    estado:
+      expedicao.etapaAtual < expedicao.etapas.length
+        ? "futura"
+        : expedicao.chefe.status === "CONCLUIDA"
+          ? "percorrida"
+          : "disponivel",
   });
 
   return (
@@ -446,20 +539,31 @@ function ConexoesTrilha({
       preserveAspectRatio="none"
       aria-hidden="true"
     >
-      {conexoes.map((conexao) => {
-        const meioY = (conexao.inicioY + conexao.fimY) / 2;
-        const desvio = ((conexao.inicioX + conexao.fimX) % 9) - 4;
-        return (
-          <path
-            d={`M ${conexao.inicioX} ${conexao.inicioY} C ${conexao.inicioX + desvio} ${meioY}, ${conexao.fimX - desvio} ${meioY}, ${conexao.fimX} ${conexao.fimY}`}
-            data-estado={conexao.estado}
-            vectorEffect="non-scaling-stroke"
-            key={conexao.id}
-          />
-        );
-      })}
+      {conexoes.map((conexao) => (
+        <path
+          d={`M ${conexao.inicioX} ${conexao.inicioY} L ${conexao.fimX} ${conexao.fimY}`}
+          data-estado={conexao.estado}
+          vectorEffect="non-scaling-stroke"
+          key={conexao.id}
+        />
+      ))}
     </svg>
   );
+}
+
+function estadoConexaoCheckpoint(
+  expedicao: EstadoExpedicao,
+  etapa: number,
+  indiceOrigem: number,
+): EstadoConexao {
+  const escolha = buscarIndiceEscolhido(expedicao, etapa);
+  if (etapa < expedicao.etapaAtual) {
+    return escolha === indiceOrigem ? "percorrida" : "descartada";
+  }
+  if (etapa === expedicao.etapaAtual && escolha === indiceOrigem) {
+    return "disponivel";
+  }
+  return etapa === expedicao.etapaAtual ? "descartada" : "futura";
 }
 
 function estadoConexao(
@@ -485,17 +589,6 @@ function estadoConexao(
   return "futura";
 }
 
-function estadoConexaoChefe(
-  expedicao: EstadoExpedicao,
-  indiceOrigem: number,
-): EstadoConexao {
-  const ultimaEtapa = expedicao.etapas.length - 1;
-  const escolhaOrigem = buscarIndiceEscolhido(expedicao, ultimaEtapa);
-  if (expedicao.etapaAtual < expedicao.etapas.length) return "futura";
-  if (escolhaOrigem !== indiceOrigem) return "descartada";
-  return expedicao.chefe.status === "CONCLUIDA" ? "percorrida" : "disponivel";
-}
-
 function buscarIndiceEscolhido(
   expedicao: EstadoExpedicao,
   indiceEtapa: number,
@@ -509,17 +602,31 @@ function buscarIndiceEscolhido(
 
 function gerarLayoutTrilha(seed: number, totalEtapas: number): LayoutTrilha {
   const random = criarRandomVisual(seed);
-  const bases = [18, 50, 82];
+  const variacao = Math.abs(seed) % 3;
+  const basesPorForma = [
+    [17, 50, 83],
+    [13, 43, 76],
+    [24, 57, 87],
+  ];
+  const posicoesY = Array.from(
+    { length: totalEtapas },
+    (_, indice) => 76 - indice * 24,
+  );
   const posicoesX = Array.from({ length: totalEtapas }, (_, indiceEtapa) => {
-    const deslocamento = (random() - 0.5) * 12;
+    const bases =
+      basesPorForma[(variacao + indiceEtapa) % basesPorForma.length];
     const sentido = indiceEtapa % 2 === 0 ? 1 : -1;
     return bases.map((base, indice) => {
-      const zigZag =
-        indice === 1 ? deslocamento * -0.35 : deslocamento * sentido;
-      return Math.min(88, Math.max(12, base + zigZag));
+      const desvio = (random() - 0.5) * 8 + (indice - 1) * sentido * 2;
+      return Math.min(89, Math.max(11, base + desvio));
     });
   });
-  return { posicoesX };
+  const checkpointsY = posicoesY.map((posicao) => posicao - 10);
+  const checkpointsX = checkpointsY.map((_, indice) => {
+    const zigueZague = indice % 2 === 0 ? -1 : 1;
+    return limitar(50 + zigueZague * (8 + random() * 10), 30, 70);
+  });
+  return { posicoesX, posicoesY, checkpointsX, checkpointsY };
 }
 
 function criarRandomVisual(seed: number) {

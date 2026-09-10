@@ -99,14 +99,16 @@ export default function DecksPage() {
       setDecks(decksData);
       const cartasObtidas = colecaoData.itens.filter((carta) => carta.obtida);
       const deckEquipado = decksData.find((deck) => deck.ativo);
-      const slotsIniciais = montarSlots(deckEquipado, cartasObtidas);
+      const parametros = new URLSearchParams(window.location.search);
+      const deckInicialId = parametros.get("deck");
+      const deckInicial = decksData.find((deck) => deck.id === deckInicialId);
+      const deckSelecionado = deckInicial ?? deckEquipado;
+      const slotsIniciais = montarSlots(deckSelecionado, cartasObtidas);
       setColecao(cartasObtidas);
-      setEditandoId(deckEquipado?.id ?? null);
-      setNome(deckEquipado?.nome ?? "Meu Deck");
+      setEditandoId(deckSelecionado?.id ?? null);
+      setNome(deckSelecionado?.nome ?? "Meu Deck");
 
-      const cartaInicialId = new URLSearchParams(window.location.search).get(
-        "carta",
-      );
+      const cartaInicialId = parametros.get("carta");
       const cartaInicial = colecaoData.itens.find(
         (carta) => carta.id === cartaInicialId && carta.obtida,
       );

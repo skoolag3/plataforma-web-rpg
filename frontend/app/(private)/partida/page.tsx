@@ -6,61 +6,37 @@ import { useRouter } from "next/navigation";
 import {
   buscarPartidaAtual,
   executarTurno,
-  iniciarPartida,
-  listarDecks,
-  type Deck,
   type EstadoPartida,
   type AcaoTurno,
 } from "../../lib/jogo";
 import styles from "../../styles/partida.module.css";
 import { MesaBatalha } from "./mesaBatalha";
-import { PartidaPreparacao } from "./partidaPreparacao";
 
 export default function PartidaPage() {
   const router = useRouter();
-  const [decks, setDecks] = useState<Deck[]>([]);
-  const [idDeck, setIdDeck] = useState("");
   const [partida, setPartida] = useState<EstadoPartida | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState("");
 
   useEffect(() => {
-    Promise.all([listarDecks(), buscarPartidaAtual()])
-      .then(([lista, atual]) => {
-        setDecks(lista);
+    buscarPartidaAtual()
+      .then((atual) => {
+        if (!atual) {
+          router.replace("/expedicao");
+          return;
+        }
         setPartida(atual);
-        const preferido =
-          lista.find((deck) => deck.ativo && deck.completo) ??
-          lista.find((deck) => deck.completo);
-        setIdDeck(preferido?.id ?? "");
       })
       .catch((error) =>
         setErro(
           error instanceof Error
             ? error.message
-            : "Não foi possível preparar a arena.",
+            : "Não foi possível preparar a batalha.",
         ),
       )
       .finally(() => setCarregando(false));
-  }, []);
-
-  async function comecar() {
-    if (!idDeck) return;
-    setProcessando(true);
-    setErro("");
-    try {
-      setPartida(await iniciarPartida(idDeck));
-    } catch (error) {
-      setErro(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível iniciar a batalha.",
-      );
-    } finally {
-      setProcessando(false);
-    }
-  }
+  }, [router]);
 
   async function executarAcao(acao: AcaoTurno) {
     if (!partida) return;
@@ -87,18 +63,15 @@ export default function PartidaPage() {
             <span>
               <ShieldCheck /> Servidor autoritativo
             </span>
-            <h1>Arena por turnos</h1>
-            <p>
-              Escolha o deck, respeite a ordem das cartas e avance um turno por
-              ação.
-            </p>
+            <h1>Batalha da expedição</h1>
+            <p>Respeite a ordem das cartas e avance um turno por ação.</p>
           </div>
           <strong>
             <Swords /> Batalha 1×1
           </strong>
         </header>
         {carregando ? (
-          <div className={styles.carregando}>Preparando arena...</div>
+          <div className={styles.carregando}>Preparando batalha...</div>
         ) : partida ? (
           <MesaBatalha
             partida={partida}
@@ -106,24 +79,12 @@ export default function PartidaPage() {
             erro={erro}
             onExecutarAcao={(acao) => void executarAcao(acao)}
             textoFinal={partida.expedicao ? "Voltar à expedição" : undefined}
-            onNovaBatalha={() => {
-              if (partida.expedicao) {
-                router.push("/expedicao");
-                return;
-              }
-              setPartida(null);
-              setErro("");
-            }}
+            onNovaBatalha={() => router.push("/expedicao")}
           />
         ) : (
-          <PartidaPreparacao
-            decks={decks}
-            idSelecionado={idDeck}
-            carregando={processando}
-            erro={erro}
-            onSelecionar={setIdDeck}
-            onIniciar={() => void comecar()}
-          />
+          <div className={styles.carregando}>
+            {erro || "Retornando para a expedição..."}
+          </div>
         )}
       </section>
     </main>

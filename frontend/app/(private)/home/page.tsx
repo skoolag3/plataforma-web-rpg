@@ -1,6 +1,13 @@
 "use client";
 
-import { ChevronRight, Layers, Sparkles, Swords, Trophy } from "lucide-react";
+import {
+  ChevronRight,
+  Layers,
+  Plus,
+  Sparkles,
+  Swords,
+  Trophy,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CartaMontada } from "../../components/cartaMontada";
@@ -12,6 +19,7 @@ import styles from "../../styles/home.module.css";
 export default function HomePage() {
   const [perfil, setPerfil] = useState<PerfilConta | null>(null);
   const [decks, setDecks] = useState<Deck[]>([]);
+  const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
   useEffect(() => {
@@ -23,13 +31,14 @@ export default function HomePage() {
         setPerfil(dados);
         setDecks(decksDados);
       })
-      .catch((e) =>
+      .catch((e) => {
         setErro(
           e instanceof Error
             ? e.message
             : "Não foi possível carregar seu salão.",
-        ),
-      );
+        );
+      })
+      .finally(() => setCarregando(false));
   }, []);
 
   const deckAtivo = decks.find((deck) => deck.ativo);
@@ -48,7 +57,7 @@ export default function HomePage() {
             <span>
               <Trophy />
               <strong>
-                {perfil?.ranking?.toLocaleString("pt-BR") ?? "—"}
+                {perfil?.ranking?.toLocaleString("pt-BR") ?? "..."}
               </strong>{" "}
               ranking
             </span>
@@ -62,8 +71,8 @@ export default function HomePage() {
             <span className={styles.capitulo}>Próximo confronto</span>
             <h2>Seu deck está esperando uma batalha.</h2>
             <p>
-              Entre na arena, enfrente o adversário e conquiste rubys para novas
-              invocações.
+              Avance pela expedição, enfrente adversários e conquiste rubys para
+              novas invocações.
             </p>
             <Link href="/expedicao" className={styles.btnJogar}>
               <Swords /> Iniciar expedição <ChevronRight />
@@ -85,20 +94,52 @@ export default function HomePage() {
             </div>
 
             <div className={styles.lequeCartas}>
-              {cartasDeck.length ? (
-                cartasDeck.map((carta) => (
-                  <div className={styles.cartaDeck} key={carta.id}>
-                    <CartaMontada
-                      arte={carta.foto ?? undefined}
-                      moldura={carta.moldura ?? undefined}
-                      nome={carta.nome}
-                      raridade={carta.raridade}
-                      elemento={carta.elemento}
-                      config={carta.configVisual ?? undefined}
-                      placeholder={<Sparkles />}
-                    />
-                  </div>
+              {carregando ? (
+                Array.from({ length: 4 }, (_, indice) => (
+                  <div
+                    className={`${styles.cartaDeck} ${styles.cartaCarregando}`}
+                    aria-hidden="true"
+                    key={indice}
+                  />
                 ))
+              ) : cartasDeck.length ? (
+                <>
+                  {cartasDeck.map((carta) => (
+                    <div className={styles.cartaDeck} key={carta.id}>
+                      <CartaMontada
+                        arte={carta.foto ?? undefined}
+                        moldura={carta.moldura ?? undefined}
+                        nome={carta.nome}
+                        raridade={carta.raridade}
+                        elemento={carta.elemento}
+                        config={carta.configVisual ?? undefined}
+                        placeholder={<Sparkles />}
+                      />
+                    </div>
+                  ))}
+                  {deckAtivo
+                    ? Array.from(
+                        { length: Math.max(0, 6 - cartasDeck.length) },
+                        (_, indice) => {
+                          const nmrSlot = cartasDeck.length + indice + 1;
+                          return (
+                            <Link
+                              href={`/decks?deck=${deckAtivo.id}`}
+                              className={`${styles.cartaDeck} ${styles.cartaPlaceholder}`}
+                              aria-label={`Adicionar carta no espaço ${nmrSlot} do deck ${deckAtivo.nome}`}
+                              key={`slot-${nmrSlot}`}
+                            >
+                              <span>
+                                <Plus aria-hidden="true" />
+                                <strong>Adicionar carta</strong>
+                                <small>{nmrSlot}º espaço</small>
+                              </span>
+                            </Link>
+                          );
+                        },
+                      )
+                    : null}
+                </>
               ) : (
                 <div className={styles.deckVazio}>
                   <Layers />
@@ -107,7 +148,10 @@ export default function HomePage() {
               )}
             </div>
 
-            <Link href="/decks" className={styles.editarDeck}>
+            <Link
+              href={deckAtivo ? `/decks?deck=${deckAtivo.id}` : "/decks"}
+              className={styles.editarDeck}
+            >
               {deckAtivo ? "Ajustar formação" : "Montar deck"} <ChevronRight />
             </Link>
           </div>

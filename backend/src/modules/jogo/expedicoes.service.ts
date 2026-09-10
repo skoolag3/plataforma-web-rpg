@@ -10,8 +10,14 @@ import { PartidasService } from './partidas.service';
 import {
   gerarSeedExpedicao,
   gerarTrilhaExpedicao,
+  type OpcaoRota,
   type TrilhaExpedicao,
 } from './expedicao.trilha';
+import {
+  recompensaAposDerrota,
+  recompensaDaRota,
+  rubysPerdidosNaDerrota,
+} from './expedicao.recompensas';
 
 const expedicaoInclude = {
   deck: { select: { id: true, nome: true } },
@@ -20,6 +26,7 @@ const expedicaoInclude = {
       id: true,
       etapa_expedicao: true,
       resultado: true,
+      recompensa_rubys: true,
       timestamp_inicio: true,
     },
     orderBy: { timestamp_inicio: 'desc' as const },
@@ -30,7 +37,7 @@ type ExpedicaoPersistida = Prisma.ExpedicaoGetPayload<{
   include: typeof expedicaoInclude;
 }>;
 
-const recompensaChefe = 100;
+const recompensaChefe = recompensaDaRota('CHEFE');
 
 @Injectable()
 export class ExpedicoesService {
@@ -181,34 +188,75 @@ export class ExpedicoesService {
     );
     if (!partida || partida.resultado === 'EM_ANDAMENTO') return;
 
+    const trilha = this.normalizarTrilha(expedicao.trilha);
+    const escolha = this.buscarEscolhaAtual(trilha, expedicao);
+    if (!escolha) return;
+    const recompensaPendente = recompensaDaRota(escolha.dificuldade);
+
     if (partida.resultado !== 'VITORIA') {
-      await this.prisma.expedicao.updateMany({
-        where: {
-          id: expedicao.id,
-          status: 'EM_ANDAMENTO',
-          etapa_atual: expedicao.etapa_atual,
-        },
-        data: {
-          status: 'FALHOU',
-          finalizado_em: new Date(),
-          atualizado_em: new Date(),
-        },
+      const recompensaMantida = recompensaAposDerrota(recompensaPendente);
+      const rubysPerdidos = rubysPerdidosNaDerrota(recompensaPendente);
+      await this.prisma.$transaction(async (tx) => {
+        const falhou = await tx.expedicao.updateMany({
+          where: {
+            id: expedicao.id,
+            status: 'EM_ANDAMENTO',
+            etapa_atual: expedicao.etapa_atual,
+          },
+          data: {
+            status: 'FALHOU',
+            finalizado_em: new Date(),
+            atualizado_em: new Date(),
+          },
+        });
+        if (!falhou.count) return;
+        await tx.logPartida.update({
+          where: { id: partida.id },
+          data: { recompensa_rubys: recompensaMantida },
+        });
+        if (recompensaMantida > 0) {
+          await tx.ledgerRuby.create({
+            data: {
+              id_usuario: idUsuario,
+              quantidade: recompensaMantida,
+              motivo: 'EXPEDICAO_RESGATE_DERROTA',
+              id_referencia: partida.id,
+              descricao: `Resgate da Expedição após perder ${rubysPerdidos} Rubys.`,
+            },
+          });
+        }
       });
       return;
     }
 
     if (expedicao.etapa_atual < 3) {
-      await this.prisma.expedicao.updateMany({
-        where: {
-          id: expedicao.id,
-          status: 'EM_ANDAMENTO',
-          etapa_atual: expedicao.etapa_atual,
-        },
-        data: {
-          etapa_atual: { increment: 1 },
-          escolha_atual: null,
-          atualizado_em: new Date(),
-        },
+      await this.prisma.$transaction(async (tx) => {
+        const avancou = await tx.expedicao.updateMany({
+          where: {
+            id: expedicao.id,
+            status: 'EM_ANDAMENTO',
+            etapa_atual: expedicao.etapa_atual,
+          },
+          data: {
+            etapa_atual: { increment: 1 },
+            escolha_atual: null,
+            atualizado_em: new Date(),
+          },
+        });
+        if (!avancou.count) return;
+        await tx.logPartida.update({
+          where: { id: partida.id },
+          data: { recompensa_rubys: recompensaPendente },
+        });
+        await tx.ledgerRuby.create({
+          data: {
+            id_usuario: idUsuario,
+            quantidade: recompensaPendente,
+            motivo: 'CHECKPOINT_EXPEDICAO',
+            id_referencia: partida.id,
+            descricao: `Recompensa assegurada no checkpoint ${expedicao.etapa_atual + 1}.`,
+          },
+        });
       });
       return;
     }
@@ -227,6 +275,10 @@ export class ExpedicoesService {
         },
       });
       if (!concluida.count) return;
+      await tx.logPartida.update({
+        where: { id: partida.id },
+        data: { recompensa_rubys: recompensaChefe },
+      });
       await tx.ledgerRuby.create({
         data: {
           id_usuario: idUsuario,
@@ -243,10 +295,26 @@ export class ExpedicoesService {
     return valor as unknown as TrilhaExpedicao;
   }
 
+  private buscarEscolhaAtual(
+    trilha: TrilhaExpedicao,
+    expedicao: ExpedicaoPersistida,
+  ): OpcaoRota | null {
+    const opcoes =
+      expedicao.etapa_atual === 3
+        ? [trilha.chefe]
+        : (trilha.etapas[expedicao.etapa_atual]?.opcoes ?? []);
+    return opcoes.find((opcao) => opcao.id === expedicao.escolha_atual) ?? null;
+  }
+
   private formatar(expedicao: ExpedicaoPersistida) {
     const trilha = this.normalizarTrilha(expedicao.trilha);
     const partidaAtual = expedicao.partidas.find(
       (partida) => partida.etapa_expedicao === expedicao.etapa_atual,
+    );
+    const escolhaAtual = this.buscarEscolhaAtual(trilha, expedicao);
+    const rubysAssegurados = expedicao.partidas.reduce(
+      (total, partida) => total + partida.recompensa_rubys,
+      0,
     );
     return {
       id: expedicao.id,
@@ -295,6 +363,10 @@ export class ExpedicoesService {
           }
         : null,
       recompensaFinal: recompensaChefe,
+      recompensaPendente: escolhaAtual
+        ? recompensaDaRota(escolhaAtual.dificuldade)
+        : 0,
+      rubysAssegurados,
       criadoEm: expedicao.criado_em,
       finalizadoEm: expedicao.finalizado_em,
     };

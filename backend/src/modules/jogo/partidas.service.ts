@@ -324,6 +324,8 @@ export class PartidasService {
             ? 'DERROTA'
             : 'EMPATE';
     const venceu = resultado === 'VITORIA';
+    const recompensaRubys =
+      venceu && !partida.id_expedicao ? recompensaVitoria.rubys : 0;
 
     await this.prisma.$transaction(async (tx) => {
       const atualizada = await tx.logPartida.updateMany({
@@ -337,7 +339,7 @@ export class PartidasService {
           resultado,
           turnos_jogados: estado.turno,
           variacao_pontos: venceu ? recompensaVitoria.pontos : 0,
-          recompensa_rubys: venceu ? recompensaVitoria.rubys : 0,
+          recompensa_rubys: recompensaRubys,
           ...(resultado !== 'EM_ANDAMENTO'
             ? { timestamp_fim: new Date() }
             : {}),
@@ -395,15 +397,17 @@ export class PartidasService {
             atualizado_em: new Date(),
           },
         });
-        await tx.ledgerRuby.create({
-          data: {
-            id_usuario: idUsuario,
-            quantidade: recompensaVitoria.rubys,
-            motivo: 'VITORIA_PARTIDA',
-            id_referencia: idPartida,
-            descricao: 'Recompensa por vitória em batalha.',
-          },
-        });
+        if (!partida.id_expedicao) {
+          await tx.ledgerRuby.create({
+            data: {
+              id_usuario: idUsuario,
+              quantidade: recompensaVitoria.rubys,
+              motivo: 'VITORIA_PARTIDA',
+              id_referencia: idPartida,
+              descricao: 'Recompensa por vitória em batalha.',
+            },
+          });
+        }
       }
     });
 

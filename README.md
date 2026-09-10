@@ -24,7 +24,7 @@ Plataforma web de RPG de cartas desenvolvida como Trabalho de Conclusão de Curs
 - notícias públicas com imagem, conteúdo, anexos e página por ID;
 - landing page alimentada pelas cartas e notícias publicadas no banco.
 - loja de Rubys com pacotes, Checkout hospedado pelo Stripe e crédito confirmado por webhook idempotente;
-- ranking público de jogadores com pontuação positiva e histórico paginado de partidas no perfil;
+- ranking público por pontos ou cartas únicas colecionadas, incluindo jogadores sem partidas, e histórico paginado de partidas no perfil;
 - rotação automática do banner de gacha a cada 30 minutos, com opção administrativa para forçar o banner;
 - painel administrativo de usuários com busca, filtros, edição, bloqueio, coleção, ajuste de saldo e auditoria;
 - notificações globais temporárias com fechamento manual e indicador de duração.

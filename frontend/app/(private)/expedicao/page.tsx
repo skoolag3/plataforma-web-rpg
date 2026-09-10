@@ -146,7 +146,7 @@ export default function ExpedicaoPage() {
                 <Swords />
                 <div>
                   <strong>Confronto em andamento</strong>
-                  <p>Retorne à Arena para continuar esta etapa.</p>
+                  <p>Retorne à batalha para continuar esta etapa.</p>
                 </div>
                 <button type="button" onClick={() => router.push("/partida")}>
                   Continuar batalha <ChevronRight />

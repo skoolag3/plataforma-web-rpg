@@ -257,6 +257,8 @@ export type EstadoExpedicao = {
     resultado: "VITORIA" | "DERROTA" | "EMPATE" | null;
   } | null;
   recompensaFinal: number;
+  recompensaPendente: number;
+  rubysAssegurados: number;
   criadoEm: string;
   finalizadoEm: string | null;
 };
