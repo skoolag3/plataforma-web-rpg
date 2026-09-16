@@ -1,0 +1,93 @@
+@startuml
+title Modelo de Domínio e Combate
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #52606D
+skinparam ClassBorderColor #475569
+skinparam ClassBackgroundColor #FFF8DF
+skinparam ClassHeaderBackgroundColor #FDE68A
+skinparam ClassFontColor #172033
+hide methods
+
+class Usuario <<entidade>> {
+  id: UUID
+  nome: String
+  saldoRubys: int
+}
+class Perfil <<entidade>> {
+  biografia: String
+  avatarUrl: String
+  preferencias: JSON
+}
+class Inventario <<entidade>> {
+  quantidade: int
+  obtidoEm: DateTime
+}
+class Deck <<entidade>> {
+  nome: String
+  ativo: boolean
+}
+class Carta <<entidade>> {
+  raridade: String
+  elemento: String
+  hpBase: int
+  ataqueBase: int
+  defesaBase: int
+}
+class ClasseCarta <<configuração>> {
+  prioridadeAtaque: int
+  modificadorHp: int
+  modificadorAtaque: int
+  modificadorDefesa: int
+}
+class Habilidade <<configuração>> {
+  gatilho: String
+  tipoEfeito: String
+  alvo: String
+  duracaoTurnos: int
+}
+class Partida <<agregado>> {
+  resultado: String
+  turnosJogados: int
+  recompensaRubys: int
+}
+class CartaEmJogo <<snapshot>> {
+  hpAtual: int
+  ataqueAtual: int
+  defesaAtual: int
+  derrotada: boolean
+}
+class EventoPartida <<auditoria>> {
+  sequencia: int
+  turno: int
+  tipo: String
+  texto: String
+}
+class Expedicao <<agregado>> {
+  seed: int
+  etapaAtual: int
+  status: String
+  trilha: JSON
+}
+class LedgerRuby <<auditoria>> {
+  quantidade: int
+  motivo: String
+  criadoEm: DateTime
+}
+
+Usuario "1" -- "0..1" Perfil
+Usuario "1" -- "0..*" Inventario
+Usuario "1" -- "0..*" Deck
+Inventario "0..*" --> "1" Carta
+Deck "1" -- "3..6" Carta
+Carta "0..*" --> "0..1" ClasseCarta
+Carta "0..*" -- "0..3" Habilidade
+Partida "1" *-- "1..*" CartaEmJogo
+Partida "1" *-- "0..*" EventoPartida
+Expedicao "1" *-- "1..4" Partida
+Usuario "1" -- "0..*" Expedicao
+Usuario "1" -- "0..*" LedgerRuby
+@enduml

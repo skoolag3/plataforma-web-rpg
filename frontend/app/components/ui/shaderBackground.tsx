@@ -324,19 +324,7 @@ export function ShaderBackground({ className }: { className?: string }) {
     const pendingRelease = pendingContextReleases.get(canvas)
     if (pendingRelease !== undefined) window.clearTimeout(pendingRelease)
     pendingContextReleases.delete(canvas)
-    // No celular, preserva a arte com um quadro estático do mesmo shader.
-    // Evita disputar a GPU com o scroll e as cartas da página.
-    const modoEstatico = window.matchMedia(
-      "(max-width: 820px), (pointer: coarse), (prefers-reduced-motion: reduce)",
-    ).matches
-    const cursorAtivo = UNIFORMS.cursorEnabled && !modoEstatico
-    const gl = canvas.getContext("webgl", {
-      antialias: false,
-      depth: false,
-      stencil: false,
-      preserveDrawingBuffer: modoEstatico,
-      powerPreference: "low-power",
-    })
+    const gl = canvas.getContext("webgl", { antialias: false })
     if (!gl) return
 
     const compile = (type: number, src: string) => {
@@ -429,18 +417,15 @@ export function ShaderBackground({ className }: { className?: string }) {
     let inView = true
     let disposed = false
     const start = performance.now()
-    const timeAnimated = !modoEstatico && Math.abs(UNIFORMS.timeScale) > 0.0001
+    const timeAnimated = Math.abs(UNIFORMS.timeScale) > 0.0001
 
     const resizeCanvas = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, modoEstatico ? 1 : 1.5)
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
       const rawWidth = Math.max(1, Math.round(bounds.width * dpr))
       const rawHeight = Math.max(1, Math.round(bounds.height * dpr))
       const pixelScale = Math.min(
         1,
-        Math.sqrt(
-          (modoEstatico ? 350_000 : 900_000) /
-            Math.max(1, rawWidth * rawHeight),
-        ),
+        Math.sqrt(2_000_000 / Math.max(1, rawWidth * rawHeight)),
       )
       const width = Math.max(1, Math.round(rawWidth * pixelScale))
       const height = Math.max(1, Math.round(rawHeight * pixelScale))
@@ -500,7 +485,7 @@ export function ShaderBackground({ className }: { className?: string }) {
       requestRender()
     }
     window.addEventListener("resize", updateLayout)
-    if (cursorAtivo) {
+    if (UNIFORMS.cursorEnabled) {
       window.addEventListener("pointermove", onPointerMove, { passive: true })
       window.addEventListener("pointercancel", onPointerLeave)
       window.addEventListener("scroll", updateLayout, true)
@@ -534,10 +519,6 @@ export function ShaderBackground({ className }: { className?: string }) {
     function render(now: number) {
       raf = 0
       if (disposed || !visible || !inView) return
-      if (lastNow !== null && now - lastNow < 1000 / 30) {
-        requestRender()
-        return
-      }
       const dt = lastNow === null ? 0 : Math.min((now - lastNow) / 1000, 0.1)
       lastNow = now
       const follow = 1 - Math.exp(-12 * dt)
@@ -551,7 +532,7 @@ export function ShaderBackground({ className }: { className?: string }) {
         uni.scene,
         width,
         height,
-        modoEstatico ? 0 : ((now - start) / 1000) * UNIFORMS.timeScale,
+        ((now - start) / 1000) * UNIFORMS.timeScale,
         UNIFORMS.colorCount,
       )
       gl!.uniform4f(
@@ -563,7 +544,7 @@ export function ShaderBackground({ className }: { className?: string }) {
       )
       gl!.uniform4f(
         uni.cursor,
-        cursorAtivo ? cursorPresence : 0,
+        UNIFORMS.cursorEnabled ? cursorPresence : 0,
         UNIFORMS.cursorEffect,
         UNIFORMS.cursorStrength,
         UNIFORMS.cursorRadius,
@@ -584,7 +565,7 @@ export function ShaderBackground({ className }: { className?: string }) {
       intersectionObserver.disconnect()
       document.removeEventListener("visibilitychange", onVisibilityChange)
       window.removeEventListener("resize", updateLayout)
-      if (cursorAtivo) {
+      if (UNIFORMS.cursorEnabled) {
         window.removeEventListener("pointermove", onPointerMove)
         window.removeEventListener("pointercancel", onPointerLeave)
         window.removeEventListener("scroll", updateLayout, true)

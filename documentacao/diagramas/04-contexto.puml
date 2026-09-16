@@ -1,0 +1,31 @@
+@startuml
+title Diagrama de Contexto da Plataforma AnimeCards
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 16
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #52606D
+skinparam rectangle {
+  BorderColor #475569
+  FontColor #172033
+}
+
+actor "Usuário" as usuario
+actor "Administrador" as admin
+rectangle "Plataforma AnimeCards\n\nColeção, decks, gacha, batalha,\nexpedição e administração" as sistema #EEEAFE
+rectangle "Stripe" as stripe #FFF6D9
+rectangle "Cloudinary" as cloudinary #FFF6D9
+rectangle "Supabase Storage" as storage #FFF6D9
+rectangle "Servidor SMTP" as smtp #FFF6D9
+rectangle "IA generativa\n(prevista)" as ia #FCEBEC
+
+usuario --> sistema : utiliza a plataforma
+admin --> sistema : mantém conteúdo e usuários
+sistema --> stripe : checkout e webhook
+sistema --> cloudinary : imagens de cartas e notícias
+sistema --> storage : avatar e banner do perfil
+sistema --> smtp : mensagens de conta
+sistema ..> ia : evento anterior ao chefe
+@enduml

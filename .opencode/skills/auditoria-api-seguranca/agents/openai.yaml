@@ -1,0 +1,4 @@
+interface:
+  display_name: "Auditoria de API"
+  short_description: "Avalia a segurança de APIs autorizadas"
+  default_prompt: "Audite a API deste projeto de forma não destrutiva e gere um relatório Markdown."

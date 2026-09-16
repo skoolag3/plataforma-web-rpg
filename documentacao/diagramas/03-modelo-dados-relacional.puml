@@ -1,0 +1,163 @@
+@startuml
+title Modelo de Dados Relacional Simplificado
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam ArrowColor #64748B
+skinparam ClassBorderColor #3F6E55
+skinparam ClassBackgroundColor #EDF9F1
+skinparam ClassHeaderBackgroundColor #BBE3C8
+hide methods
+
+package "Identidade" {
+  class usuario <<table>> {
+    id: UUID <<PK>>
+    email: varchar <<UQ>>
+    is_admin: boolean
+    saldo_rubys_cache: int
+  }
+  class perfil_usuario <<table>> {
+    id_usuario: UUID <<PK, FK>>
+    avatar_url: varchar
+    mostrar_no_ranking: boolean
+  }
+}
+
+package "Cartas e decks" {
+  class carta <<table>> {
+    id: UUID <<PK>>
+    id_classe: UUID <<FK>>
+    raridade: varchar
+    hp_base: int
+    dano_base: int
+    defesa_base: int
+  }
+  class classe_carta <<table>> {
+    id: UUID <<PK>>
+    prioridade_ataque: int
+    modificadores: int
+  }
+  class habilidade <<table>> {
+    id: UUID <<PK>>
+    gatilho: varchar
+    tipo_efeito: varchar
+    status: varchar
+  }
+  class carta_habilidade <<table>> {
+    id_carta: UUID <<PK, FK>>
+    id_habilidade: UUID <<PK, FK>>
+    ordem: int
+  }
+  class inventario <<table>> {
+    id: UUID <<PK>>
+    id_usuario: UUID <<FK>>
+    id_carta: UUID <<FK>>
+    quantidade: int
+  }
+  class deck <<table>> {
+    id: UUID <<PK>>
+    id_usuario: UUID <<FK>>
+    nome: varchar
+    ativo: boolean
+  }
+  class deck_carta <<table>> {
+    id_deck: UUID <<PK, FK>>
+    id_carta: UUID <<PK, FK>>
+    posicao_slot: int
+  }
+}
+
+package "Batalha e expedição" {
+  class log_partida <<table>> {
+    id: UUID <<PK>>
+    id_usuario: UUID <<FK>>
+    id_expedicao: UUID <<FK>>
+    resultado: varchar
+  }
+  class partida_carta <<table>> {
+    id: UUID <<PK>>
+    id_partida: UUID <<FK>>
+    lado: varchar
+    hp_atual: int
+  }
+  class evento_partida <<table>> {
+    id: UUID <<PK>>
+    id_partida: UUID <<FK>>
+    sequencia: int
+    tipo: varchar
+  }
+  class expedicao <<table>> {
+    id: UUID <<PK>>
+    id_usuario: UUID <<FK>>
+    id_deck: UUID <<FK>>
+    seed: int
+    trilha: JSON
+  }
+}
+
+package "Economia e gacha" {
+  class banner <<table>> {
+    id: UUID <<PK>>
+    nome: varchar
+    custo_giro: int
+  }
+  class banner_carta <<table>> {
+    id_banner: UUID <<PK, FK>>
+    id_carta: UUID <<PK, FK>>
+    taxa_drop: decimal
+  }
+  class banner_rotacao <<table>> {
+    id: int <<PK>>
+    id_banner: UUID <<FK>>
+    proxima_rotacao_em: timestamp
+  }
+  class log_gacha <<table>> {
+    id: UUID <<PK>>
+    id_usuario: UUID <<FK>>
+    id_carta_obtida: UUID <<FK>>
+  }
+  class ledger_ruby <<table>> {
+    id: UUID <<PK>>
+    id_usuario: UUID <<FK>>
+    quantidade: int
+    motivo: varchar
+  }
+  class pacote_ruby <<table>> {
+    id: UUID <<PK>>
+    id_stripe: varchar
+    quantidade_rubys: int
+  }
+  class log_transacao <<table>> {
+    id: UUID <<PK>>
+    id_usuario: UUID <<FK>>
+    id_pacote: UUID <<FK>>
+    status_pagamento: varchar
+  }
+}
+
+usuario ||--o| perfil_usuario
+usuario ||--o{ inventario
+usuario ||--o{ deck
+carta ||--o{ inventario
+deck ||--|{ deck_carta
+carta ||--o{ deck_carta
+classe_carta ||--o{ carta
+carta ||--o{ carta_habilidade
+habilidade ||--o{ carta_habilidade
+usuario ||--o{ log_partida
+log_partida ||--|{ partida_carta
+log_partida ||--o{ evento_partida
+usuario ||--o{ expedicao
+deck ||--o{ expedicao
+expedicao ||--|{ log_partida
+banner ||--|{ banner_carta
+carta ||--o{ banner_carta
+banner ||--o| banner_rotacao
+usuario ||--o{ log_gacha
+carta ||--o{ log_gacha
+usuario ||--o{ ledger_ruby
+usuario ||--o{ log_transacao
+pacote_ruby ||--o{ log_transacao
+@enduml
