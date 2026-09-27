@@ -10,7 +10,124 @@
 }
 
 .layoutFechado .lista {
-  width: min(100%, 52rem);
+  width: 100%;
+}
+
+.lista > div:has(.tabelaNoticias) {
+  display: block;
+  max-height: none;
+  overflow: auto;
+  padding: 0;
+}
+.tabelaNoticias {
+  min-width: 42rem !important;
+}
+.tabelaNoticias th:last-child,
+.tabelaNoticias td:last-child {
+  width: 5.5rem;
+}
+.noticiaPrincipal {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.55rem;
+}
+.noticiaPrincipal > img,
+.noticiaPrincipal > span {
+  width: 3.2rem;
+  height: 2.2rem;
+  flex: 0 0 auto;
+  border-radius: 0.35rem;
+  object-fit: cover;
+}
+.noticiaPrincipal > span {
+  display: grid;
+  place-items: center;
+  background: #11182a;
+  color: #7c8aa2;
+}
+.noticiaPrincipal > span svg {
+  width: 0.9rem;
+}
+.noticiaPrincipal > div {
+  display: grid;
+  min-width: 0;
+  gap: 0.08rem;
+}
+.noticiaPrincipal strong,
+.noticiaPrincipal small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.noticiaPrincipal strong {
+  color: #f8fafc;
+  font-size: 0.72rem;
+}
+.noticiaPrincipal small {
+  max-width: 34rem;
+  color: #758299;
+  font-size: 0.58rem;
+}
+.categoria {
+  color: #b7a3ee;
+  font-size: 0.62rem;
+  font-weight: 850;
+}
+.tabelaNoticias nav button:last-child {
+  color: #fca5a5;
+}
+.modalFundo {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(2, 4, 10, 0.82);
+  padding: 1rem;
+  backdrop-filter: blur(6px);
+}
+.confirmarExclusao {
+  width: min(100%, 25rem);
+  border: 1px solid rgba(248, 113, 113, 0.24);
+  border-radius: 0.8rem;
+  background: #090d18;
+  padding: 1rem;
+  box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.52);
+}
+.confirmarExclusao > svg {
+  width: 1.25rem;
+  color: #f87171;
+}
+.confirmarExclusao h2 {
+  margin: 0.6rem 0 0;
+  font-size: 1rem;
+}
+.confirmarExclusao p {
+  margin: 0.25rem 0 1rem;
+  color: #8b97aa;
+  font-size: 0.68rem;
+}
+.confirmarExclusao > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.confirmarExclusao button {
+  min-height: 2.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.48rem;
+  background: rgba(15, 23, 42, 0.7);
+  color: #dbe4f4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+.confirmarExclusao button:last-child {
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(127, 29, 29, 0.3);
+  color: #fecaca;
 }
 .lista,
 .formulario {

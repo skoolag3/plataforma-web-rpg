@@ -26,6 +26,7 @@ import {
   type SalvarAdminBannerPayload,
 } from "../../lib/admin";
 import styles from "../../styles/admin/adminBanners.module.css";
+import sharedStyles from "../../styles/admin/adminShared.module.css";
 import { AdminLayout } from "./adminShared";
 import { FormBanner } from "./formBanner";
 
@@ -175,14 +176,20 @@ export function AdminBanners() {
         </div>
       </section>
 
-      <section className={styles.listaBanners}>
-        <header>
+      <section
+        className={`${sharedStyles.cartasListaPanel} ${styles.listaBanners}`}
+      >
+        <header className={sharedStyles.cartasListaTopo}>
           <div>
             <h2>Banners cadastrados</h2>
             <p>Somente banners ativos participam da rotação automática.</p>
           </div>
           <div className={styles.acoesLista}>
-            <button type="button" onClick={() => setEditando("novo")}>
+            <button
+              className={sharedStyles.primaryBtn}
+              type="button"
+              onClick={() => setEditando("novo")}
+            >
               <Plus aria-hidden="true" /> Novo banner
             </button>
             <button type="button" onClick={() => void carregar()}>
@@ -191,54 +198,92 @@ export function AdminBanners() {
           </div>
         </header>
 
-        <div className={styles.gradeBanners}>
-          {(dados?.banners ?? []).map((banner) => {
-            const atual = banner.id === dados?.rotacao?.bannerAtualId;
-            return (
-              <article key={banner.id} data-atual={atual || undefined}>
-                <div>
-                  <span>
-                    {atual ? "Em destaque" : banner.ativo ? "Ativo" : "Inativo"}
-                  </span>
-                  <strong>{banner.nome}</strong>
-                  <small>
-                    {banner.totalCartas} cartas, {banner.custoGiro} Rubys por
-                    giro
-                  </small>
-                </div>
-                <p>
-                  {banner.raridades.map((item) => (
-                    <span key={item.raridade}>
-                      {item.raridade} <b>{item.total}</b>
-                    </span>
-                  ))}
-                </p>
-                <div className={styles.acoesBanner}>
-                  <button
-                    type="button"
-                    disabled={!banner.ativo || atual || Boolean(forcandoId)}
-                    onClick={() => void forcarBanner(banner.id)}
-                  >
-                    {forcandoId === banner.id
-                      ? "Alterando..."
-                      : atual
-                        ? "Banner atual"
-                        : "Forçar agora"}
-                  </button>
-                  <button type="button" onClick={() => setEditando(banner)}>
-                    <Pencil aria-hidden="true" /> Editar
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.btnExcluir}
-                    onClick={() => setExcluindo(banner)}
-                  >
-                    <Trash2 aria-hidden="true" /> Excluir
-                  </button>
-                </div>
-              </article>
-            );
-          })}
+        <div className={sharedStyles.tableWrap}>
+          <table className={styles.tabelaBanners}>
+            <thead>
+              <tr>
+                <th>Banner</th>
+                <th>Pool</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(dados?.banners ?? []).map((banner) => {
+                const atual = banner.id === dados?.rotacao?.bannerAtualId;
+                return (
+                  <tr key={banner.id} data-atual={atual || undefined}>
+                    <td>
+                      <div className={styles.bannerPrincipal}>
+                        <strong>{banner.nome}</strong>
+                        <small>{banner.custoGiro} Rubys por giro</small>
+                      </div>
+                    </td>
+                    <td>
+                      <div className={styles.raridadesBanner}>
+                        {banner.raridades.map((item) => (
+                          <span key={item.raridade}>
+                            {item.raridade} <b>{item.total}</b>
+                          </span>
+                        ))}
+                        <small>{banner.totalCartas} cartas</small>
+                      </div>
+                    </td>
+                    <td>
+                      <span
+                        className={
+                          atual || banner.ativo
+                            ? sharedStyles.statusAtivo
+                            : sharedStyles.statusInativo
+                        }
+                      >
+                        {atual
+                          ? "Em destaque"
+                          : banner.ativo
+                            ? "Ativo"
+                            : "Inativo"}
+                      </span>
+                    </td>
+                    <td>
+                      <div className={styles.acoesBanner}>
+                        <button
+                          type="button"
+                          disabled={
+                            !banner.ativo || atual || Boolean(forcandoId)
+                          }
+                          onClick={() => void forcarBanner(banner.id)}
+                        >
+                          {forcandoId === banner.id
+                            ? "Alterando..."
+                            : atual
+                              ? "Banner atual"
+                              : "Forçar agora"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditando(banner)}
+                        >
+                          <Pencil aria-hidden="true" /> Editar
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.btnExcluir}
+                          onClick={() => setExcluindo(banner)}
+                        >
+                          <Trash2 aria-hidden="true" /> Excluir
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {!dados?.banners.length ? (
+                <tr className={sharedStyles.emptyTableRow}>
+                  <td colSpan={4}>Nenhum banner cadastrado.</td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
         </div>
       </section>
 

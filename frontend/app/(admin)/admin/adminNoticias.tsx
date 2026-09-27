@@ -24,6 +24,7 @@ import {
 } from "../../lib/admin";
 import { SelectPadrao } from "../../components/ui/controlesFormulario";
 import styles from "../../styles/admin/adminNoticias.module.css";
+import sharedStyles from "../../styles/admin/adminShared.module.css";
 import {
   notificarErro,
   notificarSucesso,
@@ -46,6 +47,7 @@ export function AdminNoticias() {
   const [editorAberto, setEditorAberto] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
+  const [excluindo, setExcluindo] = useState<AdminNoticia | null>(null);
 
   useEffect(() => {
     void carregar();
@@ -145,12 +147,20 @@ export function AdminNoticias() {
     }
   }
 
-  async function remover(id: string) {
-    if (!window.confirm("Remover esta notícia definitivamente?")) return;
-    await removerAdminNoticia(id);
-    notificarSucesso("Publicação removida.");
-    if (editando === id) fecharEditor();
-    await carregar();
+  async function remover() {
+    if (!excluindo) return;
+    setSalvando(true);
+    try {
+      await removerAdminNoticia(excluindo.id);
+      notificarSucesso("Publicação removida.");
+      if (editando === excluindo.id) fecharEditor();
+      setExcluindo(null);
+      await carregar();
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Erro ao remover publicação.");
+    } finally {
+      setSalvando(false);
+    }
   }
 
   return (
@@ -161,8 +171,8 @@ export function AdminNoticias() {
       <div
         className={`${styles.layout} ${!editorAberto ? styles.layoutFechado : ""}`}
       >
-        <section className={styles.lista}>
-          <header>
+        <section className={`${sharedStyles.cartasListaPanel} ${styles.lista}`}>
+          <header className={sharedStyles.cartasListaTopo}>
             <div>
               <strong>Publicações</strong>
               <small>
@@ -170,47 +180,84 @@ export function AdminNoticias() {
                 {noticias.length === 1 ? "cadastrada" : "cadastradas"}
               </small>
             </div>
-            <button onClick={novo}>
+            <button className={sharedStyles.primaryBtn} onClick={novo}>
               <Plus /> Criar publicação
             </button>
           </header>
-          <div>
+          <div className={sharedStyles.tableWrap}>
             {erro && !editorAberto ? (
               <p className={styles.erroLista}>{erro}</p>
             ) : null}
-            {noticias.map((noticia) => (
-              <article key={noticia.id}>
-                {noticia.imagem ? (
-                  <Image src={noticia.imagem} alt="" width={100} height={64} />
-                ) : (
-                  <span>
-                    <FileText />
-                  </span>
-                )}
-                <div>
-                  <small>
-                    {noticia.categoria} ·{" "}
-                    {noticia.publicada ? "Publicada" : "Rascunho"}
-                  </small>
-                  <strong>{noticia.titulo}</strong>
-                  <p>{noticia.resumo}</p>
-                </div>
-                <nav>
-                  <button onClick={() => editar(noticia)} title="Editar">
-                    <Pencil />
-                  </button>
-                  <button
-                    onClick={() => void remover(noticia.id)}
-                    title="Remover"
-                  >
-                    <Trash2 />
-                  </button>
-                </nav>
-              </article>
-            ))}
-            {!noticias.length ? (
-              <p className={styles.vazio}>Nenhuma notícia cadastrada.</p>
-            ) : null}
+            <table className={styles.tabelaNoticias}>
+              <thead>
+                <tr>
+                  <th>Publicação</th>
+                  <th>Categoria</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {noticias.map((noticia) => (
+                  <tr key={noticia.id}>
+                    <td>
+                      <div className={styles.noticiaPrincipal}>
+                        {noticia.imagem ? (
+                          <Image
+                            src={noticia.imagem}
+                            alt=""
+                            width={52}
+                            height={36}
+                          />
+                        ) : (
+                          <span>
+                            <FileText />
+                          </span>
+                        )}
+                        <div>
+                          <strong>{noticia.titulo}</strong>
+                          <small>{noticia.resumo}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={styles.categoria}>
+                        {noticia.categoria}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={
+                          noticia.publicada
+                            ? sharedStyles.statusAtivo
+                            : sharedStyles.statusInativo
+                        }
+                      >
+                        {noticia.publicada ? "Publicada" : "Rascunho"}
+                      </span>
+                    </td>
+                    <td>
+                      <nav className={sharedStyles.rowActions}>
+                        <button onClick={() => editar(noticia)} title="Editar">
+                          <Pencil />
+                        </button>
+                        <button
+                          onClick={() => setExcluindo(noticia)}
+                          title="Remover"
+                        >
+                          <Trash2 />
+                        </button>
+                      </nav>
+                    </td>
+                  </tr>
+                ))}
+                {!noticias.length ? (
+                  <tr className={sharedStyles.emptyTableRow}>
+                    <td colSpan={4}>Nenhuma notícia cadastrada.</td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
           </div>
         </section>
 
@@ -366,6 +413,33 @@ export function AdminNoticias() {
           </section>
         ) : null}
       </div>
+
+      {excluindo ? (
+        <div className={styles.modalFundo} role="presentation">
+          <section
+            className={styles.confirmarExclusao}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="titulo-excluir-noticia"
+          >
+            <Trash2 aria-hidden="true" />
+            <h2 id="titulo-excluir-noticia">Excluir publicação?</h2>
+            <p>“{excluindo.titulo}” será removida definitivamente.</p>
+            <div>
+              <button type="button" onClick={() => setExcluindo(null)}>
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={salvando}
+                onClick={() => void remover()}
+              >
+                {salvando ? "Excluindo..." : "Excluir publicação"}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </AdminLayout>
   );
 }
