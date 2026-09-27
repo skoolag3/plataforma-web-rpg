@@ -186,8 +186,34 @@ export function MapaExpedicao({
         </div>
       </header>
 
+      <ol className={styles.resumoEtapas} aria-label="Etapas da expedição">
+        {expedicao.etapas.map((etapa, indice) => {
+          const concluida = etapa.status === "CONCLUIDA";
+          const atual = etapa.status === "ATUAL";
+          return (
+            <li
+              data-concluida={concluida || undefined}
+              data-atual={atual || undefined}
+              key={etapa.indice}
+            >
+              <span>{concluida ? <Check /> : indice + 1}</span>
+              <small>Etapa {indice + 1}</small>
+            </li>
+          );
+        })}
+        <li
+          data-atual={expedicao.chefe.status === "ATUAL" || undefined}
+          data-concluida={expedicao.chefe.status === "CONCLUIDA" || undefined}
+        >
+          <span>
+            <Flag />
+          </span>
+          <small>Chefe</small>
+        </li>
+      </ol>
+
       <div className={styles.barraMapa}>
-        <span>Ctrl + roda para zoom · arraste para explorar</span>
+        <span>Arraste para explorar · use Ctrl + roda para aproximar</span>
         <div className={styles.controlesZoom} aria-label="Controles de zoom">
           <button
             type="button"
@@ -447,9 +473,7 @@ function NoChefe({
       data-disponivel={disponivel || undefined}
       disabled={!disponivel || processando}
       onClick={() =>
-        expedicao.dialogoBoss
-          ? onAbrirDialogo()
-          : onEscolher(expedicao.chefe)
+        expedicao.dialogoBoss ? onAbrirDialogo() : onEscolher(expedicao.chefe)
       }
       aria-label={
         disponivel && expedicao.dialogoBoss
