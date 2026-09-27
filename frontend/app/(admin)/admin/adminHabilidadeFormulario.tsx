@@ -4,11 +4,39 @@ import type {
   AdminHabilidade,
   SalvarAdminHabilidadePayload,
 } from "../../lib/admin";
+import {
+  SelectPadrao,
+  type OpcaoSelect,
+} from "../../components/ui/controlesFormulario";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
 import featureStyles from "../../styles/admin/adminHabilidades.module.css";
 import { combinarEstilos } from "./combinarEstilos";
 
 const styles = combinarEstilos(sharedStyles, featureStyles);
+
+function CampoDropdown({
+  rotulo,
+  valor,
+  opcoes,
+  aoAlterar,
+}: {
+  rotulo: string;
+  valor: string;
+  opcoes: OpcaoSelect[];
+  aoAlterar: (valor: string) => void;
+}) {
+  return (
+    <div className={styles.campoDropdown}>
+      <span>{rotulo}</span>
+      <SelectPadrao
+        valor={valor}
+        aoAlterar={aoAlterar}
+        placeholder={rotulo}
+        opcoes={opcoes}
+      />
+    </div>
+  );
+}
 
 export type FormHabilidade = SalvarAdminHabilidadePayload & { id?: string };
 
@@ -90,24 +118,17 @@ export function AdminHabilidadeFormulario({
             autoFocus
           />
         </label>
-        <label>
-          Tipo de efeito
-          <select
-            value={form.tipoEfeito}
-            onChange={(event) =>
-              aoAtualizar(
-                "tipoEfeito",
-                event.target.value as AdminHabilidade["tipoEfeito"],
-              )
-            }
-          >
-            {opcoesTipo.map((opcao) => (
-              <option key={opcao.valor} value={opcao.valor}>
-                {opcao.texto}
-              </option>
-            ))}
-          </select>
-        </label>
+        <CampoDropdown
+          rotulo="Tipo de efeito"
+          valor={form.tipoEfeito}
+          aoAlterar={(valor) =>
+            aoAtualizar("tipoEfeito", valor as AdminHabilidade["tipoEfeito"])
+          }
+          opcoes={opcoesTipo.map((opcao) => ({
+            valor: opcao.valor,
+            label: opcao.texto,
+          }))}
+        />
         <label className={styles.fullField}>
           Descrição
           <textarea
@@ -117,72 +138,60 @@ export function AdminHabilidadeFormulario({
             rows={3}
           />
         </label>
-        <label>
-          Gatilho
-          <select
-            value={form.gatilho}
-            onChange={(event) =>
-              aoAtualizar(
-                "gatilho",
-                event.target.value as AdminHabilidade["gatilho"],
-              )
-            }
-          >
-            <option value="AO_ENTRAR">Ao entrar</option>
-            <option value="AO_ATACAR">Ao atacar</option>
-            <option value="AO_RECEBER_DANO">Ao receber dano</option>
-            <option value="INICIO_TURNO">Início do turno</option>
-            <option value="FIM_TURNO">Fim do turno</option>
-          </select>
-        </label>
-        <label>
-          Alvo
-          <select
-            value={form.alvo}
-            onChange={(event) =>
-              aoAtualizar("alvo", event.target.value as AdminHabilidade["alvo"])
-            }
-          >
-            <option value="PROPRIA_CARTA">Própria carta</option>
-            <option value="ALIADO_ATIVO">Aliado ativo</option>
-            <option value="INIMIGO_ATIVO">Inimigo ativo</option>
-          </select>
-        </label>
+        <CampoDropdown
+          rotulo="Gatilho"
+          valor={form.gatilho}
+          aoAlterar={(valor) =>
+            aoAtualizar("gatilho", valor as AdminHabilidade["gatilho"])
+          }
+          opcoes={[
+            { valor: "AO_ENTRAR", label: "Ao entrar" },
+            { valor: "AO_ATACAR", label: "Ao atacar" },
+            { valor: "AO_RECEBER_DANO", label: "Ao receber dano" },
+            { valor: "INICIO_TURNO", label: "Início do turno" },
+            { valor: "FIM_TURNO", label: "Fim do turno" },
+          ]}
+        />
+        <CampoDropdown
+          rotulo="Alvo"
+          valor={form.alvo}
+          aoAlterar={(valor) =>
+            aoAtualizar("alvo", valor as AdminHabilidade["alvo"])
+          }
+          opcoes={[
+            { valor: "PROPRIA_CARTA", label: "Própria carta" },
+            { valor: "ALIADO_ATIVO", label: "Aliado ativo" },
+            { valor: "INIMIGO_ATIVO", label: "Inimigo ativo" },
+          ]}
+        />
         {alteraAtributo ? (
-          <label>
-            Atributo
-            <select
-              value={form.atributo ?? "ATAQUE"}
-              onChange={(event) =>
-                aoAtualizar(
-                  "atributo",
-                  event.target.value as NonNullable<
-                    AdminHabilidade["atributo"]
-                  >,
-                )
-              }
-            >
-              <option value="ATAQUE">Ataque</option>
-              <option value="DEFESA">Defesa</option>
-              <option value="VELOCIDADE">Velocidade</option>
-            </select>
-          </label>
-        ) : null}
-        <label>
-          Unidade
-          <select
-            value={form.unidade}
-            onChange={(event) =>
+          <CampoDropdown
+            rotulo="Atributo"
+            valor={form.atributo ?? "ATAQUE"}
+            aoAlterar={(valor) =>
               aoAtualizar(
-                "unidade",
-                event.target.value as AdminHabilidade["unidade"],
+                "atributo",
+                valor as NonNullable<AdminHabilidade["atributo"]>,
               )
             }
-          >
-            <option value="FIXO">Valor fixo</option>
-            <option value="PERCENTUAL">Percentual</option>
-          </select>
-        </label>
+            opcoes={[
+              { valor: "ATAQUE", label: "Ataque" },
+              { valor: "DEFESA", label: "Defesa" },
+              { valor: "VELOCIDADE", label: "Velocidade" },
+            ]}
+          />
+        ) : null}
+        <CampoDropdown
+          rotulo="Unidade"
+          valor={form.unidade}
+          aoAlterar={(valor) =>
+            aoAtualizar("unidade", valor as AdminHabilidade["unidade"])
+          }
+          opcoes={[
+            { valor: "FIXO", label: "Valor fixo" },
+            { valor: "PERCENTUAL", label: "Percentual" },
+          ]}
+        />
         <label>
           Valor base
           <input
@@ -196,39 +205,37 @@ export function AdminHabilidadeFormulario({
             required
           />
         </label>
-        <label>
-          Aplicação
-          <select
-            value={form.formaAplicacao}
-            onChange={(event) =>
-              aoAtualizar(
-                "formaAplicacao",
-                event.target.value as AdminHabilidade["formaAplicacao"],
-              )
-            }
-          >
-            <option value="ANTES_ACAO">Antes da ação</option>
-            <option value="APOS_ACAO">Após a ação</option>
-            <option value="SUBSTITUI_ATAQUE">Substitui o ataque</option>
-          </select>
-        </label>
-        <label>
-          Requisito
-          <select
-            value={form.requisitoTipo}
-            onChange={(event) =>
-              aoAtualizar(
-                "requisitoTipo",
-                event.target.value as AdminHabilidade["requisitoTipo"],
-              )
-            }
-          >
-            <option value="NENHUM">Nenhum</option>
-            <option value="CONTADOR_ATAQUES">Contador de ataques</option>
-            <option value="HP_ABAIXO">HP abaixo de (%)</option>
-            <option value="TURNO_MINIMO">Turno mínimo</option>
-          </select>
-        </label>
+        <CampoDropdown
+          rotulo="Aplicação"
+          valor={form.formaAplicacao}
+          aoAlterar={(valor) =>
+            aoAtualizar(
+              "formaAplicacao",
+              valor as AdminHabilidade["formaAplicacao"],
+            )
+          }
+          opcoes={[
+            { valor: "ANTES_ACAO", label: "Antes da ação" },
+            { valor: "APOS_ACAO", label: "Após a ação" },
+            { valor: "SUBSTITUI_ATAQUE", label: "Substitui o ataque" },
+          ]}
+        />
+        <CampoDropdown
+          rotulo="Requisito"
+          valor={form.requisitoTipo}
+          aoAlterar={(valor) =>
+            aoAtualizar(
+              "requisitoTipo",
+              valor as AdminHabilidade["requisitoTipo"],
+            )
+          }
+          opcoes={[
+            { valor: "NENHUM", label: "Nenhum" },
+            { valor: "CONTADOR_ATAQUES", label: "Contador de ataques" },
+            { valor: "HP_ABAIXO", label: "HP abaixo de (%)" },
+            { valor: "TURNO_MINIMO", label: "Turno mínimo" },
+          ]}
+        />
         {possuiRequisito ? (
           <label>
             Valor do requisito
@@ -244,22 +251,18 @@ export function AdminHabilidadeFormulario({
             />
           </label>
         ) : null}
-        <label>
-          Escala
-          <select
-            value={form.escalaTipo}
-            onChange={(event) =>
-              aoAtualizar(
-                "escalaTipo",
-                event.target.value as AdminHabilidade["escalaTipo"],
-              )
-            }
-          >
-            <option value="NENHUMA">Sem escala</option>
-            <option value="POR_TURNO">Por turno</option>
-            <option value="POR_ATAQUE">Por ataque</option>
-          </select>
-        </label>
+        <CampoDropdown
+          rotulo="Escala"
+          valor={form.escalaTipo}
+          aoAlterar={(valor) =>
+            aoAtualizar("escalaTipo", valor as AdminHabilidade["escalaTipo"])
+          }
+          opcoes={[
+            { valor: "NENHUMA", label: "Sem escala" },
+            { valor: "POR_TURNO", label: "Por turno" },
+            { valor: "POR_ATAQUE", label: "Por ataque" },
+          ]}
+        />
         {possuiEscala ? (
           <>
             <label>

@@ -19,6 +19,7 @@ import {
   type AdminHabilidade,
   type SalvarAdminHabilidadePayload,
 } from "../../lib/admin";
+import { SelectPadrao } from "../../components/ui/controlesFormulario";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
 import featureStyles from "../../styles/admin/adminHabilidades.module.css";
 import {
@@ -423,26 +424,28 @@ export function Habilidades() {
               onChange={(event) => setBusca(event.target.value)}
             />
           </label>
-          <select
-            value={filtroTipo}
-            onChange={(event) => setFiltroTipo(event.target.value)}
-            aria-label="Filtrar por tipo"
-          >
-            <option value="">Todos os tipos</option>
-            {tipos.map((tipo) => (
-              <option key={tipo}>{tipo}</option>
-            ))}
-          </select>
-          <select
-            value={filtroStatus}
-            onChange={(event) => setFiltroStatus(event.target.value)}
-            aria-label="Filtrar por status"
-          >
-            <option value="">Todos os status</option>
-            <option value="RASCUNHO">Rascunhos</option>
-            <option value="PUBLICADA">Publicadas</option>
-            <option value="INATIVA">Inativas</option>
-          </select>
+          <SelectPadrao
+            valor={filtroTipo}
+            aoAlterar={setFiltroTipo}
+            placeholder="Tipo"
+            ariaLabel="Filtrar por tipo"
+            opcoes={[
+              { valor: "", label: "Todos os tipos", labelCurto: "Tipo" },
+              ...tipos.map((tipo) => ({ valor: tipo, label: tipo })),
+            ]}
+          />
+          <SelectPadrao
+            valor={filtroStatus}
+            aoAlterar={setFiltroStatus}
+            placeholder="Status"
+            ariaLabel="Filtrar por status"
+            opcoes={[
+              { valor: "", label: "Todos os status", labelCurto: "Status" },
+              { valor: "RASCUNHO", label: "Rascunhos", cor: "#fbbf24" },
+              { valor: "PUBLICADA", label: "Publicadas", cor: "#4ade80" },
+              { valor: "INATIVA", label: "Inativas", cor: "#94a3b8" },
+            ]}
+          />
         </aside>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Pencil, Plus, Save, X } from "lucide-react";
+import { Pencil, Plus, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   atualizarAdminClasse,
@@ -10,6 +10,7 @@ import {
   type SalvarAdminClassePayload,
 } from "../../lib/admin";
 import styles from "../../styles/admin/adminClasseSelect.module.css";
+import { SelectPadrao } from "../../components/ui/controlesFormulario";
 
 const classeVazia: SalvarAdminClassePayload = {
   nome: "",
@@ -95,31 +96,32 @@ export function AdminClasseSelect({
       <label htmlFor="classe-carta">Classe</label>
       <div className={styles.linhaSelect}>
         <div className={styles.selectClasse}>
-          <select
-            id="classe-carta"
-            value={idClasse}
-            onChange={(event) =>
+          <SelectPadrao
+            valor={idClasse}
+            aoAlterar={(valor) =>
               aoSelecionar(
-                classes.find((classe) => classe.id === event.target.value) ??
-                  null,
+                classes.find((classe) => classe.id === valor) ?? null,
               )
             }
-          >
-            <option value="">Sem classe</option>
-            {!idClasse && classeLegada ? (
-              <option value="" disabled>
-                {classeLegada} (legada)
-              </option>
-            ) : null}
-            {classes
-              .filter((classe) => classe.ativo || classe.id === idClasse)
-              .map((classe) => (
-                <option value={classe.id} key={classe.id}>
-                  {classe.nome} · prioridade {classe.prioridadeAtaque}
-                </option>
-              ))}
-          </select>
-          <ChevronDown aria-hidden="true" />
+            placeholder="Classe"
+            ariaLabel="Classe da carta"
+            opcoes={[
+              {
+                valor: "",
+                label: classeLegada
+                  ? `${classeLegada} (legada, sem vínculo)`
+                  : "Sem classe",
+                labelCurto: classeLegada ?? "Sem classe",
+              },
+              ...classes
+                .filter((classe) => classe.ativo || classe.id === idClasse)
+                .map((classe) => ({
+                  valor: classe.id,
+                  label: classe.nome,
+                  descricao: `Prioridade ${classe.prioridadeAtaque}`,
+                })),
+            ]}
+          />
         </div>
         <button type="button" onClick={() => abrir()} title="Criar classe">
           <Plus />

@@ -22,6 +22,7 @@ import {
   type AnexoNoticia,
   type SalvarAdminNoticiaPayload,
 } from "../../lib/admin";
+import { SelectPadrao } from "../../components/ui/controlesFormulario";
 import styles from "../../styles/admin/adminNoticias.module.css";
 import {
   notificarErro,
@@ -237,24 +238,29 @@ export function AdminNoticias() {
                   onChange={(e) => atualizar("titulo", e.target.value)}
                 />
               </label>
-              <label>
+              <div className={styles.campoDropdown}>
                 <span>Categoria</span>
-                <select
-                  value={form.categoria}
-                  onChange={(e) =>
+                <SelectPadrao
+                  valor={form.categoria}
+                  aoAlterar={(valor) =>
                     atualizar(
                       "categoria",
-                      e.target.value as SalvarAdminNoticiaPayload["categoria"],
+                      valor as SalvarAdminNoticiaPayload["categoria"],
                     )
                   }
-                >
-                  <option>NOVIDADE</option>
-                  <option>BALANCE</option>
-                  <option>EVENTO</option>
-                  <option>PROMOCAO</option>
-                  <option>AVISO</option>
-                </select>
-              </label>
+                  placeholder="Categoria"
+                  opcoes={[
+                    "NOVIDADE",
+                    "BALANCE",
+                    "EVENTO",
+                    "PROMOCAO",
+                    "AVISO",
+                  ].map((categoria) => ({
+                    valor: categoria,
+                    label: categoria,
+                  }))}
+                />
+              </div>
             </div>
             <label>
               <span>Resumo do banner</span>

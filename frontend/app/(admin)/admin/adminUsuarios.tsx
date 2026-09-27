@@ -17,6 +17,7 @@ import {
 import sharedStyles from "../../styles/admin/adminShared.module.css";
 import featureStyles from "../../styles/admin/adminUsuarios.module.css";
 import colecaoStyles from "../../styles/admin/adminUsuarioColecao.module.css";
+import { SelectPadrao } from "../../components/ui/controlesFormulario";
 import financeiroStyles from "../../styles/admin/adminUsuarioFinanceiro.module.css";
 
 import { AdminLayout } from "./adminShared";
@@ -220,17 +221,19 @@ export function Usuarios() {
             onChange={(event) => setBusca(event.target.value)}
           />
         </label>
-        <select
-          value={filtroStatus}
-          onChange={(event) => setFiltroStatus(event.target.value)}
-          aria-label="Filtrar usuários por status"
-        >
-          <option value="">Todos os status</option>
-          <option value="ativos">Ativos</option>
-          <option value="bloqueados">Bloqueados</option>
-          <option value="inativos">Inativos</option>
-          <option value="admins">Administradores</option>
-        </select>
+        <SelectPadrao
+          valor={filtroStatus}
+          aoAlterar={setFiltroStatus}
+          placeholder="Status"
+          ariaLabel="Filtrar usuários por status"
+          opcoes={[
+            { valor: "", label: "Todos os status", labelCurto: "Status" },
+            { valor: "ativos", label: "Ativos", cor: "#4ade80" },
+            { valor: "bloqueados", label: "Bloqueados", cor: "#f87171" },
+            { valor: "inativos", label: "Inativos", cor: "#fbbf24" },
+            { valor: "admins", label: "Administradores", cor: "#c4b5fd" },
+          ]}
+        />
         <small>Atualização automática</small>
       </div>
       <div className={styles.usuariosWorkspace}>

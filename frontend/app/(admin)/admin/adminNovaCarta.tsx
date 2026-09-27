@@ -14,6 +14,7 @@ import {
   uploadCartaAssets,
   type CreateAdminCartaPayload,
 } from "../../lib/admin";
+import { SelectPadrao } from "../../components/ui/controlesFormulario";
 import {
   criarConfigVisualPadrao,
   type ConfigVisualCarta,
@@ -32,7 +33,6 @@ import {
   ControleVisualCarta,
   ElementoSelect,
   PreviewCarta,
-  classeRaridade,
   obterElementoVisual,
   raridades,
 } from "./adminCartaVisual";
@@ -271,24 +271,27 @@ export function NovaCarta() {
                   required
                 />
               </label>
-              <label>
-                Raridade
-                <select
-                  className={`${styles.selectRaridade} ${classeRaridade(form.raridade)}`}
-                  value={form.raridade}
-                  onChange={(event) =>
-                    alterarRaridade(
-                      event.target.value as CartaFormState["raridade"],
-                    )
+              <div className={styles.campoDropdown}>
+                <span>Raridade</span>
+                <SelectPadrao
+                  valor={form.raridade}
+                  aoAlterar={(valor) =>
+                    alterarRaridade(valor as CartaFormState["raridade"])
                   }
-                >
-                  {raridades.map((raridade) => (
-                    <option className={classeRaridade(raridade)} key={raridade}>
-                      {raridade}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  placeholder="Raridade"
+                  opcoes={raridades.map((raridade) => ({
+                    valor: raridade,
+                    label: raridade,
+                    cor: {
+                      UR: "#e879f9",
+                      SSR: "#facc15",
+                      SR: "#67e8f9",
+                      R: "#a78bfa",
+                      N: "#94a3b8",
+                    }[raridade],
+                  }))}
+                />
+              </div>
               <label>
                 Elemento
                 <ElementoSelect
@@ -440,4 +443,3 @@ function toNumber(value: string, label: string) {
 
   return number;
 }
-

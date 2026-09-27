@@ -483,6 +483,14 @@
   font-weight: 800;
 }
 
+.campoDropdown {
+  display: grid;
+  gap: 0.35rem;
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
 .usuarioEditor input,
 .usuarioEditor select {
   width: 100%;
