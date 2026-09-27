@@ -18,7 +18,6 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { ExpandableTabs } from "../../components/ui/expandableTabs";
 import styles from "../../styles/admin/adminShared.module.css";
 import layoutStyles from "../../styles/admin/adminLayout.module.css";
 
@@ -55,7 +54,7 @@ export function AdminLayout({
 
   return (
     <main className={layoutStyles.adminPage}>
-      <header className={layoutStyles.adminNavbar}>
+      <aside className={layoutStyles.adminNavbar}>
         <div className={layoutStyles.brand}>
           <span>
             <Gem aria-hidden="true" />
@@ -66,19 +65,27 @@ export function AdminLayout({
           </div>
         </div>
 
-        <ExpandableTabs
-          className={layoutStyles.nav}
-          ariaLabel="Navegação administrativa"
-          itens={nav.map((item) => ({
-            titulo: item.label,
-            icone: item.icon,
-            href: item.href,
-            ativa:
+        <nav className={layoutStyles.nav} aria-label="Navegação administrativa">
+          {nav.map((item) => {
+            const Icone = item.icon;
+            const ativa =
               item.href === "/admin"
                 ? pathname === item.href
-                : pathname.startsWith(item.href),
-          }))}
-        />
+                : pathname.startsWith(item.href);
+
+            return (
+              <Link
+                href={item.href}
+                className={ativa ? layoutStyles.navAtiva : undefined}
+                aria-current={ativa ? "page" : undefined}
+                key={item.href}
+              >
+                <Icone aria-hidden="true" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
 
         <div className={layoutStyles.navAcoes}>
           <Link href="/perfil" className={layoutStyles.adminUser}>
@@ -99,7 +106,7 @@ export function AdminLayout({
             <span>Jogo</span>
           </Link>
         </div>
-      </header>
+      </aside>
 
       <section className={layoutStyles.content}>
         <header className={layoutStyles.topbar}>
