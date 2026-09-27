@@ -39,7 +39,7 @@
   line-height: 1;
 }
 
-.selectTrigger {
+.selectRaiz > .selectTrigger {
   display: flex;
   width: 100%;
   min-width: 0;
@@ -120,7 +120,7 @@
   animation: abrirMenu 160ms ease-out;
 }
 
-.selectMenu > button {
+.selectRaiz .selectMenu > button {
   display: flex;
   width: 100%;
   min-height: 2.35rem;
@@ -142,19 +142,19 @@
     transform 150ms ease;
 }
 
-.selectMenu > button:hover,
-.selectMenu > button:focus-visible {
+.selectRaiz .selectMenu > button:hover,
+.selectRaiz .selectMenu > button:focus-visible {
   border-color: color-mix(in srgb, var(--controle-cor) 35%, transparent);
   background: color-mix(in srgb, var(--controle-cor) 10%, #0a101c);
   transform: translateX(0.1rem);
 }
 
-.selectMenu > button[data-selecionada] {
+.selectRaiz .selectMenu > button[data-selecionada] {
   border-color: color-mix(in srgb, var(--controle-cor) 46%, transparent);
   background: color-mix(in srgb, var(--controle-cor) 13%, #0a101c);
 }
 
-.selectMenu > button > svg {
+.selectRaiz .selectMenu > button > svg {
   width: 0.85rem;
   height: 0.85rem;
   flex: 0 0 auto;
@@ -266,7 +266,7 @@
     animation: none;
   }
 
-  .selectMenu > button,
+  .selectRaiz .selectMenu > button,
   .chevron {
     transition: none;
   }
