@@ -1,18 +1,8 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import {
-  Check,
-  ChevronDown,
-  Gem,
-  Shapes,
-  Shield,
-  SlidersHorizontal,
-} from "lucide-react";
+import { Gem, Shapes, Shield, SlidersHorizontal } from "lucide-react";
 
+import { SelectPadrao } from "../../../components/ui/controlesFormulario";
 import { obterElementoCarta } from "../../../components/elementosCarta";
-import { styles } from "../styles";
 
 type FiltroSelectProps = {
   rotulo: string;
@@ -21,7 +11,7 @@ type FiltroSelectProps = {
   aoAlterar: (valor: string) => void;
 };
 
-function ValorFiltro({ rotulo, valor }: { rotulo: string; valor: string }) {
+function IconeFiltro({ rotulo, valor }: { rotulo: string; valor: string }) {
   const elemento = obterElementoCarta(valor);
   const Icone =
     rotulo === "Raridade"
@@ -32,30 +22,25 @@ function ValorFiltro({ rotulo, valor }: { rotulo: string; valor: string }) {
           ? SlidersHorizontal
           : Shapes;
 
-  return (
-    <span
-      className={styles.valorFiltro}
-      style={elemento ? { color: elemento.cor } : undefined}
-      data-raridade={rotulo === "Raridade" ? valor : undefined}
-    >
-      {elemento ? (
-        <Image
-          className={styles.iconeElementoFiltro}
-          src={elemento.icone}
-          width={18}
-          height={18}
-          alt=""
-        />
-      ) : (
-        <Icone
-          className={styles.iconeFiltro}
-          strokeWidth={2.25}
-          aria-hidden="true"
-        />
-      )}
-      <strong>{valor}</strong>
-    </span>
+  return elemento ? (
+    <Image src={elemento.icone} width={18} height={18} alt="" />
+  ) : (
+    <Icone strokeWidth={2.25} aria-hidden="true" />
   );
+}
+
+function obterCorFiltro(rotulo: string, valor: string) {
+  const elemento = obterElementoCarta(valor);
+  if (elemento) return elemento.cor;
+  if (rotulo !== "Raridade") return undefined;
+  const coresRaridade: Record<string, string> = {
+    UR: "#e879f9",
+    SSR: "#facc15",
+    SR: "#67e8f9",
+    R: "#a78bfa",
+    N: "#94a3b8",
+  };
+  return coresRaridade[valor];
 }
 
 export function FiltroSelect({
@@ -64,69 +49,18 @@ export function FiltroSelect({
   opcoes,
   aoAlterar,
 }: FiltroSelectProps) {
-  const [aberto, setAberto] = useState(false);
-  const raiz = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function fecharAoClicarFora(evento: PointerEvent) {
-      if (!raiz.current?.contains(evento.target as Node)) {
-        setAberto(false);
-      }
-    }
-
-    function fecharComEscape(evento: KeyboardEvent) {
-      if (evento.key === "Escape") {
-        setAberto(false);
-      }
-    }
-
-    document.addEventListener("pointerdown", fecharAoClicarFora);
-    document.addEventListener("keydown", fecharComEscape);
-
-    return () => {
-      document.removeEventListener("pointerdown", fecharAoClicarFora);
-      document.removeEventListener("keydown", fecharComEscape);
-    };
-  }, []);
-
   return (
-    <div
-      className={styles.selectVisual}
-      ref={raiz}
-      data-open={aberto || undefined}
-    >
-      <span>{rotulo}</span>
-      <button
-        type="button"
-        className={styles.selectTrigger}
-        aria-haspopup="listbox"
-        aria-expanded={aberto}
-        onClick={() => setAberto((atual) => !atual)}
-      >
-        <ValorFiltro rotulo={rotulo} valor={valor} />
-        <ChevronDown aria-hidden="true" />
-      </button>
-
-      {aberto ? (
-        <div className={styles.selectMenu} role="listbox" aria-label={rotulo}>
-          {opcoes.map((opcao) => (
-            <button
-              type="button"
-              role="option"
-              aria-selected={opcao === valor}
-              className={opcao === valor ? styles.selectOpcaoAtiva : undefined}
-              key={opcao}
-              onClick={() => {
-                aoAlterar(opcao);
-                setAberto(false);
-              }}
-            >
-              <ValorFiltro rotulo={rotulo} valor={opcao} />
-              {opcao === valor ? <Check aria-hidden="true" /> : null}
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
+    <SelectPadrao
+      rotulo={rotulo}
+      placeholder={rotulo}
+      valor={valor}
+      aoAlterar={aoAlterar}
+      opcoes={opcoes.map((opcao) => ({
+        valor: opcao,
+        label: opcao,
+        icone: <IconeFiltro rotulo={rotulo} valor={opcao} />,
+        cor: obterCorFiltro(rotulo, opcao),
+      }))}
+    />
   );
 }

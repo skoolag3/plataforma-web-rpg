@@ -2,18 +2,19 @@
 
 import {
   ArrowUpDown,
+  CheckCircle2,
+  CircleOff,
   Edit3,
+  Gem,
   ImagePlus,
   Plus,
-  Search,
+  Shapes,
+  Shield,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  useEffect,
-  useState,
-  type CSSProperties,
-} from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import {
   atualizarAdminCarta,
   listarAdminCartas,
@@ -21,9 +22,12 @@ import {
   removerAdminCarta,
   type AdminCarta,
   type AdminClasse,
-  type CreateAdminCartaPayload,
   type UpdateAdminCartaPayload,
 } from "../../lib/admin";
+import {
+  CampoBusca,
+  SelectPadrao,
+} from "../../components/ui/controlesFormulario";
 import {
   notificarErro,
   notificarSucesso,
@@ -33,11 +37,9 @@ import editorStyles from "../../styles/admin/adminCartaEditor.module.css";
 import visualStyles from "../../styles/admin/adminCartaVisual.module.css";
 import listaStyles from "../../styles/admin/adminCartasLista.module.css";
 import {
-  ElementoSelect,
   ElementoVisual,
   Raridade,
-  StatusSelect,
-  classeRaridade,
+  elementos,
   obterElementoVisual,
   raridades,
 } from "./adminCartaVisual";
@@ -265,19 +267,27 @@ export function Cartas() {
               </small>
             </div>
             <div className={styles.cartasListaAcoes}>
-              <label className={styles.ordenacaoCartas}>
-                <ArrowUpDown aria-hidden="true" />
-                <span className={styles.srOnly}>Ordenar cartas</span>
-                <select
-                  value={ordem}
-                  onChange={(event) => setOrdem(event.target.value)}
-                >
-                  <option value="recentes">Mais recentes</option>
-                  <option value="antigas">Mais antigas</option>
-                  <option value="az">Nome A–Z</option>
-                  <option value="za">Nome Z–A</option>
-                </select>
-              </label>
+              <SelectPadrao
+                className={styles.ordenacaoCartas}
+                ariaLabel="Ordenar cartas"
+                placeholder="Ordenar cartas"
+                valor={ordem}
+                aoAlterar={setOrdem}
+                opcoes={[
+                  {
+                    valor: "recentes",
+                    label: "Mais recentes",
+                    icone: <ArrowUpDown />,
+                  },
+                  {
+                    valor: "antigas",
+                    label: "Mais antigas",
+                    icone: <ArrowUpDown />,
+                  },
+                  { valor: "az", label: "Nome A–Z", icone: <ArrowUpDown /> },
+                  { valor: "za", label: "Nome Z–A", icone: <ArrowUpDown /> },
+                ]}
+              />
               <Link href="/admin/cartas/nova" className={styles.primaryBtn}>
                 <Plus aria-hidden="true" /> Nova Carta
               </Link>
@@ -399,46 +409,115 @@ export function Cartas() {
             <strong>Filtros</strong>
             <small>Atualização automática</small>
           </header>
-          <label>
-            <Search aria-hidden="true" />
-            <input
-              placeholder="Buscar cartas..."
-              value={busca}
-              onChange={(event) => setBusca(event.target.value)}
-            />
-          </label>
-          <select
-            className={`${styles.selectRaridade} ${classeRaridade(filtroRaridade)}`}
-            value={filtroRaridade}
-            onChange={(event) => setFiltroRaridade(event.target.value)}
-          >
-            <option value="">Raridade</option>
-            {raridades.map((raridade) => (
-              <option className={classeRaridade(raridade)} key={raridade}>
-                {raridade}
-              </option>
-            ))}
-          </select>
-          <ElementoSelect
-            value={filtroElemento as CreateAdminCartaPayload["elemento"] | ""}
+          <CampoBusca
+            className={styles.buscaCartas}
+            placeholder="Buscar cartas..."
+            value={busca}
+            onChange={(event) => setBusca(event.target.value)}
+            aoLimpar={() => setBusca("")}
+          />
+          <SelectPadrao
+            className={styles.controlePadrao}
+            placeholder="Raridade"
+            valor={filtroRaridade}
+            aoAlterar={setFiltroRaridade}
+            opcoes={[
+              {
+                valor: "",
+                label: "Todas as raridades",
+                labelCurto: "Raridade",
+                icone: <Gem />,
+              },
+              ...raridades.map((raridade) => ({
+                valor: raridade,
+                label: raridade,
+                icone: <Gem />,
+                cor: {
+                  UR: "#e879f9",
+                  SSR: "#facc15",
+                  SR: "#67e8f9",
+                  R: "#a78bfa",
+                  N: "#94a3b8",
+                }[raridade],
+              })),
+            ]}
+          />
+          <SelectPadrao
+            className={styles.controlePadrao}
             placeholder="Elemento"
-            onChange={setFiltroElemento}
+            valor={filtroElemento}
+            aoAlterar={setFiltroElemento}
+            opcoes={[
+              {
+                valor: "",
+                label: "Todos os elementos",
+                labelCurto: "Elemento",
+                icone: <Shapes />,
+              },
+              ...elementos.map((elemento) => ({
+                valor: elemento.value,
+                label: elemento.label,
+                cor: elemento.cor,
+                icone: (
+                  <span
+                    className={styles.iconeOpcaoElemento}
+                    style={{ backgroundImage: `url("${elemento.icone}")` }}
+                  />
+                ),
+              })),
+            ]}
           />
-          <StatusSelect
-            value={filtroStatus as "" | "ativas" | "inativas" | "removidas"}
-            onChange={setFiltroStatus}
+          <SelectPadrao
+            className={styles.controlePadrao}
+            placeholder="Status"
+            valor={filtroStatus}
+            aoAlterar={setFiltroStatus}
+            opcoes={[
+              {
+                valor: "",
+                label: "Todos os status",
+                labelCurto: "Status",
+                icone: <Shield />,
+              },
+              {
+                valor: "ativas",
+                label: "Ativas",
+                cor: "#4ade80",
+                icone: <CheckCircle2 />,
+              },
+              {
+                valor: "inativas",
+                label: "Inativas",
+                cor: "#fbbf24",
+                icone: <CircleOff />,
+              },
+              {
+                valor: "removidas",
+                label: "Removidas",
+                cor: "#f87171",
+                icone: <Trash2 />,
+              },
+            ]}
           />
-          <select
-            value={filtroClasse}
-            onChange={(event) => setFiltroClasse(event.target.value)}
-          >
-            <option value="">Classe</option>
-            {classesApi.map((classe) => (
-              <option key={classe.id} value={classe.nome}>
-                {classe.nome}
-              </option>
-            ))}
-          </select>
+          <SelectPadrao
+            className={styles.controlePadrao}
+            placeholder="Classe"
+            valor={filtroClasse}
+            aoAlterar={setFiltroClasse}
+            opcoes={[
+              {
+                valor: "",
+                label: "Todas as classes",
+                labelCurto: "Classe",
+                icone: <Shield />,
+              },
+              ...classesApi.map((classe) => ({
+                valor: classe.nome,
+                label: classe.nome,
+                icone: <Shield />,
+              })),
+            ]}
+          />
           <div className={styles.periodoFiltro}>
             <div className={styles.periodoCabecalho}>
               <span>Período de cadastro</span>

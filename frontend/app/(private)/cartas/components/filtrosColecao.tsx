@@ -1,5 +1,4 @@
-import { Search } from "lucide-react";
-
+import { CampoBusca } from "../../../components/ui/controlesFormulario";
 import { CLASSES, ELEMENTOS, RARIDADES, VALORES_VENDA } from "../cardData";
 import { styles } from "../styles";
 import { FiltroSelect } from "./filtroSelect";
@@ -24,15 +23,12 @@ type FiltrosColecaoProps = {
 export function FiltrosColecao(props: FiltrosColecaoProps) {
   return (
     <div className={styles.filtros}>
-      <label className={styles.busca}>
-        <Search aria-hidden="true" />
-        <input
-          type="search"
-          value={props.busca}
-          onChange={(evento) => props.aoAlterarBusca(evento.target.value)}
-          placeholder="Buscar carta..."
-        />
-      </label>
+      <CampoBusca
+        value={props.busca}
+        onChange={(evento) => props.aoAlterarBusca(evento.target.value)}
+        aoLimpar={() => props.aoAlterarBusca("")}
+        placeholder="Buscar carta..."
+      />
       <FiltroSelect
         rotulo="Raridade"
         valor={props.raridade}

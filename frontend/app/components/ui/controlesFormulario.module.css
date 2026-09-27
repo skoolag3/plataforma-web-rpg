@@ -1,0 +1,273 @@
+.selectRaiz {
+  --controle-cor: #c4b5fd;
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 2.65rem;
+  align-content: center;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.62rem;
+  background: #0b111d;
+  padding: 0.28rem 0.58rem;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.045),
+    0 0 0 0 rgba(190, 242, 100, 0);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.selectRaiz:hover {
+  border-color: rgba(167, 139, 250, 0.42);
+  background: #0d1422;
+}
+
+.selectRaiz:focus-within,
+.selectRaiz[data-aberto] {
+  z-index: 60;
+  border-color: rgba(190, 242, 100, 0.72);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.045),
+    0 0 0 3px rgba(190, 242, 100, 0.08);
+}
+
+.rotulo {
+  color: #7e8ba3;
+  font-size: 0.52rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.selectTrigger {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 1.65rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  border: 0;
+  outline: 0;
+  color: var(--controle-cor);
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.valorAtual,
+.opcaoConteudo {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.42rem;
+}
+
+.valorAtual strong,
+.opcaoConteudo strong {
+  overflow: hidden;
+  color: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.valorAtual > svg,
+.valorAtual > img,
+.opcaoConteudo > svg,
+.opcaoConteudo > img {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex: 0 0 auto;
+  color: currentColor;
+  object-fit: contain;
+}
+
+.selectRaiz[data-vazio] .valorAtual {
+  color: #aeb8ca;
+}
+
+.chevron {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex: 0 0 auto;
+  color: #8491a8;
+  transition: transform 180ms ease;
+}
+
+.selectRaiz[data-aberto] .chevron {
+  transform: rotate(180deg);
+}
+
+.selectMenu {
+  position: absolute;
+  z-index: 70;
+  top: calc(100% + 0.38rem);
+  right: 0;
+  left: 0;
+  display: grid;
+  max-height: min(19rem, 50vh);
+  gap: 0.16rem;
+  overflow-y: auto;
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  border-radius: 0.68rem;
+  background: #0a101c;
+  padding: 0.3rem;
+  box-shadow: 0 1.1rem 2.8rem rgba(1, 4, 12, 0.6);
+  animation: abrirMenu 160ms ease-out;
+}
+
+.selectMenu > button {
+  display: flex;
+  width: 100%;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 0.46rem;
+  outline: 0;
+  color: var(--controle-cor, #dbe4f4);
+  background: transparent;
+  padding: 0.42rem 0.5rem;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.selectMenu > button:hover,
+.selectMenu > button:focus-visible {
+  border-color: color-mix(in srgb, var(--controle-cor) 35%, transparent);
+  background: color-mix(in srgb, var(--controle-cor) 10%, #0a101c);
+  transform: translateX(0.1rem);
+}
+
+.selectMenu > button[data-selecionada] {
+  border-color: color-mix(in srgb, var(--controle-cor) 46%, transparent);
+  background: color-mix(in srgb, var(--controle-cor) 13%, #0a101c);
+}
+
+.selectMenu > button > svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: 0 0 auto;
+  color: #bef264;
+}
+
+.opcaoConteudo > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.opcaoConteudo small {
+  color: #748199;
+  font-size: 0.56rem;
+}
+
+.campoBusca {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 2.65rem;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.62rem;
+  background: #090f1a;
+  padding: 0 0.65rem;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.035);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.campoBusca:hover {
+  border-color: rgba(167, 139, 250, 0.4);
+  background: #0b121f;
+}
+
+.campoBusca:focus-within {
+  border-color: rgba(190, 242, 100, 0.72);
+  box-shadow: 0 0 0 3px rgba(190, 242, 100, 0.08);
+}
+
+.campoBusca > svg,
+.campoBusca > button svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: 0 0 auto;
+  color: #7f8da5;
+}
+
+.campoBusca input {
+  width: 100%;
+  min-width: 0;
+  border: 0 !important;
+  outline: 0 !important;
+  color: #edf2fa;
+  background: transparent !important;
+  padding: 0 !important;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 650;
+  box-shadow: none !important;
+}
+
+.campoBusca input::placeholder {
+  color: #78859b;
+  opacity: 1;
+}
+
+.campoBusca input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.campoBusca > button {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+.campoBusca > button:hover,
+.campoBusca > button:focus-visible {
+  outline: 0;
+  background: rgba(167, 139, 250, 0.12);
+}
+
+@keyframes abrirMenu {
+  from {
+    opacity: 0;
+    transform: translateY(-0.35rem) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selectMenu {
+    animation: none;
+  }
+
+  .selectMenu > button,
+  .chevron {
+    transition: none;
+  }
+}
