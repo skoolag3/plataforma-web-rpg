@@ -579,20 +579,12 @@ function ConexoesTrilha({
       aria-hidden="true"
     >
       {conexoes.map((conexao) => (
-        <g key={conexao.id}>
-          <path
-            d={`M ${conexao.inicioX} ${conexao.inicioY} L ${conexao.fimX} ${conexao.fimY}`}
-            data-estado={conexao.estado}
-            vectorEffect="non-scaling-stroke"
-          />
-          {conexao.estado === "disponivel" ? (
-            <path
-              className={styles.pulsoConexao}
-              d={`M ${conexao.inicioX} ${conexao.inicioY} L ${conexao.fimX} ${conexao.fimY}`}
-              vectorEffect="non-scaling-stroke"
-            />
-          ) : null}
-        </g>
+        <path
+          d={`M ${conexao.inicioX} ${conexao.inicioY} L ${conexao.fimX} ${conexao.fimY}`}
+          data-estado={conexao.estado}
+          vectorEffect="non-scaling-stroke"
+          key={conexao.id}
+        />
       ))}
     </svg>
   );

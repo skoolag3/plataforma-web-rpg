@@ -372,16 +372,9 @@
     stroke 220ms ease;
 }
 .conexoesTrilha path[data-estado="disponivel"] {
-  stroke: rgba(167, 139, 250, 0.48);
-  stroke-width: 1.8;
-}
-.conexoesTrilha .pulsoConexao {
-  stroke: #c4b5fd;
-  stroke-width: 3;
-  stroke-dasharray: 7 93;
-  stroke-dashoffset: 100;
-  filter: drop-shadow(0 0 4px rgba(167, 139, 250, 0.9));
-  animation: fluxoRota 2.8s linear infinite;
+  stroke: rgba(167, 139, 250, 0.72);
+  stroke-dasharray: 4 5;
+  animation: fluxoRota 18s linear infinite;
 }
 .conexoesTrilha path[data-estado="futura"] {
   stroke: rgba(139, 118, 192, 0.2);
@@ -1042,7 +1035,7 @@
 
 @keyframes fluxoRota {
   to {
-    stroke-dashoffset: 0;
+    stroke-dashoffset: -90;
   }
 }
 
