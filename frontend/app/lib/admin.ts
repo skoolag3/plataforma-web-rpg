@@ -295,7 +295,15 @@ export type AdminBanner = {
   custoGiro: number;
   ativo: boolean;
   totalCartas: number;
+  cartas: Pick<AdminCarta, "id" | "nome" | "raridade" | "elemento">[];
   raridades: { raridade: string; total: number }[];
+};
+
+export type SalvarAdminBannerPayload = {
+  nome: string;
+  custoGiro: number;
+  ativo: boolean;
+  cartasIds: string[];
 };
 
 export type AdminBannersResponse = {
@@ -581,6 +589,29 @@ export function uploadNoticiaImagem(formData: FormData) {
 
 export function listarAdminBanners() {
   return adminRequest<AdminBannersResponse>("/admin/banners");
+}
+
+export function criarAdminBanner(payload: SalvarAdminBannerPayload) {
+  return adminRequest<{ message: string; id: string }>("/admin/banners", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function atualizarAdminBanner(
+  id: string,
+  payload: SalvarAdminBannerPayload,
+) {
+  return adminRequest<{ message: string }>(`/admin/banners/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removerAdminBanner(id: string) {
+  return adminRequest<{ message: string }>(`/admin/banners/${id}`, {
+    method: "DELETE",
+  });
 }
 
 export function obterAdminCampanha() {

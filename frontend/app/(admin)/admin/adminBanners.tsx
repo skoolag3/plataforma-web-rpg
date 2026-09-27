@@ -1,18 +1,33 @@
 "use client";
 
-import { Clock3, RefreshCw, ShieldCheck } from "lucide-react";
+import {
+  Clock3,
+  Pencil,
+  Plus,
+  RefreshCw,
+  ShieldCheck,
+  Trash2,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   notificarErro,
   notificarSucesso,
 } from "../../components/notificacoesGlobais";
 import {
+  atualizarAdminBanner,
+  criarAdminBanner,
   forcarAdminBanner,
+  listarAdminCartas,
   listarAdminBanners,
+  removerAdminBanner,
+  type AdminBanner,
   type AdminBannersResponse,
+  type AdminCarta,
+  type SalvarAdminBannerPayload,
 } from "../../lib/admin";
 import styles from "../../styles/admin/adminBanners.module.css";
 import { AdminLayout } from "./adminShared";
+import { FormBanner } from "./formBanner";
 
 function formatarTempo(ms: number) {
   const segundos = Math.max(0, Math.floor(ms / 1000));
@@ -24,10 +39,19 @@ export function AdminBanners() {
   const [dados, setDados] = useState<AdminBannersResponse | null>(null);
   const [agora, setAgora] = useState(Date.now());
   const [forcandoId, setForcandoId] = useState("");
+  const [cartas, setCartas] = useState<AdminCarta[]>([]);
+  const [editando, setEditando] = useState<AdminBanner | "novo" | null>(null);
+  const [salvando, setSalvando] = useState(false);
+  const [excluindo, setExcluindo] = useState<AdminBanner | null>(null);
 
   const carregar = useCallback(async () => {
     try {
-      setDados(await listarAdminBanners());
+      const [resBanners, resCartas] = await Promise.all([
+        listarAdminBanners(),
+        listarAdminCartas({ status: "ativas", ordem: "az" }),
+      ]);
+      setDados(resBanners);
+      setCartas(resCartas);
     } catch (erro) {
       notificarErro(
         erro instanceof Error ? erro.message : "Erro ao carregar banners.",
@@ -67,6 +91,45 @@ export function AdminBanners() {
       );
     } finally {
       setForcandoId("");
+    }
+  }
+
+  async function salvarBanner(payload: SalvarAdminBannerPayload) {
+    setSalvando(true);
+    try {
+      const res =
+        editando && editando !== "novo"
+          ? await atualizarAdminBanner(editando.id, payload)
+          : await criarAdminBanner(payload);
+      notificarSucesso(
+        res.message,
+        editando === "novo" ? "Banner criado" : "Banner atualizado",
+      );
+      setEditando(null);
+      await carregar();
+    } catch (erro) {
+      notificarErro(
+        erro instanceof Error ? erro.message : "Erro ao salvar banner.",
+      );
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function confirmarExclusao() {
+    if (!excluindo) return;
+    setSalvando(true);
+    try {
+      const res = await removerAdminBanner(excluindo.id);
+      notificarSucesso(res.message, "Banner excluído");
+      setExcluindo(null);
+      await carregar();
+    } catch (erro) {
+      notificarErro(
+        erro instanceof Error ? erro.message : "Erro ao excluir banner.",
+      );
+    } finally {
+      setSalvando(false);
     }
   }
 
@@ -118,9 +181,14 @@ export function AdminBanners() {
             <h2>Banners cadastrados</h2>
             <p>Somente banners ativos participam da rotação automática.</p>
           </div>
-          <button type="button" onClick={() => void carregar()}>
-            <RefreshCw aria-hidden="true" /> Atualizar
-          </button>
+          <div className={styles.acoesLista}>
+            <button type="button" onClick={() => setEditando("novo")}>
+              <Plus aria-hidden="true" /> Novo banner
+            </button>
+            <button type="button" onClick={() => void carregar()}>
+              <RefreshCw aria-hidden="true" /> Atualizar
+            </button>
+          </div>
         </header>
 
         <div className={styles.gradeBanners}>
@@ -134,7 +202,8 @@ export function AdminBanners() {
                   </span>
                   <strong>{banner.nome}</strong>
                   <small>
-                    {banner.totalCartas} cartas, {banner.custoGiro} Rubys por giro
+                    {banner.totalCartas} cartas, {banner.custoGiro} Rubys por
+                    giro
                   </small>
                 </div>
                 <p>
@@ -144,22 +213,73 @@ export function AdminBanners() {
                     </span>
                   ))}
                 </p>
-                <button
-                  type="button"
-                  disabled={!banner.ativo || atual || Boolean(forcandoId)}
-                  onClick={() => void forcarBanner(banner.id)}
-                >
-                  {forcandoId === banner.id
-                    ? "Alterando..."
-                    : atual
-                      ? "Banner atual"
-                      : "Forçar agora"}
-                </button>
+                <div className={styles.acoesBanner}>
+                  <button
+                    type="button"
+                    disabled={!banner.ativo || atual || Boolean(forcandoId)}
+                    onClick={() => void forcarBanner(banner.id)}
+                  >
+                    {forcandoId === banner.id
+                      ? "Alterando..."
+                      : atual
+                        ? "Banner atual"
+                        : "Forçar agora"}
+                  </button>
+                  <button type="button" onClick={() => setEditando(banner)}>
+                    <Pencil aria-hidden="true" /> Editar
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.btnExcluir}
+                    onClick={() => setExcluindo(banner)}
+                  >
+                    <Trash2 aria-hidden="true" /> Excluir
+                  </button>
+                </div>
               </article>
             );
           })}
         </div>
       </section>
+
+      {editando ? (
+        <FormBanner
+          banner={editando === "novo" ? null : editando}
+          cartas={cartas}
+          salvando={salvando}
+          onFechar={() => setEditando(null)}
+          onSalvar={(payload) => void salvarBanner(payload)}
+        />
+      ) : null}
+
+      {excluindo ? (
+        <div className={styles.modalFundo} role="presentation">
+          <section
+            className={styles.confirmarExclusao}
+            role="alertdialog"
+            aria-modal="true"
+          >
+            <Trash2 aria-hidden="true" />
+            <h2>Excluir {excluindo.nome}?</h2>
+            <p>
+              A exclusão só será permitida se existir outro banner ativo e se
+              este banner ainda não possuir giros no histórico.
+            </p>
+            <div>
+              <button type="button" onClick={() => setExcluindo(null)}>
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={salvando}
+                onClick={() => void confirmarExclusao()}
+              >
+                {salvando ? "Excluindo..." : "Excluir banner"}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </AdminLayout>
   );
 }

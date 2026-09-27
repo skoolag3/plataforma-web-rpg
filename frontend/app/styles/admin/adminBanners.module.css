@@ -26,7 +26,8 @@
 
 .iconeAtual svg,
 .contador svg,
-.listaBanners header button svg {
+.listaBanners header button svg,
+.acoesBanner svg {
   width: 1rem;
 }
 
@@ -133,6 +134,13 @@
   padding: 0 0.7rem;
 }
 
+.acoesLista,
+.acoesBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .gradeBanners {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -190,9 +198,273 @@
   opacity: 0.48;
 }
 
+.acoesBanner {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+}
+
+.acoesBanner button {
+  padding: 0 0.55rem;
+}
+
+.acoesBanner .btnExcluir {
+  border-color: rgba(248, 113, 113, 0.24);
+  color: #fca5a5;
+  background: rgba(127, 29, 29, 0.12);
+}
+
+.modalFundo {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  background: rgba(2, 4, 10, 0.82);
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+}
+
+.formBanner,
+.confirmarExclusao {
+  width: min(100%, 47rem);
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  border-radius: 0.9rem;
+  color: #f8fafc;
+  background: #090d18;
+  padding: 1rem;
+  box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.55);
+}
+
+.formBanner > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.formBanner h2,
+.confirmarExclusao h2 {
+  margin: 0.15rem 0 0;
+  font-size: 1.15rem;
+}
+
+.formBanner > header small,
+.seletorCartas small {
+  color: #8f9ab0;
+  font-size: 0.6rem;
+}
+
+.formBanner > header button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.5rem;
+  color: #a8b3c5;
+  background: transparent;
+  cursor: pointer;
+}
+
+.formBanner > header button svg {
+  width: 0.9rem;
+}
+
+.camposBanner {
+  display: grid;
+  grid-template-columns: 1fr 10rem auto;
+  align-items: end;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.camposBanner label:not(.statusBanner) {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.camposBanner span,
+.seletorCartas strong {
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.camposBanner input,
+.seletorCartas header label {
+  min-height: 2.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.55rem;
+  color: #f8fafc;
+  background: #050914;
+}
+
+.camposBanner input {
+  padding: 0 0.65rem;
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.statusBanner {
+  display: flex;
+  min-height: 2.5rem;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.statusBanner input {
+  width: 1rem;
+  min-height: 1rem;
+  accent-color: #8b5cf6;
+}
+
+.seletorCartas {
+  margin-top: 1rem;
+}
+
+.seletorCartas > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.seletorCartas > header > div {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.seletorCartas header label {
+  display: flex;
+  width: min(100%, 16rem);
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.65rem;
+}
+
+.seletorCartas header label svg {
+  width: 0.8rem;
+  color: #8f9ab0;
+}
+
+.seletorCartas header input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 0.68rem;
+}
+
+.seletorCartas > div {
+  display: grid;
+  max-height: 17rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+  overflow-y: auto;
+  margin-top: 0.65rem;
+  padding-right: 0.2rem;
+}
+
+.seletorCartas > div button {
+  display: flex;
+  min-height: 3.4rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.55rem;
+  color: #dbe4f4;
+  background: rgba(15, 23, 42, 0.55);
+  padding: 0.55rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.seletorCartas > div button[data-selecionada] {
+  border-color: rgba(190, 242, 100, 0.45);
+  background: rgba(101, 132, 45, 0.1);
+}
+
+.seletorCartas > div button span {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.seletorCartas > div button svg {
+  width: 0.8rem;
+  color: #bef264;
+}
+
+.formBanner > footer,
+.confirmarExclusao > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.formBanner > footer button,
+.confirmarExclusao button {
+  min-height: 2.4rem;
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 0.55rem;
+  color: #ddd6fe;
+  background: rgba(124, 58, 237, 0.13);
+  padding: 0 0.8rem;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.formBanner > footer button:last-child {
+  color: #10131d;
+  background: linear-gradient(135deg, #bef264, #8b5cf6);
+}
+
+.formBanner button:disabled,
+.confirmarExclusao button:disabled {
+  cursor: wait;
+  opacity: 0.48;
+}
+
+.confirmarExclusao {
+  width: min(100%, 25rem);
+  text-align: center;
+}
+
+.confirmarExclusao > svg {
+  width: 1.8rem;
+  color: #f87171;
+}
+
+.confirmarExclusao p {
+  color: #8f9ab0;
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+.confirmarExclusao > div {
+  justify-content: center;
+}
+
+.confirmarExclusao button:last-child {
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.2);
+}
+
 @media (max-width: 850px) {
   .probabilidades > div,
   .gradeBanners {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .camposBanner,
+  .seletorCartas > div {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -211,7 +483,24 @@
   }
 
   .probabilidades > div,
-  .gradeBanners {
+  .gradeBanners,
+  .camposBanner,
+  .seletorCartas > div {
     grid-template-columns: 1fr;
+  }
+
+  .listaBanners > header,
+  .seletorCartas > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .acoesLista,
+  .seletorCartas header label {
+    width: 100%;
+  }
+
+  .acoesLista button {
+    flex: 1;
   }
 }
