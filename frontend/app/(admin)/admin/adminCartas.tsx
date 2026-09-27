@@ -4,9 +4,10 @@ import {
   ArrowUpDown,
   CheckCircle2,
   CircleOff,
-  Edit3,
   Gem,
   ImagePlus,
+  MoreHorizontal,
+  Pencil,
   Plus,
   Shapes,
   Shield,
@@ -90,6 +91,7 @@ export function Cartas() {
   const [erro, setErro] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [editorAlterado, setEditorAlterado] = useState(false);
+  const [excluindo, setExcluindo] = useState<AdminCarta | null>(null);
 
   useEffect(() => {
     if (erro) notificarErro(erro);
@@ -98,6 +100,15 @@ export function Cartas() {
   useEffect(() => {
     if (feedback) notificarSucesso(feedback);
   }, [feedback]);
+
+  useEffect(() => {
+    if (!selecionada && !excluindo) return;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+    };
+  }, [selecionada, excluindo]);
 
   useEffect(() => {
     const carregarClasses = () =>
@@ -195,6 +206,7 @@ export function Cartas() {
       await removerAdminCarta(carta.id, carta.nome, true);
       setCartasApi((current) => current.filter((item) => item.id !== carta.id));
       setSelecionada((current) => (current?.id === carta.id ? null : current));
+      setExcluindo(null);
       setFeedback(
         "Carta removida com segurança. O registro foi preservado no histórico.",
       );
@@ -366,33 +378,27 @@ export function Cartas() {
                       />
                     </td>
                     <td>
-                      <span className={styles.rowActions}>
-                        <button
-                          type="button"
-                          className={
-                            selecionada?.id === carta.id
-                              ? styles.rowActionSelected
-                              : undefined
-                          }
-                          onClick={() =>
-                            selecionarCarta(
-                              selecionada?.id === carta.id ? null : carta,
-                            )
-                          }
-                          disabled={Boolean(carta.excluidoEm)}
-                          title={
-                            carta.excluidoEm
-                              ? "Carta removida"
-                              : selecionada?.id === carta.id
-                                ? "Carta em edição"
-                                : "Editar"
-                          }
-                          aria-label={`Editar ${carta.nome}`}
-                          aria-pressed={selecionada?.id === carta.id}
-                        >
-                          <Edit3 aria-hidden="true" />
-                        </button>
-                      </span>
+                      <details className={styles.menuAcoesCarta}>
+                        <summary aria-label={`Ações de ${carta.nome}`}>
+                          <MoreHorizontal aria-hidden="true" />
+                        </summary>
+                        <div>
+                          <button
+                            type="button"
+                            disabled={Boolean(carta.excluidoEm)}
+                            onClick={() => selecionarCarta(carta)}
+                          >
+                            <Pencil aria-hidden="true" /> Editar
+                          </button>
+                          <button
+                            type="button"
+                            disabled={Boolean(carta.excluidoEm)}
+                            onClick={() => setExcluindo(carta)}
+                          >
+                            <Trash2 aria-hidden="true" /> Excluir
+                          </button>
+                        </div>
+                      </details>
                     </td>
                   </tr>
                 ))}
@@ -564,15 +570,47 @@ export function Cartas() {
       </div>
 
       {selecionada ? (
-        <CartaEditor
-          key={selecionada.id}
-          carta={selecionada}
-          onClose={() => selecionarCarta(null)}
-          onDirtyChange={setEditorAlterado}
-          onSave={(payload) => salvarEdicao(selecionada, payload)}
-          onDelete={() => removerCarta(selecionada)}
-          salvando={salvando}
-        />
+        <div className={styles.modalCartaBackdrop} role="presentation">
+          <CartaEditor
+            key={selecionada.id}
+            carta={selecionada}
+            onClose={() => selecionarCarta(null)}
+            onDirtyChange={setEditorAlterado}
+            onSave={(payload) => salvarEdicao(selecionada, payload)}
+            onDelete={() => removerCarta(selecionada)}
+            salvando={salvando}
+          />
+        </div>
+      ) : null}
+
+      {excluindo ? (
+        <div className={styles.modalCartaBackdrop} role="presentation">
+          <section
+            className={styles.confirmarExclusaoCarta}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="titulo-excluir-carta"
+          >
+            <Trash2 aria-hidden="true" />
+            <h2 id="titulo-excluir-carta">Excluir {excluindo.nome}?</h2>
+            <p>
+              A carta deixará de aparecer no jogo, mas o histórico será
+              preservado.
+            </p>
+            <div>
+              <button type="button" onClick={() => setExcluindo(null)}>
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={salvando}
+                onClick={() => void removerCarta(excluindo)}
+              >
+                {salvando ? "Excluindo..." : "Excluir carta"}
+              </button>
+            </div>
+          </section>
+        </div>
       ) : null}
     </AdminLayout>
   );
