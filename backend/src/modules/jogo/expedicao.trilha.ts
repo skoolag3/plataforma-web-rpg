@@ -16,6 +16,60 @@ export type TrilhaExpedicao = {
   boss?: ConfiguracaoBoss;
 };
 
+const rotasPorDificuldade: Record<
+  Exclude<DificuldadeRota, 'CHEFE'>,
+  Array<Omit<OpcaoRota, 'id' | 'dificuldade' | 'risco'>>
+> = {
+  FACIL: [
+    {
+      titulo: 'Bosque dos Ecos',
+      descricao: 'Criaturas jovens guardam uma passagem coberta por raízes.',
+    },
+    {
+      titulo: 'Ponte do Luar',
+      descricao: 'Patrulheiros dispersos protegem a travessia silenciosa.',
+    },
+    {
+      titulo: 'Campo das Cinzas',
+      descricao: 'Restos de uma batalha escondem um pequeno grupo rival.',
+    },
+  ],
+  MEDIA: [
+    {
+      titulo: 'Ruínas de Aster',
+      descricao: 'Sentinelas antigas despertam entre corredores instáveis.',
+    },
+    {
+      titulo: 'Pântano Violeta',
+      descricao: 'A névoa fortalece inimigos acostumados ao terreno hostil.',
+    },
+    {
+      titulo: 'Passagem do Eclipse',
+      descricao: 'Duas patrulhas disputam a única saída segura da região.',
+    },
+  ],
+  DIFICIL: [
+    {
+      titulo: 'Fenda Carmesim',
+      descricao: 'A energia corrompida aumenta o poder dos adversários.',
+    },
+    {
+      titulo: 'Fortaleza Abandonada',
+      descricao: 'Um esquadrão veterano transformou as muralhas em armadilha.',
+    },
+    {
+      titulo: 'Abismo do Invocador',
+      descricao: 'A rota mais curta leva ao confronto mais perigoso da trilha.',
+    },
+  ],
+};
+
+const riscoPorDificuldade = {
+  FACIL: 'Baixo',
+  MEDIA: 'Médio',
+  DIFICIL: 'Alto',
+} satisfies Record<Exclude<DificuldadeRota, 'CHEFE'>, string>;
+
 const maiorInteiroPostgres = 2_147_483_647;
 
 export function gerarSeedExpedicao(referencia: string, timestamp = Date.now()) {
@@ -33,33 +87,21 @@ export function gerarTrilhaExpedicao(
   boss?: ConfiguracaoBoss,
 ): TrilhaExpedicao {
   const random = criarRandom(seed);
-  const modelos: Omit<OpcaoRota, 'id'>[] = [
-    {
-      titulo: 'Trilha protegida',
-      descricao: 'Um confronto direto com resistência reduzida.',
-      dificuldade: 'FACIL',
-      risco: 'Baixo',
-    },
-    {
-      titulo: 'Ruínas instáveis',
-      descricao: 'Adversários equilibrados guardam esta passagem.',
-      dificuldade: 'MEDIA',
-      risco: 'Médio',
-    },
-    {
-      titulo: 'Fenda corrompida',
-      descricao: 'Uma rota curta dominada por inimigos fortalecidos.',
-      dificuldade: 'DIFICIL',
-      risco: 'Alto',
-    },
-  ];
-  const etapas = Array.from({ length: 3 }, (_, indice) => ({
-    indice,
-    opcoes: embaralhar(modelos, random).map((modelo) => ({
-      ...modelo,
-      id: `etapa-${indice + 1}-${modelo.dificuldade.toLowerCase()}`,
-    })),
-  }));
+  const dificuldades = ['FACIL', 'MEDIA', 'DIFICIL'] as const;
+  const etapas = Array.from({ length: 3 }, (_, indice) => {
+    const opcoes = dificuldades.map((dificuldade) => {
+      const modelos = rotasPorDificuldade[dificuldade];
+      const modelo = modelos[Math.floor(random() * modelos.length)];
+      return {
+        ...modelo,
+        id: `etapa-${indice + 1}-${dificuldade.toLowerCase()}`,
+        dificuldade,
+        risco: riscoPorDificuldade[dificuldade],
+      };
+    });
+
+    return { indice, opcoes: embaralhar(opcoes, random) };
+  });
   return {
     etapas,
     configuracao,

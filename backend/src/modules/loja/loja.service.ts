@@ -6,6 +6,39 @@ import {
 import Stripe from 'stripe';
 import { PrismaService } from '../../database/prisma.service';
 
+const pacotesIniciais = [
+  {
+    id_stripe: 'rubys_leve',
+    nome: 'Bolsa do Viajante',
+    quantidade_rubys: 500,
+    preco_brl: 4.9,
+  },
+  {
+    id_stripe: 'rubys_medio',
+    nome: 'Reserva do Invocador',
+    quantidade_rubys: 1_200,
+    preco_brl: 9.9,
+  },
+  {
+    id_stripe: 'rubys_grande',
+    nome: 'Baú da Guilda',
+    quantidade_rubys: 2_700,
+    preco_brl: 19.9,
+  },
+  {
+    id_stripe: 'rubys_lenda',
+    nome: 'Cofre do Herói',
+    quantidade_rubys: 7_000,
+    preco_brl: 44.9,
+  },
+  {
+    id_stripe: 'rubys_eclipse',
+    nome: 'Tesouro do Eclipse',
+    quantidade_rubys: 15_000,
+    preco_brl: 89.9,
+  },
+];
+
 @Injectable()
 export class LojaService {
   private readonly stripe = process.env.STRIPE_SECRET_KEY
@@ -14,39 +47,26 @@ export class LojaService {
   constructor(private readonly prisma: PrismaService) {}
 
   async pacotes() {
-    let pacotes = await this.prisma.pacoteRuby.findMany({
+    await Promise.all(
+      pacotesIniciais.map((pacote) =>
+        this.prisma.pacoteRuby.upsert({
+          where: { id_stripe: pacote.id_stripe },
+          create: pacote,
+          update: {
+            nome: pacote.nome,
+            quantidade_rubys: pacote.quantidade_rubys,
+            preco_brl: pacote.preco_brl,
+            ativo: true,
+            atualizado_em: new Date(),
+          },
+        }),
+      ),
+    );
+
+    return this.prisma.pacoteRuby.findMany({
       where: { ativo: true },
       orderBy: { preco_brl: 'asc' },
     });
-    if (!pacotes.length) {
-      await this.prisma.pacoteRuby.createMany({
-        data: [
-          {
-            id_stripe: 'rubys_leve',
-            nome: 'Pacote Leve',
-            quantidade_rubys: 500,
-            preco_brl: 4.9,
-          },
-          {
-            id_stripe: 'rubys_medio',
-            nome: 'Pacote Médio',
-            quantidade_rubys: 1400,
-            preco_brl: 9.9,
-          },
-          {
-            id_stripe: 'rubys_grande',
-            nome: 'Pacote Grande',
-            quantidade_rubys: 3200,
-            preco_brl: 19.9,
-          },
-        ],
-      });
-      pacotes = await this.prisma.pacoteRuby.findMany({
-        where: { ativo: true },
-        orderBy: { preco_brl: 'asc' },
-      });
-    }
-    return pacotes;
   }
 
   async criarCheckout(idUsuario: string, idPacote: string) {

@@ -34,4 +34,20 @@ describe('trilha da expedição', () => {
       ]);
     }
   });
+
+  it('varia os caminhos mantendo os identificadores usados na progressão', () => {
+    const trilhas = [11, 22, 33, 44].map((seed) => gerarTrilhaExpedicao(seed));
+    const titulos = new Set(
+      trilhas.flatMap((trilha) =>
+        trilha.etapas.flatMap((etapa) =>
+          etapa.opcoes.map((opcao) => opcao.titulo),
+        ),
+      ),
+    );
+
+    expect(titulos.size).toBeGreaterThan(3);
+    expect(trilhas[0].etapas[0].opcoes.map((opcao) => opcao.id).sort()).toEqual(
+      ['etapa-1-dificil', 'etapa-1-facil', 'etapa-1-media'],
+    );
+  });
 });
