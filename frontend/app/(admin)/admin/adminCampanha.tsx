@@ -1,6 +1,14 @@
 "use client";
 
-import { Gem, Map, PauseCircle, PlayCircle, Save, Swords } from "lucide-react";
+import {
+  Bot,
+  Gem,
+  Map,
+  PauseCircle,
+  PlayCircle,
+  Save,
+  Swords,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -23,6 +31,7 @@ export function AdminCampanha() {
   const [painel, setPainel] = useState<AdminCampanhaPainel | null>(null);
   const [form, setForm] = useState<FormCampanha | null>(null);
   const [salvando, setSalvando] = useState(false);
+  const [bossAberto, setBossAberto] = useState(false);
 
   const carregar = useCallback(async () => {
     try {
@@ -160,7 +169,31 @@ export function AdminCampanha() {
       ) : null}
 
       {painel?.boss ? (
-        <FormBoss boss={painel.boss} onSalvo={() => void carregar()} />
+        <section className={styles.acessoBoss}>
+          <div>
+            <span>
+              <Bot aria-hidden="true" />
+            </span>
+            <div>
+              <h2>Boss final</h2>
+              <p>{painel.boss.nome} · Configuração das próximas expedições.</p>
+            </div>
+          </div>
+          <button type="button" onClick={() => setBossAberto(true)}>
+            Configurar boss final
+          </button>
+        </section>
+      ) : null}
+
+      {painel?.boss && bossAberto ? (
+        <FormBoss
+          boss={painel.boss}
+          onFechar={() => setBossAberto(false)}
+          onSalvo={() => {
+            setBossAberto(false);
+            void carregar();
+          }}
+        />
       ) : null}
 
       <section className={styles.historico}>

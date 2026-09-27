@@ -57,6 +57,149 @@
   padding: 0.9rem;
 }
 
+.acessoBoss {
+  display: flex;
+  min-height: 4.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 0.75rem;
+  background: #080d19;
+  padding: 0.65rem 0.8rem;
+}
+.acessoBoss > div {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.acessoBoss > div > span {
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  place-items: center;
+  border-radius: 0.55rem;
+  background: rgba(124, 58, 237, 0.16);
+  color: #c4b5fd;
+}
+.acessoBoss svg {
+  width: 1rem;
+}
+.acessoBoss h2 {
+  margin: 0;
+  font-size: 0.85rem;
+}
+.acessoBoss p {
+  margin: 0.15rem 0 0;
+  color: #7f8da4;
+  font-size: 0.65rem;
+}
+.acessoBoss > button {
+  min-height: 2.25rem;
+  border: 1px solid rgba(139, 92, 246, 0.42);
+  border-radius: 0.5rem;
+  background: rgba(124, 58, 237, 0.14);
+  color: #ddd6fe;
+  cursor: pointer;
+  padding: 0 0.75rem;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+.acessoBoss > button:hover {
+  background: rgba(124, 58, 237, 0.24);
+}
+
+.modalBossBackdrop {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  background: rgba(1, 4, 12, 0.8);
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+.modalBoss {
+  width: min(100%, 52rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 0.85rem;
+  background: #080d19;
+  box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.48);
+  scrollbar-color: #6d28d9 #111827;
+  scrollbar-width: thin;
+}
+.modalBoss > header {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(8, 13, 25, 0.96);
+  padding: 0.8rem 0.9rem;
+  backdrop-filter: blur(0.8rem);
+}
+.modalBoss h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.modalBoss header p {
+  margin: 0.15rem 0 0;
+  color: #7f8da4;
+  font-size: 0.65rem;
+}
+.modalBoss header > button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.17);
+  border-radius: 0.45rem;
+  background: rgba(2, 6, 18, 0.6);
+  color: #94a3b8;
+  cursor: pointer;
+}
+.modalBoss header > button svg {
+  width: 0.9rem;
+}
+.modalBoss .formBoss {
+  margin: 0;
+  padding: 0.85rem 0.9rem;
+}
+.modalBoss > footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(8, 13, 25, 0.96);
+  padding: 0.65rem 0.9rem;
+  backdrop-filter: blur(0.8rem);
+}
+.modalBoss > footer .salvar {
+  margin: 0;
+}
+.cancelarBoss {
+  min-height: 2.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.17);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #aeb8ca;
+  cursor: pointer;
+  padding: 0 0.8rem;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
 .formBoss {
   display: grid;
   gap: 0.7rem;
@@ -274,5 +417,27 @@
   .configuracao > header {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .acessoBoss {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .acessoBoss > button {
+    width: 100%;
+  }
+  .modalBossBackdrop {
+    align-items: end;
+    padding: 0;
+  }
+  .modalBoss {
+    max-height: 92dvh;
+    border-radius: 0.9rem 0.9rem 0 0;
+  }
+  .modalBoss > footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .modalBoss > footer button {
+    justify-content: center;
   }
 }
