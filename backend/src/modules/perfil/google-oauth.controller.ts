@@ -1,20 +1,19 @@
-import {
-  Controller,
-  Get,
-  Query,
-  Res,
-  ServiceUnavailableException,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { definirCookieSessao } from '../auth/auth-cookie';
 import { GoogleOAuthService } from './google-oauth.service';
 
 @Controller('perfil/google')
 export class GoogleOAuthController {
-  constructor(private readonly googleOAuthService: GoogleOAuthService) { }
+  constructor(private readonly googleOAuthService: GoogleOAuthService) {}
+
+  @Get('url-login')
+  gerarUrlLogin() {
+    return this.googleOAuthService.gerarUrlLogin();
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('url')
@@ -24,16 +23,39 @@ export class GoogleOAuthController {
 
   @Get('callback')
   async callback(
-    @Query('code') code: string,
-    @Query('state') state: string,
+    @Query('code') code: string | undefined,
+    @Query('state') state: string | undefined,
+    @Query('error') erroOAuth: string | undefined,
     @Res() response: Response,
   ) {
-    if (!code || !state) {
-      throw new ServiceUnavailableException('Resposta OAuth incompleta.');
+    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+    const callbackFrontend = `${frontendUrl}/login/google-callback`;
+
+    if (erroOAuth) {
+      const motivo = erroOAuth === 'access_denied' ? 'cancelado' : 'oauth';
+      response.redirect(`${callbackFrontend}#error=${motivo}`);
+      return;
     }
 
-    await this.googleOAuthService.processarCallback(code, state);
-    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+    if (!code || !state) {
+      response.redirect(`${callbackFrontend}#error=incompleto`);
+      return;
+    }
+
+    let resultado: Awaited<ReturnType<GoogleOAuthService['processarCallback']>>;
+    try {
+      resultado = await this.googleOAuthService.processarCallback(code, state);
+    } catch {
+      response.redirect(`${callbackFrontend}#error=oauth`);
+      return;
+    }
+
+    if (resultado.finalidade === 'LOGIN_GOOGLE') {
+      definirCookieSessao(response, resultado.sessao.access_token);
+      response.redirect(`${frontendUrl}/login/google-callback#success=1`);
+      return;
+    }
+
     response.redirect(`${frontendUrl}/perfil?google=vinculado`);
   }
 }

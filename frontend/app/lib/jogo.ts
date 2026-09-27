@@ -72,6 +72,7 @@ async function jogoRequest<T>(path: string, options: RequestInit = {}) {
 
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -96,8 +97,9 @@ async function jogoRequest<T>(path: string, options: RequestInit = {}) {
   return data as T;
 }
 
-export function buscarColecao() {
-  return jogoRequest<ColecaoResponse>("/colecao");
+export function buscarColecao(posse?: "todas" | "obtidas" | "nao-obtidas") {
+  const parametros = posse ? `?posse=${posse}` : "";
+  return jogoRequest<ColecaoResponse>(`/colecao${parametros}`);
 }
 
 export function listarDecks() {
@@ -232,6 +234,7 @@ export type OpcaoExpedicao = {
   descricao: string;
   dificuldade: "FACIL" | "MEDIA" | "DIFICIL" | "CHEFE";
   risco: string;
+  recompensa: number;
 };
 
 export type EstadoExpedicao = {
@@ -250,6 +253,19 @@ export type EstadoExpedicao = {
   chefe: OpcaoExpedicao & {
     status: "CONCLUIDA" | "ATUAL" | "BLOQUEADA";
   };
+  dialogoBoss: {
+    nome: string;
+    provocacao: string;
+    pergunta: string;
+    resultado: {
+      pergunta: string;
+      resposta: string;
+      reacao: string;
+      nota: number;
+      multiplicador: number;
+      modo: "IA" | "LOCAL";
+    } | null;
+  } | null;
   opcoesAtuais: OpcaoExpedicao[];
   partidaAtual: {
     id: string;
@@ -258,10 +274,18 @@ export type EstadoExpedicao = {
   } | null;
   recompensaFinal: number;
   recompensaPendente: number;
+  rubysPerdidos: number;
   rubysAssegurados: number;
   criadoEm: string;
   finalizadoEm: string | null;
 };
+
+export function responderBossExpedicao(idExpedicao: string, resposta: string) {
+  return jogoRequest<EstadoExpedicao>(
+    `/expedicoes/${idExpedicao}/boss/resposta`,
+    { method: "POST", body: JSON.stringify({ resposta }) },
+  );
+}
 
 export function buscarExpedicaoAtual() {
   return jogoRequest<EstadoExpedicao | null>("/expedicoes/atual");
@@ -298,6 +322,7 @@ export type CartaGachaApi = {
   taxaDrop?: number;
   quantidade?: number;
   nova?: boolean;
+  valorVenda?: number;
 };
 
 export type BannerGacha = {
@@ -336,6 +361,7 @@ export function girarGacha(idBanner: string, quantidade: 1 | 10) {
     pity: number;
     rubys: number;
     custo: number;
+    rubysGanhosDuplicatas: number;
   }>("/gacha/girar", {
     method: "POST",
     body: JSON.stringify({ idBanner, quantidade }),

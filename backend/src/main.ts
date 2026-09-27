@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { AppModule } from './core/app/app.module';
+import helmet from 'helmet';
 
 type ValidationErrorDetail = {
   field: string;
@@ -24,14 +25,6 @@ function getAllowedOrigins(): string[] {
     .filter(Boolean);
 }
 
-function isAllowedOrigin(origin: string, allowedOrigins: string[]): boolean {
-  return (
-    allowedOrigins.includes(origin) ||
-    /^https:\/\/[a-z0-9-]+\.ngrok-free\.app$/i.test(origin) ||
-    /^https:\/\/[a-z0-9-]+\.ngrok\.app$/i.test(origin)
-  );
-}
-
 function formatValidationErrors(
   errors: ValidationError[],
 ): ValidationErrorDetail[] {
@@ -39,19 +32,19 @@ function formatValidationErrors(
     const messages = Object.values(error.constraints ?? {});
     const children = error.children?.length
       ? formatValidationErrors(error.children).map((child) => ({
-        ...child,
-        field: `${error.property}.${child.field}`,
-      }))
+          ...child,
+          field: `${error.property}.${child.field}`,
+        }))
       : [];
 
     return [
       ...(messages.length
         ? [
-          {
-            field: error.property,
-            messages,
-          },
-        ]
+            {
+              field: error.property,
+              messages,
+            },
+          ]
         : []),
       ...children,
     ];
@@ -62,19 +55,31 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { rawBody: true });
   const allowedOrigins = getAllowedOrigins();
 
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'none'"],
+          frameAncestors: ["'none'"],
+        },
+      },
+    }),
+  );
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
   app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors({
     origin(
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) {
-      if (!origin || isAllowedOrigin(origin, allowedOrigins)) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
         return;
       }
 
       callback(null, false);
     },
+    credentials: true,
   });
   app.useGlobalPipes(
     new ValidationPipe({

@@ -42,6 +42,7 @@ type ApiErrorResponse = {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 const TOKEN_KEY = "card_game_rpg_token";
+const COOKIE_SESSION_MARKER = "__cookie_session__";
 const USER_KEY = "card_game_rpg_user";
 const AUTH_EVENT = "card_game_rpg_auth_change";
 let cachedUserText: string | null = null;
@@ -50,6 +51,7 @@ let cachedUser: Usuario | null = null;
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
@@ -73,6 +75,10 @@ export async function login(email: string, senha: string) {
 
   saveSession(data);
   return data;
+}
+
+export async function obterUrlLoginGoogle() {
+  return request<{ url: string }>("/perfil/google/url-login");
 }
 
 export async function register(nome: string, email: string, senha: string) {
@@ -110,20 +116,24 @@ export async function redefinirSenha(token: string, senha: string) {
   });
 }
 
-export async function getProfile(token: string) {
+export async function getProfile(token = getToken()) {
   return request<Usuario>("/auth/me", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers:
+      token && token !== COOKIE_SESSION_MARKER
+        ? { Authorization: `Bearer ${token}` }
+        : undefined,
   });
 }
 
-export function saveSession(data: AuthResponse) {
-  if (!data.access_token) {
-    return;
-  }
+export async function concluirLoginGoogle() {
+  const usuario = await getProfile();
+  const sessao = { usuario, access_token: COOKIE_SESSION_MARKER };
+  saveSession(sessao);
+  return sessao;
+}
 
-  localStorage.setItem(TOKEN_KEY, data.access_token);
+export function saveSession(data: AuthResponse) {
+  localStorage.setItem(TOKEN_KEY, COOKIE_SESSION_MARKER);
   localStorage.setItem(USER_KEY, JSON.stringify(data.usuario));
   notifyAuthChange();
 }
@@ -143,7 +153,15 @@ export function updateStoredUser(changes: Partial<Usuario>) {
 }
 
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  const token = localStorage.getItem(TOKEN_KEY);
+
+  if (token && token !== COOKIE_SESSION_MARKER) {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    return null;
+  }
+
+  return token;
 }
 
 export function getStoredUser() {
@@ -172,6 +190,10 @@ export function getStoredUser() {
 }
 
 export function clearSession() {
+  void fetch(`${API_URL}/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  }).catch(() => undefined);
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
   cachedUserText = null;

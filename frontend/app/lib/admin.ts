@@ -11,7 +11,13 @@ type ApiErrorResponse = {
 };
 
 export type TipoEfeitoHabilidade =
-  "BUFF" | "DEBUFF" | "DANO" | "CURA" | "ESCUDO" | "ROUBO_VIDA" | "EVASAO";
+  | "BUFF"
+  | "DEBUFF"
+  | "DANO"
+  | "CURA"
+  | "ESCUDO"
+  | "ROUBO_VIDA"
+  | "EVASAO";
 
 export type AdminHabilidade = {
   id: string;
@@ -302,10 +308,59 @@ export type AdminBannersResponse = {
   banners: AdminBanner[];
 };
 
+export type AdminCampanhaConfiguracao = {
+  ativa: boolean;
+  recompensaFacil: number;
+  recompensaMedia: number;
+  recompensaDificil: number;
+  recompensaChefe: number;
+  percentualMantidoDerrota: number;
+  atualizadoEm: string;
+};
+
+export type AdminCampanhaPainel = {
+  configuracao: AdminCampanhaConfiguracao;
+  boss: AdminBoss;
+  metricas: {
+    total: number;
+    ativas: number;
+    concluidas: number;
+    falhas: number;
+    abandonadas: number;
+  };
+  recentes: {
+    id: string;
+    jogador: string;
+    email: string;
+    deck: string;
+    status: string;
+    etapaAtual: number;
+    rubys: number;
+    criadoEm: string;
+    finalizadoEm: string | null;
+  }[];
+};
+
+export type AdminBoss = {
+  nome: string;
+  personalidade: string;
+  provocacao: string;
+  perguntas: string[];
+  cartas: string[];
+};
+
+export function atualizarAdminBoss(boss: AdminBoss) {
+  return adminRequest<{ message: string; boss: AdminBoss }>(
+    "/admin/campanha/boss",
+    { method: "PATCH", body: JSON.stringify(boss) },
+  );
+}
+
 async function adminRequest<T>(path: string, options: RequestInit = {}) {
   const token = getToken();
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       ...(options.body instanceof FormData
         ? {}
@@ -526,6 +581,22 @@ export function uploadNoticiaImagem(formData: FormData) {
 
 export function listarAdminBanners() {
   return adminRequest<AdminBannersResponse>("/admin/banners");
+}
+
+export function obterAdminCampanha() {
+  return adminRequest<AdminCampanhaPainel>("/admin/campanha");
+}
+
+export function atualizarAdminCampanha(
+  configuracao: Omit<AdminCampanhaConfiguracao, "atualizadoEm">,
+) {
+  return adminRequest<{
+    message: string;
+    configuracao: AdminCampanhaConfiguracao;
+  }>("/admin/campanha", {
+    method: "PATCH",
+    body: JSON.stringify(configuracao),
+  });
 }
 
 export function forcarAdminBanner(idBanner: string) {

@@ -55,7 +55,7 @@ export default function CartasPage() {
   const [modalDeckAberto, setModalDeckAberto] = useState(false);
 
   useEffect(() => {
-    buscarColecao()
+    buscarColecao("obtidas")
       .then((dados) => {
         setCards(dados.itens.map(mapearCarta));
         setResumo(dados.resumo);

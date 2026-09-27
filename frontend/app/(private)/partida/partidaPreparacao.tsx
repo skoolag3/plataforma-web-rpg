@@ -59,7 +59,7 @@ export function PartidaPreparacao({
                 <small>
                   {deck.completo
                     ? `${deck.cartas.length} cartas · pronto`
-                    : `${deck.cartas.length}/3 cartas mínimas`}
+                    : `${deck.cartas.length}/1 carta mínima`}
                 </small>
               </button>
               <span className={styles.miniCartas}>
@@ -95,7 +95,7 @@ export function PartidaPreparacao({
         <div className={styles.semDeck}>
           <Layers3 />
           <strong>Nenhum deck criado</strong>
-          <p>Monte pelo menos três cartas antes de entrar na arena.</p>
+          <p>Adicione pelo menos uma carta antes de entrar na arena.</p>
           <Link href="/decks">Criar meu deck</Link>
         </div>
       )}

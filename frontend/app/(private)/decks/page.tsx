@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AlertTriangle,
   ArrowLeft,
   Check,
   CheckCircle2,
@@ -68,6 +69,8 @@ export default function DecksPage() {
   const [elemento, setElemento] = useState("Todos");
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
+  const [deckParaExcluir, setDeckParaExcluir] = useState<Deck | null>(null);
+  const [excluindo, setExcluindo] = useState(false);
   const [erro, setErro] = useState("");
   const [mensagem, setMensagem] = useState("");
 
@@ -157,7 +160,7 @@ export default function DecksPage() {
   const cartasSelecionadas = slots.filter((carta): carta is CartaColecao =>
     Boolean(carta),
   );
-  const deckCompleto = cartasSelecionadas.length >= 3;
+  const deckCompleto = cartasSelecionadas.length >= 1;
 
   function novoDeck() {
     setEditandoId(null);
@@ -204,7 +207,7 @@ export default function DecksPage() {
       return;
     }
     if (ativar && !deckCompleto) {
-      setErro("Escolha pelo menos 3 cartas antes de salvar e ativar.");
+      setErro("Adicione pelo menos uma carta antes de salvar e equipar.");
       return;
     }
 
@@ -248,16 +251,21 @@ export default function DecksPage() {
     }
   }
 
-  async function removerDeck(deck: Deck) {
-    if (!window.confirm(`Excluir o deck "${deck.nome}"?`)) return;
+  async function confirmarExclusao() {
+    if (!deckParaExcluir || excluindo) return;
+    const deck = deckParaExcluir;
+    setExcluindo(true);
     setErro("");
     try {
       const resposta = await excluirDeck(deck.id);
       setMensagem(resposta.message);
       if (editandoId === deck.id) novoDeck();
       setDecks(await listarDecks());
+      setDeckParaExcluir(null);
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Erro ao excluir deck.");
+    } finally {
+      setExcluindo(false);
     }
   }
 
@@ -270,7 +278,7 @@ export default function DecksPage() {
       <header className={styles.topo}>
         <div>
           <Link href="/cartas" className={styles.voltar}>
-            <ArrowLeft aria-hidden="true" /> Voltar para a coleção
+            <ArrowLeft aria-hidden="true" /> Voltar
           </Link>
           <h1>Construtor de decks</h1>
           <p>Monte e equipe o deck que será usado nas partidas.</p>
@@ -334,7 +342,7 @@ export default function DecksPage() {
                     title={
                       deck.completo
                         ? "Equipar deck"
-                        : "Escolha pelo menos 3 cartas"
+                        : "Adicione pelo menos uma carta"
                     }
                   >
                     <Check aria-hidden="true" />
@@ -342,7 +350,7 @@ export default function DecksPage() {
                 )}
                 <button
                   type="button"
-                  onClick={() => void removerDeck(deck)}
+                  onClick={() => setDeckParaExcluir(deck)}
                   disabled={deck.ativo}
                   aria-label={`Excluir ${deck.nome}`}
                   title={
@@ -376,7 +384,7 @@ export default function DecksPage() {
               <ShieldCheck aria-hidden="true" />
               <span>
                 <strong>
-                  {deckCompleto ? "Deck válido" : "Mínimo de 3 cartas"}
+                  {deckCompleto ? "Deck válido" : "Adicione uma carta"}
                 </strong>
                 {cartasSelecionadas.length}/6 cartas únicas
               </span>
@@ -540,6 +548,65 @@ export default function DecksPage() {
           </div>
         </aside>
       </div>
+
+      {deckParaExcluir ? (
+        <div
+          className={styles.fundoConfirmacao}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !excluindo) {
+              setDeckParaExcluir(null);
+            }
+          }}
+        >
+          <section
+            className={styles.popupConfirmacao}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="titulo-excluir-deck"
+            aria-describedby="descricao-excluir-deck"
+          >
+            <button
+              type="button"
+              className={styles.fecharConfirmacao}
+              onClick={() => setDeckParaExcluir(null)}
+              disabled={excluindo}
+              aria-label="Fechar confirmação"
+            >
+              <X aria-hidden="true" />
+            </button>
+            <span className={styles.iconeConfirmacao}>
+              <AlertTriangle aria-hidden="true" />
+            </span>
+            <div>
+              <small>Ação permanente</small>
+              <h2 id="titulo-excluir-deck">Excluir deck?</h2>
+              <p id="descricao-excluir-deck">
+                O deck <strong>{deckParaExcluir.nome}</strong> será removido.
+                Suas cartas continuarão na coleção.
+              </p>
+            </div>
+            <footer>
+              <button
+                type="button"
+                className={styles.btnCancelarExclusao}
+                onClick={() => setDeckParaExcluir(null)}
+                disabled={excluindo}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={styles.btnConfirmarExclusao}
+                onClick={() => void confirmarExclusao()}
+                disabled={excluindo}
+              >
+                <Trash2 aria-hidden="true" />
+                {excluindo ? "Excluindo..." : "Excluir deck"}
+              </button>
+            </footer>
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }

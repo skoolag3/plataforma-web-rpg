@@ -14,10 +14,18 @@ import {
   type TrilhaExpedicao,
 } from './expedicao.trilha';
 import {
+  configuracaoRecompensasPadrao,
   recompensaAposDerrota,
   recompensaDaRota,
   rubysPerdidosNaDerrota,
+  type ConfiguracaoRecompensasExpedicao,
 } from './expedicao.recompensas';
+import {
+  avaliarRespostaBoss,
+  multiplicadorBoss,
+  perguntaBoss,
+  type DialogoBoss,
+} from './boss.dialogo';
 
 const expedicaoInclude = {
   deck: { select: { id: true, nome: true } },
@@ -37,8 +45,6 @@ type ExpedicaoPersistida = Prisma.ExpedicaoGetPayload<{
   include: typeof expedicaoInclude;
 }>;
 
-const recompensaChefe = recompensaDaRota('CHEFE');
-
 @Injectable()
 export class ExpedicoesService {
   constructor(
@@ -48,6 +54,14 @@ export class ExpedicoesService {
 
   async criar(idUsuario: string, idDeck: string) {
     await this.sincronizar(idUsuario);
+    const configuracao = await this.prisma.configuracaoCampanha.upsert({
+      where: { id: 1 },
+      create: { id: 1 },
+      update: {},
+    });
+    if (!configuracao.ativa) {
+      throw new ConflictException('A campanha está temporariamente pausada.');
+    }
     const ativa = await this.prisma.expedicao.findFirst({
       where: { id_usuario: idUsuario, status: 'EM_ANDAMENTO' },
     });
@@ -57,8 +71,8 @@ export class ExpedicoesService {
       where: { id: idDeck, id_usuario: idUsuario, excluido_em: null },
       include: { cartas: true },
     });
-    if (!deck || deck.cartas.length < 3 || deck.cartas.length > 6) {
-      throw new BadRequestException('Selecione um deck com 3 a 6 cartas.');
+    if (!deck || deck.cartas.length < 1 || deck.cartas.length > 6) {
+      throw new BadRequestException('Selecione um deck com 1 a 6 cartas.');
     }
 
     const seed = gerarSeedExpedicao(`${idUsuario}:${idDeck}`);
@@ -67,7 +81,25 @@ export class ExpedicoesService {
         id_usuario: idUsuario,
         id_deck: idDeck,
         seed,
-        trilha: gerarTrilhaExpedicao(seed),
+        trilha: gerarTrilhaExpedicao(
+          seed,
+          {
+            percentualMantidoDerrota: configuracao.percentual_mantido_derrota,
+            recompensas: {
+              FACIL: configuracao.recompensa_facil,
+              MEDIA: configuracao.recompensa_media,
+              DIFICIL: configuracao.recompensa_dificil,
+              CHEFE: configuracao.recompensa_chefe,
+            },
+          },
+          {
+            nome: configuracao.boss_nome,
+            personalidade: configuracao.boss_personalidade,
+            provocacao: configuracao.boss_provocacao,
+            perguntas: configuracao.boss_perguntas,
+            cartas: configuracao.boss_cartas,
+          },
+        ),
       },
     });
     return this.buscarAtual(idUsuario);
@@ -107,6 +139,11 @@ export class ExpedicoesService {
     }
 
     const trilha = this.normalizarTrilha(expedicao.trilha);
+    if (expedicao.etapa_atual === 3 && trilha.boss && !expedicao.dialogo_boss) {
+      throw new ConflictException(
+        'Responda à provocação do boss antes do confronto.',
+      );
+    }
     const opcoes =
       expedicao.etapa_atual === 3
         ? [trilha.chefe]
@@ -137,6 +174,12 @@ export class ExpedicoesService {
         idExpedicao: expedicao.id,
         etapa: expedicao.etapa_atual,
         dificuldade: escolha.dificuldade,
+        boss:
+          expedicao.etapa_atual === 3 && trilha.boss
+            ? {
+                cartas: trilha.boss.cartas,
+              }
+            : undefined,
       });
     } catch (error) {
       await this.prisma.expedicao.update({
@@ -153,6 +196,61 @@ export class ExpedicoesService {
     return this.buscarAtual(idUsuario);
   }
 
+  async responderBoss(
+    idUsuario: string,
+    idExpedicao: string,
+    resposta: string,
+  ) {
+    const texto = resposta.trim();
+    if (texto.length < 20)
+      throw new BadRequestException(
+        'Escreva uma resposta com pelo menos 20 caracteres.',
+      );
+    const expedicao = await this.prisma.expedicao.findFirst({
+      where: {
+        id: idExpedicao,
+        id_usuario: idUsuario,
+        status: 'EM_ANDAMENTO',
+        etapa_atual: 3,
+      },
+    });
+    if (!expedicao)
+      throw new NotFoundException('Confronto final indisponível.');
+    if (expedicao.dialogo_boss || expedicao.escolha_atual)
+      throw new ConflictException('A resposta do boss já foi registrada.');
+    const trilha = this.normalizarTrilha(expedicao.trilha);
+    if (!trilha.boss)
+      throw new BadRequestException(
+        'Esta expedição não possui diálogo configurado.',
+      );
+    const pergunta = perguntaBoss(trilha.boss, expedicao.seed);
+    const avaliacao = await avaliarRespostaBoss(trilha.boss, pergunta, texto);
+    const dialogo: DialogoBoss = {
+      pergunta,
+      resposta: texto,
+      reacao: avaliacao.reacao,
+      nota: avaliacao.nota,
+      multiplicador: multiplicadorBoss(avaliacao.nota),
+      modo: avaliacao.modo,
+    };
+    const salvo = await this.prisma.expedicao.updateMany({
+      where: {
+        id: idExpedicao,
+        id_usuario: idUsuario,
+        status: 'EM_ANDAMENTO',
+        etapa_atual: 3,
+        escolha_atual: null,
+        dialogo_boss: { equals: Prisma.DbNull },
+      },
+      data: {
+        dialogo_boss: dialogo as unknown as Prisma.InputJsonValue,
+        atualizado_em: new Date(),
+      },
+    });
+    if (!salvo.count) throw new ConflictException('A resposta já foi enviada.');
+    return this.buscarAtual(idUsuario);
+  }
+
   async abandonar(idUsuario: string, idExpedicao: string) {
     const atualizada = await this.prisma.expedicao.updateMany({
       where: {
@@ -160,6 +258,7 @@ export class ExpedicoesService {
         id_usuario: idUsuario,
         status: 'EM_ANDAMENTO',
         partidas: { none: { resultado: 'EM_ANDAMENTO' } },
+        dialogo_boss: { equals: Prisma.DbNull },
       },
       data: {
         status: 'ABANDONADA',
@@ -169,7 +268,7 @@ export class ExpedicoesService {
     });
     if (!atualizada.count) {
       throw new ConflictException(
-        'Não é possível abandonar durante uma batalha.',
+        'Não é possível abandonar durante uma batalha ou após responder ao boss.',
       );
     }
     return this.buscarAtual(idUsuario);
@@ -189,13 +288,25 @@ export class ExpedicoesService {
     if (!partida || partida.resultado === 'EM_ANDAMENTO') return;
 
     const trilha = this.normalizarTrilha(expedicao.trilha);
+    const configuracao = this.obterConfiguracaoTrilha(trilha);
     const escolha = this.buscarEscolhaAtual(trilha, expedicao);
     if (!escolha) return;
-    const recompensaPendente = recompensaDaRota(escolha.dificuldade);
+    const recompensaPendente = Math.round(
+      recompensaDaRota(escolha.dificuldade, configuracao) *
+        (escolha.dificuldade === 'CHEFE'
+          ? ((expedicao.dialogo_boss as DialogoBoss | null)?.multiplicador ?? 1)
+          : 1),
+    );
 
     if (partida.resultado !== 'VITORIA') {
-      const recompensaMantida = recompensaAposDerrota(recompensaPendente);
-      const rubysPerdidos = rubysPerdidosNaDerrota(recompensaPendente);
+      const recompensaMantida = recompensaAposDerrota(
+        recompensaPendente,
+        configuracao.percentualMantidoDerrota,
+      );
+      const rubysPerdidos = rubysPerdidosNaDerrota(
+        recompensaPendente,
+        configuracao.percentualMantidoDerrota,
+      );
       await this.prisma.$transaction(async (tx) => {
         const falhou = await tx.expedicao.updateMany({
           where: {
@@ -261,6 +372,10 @@ export class ExpedicoesService {
       return;
     }
 
+    const dialogo = expedicao.dialogo_boss as DialogoBoss | null;
+    const recompensaChefe = Math.round(
+      recompensaDaRota('CHEFE', configuracao) * (dialogo?.multiplicador ?? 1),
+    );
     await this.prisma.$transaction(async (tx) => {
       const concluida = await tx.expedicao.updateMany({
         where: {
@@ -306,8 +421,31 @@ export class ExpedicoesService {
     return opcoes.find((opcao) => opcao.id === expedicao.escolha_atual) ?? null;
   }
 
+  private obterConfiguracaoTrilha(
+    trilha: TrilhaExpedicao,
+  ): ConfiguracaoRecompensasExpedicao {
+    return trilha.configuracao ?? configuracaoRecompensasPadrao;
+  }
+
+  private formatarOpcao(
+    opcao: OpcaoRota,
+    configuracao: ConfiguracaoRecompensasExpedicao,
+    multiplicador = 1,
+  ) {
+    return {
+      ...opcao,
+      recompensa: Math.round(
+        recompensaDaRota(opcao.dificuldade, configuracao) *
+          (opcao.dificuldade === 'CHEFE' ? multiplicador : 1),
+      ),
+    };
+  }
+
   private formatar(expedicao: ExpedicaoPersistida) {
     const trilha = this.normalizarTrilha(expedicao.trilha);
+    const configuracao = this.obterConfiguracaoTrilha(trilha);
+    const multiplicador =
+      (expedicao.dialogo_boss as DialogoBoss | null)?.multiplicador ?? 1;
     const partidaAtual = expedicao.partidas.find(
       (partida) => partida.etapa_expedicao === expedicao.etapa_atual,
     );
@@ -325,7 +463,10 @@ export class ExpedicoesService {
       deck: expedicao.deck,
       escolhas: expedicao.escolhas,
       etapas: trilha.etapas.map((etapa) => ({
-        ...etapa,
+        indice: etapa.indice,
+        opcoes: etapa.opcoes.map((opcao) =>
+          this.formatarOpcao(opcao, configuracao),
+        ),
         status:
           etapa.indice < expedicao.etapa_atual
             ? 'CONCLUIDA'
@@ -335,7 +476,7 @@ export class ExpedicoesService {
               : 'BLOQUEADA',
       })),
       chefe: {
-        ...trilha.chefe,
+        ...this.formatarOpcao(trilha.chefe, configuracao, multiplicador),
         status:
           expedicao.etapa_atual === 3 && expedicao.status === 'EM_ANDAMENTO'
             ? 'ATUAL'
@@ -343,12 +484,22 @@ export class ExpedicoesService {
               ? 'CONCLUIDA'
               : 'BLOQUEADA',
       },
+      dialogoBoss: trilha.boss
+        ? {
+            nome: trilha.boss.nome,
+            provocacao: trilha.boss.provocacao,
+            pergunta: perguntaBoss(trilha.boss, expedicao.seed),
+            resultado: expedicao.dialogo_boss as DialogoBoss | null,
+          }
+        : null,
       opcoesAtuais:
         expedicao.status !== 'EM_ANDAMENTO' || partidaAtual
           ? []
           : expedicao.etapa_atual === 3
-            ? [trilha.chefe]
-            : (trilha.etapas[expedicao.etapa_atual]?.opcoes ?? []),
+            ? [this.formatarOpcao(trilha.chefe, configuracao, multiplicador)]
+            : (trilha.etapas[expedicao.etapa_atual]?.opcoes.map((opcao) =>
+                this.formatarOpcao(opcao, configuracao),
+              ) ?? []),
       partidaAtual: partidaAtual
         ? {
             id: partidaAtual.id,
@@ -362,10 +513,25 @@ export class ExpedicoesService {
                 : partidaAtual.resultado,
           }
         : null,
-      recompensaFinal: recompensaChefe,
+      recompensaFinal: Math.round(
+        recompensaDaRota('CHEFE', configuracao) * multiplicador,
+      ),
       recompensaPendente: escolhaAtual
-        ? recompensaDaRota(escolhaAtual.dificuldade)
+        ? Math.round(
+            recompensaDaRota(escolhaAtual.dificuldade, configuracao) *
+              (escolhaAtual.dificuldade === 'CHEFE' ? multiplicador : 1),
+          )
         : 0,
+      rubysPerdidos:
+        expedicao.status === 'FALHOU' && escolhaAtual
+          ? rubysPerdidosNaDerrota(
+              Math.round(
+                recompensaDaRota(escolhaAtual.dificuldade, configuracao) *
+                  (escolhaAtual.dificuldade === 'CHEFE' ? multiplicador : 1),
+              ),
+              configuracao.percentualMantidoDerrota,
+            )
+          : 0,
       rubysAssegurados,
       criadoEm: expedicao.criado_em,
       finalizadoEm: expedicao.finalizado_em,

@@ -111,6 +111,15 @@
     inset: 0 -1rem -0.5rem;
     background-position: center top;
     background-size: auto min(112%, 32rem);
+    translate: 4rem 0;
+    -webkit-mask-image:
+      linear-gradient(to right, #000 0%, #000 72%, rgba(0, 0, 0, 0.72) 84%, transparent 100%),
+      linear-gradient(to bottom, #000 0%, #000 84%, rgba(0, 0, 0, 0.82) 90%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to right, #000 0%, #000 72%, rgba(0, 0, 0, 0.72) 84%, transparent 100%),
+      linear-gradient(to bottom, #000 0%, #000 84%, rgba(0, 0, 0, 0.82) 90%, transparent 100%);
+    mask-composite: intersect;
   }
 
   .conjuntoCartas {

@@ -15,7 +15,7 @@ database "PostgreSQL\n<<banco de dados>>" as banco #EAF7EF
 rectangle "Stripe\n<<serviço externo>>" as stripe #FFF6D9
 rectangle "Cloudinary e Storage\n<<serviços externos>>" as midia #FFF6D9
 rectangle "SMTP\n<<serviço externo>>" as smtp #FFF6D9
-rectangle "IA generativa\n<<serviço previsto>>" as ia #FCEBEC
+rectangle "IA generativa\n<<serviço externo>>\nGemini ou OpenAI" as ia #FCEBEC
 
 navegador --> frontend : HTTPS
 frontend --> api : HTTP / REST

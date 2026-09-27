@@ -463,6 +463,7 @@ model Expedicao {
   trilha        Json
   escolhas      String[]  @default([])
   escolha_atual String?   @db.VarChar(80)
+  dialogo_boss  Json?
   criado_em     DateTime  @default(now()) @db.Timestamptz(0)
   atualizado_em DateTime  @default(now()) @db.Timestamptz(0)
   finalizado_em DateTime? @db.Timestamptz(0)
@@ -473,6 +474,24 @@ model Expedicao {
 
   @@index([id_usuario, criado_em(sort: Desc)])
   @@map("expedicao")
+}
+
+model ConfiguracaoCampanha {
+  id                         Int      @id @default(1)
+  ativa                      Boolean  @default(true)
+  recompensa_facil           Int      @default(25)
+  recompensa_media           Int      @default(25)
+  recompensa_dificil         Int      @default(25)
+  recompensa_chefe           Int      @default(100)
+  percentual_mantido_derrota Int      @default(70)
+  boss_nome                  String   @default("Guardião da Expedição") @db.VarChar(100)
+  boss_personalidade         String   @default("Orgulhoso, estratégico e provocador, mas respeita a coragem.") @db.VarChar(600)
+  boss_provocacao            String   @default("Você atravessou minha trilha. Agora prove que merece sair dela.") @db.VarChar(500)
+  boss_perguntas             String[] @default(["Por que você merece atravessar meu domínio?", "O que faria se sua carta mais forte caísse agora?", "Qual sacrifício aceitaria para vencer esta batalha?", "O que distingue coragem de imprudência?"])
+  boss_cartas                String[] @default([])
+  atualizado_em              DateTime @default(now()) @db.Timestamptz(0)
+
+  @@map("configuracao_campanha")
 }
 
 model PartidaCarta {

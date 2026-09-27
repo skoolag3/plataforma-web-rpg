@@ -3,6 +3,7 @@
 import { Cartas, NovaCarta } from "./adminCartas";
 import { AdminDashboard } from "./adminDashboard";
 import { AdminBanners } from "./adminBanners";
+import { AdminCampanha } from "./adminCampanha";
 import { DecksNpc } from "./adminDecksNpc";
 import { Habilidades } from "./adminHabilidades";
 import { Usuarios } from "./adminUsuarios";
@@ -14,7 +15,8 @@ type AdminView =
   | "habilidades"
   | "decks"
   | "usuarios"
-  | "banners";
+  | "banners"
+  | "campanha";
 
 export function AdminScreen({ view }: { view: AdminView }) {
   if (view === "cartas") return <Cartas />;
@@ -23,5 +25,6 @@ export function AdminScreen({ view }: { view: AdminView }) {
   if (view === "decks") return <DecksNpc />;
   if (view === "usuarios") return <Usuarios />;
   if (view === "banners") return <AdminBanners />;
+  if (view === "campanha") return <AdminCampanha />;
   return <AdminDashboard />;
 }

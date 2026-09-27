@@ -45,19 +45,18 @@ export default function PerfilPage() {
       return;
     }
 
-    Promise.all([buscarPerfilApi(token), listarMoldurasApi(token), buscarHistoricoPartidas()])
-      .then(([dadosPerfil, dadosMolduras, partidas]) => {
-        setPerfil(dadosPerfil);
-        setMolduras(dadosMolduras);
-        setHistorico(partidas);
-      })
+    buscarPerfilApi(token)
+      .then(setPerfil)
       .catch((erroCapturado) =>
         setErro(
           erroCapturado instanceof Error
             ? erroCapturado.message
-            : "Não foi possível carregar o perfil.",
+          : "Não foi possível carregar o perfil.",
         ),
       );
+
+    listarMoldurasApi(token).then(setMolduras).catch(() => setMolduras([]));
+    buscarHistoricoPartidas().then(setHistorico).catch(() => setHistorico([]));
   }, []);
 
   async function atualizarNome(nome: string) {

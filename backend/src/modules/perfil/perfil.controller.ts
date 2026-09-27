@@ -13,6 +13,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { validarConteudoImagem } from '../../common/validation/imagem.validation';
 import { AtualizarEmailDto } from './dto/atualizar-email.dto';
 import { AtualizarNomeDto } from './dto/atualizar-nome.dto';
 import { AtualizarPreferenciasDto } from './dto/atualizar-preferencias.dto';
@@ -120,6 +121,7 @@ export class PerfilController {
     @CurrentUser() usuario: AuthenticatedUser,
     @UploadedFile() arquivo: Express.Multer.File,
   ) {
+    validarConteudoImagem(arquivo, ['image/jpeg', 'image/png', 'image/webp']);
     const url = await this.storageService.enviar(usuario.id, 'avatar', arquivo);
     return this.perfilService.atualizarImagem(usuario.id, 'avatar', url);
   }
@@ -130,6 +132,7 @@ export class PerfilController {
     @CurrentUser() usuario: AuthenticatedUser,
     @UploadedFile() arquivo: Express.Multer.File,
   ) {
+    validarConteudoImagem(arquivo, ['image/jpeg', 'image/png', 'image/webp']);
     const url = await this.storageService.enviar(usuario.id, 'banner', arquivo);
     return this.perfilService.atualizarImagem(usuario.id, 'banner', url);
   }

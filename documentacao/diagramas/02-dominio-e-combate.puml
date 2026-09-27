@@ -82,7 +82,7 @@ Usuario "1" -- "0..1" Perfil
 Usuario "1" -- "0..*" Inventario
 Usuario "1" -- "0..*" Deck
 Inventario "0..*" --> "1" Carta
-Deck "1" -- "3..6" Carta
+Deck "1" -- "1..6" Carta
 Carta "0..*" --> "0..1" ClasseCarta
 Carta "0..*" -- "0..3" Habilidade
 Partida "1" *-- "1..*" CartaEmJogo

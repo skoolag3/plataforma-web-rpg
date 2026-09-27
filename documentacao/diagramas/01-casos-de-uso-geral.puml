@@ -19,7 +19,7 @@ actor "Usuário" as usuario
 actor "Administrador" as admin
 actor "Stripe" as stripe
 actor "Serviços de mídia\ne e-mail" as externos
-actor "IA generativa\n(prevista)" as ia
+actor "IA generativa\n(Gemini ou OpenAI)" as ia
 
 rectangle "Plataforma AnimeCards" {
   usecase "Gerenciar conta\ne perfil" as ucConta

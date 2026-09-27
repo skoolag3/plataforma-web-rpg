@@ -40,6 +40,18 @@ const habilidadeBase: ConfiguracaoHabilidade = {
 };
 
 describe('motor de batalha', () => {
+  it('mantém os atributos básicos das cartas no confronto com o chefe', () => {
+    const estado = iniciarBatalha(
+      [carta('Jogador', 3)],
+      [carta('Chefe', 3)],
+      'CHEFE',
+    );
+
+    expect(estado.bot.cartas[0]).toEqual(
+      expect.objectContaining({ hp: 100, ataque: 50, defesa: 10 }),
+    );
+  });
+
   it('faz a classe com menor prioridade numérica atacar primeiro', () => {
     const estado = iniciarBatalha(
       [carta('Guardião', 5)],

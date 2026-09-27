@@ -24,3 +24,4 @@ NOTAS_PRIVADAS_DESENVOLVIMENTO.md
 
 # Logs locais usados para manter os servidores de desenvolvimento ativos
 .codex-runtime/
+.codex-temp/

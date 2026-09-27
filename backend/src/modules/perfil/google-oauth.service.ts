@@ -5,11 +5,14 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { PrismaService } from '../../database/prisma.service';
+import { AuthService } from '../auth/services/auth.service';
 
 type GoogleState = {
-  sub: string;
-  finalidade: 'VINCULAR_GOOGLE';
+  sub?: string;
+  finalidade: 'VINCULAR_GOOGLE' | 'LOGIN_GOOGLE';
 };
 
 type GoogleTokenResponse = {
@@ -21,6 +24,7 @@ type GoogleTokenInfo = {
   email?: string;
   email_verified?: string;
   aud?: string;
+  name?: string;
 };
 
 @Injectable()
@@ -28,14 +32,23 @@ export class GoogleOAuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-  ) { }
+    private readonly authService: AuthService,
+  ) {}
+
+  gerarUrlLogin() {
+    return this.gerarUrl({ finalidade: 'LOGIN_GOOGLE' });
+  }
 
   gerarUrlVinculo(idUsuario: string) {
+    return this.gerarUrl({
+      sub: idUsuario,
+      finalidade: 'VINCULAR_GOOGLE',
+    });
+  }
+
+  private gerarUrl(payload: GoogleState) {
     const config = this.getConfig();
-    const state = this.jwtService.sign(
-      { sub: idUsuario, finalidade: 'VINCULAR_GOOGLE' },
-      { expiresIn: '10m' },
-    );
+    const state = this.jwtService.sign(payload, { expiresIn: '10m' });
     const parametros = new URLSearchParams({
       client_id: config.clientId,
       redirect_uri: config.callbackUrl,
@@ -43,7 +56,7 @@ export class GoogleOAuthService {
       scope: 'openid email profile',
       state,
       access_type: 'offline',
-      prompt: 'consent',
+      prompt: 'select_account',
     });
 
     return {
@@ -61,8 +74,15 @@ export class GoogleOAuthService {
       throw new BadRequestException('Estado OAuth inválido ou expirado.');
     }
 
-    if (payload.finalidade !== 'VINCULAR_GOOGLE') {
+    if (
+      payload.finalidade !== 'VINCULAR_GOOGLE' &&
+      payload.finalidade !== 'LOGIN_GOOGLE'
+    ) {
       throw new BadRequestException('Finalidade OAuth inválida.');
+    }
+
+    if (payload.finalidade === 'VINCULAR_GOOGLE' && !payload.sub) {
+      throw new BadRequestException('Usuário do vínculo não informado.');
     }
 
     const respostaToken = await fetch('https://oauth2.googleapis.com/token', {
@@ -98,16 +118,92 @@ export class GoogleOAuthService {
       throw new BadRequestException('Identidade Google inválida.');
     }
 
-    const vinculoExistente = await this.prisma.provedorUsuario.findUnique({
+    if (payload.finalidade === 'LOGIN_GOOGLE') {
+      return this.autenticarComGoogle(info);
+    }
+
+    await this.vincularGoogle(payload.sub!, info);
+    return { finalidade: 'VINCULAR_GOOGLE' as const };
+  }
+
+  private async autenticarComGoogle(info: GoogleTokenInfo) {
+    const email = info.email?.toLowerCase().trim();
+
+    if (!email || !info.sub) {
+      throw new BadRequestException('O Google não informou um e-mail válido.');
+    }
+
+    const vinculo = await this.prisma.provedorUsuario.findUnique({
       where: {
         provedor_id_provedor: {
           provedor: 'GOOGLE',
           id_provedor: info.sub,
         },
       },
+      include: { usuario: true },
     });
 
-    if (vinculoExistente && vinculoExistente.id_usuario !== payload.sub) {
+    if (vinculo) {
+      await this.prisma.provedorUsuario.update({
+        where: { id: vinculo.id },
+        data: { ultimo_login_em: new Date(), email_provedor: email },
+      });
+      return {
+        finalidade: 'LOGIN_GOOGLE' as const,
+        sessao: await this.authService.criarSessaoOAuth(vinculo.usuario),
+      };
+    }
+
+    const usuarioExistente = await this.prisma.usuario.findUnique({
+      where: { email },
+    });
+    const usuario = usuarioExistente
+      ? await this.prisma.usuario.update({
+          where: { id: usuarioExistente.id },
+          data: {
+            email_verificado: true,
+            token_verificacao_email: null,
+            token_verificacao_expira_em: null,
+          },
+        })
+      : await this.prisma.usuario.create({
+          data: {
+            nome: info.name?.trim().slice(0, 100) || email.split('@')[0],
+            email,
+            senha_hash: await bcrypt.hash(randomBytes(32).toString('hex'), 10),
+            email_verificado: true,
+            bloqueado: false,
+            tentativas_login: 0,
+          },
+        });
+
+    await this.prisma.provedorUsuario.create({
+      data: {
+        id_usuario: usuario.id,
+        provedor: 'GOOGLE',
+        id_provedor: info.sub,
+        email_provedor: email,
+        ultimo_login_em: new Date(),
+      },
+    });
+
+    return {
+      finalidade: 'LOGIN_GOOGLE' as const,
+      sessao: await this.authService.criarSessaoOAuth(usuario),
+    };
+  }
+
+  private async vincularGoogle(idUsuario: string, info: GoogleTokenInfo) {
+    const vinculoExistente = await this.prisma.provedorUsuario.findUnique({
+      where: {
+        provedor_id_provedor: {
+          provedor: 'GOOGLE',
+          id_provedor: info.sub!,
+        },
+      },
+    });
+
+    if (vinculoExistente && vinculoExistente.id_usuario !== idUsuario) {
       throw new ConflictException(
         'Esta conta Google já está vinculada a outro usuário.',
       );
@@ -116,18 +212,18 @@ export class GoogleOAuthService {
     await this.prisma.provedorUsuario.upsert({
       where: {
         id_usuario_provedor: {
-          id_usuario: payload.sub,
+          id_usuario: idUsuario,
           provedor: 'GOOGLE',
         },
       },
       create: {
-        id_usuario: payload.sub,
+        id_usuario: idUsuario,
         provedor: 'GOOGLE',
-        id_provedor: info.sub,
+        id_provedor: info.sub!,
         email_provedor: info.email,
       },
       update: {
-        id_provedor: info.sub,
+        id_provedor: info.sub!,
         email_provedor: info.email,
       },
     });

@@ -10,10 +10,12 @@ import { BannerRotacaoService } from './banner-rotacao.service';
 import {
   giroGratuitoDisponivel,
   LIMITE_PITY,
+  obterInicioJanelaGiroGratuito,
   obterProximoGiroGratuito,
   PROBABILIDADES_RARIDADE,
   type RaridadeGacha,
 } from './gacha.config';
+import { obterValorVendaPorRaridade } from './valor-venda-raridade';
 
 const PESOS: Record<string, number> = { UR: 1, SSR: 3, SR: 8, R: 18, N: 35 };
 
@@ -27,7 +29,7 @@ export class GachaService {
   async listar(idUsuario: string) {
     await this.garantirBannerPadrao();
     const rotacao = await this.bannerRotacaoService.obterAtual();
-    const [banners, usuario] = await Promise.all([
+    const [banners, usuario, horarioBanco] = await Promise.all([
       this.prisma.banner.findMany({
         where: rotacao ? { id: rotacao.idBanner, ativo: true } : { id: '' },
         include: {
@@ -44,6 +46,9 @@ export class GachaService {
           saldo_rubys_cache: true,
         },
       }),
+      this.prisma.$queryRaw<Array<{ agora: Date }>>(
+        Prisma.sql`SELECT CURRENT_TIMESTAMP AS "agora"`,
+      ),
     ]);
 
     const logs = await this.prisma.logGacha.findMany({
@@ -55,7 +60,7 @@ export class GachaService {
       distinct: ['id_banner'],
       select: { id_banner: true, pity_contador: true },
     });
-    const agora = Date.now();
+    const agora = horarioBanco[0].agora.getTime();
     return {
       jogador: {
         nome: usuario.nome,
@@ -142,7 +147,9 @@ export class GachaService {
           configVisual: unknown;
           quantidade: number | null;
           nova: boolean;
+          valorVenda: number;
         }> = [];
+        let rubysGanhosDuplicatas = 0;
         for (let index = 0; index < quantidade; index += 1) {
           pity += 1;
           const forcarUr = pity >= LIMITE_PITY;
@@ -150,20 +157,47 @@ export class GachaService {
           const sorteada = this.sortear(pool);
           pity = sorteada.carta.raridade === 'UR' ? 0 : pity;
 
-          const inventario = await tx.inventario.upsert({
+          const inventarioAtual = await tx.inventario.findUnique({
             where: {
               id_usuario_id_carta: {
                 id_usuario: idUsuario,
                 id_carta: sorteada.id_carta,
               },
             },
-            create: {
-              id_usuario: idUsuario,
-              id_carta: sorteada.id_carta,
-              quantidade: 1,
-            },
-            update: { quantidade: { increment: 1 } },
           });
+          const nova = !inventarioAtual || (inventarioAtual.quantidade ?? 0) < 1;
+          const valorVenda = nova
+            ? 0
+            : obterValorVendaPorRaridade(sorteada.carta.raridade);
+          const inventario = nova
+            ? await tx.inventario.upsert({
+                where: {
+                  id_usuario_id_carta: {
+                    id_usuario: idUsuario,
+                    id_carta: sorteada.id_carta,
+                  },
+                },
+                create: {
+                  id_usuario: idUsuario,
+                  id_carta: sorteada.id_carta,
+                  quantidade: 1,
+                },
+                update: { quantidade: 1 },
+              })
+            : inventarioAtual;
+
+          if (valorVenda > 0) {
+            rubysGanhosDuplicatas += valorVenda;
+            await tx.ledgerRuby.create({
+              data: {
+                id_usuario: idUsuario,
+                quantidade: valorVenda,
+                motivo: 'VENDA_CARTA_DUPLICADA',
+                id_referencia: sorteada.id_carta,
+                descricao: `Venda automática de ${sorteada.carta.nome}`,
+              },
+            });
+          }
           await tx.logGacha.create({
             data: {
               id_usuario: idUsuario,
@@ -182,15 +216,18 @@ export class GachaService {
             moldura: sorteada.carta.moldura,
             configVisual: sorteada.carta.config_visual,
             quantidade: inventario.quantidade,
-            nova: inventario.quantidade === 1,
+            nova,
+            valorVenda,
           });
         }
 
         return {
           cartas: obtidas,
           pity,
-          rubys: (usuario.saldo_rubys_cache ?? 0) - custo,
+          rubys:
+            (usuario.saldo_rubys_cache ?? 0) - custo + rubysGanhosDuplicatas,
           custo,
+          rubysGanhosDuplicatas,
         };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
@@ -200,38 +237,32 @@ export class GachaService {
   async resgatarDiario(idUsuario: string, idBanner: string) {
     return this.prisma.$transaction(
       async (tx) => {
-        const [banner, coleta] = await Promise.all([
+        const [banner, horarioBanco] = await Promise.all([
           tx.banner.findFirst({ where: { id: idBanner, ativo: true } }),
-          tx.usuarioBannerColeta.findUnique({
-            where: {
-              id_usuario_id_banner: {
-                id_usuario: idUsuario,
-                id_banner: idBanner,
-              },
-            },
-          }),
+          tx.$queryRaw<Array<{ agora: Date }>>(
+            Prisma.sql`SELECT CURRENT_TIMESTAMP AS "agora"`,
+          ),
         ]);
         if (!banner) throw new NotFoundException('Banner indisponível.');
-        const agora = new Date();
-        if (!giroGratuitoDisponivel(coleta?.ultima_coleta, agora.getTime())) {
+        const agora = horarioBanco[0].agora;
+        const inicioJanela = obterInicioJanelaGiroGratuito(agora.getTime());
+        const coletasAtualizadas = await tx.$executeRaw(
+          Prisma.sql`
+            INSERT INTO usuario_banner_coleta
+              (id_usuario, id_banner, ultima_coleta)
+            VALUES
+              (${idUsuario}::uuid, ${idBanner}::uuid, ${agora})
+            ON CONFLICT (id_usuario, id_banner)
+            DO UPDATE SET ultima_coleta = EXCLUDED.ultima_coleta
+            WHERE usuario_banner_coleta.ultima_coleta IS NULL
+               OR usuario_banner_coleta.ultima_coleta < ${inicioJanela}
+          `,
+        );
+        if (!coletasAtualizadas) {
           throw new ConflictException(
             'O giro gratuito ainda não está disponível.',
           );
         }
-        await tx.usuarioBannerColeta.upsert({
-          where: {
-            id_usuario_id_banner: {
-              id_usuario: idUsuario,
-              id_banner: idBanner,
-            },
-          },
-          create: {
-            id_usuario: idUsuario,
-            id_banner: idBanner,
-            ultima_coleta: agora,
-          },
-          update: { ultima_coleta: agora },
-        });
         await tx.ledgerRuby.create({
           data: {
             id_usuario: idUsuario,

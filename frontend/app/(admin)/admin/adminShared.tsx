@@ -12,6 +12,7 @@ import {
   MoreHorizontal,
   Newspaper,
   Sparkles,
+  Map,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -28,6 +29,7 @@ const nav = [
   { href: "/admin/decks-npc", label: "Decks NPC", icon: Bot },
   { href: "/admin/usuarios", label: "Usuários", icon: Users },
   { href: "/admin/banners", label: "Gacha (Banners)", icon: ImagePlus },
+  { href: "/admin/campanha", label: "Campanha", icon: Map },
   { href: "/admin/noticias", label: "Notícias", icon: Newspaper },
 ];
 

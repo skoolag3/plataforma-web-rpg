@@ -1,4 +1,5 @@
 export type DificuldadeRota = 'FACIL' | 'MEDIA' | 'DIFICIL' | 'CHEFE';
+import type { ConfiguracaoBoss } from './boss.dialogo';
 
 export type OpcaoRota = {
   id: string;
@@ -11,14 +12,13 @@ export type OpcaoRota = {
 export type TrilhaExpedicao = {
   etapas: Array<{ indice: number; opcoes: OpcaoRota[] }>;
   chefe: OpcaoRota;
+  configuracao?: ConfiguracaoRecompensasExpedicao;
+  boss?: ConfiguracaoBoss;
 };
 
 const maiorInteiroPostgres = 2_147_483_647;
 
-export function gerarSeedExpedicao(
-  referencia: string,
-  timestamp = Date.now(),
-) {
+export function gerarSeedExpedicao(referencia: string, timestamp = Date.now()) {
   const hash = [...referencia].reduce(
     (valor, caractere) =>
       (valor * 31 + caractere.charCodeAt(0)) % maiorInteiroPostgres,
@@ -27,7 +27,11 @@ export function gerarSeedExpedicao(
   return Math.abs((timestamp + hash) % maiorInteiroPostgres) || 1;
 }
 
-export function gerarTrilhaExpedicao(seed: number): TrilhaExpedicao {
+export function gerarTrilhaExpedicao(
+  seed: number,
+  configuracao = configuracaoRecompensasPadrao,
+  boss?: ConfiguracaoBoss,
+): TrilhaExpedicao {
   const random = criarRandom(seed);
   const modelos: Omit<OpcaoRota, 'id'>[] = [
     {
@@ -58,9 +62,11 @@ export function gerarTrilhaExpedicao(seed: number): TrilhaExpedicao {
   }));
   return {
     etapas,
+    configuracao,
+    boss,
     chefe: {
       id: 'chefe-final',
-      titulo: 'Guardião da Expedição',
+      titulo: boss?.nome ?? 'Guardião da Expedição',
       descricao: 'O último adversário protege a recompensa da jornada.',
       dificuldade: 'CHEFE',
       risco: 'Chefe',
@@ -87,3 +93,5 @@ function criarRandom(seed: number) {
     return ((nmr ^ (nmr >>> 14)) >>> 0) / 4294967296;
   };
 }
+import type { ConfiguracaoRecompensasExpedicao } from './expedicao.recompensas';
+import { configuracaoRecompensasPadrao } from './expedicao.recompensas';

@@ -26,6 +26,7 @@ import { LerCorreioDto } from './dto/ler-correio.dto';
 import { EscolherRotaDto, IniciarExpedicaoDto } from './dto/expedicao.dto';
 import { ExecutarTurnoDto } from './dto/executar-turno.dto';
 import { ExpedicoesService } from './expedicoes.service';
+import { ResponderBossDto } from './dto/responder-boss.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller()
@@ -60,6 +61,15 @@ export class JogoController {
     @Body() dto: EscolherRotaDto,
   ) {
     return this.expedicoesService.escolher(usuario.id, id, dto.idEscolha);
+  }
+
+  @Post('expedicoes/:id/boss/resposta')
+  responderBoss(
+    @CurrentUser() usuario: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: ResponderBossDto,
+  ) {
+    return this.expedicoesService.responderBoss(usuario.id, id, dto.resposta);
   }
 
   @Post('expedicoes/:id/abandonar')

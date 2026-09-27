@@ -1,0 +1,128 @@
+.resultado {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--member-border);
+  border-radius: var(--member-radius);
+  background:
+    linear-gradient(135deg, rgba(190, 242, 100, 0.06), transparent 42%),
+    var(--member-surface);
+  padding: 1rem 1.1rem;
+}
+
+.resultado[data-status="FALHOU"] {
+  background:
+    linear-gradient(135deg, rgba(248, 113, 113, 0.07), transparent 42%),
+    var(--member-surface);
+}
+
+.resultado[data-status="ABANDONADA"] {
+  background:
+    linear-gradient(135deg, rgba(148, 163, 184, 0.06), transparent 42%),
+    var(--member-surface);
+}
+
+.iconeResultado {
+  display: grid;
+  width: 3.2rem;
+  height: 3.2rem;
+  place-items: center;
+  border: 1px solid rgba(190, 242, 100, 0.28);
+  border-radius: 0.85rem;
+  color: #bef264;
+  background: rgba(101, 163, 13, 0.1);
+}
+
+[data-status="FALHOU"] .iconeResultado {
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #fca5a5;
+  background: rgba(127, 29, 29, 0.15);
+}
+
+[data-status="ABANDONADA"] .iconeResultado {
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #cbd5e1;
+  background: rgba(51, 65, 85, 0.16);
+}
+
+.iconeResultado svg {
+  width: 1.45rem;
+}
+
+.textoResultado small {
+  color: #a78bfa;
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.textoResultado h2 {
+  margin: 0.16rem 0 0;
+  font-size: 1.1rem;
+}
+
+.textoResultado p {
+  margin: 0.2rem 0 0;
+  color: var(--member-muted);
+  font-size: 0.66rem;
+}
+
+.resumoResultado {
+  display: flex;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.resumoResultado div {
+  min-width: 7.5rem;
+  border: 1px solid rgba(167, 139, 250, 0.14);
+  border-radius: 0.7rem;
+  background: rgba(8, 10, 18, 0.48);
+  padding: 0.55rem 0.65rem;
+}
+
+.resumoResultado dt {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #8993a7;
+  font-size: 0.5rem;
+}
+
+.resumoResultado dt svg {
+  width: 0.72rem;
+}
+
+.resumoResultado dd {
+  margin: 0.18rem 0 0;
+  color: #f8fafc;
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+@media (max-width: 760px) {
+  .resultado {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .resumoResultado {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .resultado {
+    align-items: start;
+  }
+
+  .resumoResultado {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .resumoResultado div {
+    min-width: 0;
+  }
+}

@@ -74,7 +74,7 @@ Se quiser autorizar uma URL de preview específica, acrescente-a em `FRONTEND_UR
 
 ## 4. Ajustar integrações externas
 
-- Google OAuth: `GOOGLE_CALLBACK_URL=https://animecards-api.onrender.com/perfil/google/callback`;
+- Google OAuth: `GOOGLE_CALLBACK_URL=https://animecards.vercel.app/api/perfil/google/callback` (troque pelo domínio final do frontend e cadastre exatamente a mesma URL no Google Cloud);
 - Stripe: webhook `https://animecards-api.onrender.com/loja/stripe/webhook`;
 - Supabase Storage: mantenha o bucket e as políticas já usados pelo perfil;
 - Cloudinary: nenhuma alteração de URL é necessária.
@@ -87,3 +87,7 @@ Se quiser autorizar uma URL de preview específica, acrescente-a em `FRONTEND_UR
 - conferir upload de perfil e imagens administrativas;
 - confirmar que `/admin` continua exigindo autenticação administrativa;
 - observar os logs do Render durante a primeira requisição.
+- confirmar que o login cria `animecards_session` como cookie `HttpOnly`, sem JWT no `localStorage`;
+- validar os redirects de Google OAuth e Stripe usando exclusivamente os domínios definitivos.
+
+O CORS aceita somente as origens listadas explicitamente em `FRONTEND_URLS`. Para um teste temporário com ngrok, inclua a URL exata do túnel nessa variável e remova-a ao encerrar o teste.

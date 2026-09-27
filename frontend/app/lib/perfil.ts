@@ -66,6 +66,7 @@ async function requisicaoPerfil<T>(
 ): Promise<T> {
   const resposta = await fetch(`${API_URL}${caminho}`, {
     ...opcoes,
+    credentials: "include",
     cache: "no-store",
     headers: {
       "Content-Type": "application/json",
@@ -168,6 +169,7 @@ export async function enviarImagemPerfilApi(
   dados.append("arquivo", arquivo);
   const resposta = await fetch(`${API_URL}/perfil/${tipo}`, {
     method: "POST",
+    credentials: "include",
     headers: { Authorization: `Bearer ${token}` },
     body: dados,
   });
@@ -210,6 +212,7 @@ export function cancelarExclusaoApi(token: string) {
 
 export async function confirmarTrocaEmailApi(token: string) {
   const resposta = await fetch(`${API_URL}/perfil/confirmar-troca-email`, {
+    credentials: "include",
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token }),

@@ -38,8 +38,7 @@ export class AdminBannersService {
         totalCartas: banner.cartas.length,
         raridades: Object.entries(
           banner.cartas.reduce<Record<string, number>>((total, item) => {
-            total[item.carta.raridade] =
-              (total[item.carta.raridade] ?? 0) + 1;
+            total[item.carta.raridade] = (total[item.carta.raridade] ?? 0) + 1;
             return total;
           }, {}),
         ).map(([raridade, total]) => ({ raridade, total })),

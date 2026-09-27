@@ -5,7 +5,7 @@ export type PacoteRuby = { id: string; nome: string; quantidade_rubys: number; p
 
 async function lojaRequest<T>(path: string, options: RequestInit = {}) {
   const token = getToken();
-  const resposta = await fetch(`${API_URL}${path}`, { ...options, headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), ...options.headers } });
+  const resposta = await fetch(`${API_URL}${path}`, { ...options, credentials: "include", headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), ...options.headers } });
   const dados = await resposta.json().catch(() => null);
   if (!resposta.ok) throw new Error(dados?.message ?? "Não foi possível concluir a operação.");
   return dados as T;

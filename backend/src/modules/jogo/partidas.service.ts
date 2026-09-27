@@ -92,6 +92,7 @@ export class PartidasService {
       where: {
         is_admin: false,
         ativo: true,
+        email_verificado: true,
         excluido_em: null,
       },
       select: {
@@ -151,6 +152,7 @@ export class PartidasService {
           avatarUrl: usuario.perfil?.avatar_url ?? null,
         };
       })
+      .filter((jogador) => jogador.pontos > 0)
       .sort(
         (a, b) =>
           b.pontos - a.pontos ||
@@ -175,6 +177,7 @@ export class PartidasService {
       idExpedicao: string;
       etapa: number;
       dificuldade: Dificuldade;
+      boss?: { cartas: string[] };
     },
   ) {
     const existente = await this.prisma.logPartida.findFirst({
@@ -193,8 +196,8 @@ export class PartidasService {
         },
       },
     });
-    if (!deck || deck.cartas.length < 3 || deck.cartas.length > 6) {
-      throw new BadRequestException('Selecione um deck com 3 a 6 cartas.');
+    if (!deck || deck.cartas.length < 1 || deck.cartas.length > 6) {
+      throw new BadRequestException('Selecione um deck com 1 a 6 cartas.');
     }
 
     const idsCartas = deck.cartas.map((item) => item.id_carta);
@@ -212,19 +215,34 @@ export class PartidasService {
       );
     }
 
-    const cartasBot = await this.prisma.carta.findMany({
-      where: { ativo: true, excluido_em: null },
+    const cartasCandidatas = await this.prisma.carta.findMany({
+      where: {
+        ativo: true,
+        excluido_em: null,
+        ...(contexto?.boss?.cartas.length
+          ? { id: { in: contexto.boss.cartas } }
+          : {}),
+      },
       orderBy: [{ raridade: 'asc' }, { nome: 'asc' }],
-      take: deck.cartas.length,
+      take: contexto?.boss ? 100 : deck.cartas.length,
       include: cartaBatalhaInclude,
     });
+    const cartasJogador = deck.cartas.map((item) => item.carta);
+    const cartasBot = contexto?.boss
+      ? [...cartasCandidatas]
+          .sort(
+            (a, b) =>
+              this.vantagemCarta(b, cartasJogador) -
+              this.vantagemCarta(a, cartasJogador),
+          )
+          .slice(0, deck.cartas.length)
+      : cartasCandidatas.slice(0, deck.cartas.length);
     if (cartasBot.length !== deck.cartas.length) {
       throw new BadRequestException(
         `Cadastre pelo menos ${deck.cartas.length} cartas ativas para montar o adversário.`,
       );
     }
 
-    const cartasJogador = deck.cartas.map((item) => item.carta);
     const estado = iniciarBatalha(
       cartasJogador.map((carta) => this.mapearCarta(carta)),
       cartasBot.map((carta) => this.mapearCarta(carta)),
@@ -285,6 +303,26 @@ export class PartidasService {
       }
       throw error;
     }
+  }
+
+  private vantagemCarta(carta: CartaCompleta, adversarias: CartaCompleta[]) {
+    const supera = (elemento: string, alvo: string) =>
+      ({
+        fogo: 'natureza',
+        natureza: 'agua',
+        agua: 'fogo',
+        luz: 'sombra',
+        sombra: 'luz',
+      })[elemento] === alvo;
+    const vantagemElemental =
+      adversarias.filter((alvo) => supera(carta.elemento, alvo.elemento))
+        .length * 100;
+    return (
+      vantagemElemental +
+      carta.dano_base * 2 +
+      carta.hp_base / 4 +
+      carta.defesa_base
+    );
   }
 
   async buscarAtual(idUsuario: string) {
@@ -578,11 +616,11 @@ export class PartidasService {
                 turno: habilidade.requisito_valor ?? 1,
               }
             : { tipo: 'NENHUM' as const };
-    const escala =
+    const escala: ConfiguracaoHabilidade['escala'] =
       habilidade.escala_tipo === 'POR_TURNO' ||
       habilidade.escala_tipo === 'POR_ATAQUE'
         ? {
-            tipo: habilidade.escala_tipo as 'POR_TURNO' | 'POR_ATAQUE',
+            tipo: habilidade.escala_tipo,
             valor: habilidade.escala_valor ?? 0,
             limite: habilidade.escala_limite ?? habilidade.valor_base,
           }

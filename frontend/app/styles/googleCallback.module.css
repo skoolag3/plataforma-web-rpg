@@ -1,0 +1,49 @@
+.pagina {
+  align-items: center;
+  background: radial-gradient(circle at top, #241448, #090711 62%);
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.cartao {
+  background: rgba(20, 15, 36, 0.94);
+  border: 1px solid rgba(194, 151, 255, 0.28);
+  border-radius: 20px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+  color: #f7f2ff;
+  max-width: 440px;
+  padding: 40px;
+  text-align: center;
+  width: 100%;
+}
+
+.cartao h1 {
+  font-size: 1.6rem;
+  margin: 18px 0 8px;
+}
+
+.cartao p {
+  color: #c8bddb;
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+
+.cartao a {
+  color: #d7b5ff;
+  font-weight: 700;
+}
+
+.iconeCarregando,
+.iconeErro {
+  font-size: 2rem;
+}
+
+.iconeCarregando {
+  color: #c79cff;
+}
+
+.iconeErro {
+  color: #ff8f9f;
+}

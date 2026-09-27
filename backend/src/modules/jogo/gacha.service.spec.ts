@@ -10,7 +10,9 @@ import {
 describe('GachaService', () => {
   const prisma = {
     banner: { findFirst: jest.fn() },
-    usuarioBannerColeta: { findUnique: jest.fn() },
+    ledgerRuby: { create: jest.fn() },
+    $queryRaw: jest.fn(),
+    $executeRaw: jest.fn(),
     $transaction: jest.fn(),
   };
   prisma.$transaction.mockImplementation(
@@ -57,12 +59,31 @@ describe('GachaService', () => {
       id: 'banner',
       custo_giro: 300,
     });
-    prisma.usuarioBannerColeta.findUnique.mockResolvedValue({
-      ultima_coleta: new Date(),
-    });
+    prisma.$queryRaw.mockResolvedValue([{ agora: new Date() }]);
+    prisma.$executeRaw.mockResolvedValue(0);
     await expect(
       service.resgatarDiario('usuario', 'banner'),
     ).rejects.toBeInstanceOf(ConflictException);
+    expect(prisma.ledgerRuby.create).not.toHaveBeenCalled();
+  });
+
+  it('credita o giro somente depois da trava atômica do banco', async () => {
+    prisma.banner.findFirst.mockResolvedValue({
+      id: 'banner',
+      custo_giro: 300,
+    });
+    prisma.$queryRaw.mockResolvedValue([
+      { agora: new Date('2026-09-24T13:00:00.000Z') },
+    ]);
+    prisma.$executeRaw.mockResolvedValue(1);
+
+    await expect(
+      service.resgatarDiario('usuario', 'banner'),
+    ).resolves.toEqual({
+      message: 'Giro gratuito resgatado.',
+      rubysRecebidos: 300,
+    });
+    expect(prisma.ledgerRuby.create).toHaveBeenCalledTimes(1);
   });
 
   it('renova o giro gratuito nas janelas globais de 01:00 e 13:00 UTC', () => {

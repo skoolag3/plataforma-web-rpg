@@ -1,22 +1,40 @@
 import type { DificuldadeRota } from './expedicao.trilha';
 
-const percentualMantidoNaDerrota = 0.7;
-
-const recompensaPorDificuldade: Record<DificuldadeRota, number> = {
-  FACIL: 25,
-  MEDIA: 25,
-  DIFICIL: 25,
-  CHEFE: 100,
+export type ConfiguracaoRecompensasExpedicao = {
+  recompensas: Record<DificuldadeRota, number>;
+  percentualMantidoDerrota: number;
 };
 
-export function recompensaDaRota(dificuldade: DificuldadeRota) {
-  return recompensaPorDificuldade[dificuldade];
+export const configuracaoRecompensasPadrao: ConfiguracaoRecompensasExpedicao = {
+  percentualMantidoDerrota: 70,
+  recompensas: {
+    FACIL: 25,
+    MEDIA: 25,
+    DIFICIL: 25,
+    CHEFE: 100,
+  },
+};
+
+export function recompensaDaRota(
+  dificuldade: DificuldadeRota,
+  configuracao = configuracaoRecompensasPadrao,
+) {
+  return configuracao.recompensas[dificuldade];
 }
 
-export function recompensaAposDerrota(recompensaPendente: number) {
-  return Math.ceil(recompensaPendente * percentualMantidoNaDerrota);
+export function recompensaAposDerrota(
+  recompensaPendente: number,
+  percentualMantido = configuracaoRecompensasPadrao.percentualMantidoDerrota,
+) {
+  return Math.ceil(recompensaPendente * (percentualMantido / 100));
 }
 
-export function rubysPerdidosNaDerrota(recompensaPendente: number) {
-  return recompensaPendente - recompensaAposDerrota(recompensaPendente);
+export function rubysPerdidosNaDerrota(
+  recompensaPendente: number,
+  percentualMantido = configuracaoRecompensasPadrao.percentualMantidoDerrota,
+) {
+  return (
+    recompensaPendente -
+    recompensaAposDerrota(recompensaPendente, percentualMantido)
+  );
 }

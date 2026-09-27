@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import type { LucideIcon } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
   Flame,
@@ -10,12 +9,10 @@ import {
   Moon,
   Sparkles,
   Waves,
+  X,
   Zap,
 } from "lucide-react";
-import {
-  CartaMontada,
-  type ConfigVisualCarta,
-} from "../../components/cartaMontada";
+import { CartaMontada } from "../../components/cartaMontada";
 import { IconeRuby } from "../../components/iconeRuby";
 import {
   notificarErro,
@@ -30,129 +27,36 @@ import {
   type BannerGacha,
   type CartaGachaApi,
 } from "../../lib/jogo";
-import cardsStyles from "../../styles/inventario/cards.module.css";
-import layoutStyles from "../../styles/inventario/layout.module.css";
-import gachaActionsStyles from "../../styles/gacha/actions.module.css";
-import gachaBannerStyles from "../../styles/gacha/banner.module.css";
-import gachaCardsStyles from "../../styles/gacha/cards.module.css";
-import gachaLayoutStyles from "../../styles/gacha/layout.module.css";
-import gachaResultsStyles from "../../styles/gacha/results.module.css";
+import { PityProgress } from "./components/pityProgress";
+import { RarityBadge } from "./components/rarityBadge";
+import { RewardCard } from "./components/rewardCard";
+import { SummonButton } from "./components/summonButton";
+import type { CartaGachaVisual, EstadoGacha, RaridadeCarta } from "./types";
+import styles from "../../styles/gacha/gacha.module.css";
 
-const styles = {
-  ...layoutStyles,
-  ...cardsStyles,
-  ...gachaLayoutStyles,
-  ...gachaBannerStyles,
-  ...gachaCardsStyles,
-  ...gachaActionsStyles,
-  ...gachaResultsStyles,
+const pesoRaridade: Record<RaridadeCarta, number> = {
+  UR: 5,
+  SSR: 4,
+  SR: 3,
+  R: 2,
+  N: 1,
 };
 
-type CartaGacha = {
-  id?: string;
-  nome: string;
-  subtitulo: string;
-  raridade: "UR" | "SSR" | "SR" | "R" | "N";
-  elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
-  icon: LucideIcon;
-  borda: string;
-  elementoCor: string;
-  artA: string;
-  artB: string;
-  destaque?: boolean;
-  foto?: string | null;
-  moldura?: string | null;
-  configVisual?: ConfigVisualCarta | null;
-  nova?: boolean;
-};
-
-const cartasPool: CartaGacha[] = [
-  {
-    nome: "Kael Arcano",
-    subtitulo: "Guardião da Floresta",
-    raridade: "UR",
-    elemento: "natureza",
-    icon: Leaf,
-    borda: "#a78bfa",
-    elementoCor: "#7ee757",
-    artA: "#0f2d1f",
-    artB: "#172554",
-    destaque: true,
-  },
-  {
-    nome: "Lyria da Luz",
-    subtitulo: "Oráculo Azul",
-    raridade: "SR",
-    elemento: "agua",
-    icon: Waves,
-    borda: "#a78bfa",
-    elementoCor: "#38bdf8",
-    artA: "#1e3a8a",
-    artB: "#0f172a",
-  },
-  {
-    nome: "Mira Sombria",
-    subtitulo: "Vidente Lunar",
-    raridade: "SR",
-    elemento: "sombra",
-    icon: Moon,
-    borda: "#a78bfa",
-    elementoCor: "#a855f7",
-    artA: "#312e81",
-    artB: "#0f172a",
-  },
-  {
-    nome: "Zed Pirotecnico",
-    subtitulo: "Faisca Rubra",
-    raridade: "R",
-    elemento: "fogo",
-    icon: Flame,
-    borda: "#60a5fa",
-    elementoCor: "#ef4444",
-    artA: "#7f1d1d",
-    artB: "#111827",
-  },
-  {
-    nome: "Soldado Real",
-    subtitulo: "Linha de Frente",
-    raridade: "N",
-    elemento: "luz",
-    icon: Zap,
-    borda: "#64748b",
-    elementoCor: "#facc15",
-    artA: "#57534e",
-    artB: "#111827",
-  },
-];
-
-function mapearCarta(carta: CartaGachaApi): CartaGacha {
-  const base =
-    cartasPool.find((item) => item.elemento === carta.elemento) ??
-    cartasPool[0];
-  return {
-    ...base,
-    ...carta,
-    subtitulo: carta.nova ? "Nova na coleção" : "Cópia adicional",
-    icon:
-      carta.elemento === "natureza"
-        ? Leaf
-        : carta.elemento === "agua"
-          ? Waves
-          : carta.elemento === "fogo"
-            ? Flame
-            : carta.elemento === "sombra"
-              ? Moon
-              : Zap,
-    borda:
-      carta.raridade === "UR"
-        ? "#a78bfa"
-        : carta.raridade === "SSR"
-          ? "#f59e0b"
-          : base.borda,
-  };
+function mapearCarta(carta: CartaGachaApi): CartaGachaVisual {
+  const icon =
+    carta.elemento === "natureza"
+      ? Leaf
+      : carta.elemento === "agua"
+        ? Waves
+        : carta.elemento === "fogo"
+          ? Flame
+          : carta.elemento === "sombra"
+            ? Moon
+            : Zap;
+  return { ...carta, icon };
 }
 
-function CartaVisualGacha({ carta }: { carta: CartaGacha }) {
+function CartaReal({ carta }: { carta: CartaGachaVisual }) {
   const Icone = carta.icon;
   return (
     <CartaMontada
@@ -169,16 +73,22 @@ function CartaVisualGacha({ carta }: { carta: CartaGacha }) {
 
 export default function GachaPage() {
   const [banners, setBanners] = useState<BannerGacha[]>([]);
-  const [aba, setAba] = useState("");
+  const [idBanner, setIdBanner] = useState("");
   const [rubys, setRubys] = useState(0);
   const [pity, setPity] = useState(0);
-  const [invocando, setInvocando] = useState(false);
-  const [resultado, setResultado] = useState<CartaGacha[]>([]);
-  const [resgatado, setResgatado] = useState(false);
+  const [estado, setEstado] = useState<EstadoGacha>("selecao");
+  const [resultado, setResultado] = useState<CartaGachaVisual[]>([]);
+  const [cartaDetalhada, setCartaDetalhada] = useState<CartaGachaVisual | null>(
+    null,
+  );
+  const [giroDiarioResgatado, setGiroDiarioResgatado] = useState(false);
+  const [resgatandoDiario, setResgatandoDiario] = useState(false);
+  const [proximoGiroGratuitoEm, setProximoGiroGratuitoEm] = useState<
+    string | null
+  >(null);
   const [semanalDisponivel, setSemanalDisponivel] = useState(false);
   const [rubysSemanais, setRubysSemanais] = useState(500);
   const [resgatandoSemanal, setResgatandoSemanal] = useState(false);
-  const [erro, setErro] = useState("");
   const [probabilidades, setProbabilidades] = useState<
     { raridade: CartaGachaApi["raridade"]; percentual: number }[]
   >([]);
@@ -187,374 +97,487 @@ export default function GachaPage() {
     "detalhes" | "probabilidades" | null
   >(null);
 
-  useEffect(() => {
-    if (erro) notificarErro(erro);
-  }, [erro]);
-
-  const bannerAtivo = banners.find((banner) => banner.id === aba) ?? banners[0];
+  const bannerAtivo =
+    banners.find((banner) => banner.id === idBanner) ?? banners[0];
+  const custo1 = bannerAtivo?.custoGiro ?? 300;
+  const custo10 = bannerAtivo?.custoDez ?? 2700;
+  const cartaBanner = useMemo(
+    () =>
+      bannerAtivo?.cartas.find((carta) => carta.raridade === "UR") ??
+      bannerAtivo?.cartas[0],
+    [bannerAtivo],
+  );
+  const destaque = useMemo(
+    () =>
+      [...resultado].sort(
+        (a, b) => pesoRaridade[b.raridade] - pesoRaridade[a.raridade],
+      )[0],
+    [resultado],
+  );
+  const restantes = useMemo(
+    () => (destaque ? resultado.filter((carta) => carta !== destaque) : []),
+    [destaque, resultado],
+  );
+  const resumo = useMemo(
+    () =>
+      resultado.reduce(
+        (acc, carta) => ({ ...acc, [carta.raridade]: acc[carta.raridade] + 1 }),
+        { UR: 0, SSR: 0, SR: 0, R: 0, N: 0 },
+      ),
+    [resultado],
+  );
+  const copias = resultado.filter((carta) => !carta.nova).length;
+  const rubysDuplicatas = resultado.reduce(
+    (total, carta) => total + (carta.valorVenda ?? 0),
+    0,
+  );
 
   useEffect(() => {
     Promise.all([buscarGacha(), buscarRecompensas()])
       .then(([dados, recompensas]) => {
+        const primeiro = dados.banners[0];
         setBanners(dados.banners);
-        setAba(dados.banners[0]?.id ?? "");
+        setIdBanner(primeiro?.id ?? "");
         setRubys(dados.jogador.rubys);
-        setPity(dados.banners[0]?.pity ?? 0);
-        setResgatado(!dados.banners[0]?.diarioDisponivel);
+        setPity(primeiro?.pity ?? 0);
+        setGiroDiarioResgatado(!primeiro?.diarioDisponivel);
+        setProximoGiroGratuitoEm(dados.proximoGiroGratuitoEm ?? null);
         setProbabilidades(dados.probabilidades);
         setProximaRotacaoEm(dados.rotacao?.proximaRotacaoEm ?? null);
         setSemanalDisponivel(recompensas.semanal.disponivel);
         setRubysSemanais(recompensas.semanal.rubys);
       })
-      .catch((e) =>
-        setErro(e instanceof Error ? e.message : "Erro ao carregar gacha."),
+      .catch((erro) =>
+        notificarErro(
+          erro instanceof Error ? erro.message : "Erro ao carregar gacha.",
+        ),
       );
   }, []);
 
-  const destaque = resultado[0] ?? cartasPool[0];
-  const resultadoMultiplo = resultado.length > 1;
-  const custo10 = bannerAtivo?.custoDez ?? 2700;
-
-  const statusResultado = useMemo(() => {
-    if (!resultado.length) return "principal";
-    if (resultadoMultiplo) return "multiplo";
-    return destaque.raridade;
-  }, [destaque.raridade, resultado.length, resultadoMultiplo]);
-
-  async function invocar(qtd: 1 | 10) {
-    if (!bannerAtivo) return;
-    setInvocando(true);
+  async function invocar(quantidade: 1 | 10) {
+    if (!bannerAtivo || estado === "carregando") return;
+    setEstado("carregando");
     setResultado([]);
-    setErro("");
-    const inicioInvocacao = Date.now();
+    const inicio = Date.now();
     try {
-      const resposta = await girarGacha(bannerAtivo.id, qtd);
-      const tempoRestante = Math.max(0, 1500 - (Date.now() - inicioInvocacao));
-      if (tempoRestante) {
-        await new Promise((resolve) => setTimeout(resolve, tempoRestante));
-      }
-      setResultado(resposta.cartas.map(mapearCarta));
+      const resposta = await girarGacha(bannerAtivo.id, quantidade);
+      const espera = Math.max(0, 850 - (Date.now() - inicio));
+      if (espera) await new Promise((resolve) => setTimeout(resolve, espera));
+      const cartas = resposta.cartas.map(mapearCarta);
+      setResultado(cartas);
       setPity(resposta.pity);
       setRubys(resposta.rubys);
+      setEstado(quantidade === 10 ? "resultado" : "revelacao");
       window.dispatchEvent(new Event("perfil-atualizado"));
-    } catch (e) {
-      setErro(e instanceof Error ? e.message : "Erro ao realizar giro.");
-    } finally {
-      setInvocando(false);
+    } catch (erro) {
+      setEstado("selecao");
+      notificarErro(
+        erro instanceof Error ? erro.message : "Erro ao realizar invocação.",
+      );
     }
   }
 
-  function resetar() {
-    setResultado([]);
-    setInvocando(false);
-  }
-
   async function resgatarDiario() {
-    if (!bannerAtivo) return;
-    setErro("");
+    if (!bannerAtivo || resgatandoDiario) return;
+    setResgatandoDiario(true);
     try {
       const resposta = await resgatarGiroDiario(bannerAtivo.id);
-      setRubys((atual) => atual + resposta.rubysRecebidos);
+      setRubys((valor) => valor + resposta.rubysRecebidos);
+      setGiroDiarioResgatado(true);
+      notificarSucesso(
+        `Você recebeu ${resposta.rubysRecebidos} Rubys.`,
+        "Giro gratuito resgatado",
+      );
       window.dispatchEvent(new Event("perfil-atualizado"));
-      setResgatado(true);
-    } catch (e) {
-      setErro(e instanceof Error ? e.message : "Erro ao resgatar recompensa.");
+    } catch (erro) {
+      notificarErro(
+        erro instanceof Error ? erro.message : "Erro ao resgatar recompensa.",
+      );
+    } finally {
+      setResgatandoDiario(false);
     }
   }
 
   async function resgatarSemanal() {
-    setErro("");
     setResgatandoSemanal(true);
     try {
       const resposta = await resgatarRecompensaSemanal();
-      setRubys((atual) => atual + resposta.rubysRecebidos);
+      setRubys((valor) => valor + resposta.rubysRecebidos);
       setSemanalDisponivel(false);
       notificarSucesso(
         `Você recebeu ${resposta.rubysRecebidos.toLocaleString("pt-BR")} Rubys.`,
         "Recompensa semanal",
       );
       window.dispatchEvent(new Event("perfil-atualizado"));
-    } catch (e) {
-      setErro(e instanceof Error ? e.message : "Erro ao resgatar recompensa.");
+    } catch (erro) {
+      notificarErro(
+        erro instanceof Error ? erro.message : "Erro ao resgatar recompensa.",
+      );
     } finally {
       setResgatandoSemanal(false);
     }
   }
 
+  function voltarSelecao() {
+    setResultado([]);
+    setEstado("selecao");
+  }
+
   return (
     <main className={styles.pagina}>
-      <div className={styles.shellSemSidebar}>
-        <section className={styles.conteudo}>
-          <header className={styles.gachaTopo}>
-            <div>
-              <span>
-                <Sparkles aria-hidden="true" /> Invocações
+      <header className={styles.topo}>
+        <div>
+          <h1>Gacha</h1>
+          <p>Escolha um banner. Veja a garantia. Invoque.</p>
+        </div>
+      </header>
+
+      {estado === "selecao" && (
+        <section className={styles.selecao} aria-label="Seleção de banner">
+          {banners.length > 1 && (
+            <nav className={styles.abas} aria-label="Banners disponíveis">
+              {banners.map((banner) => (
+                <button
+                  type="button"
+                  key={banner.id}
+                  aria-current={banner.id === idBanner ? "true" : undefined}
+                  onClick={() => {
+                    setIdBanner(banner.id);
+                    setPity(banner.pity);
+                    setGiroDiarioResgatado(!banner.diarioDisponivel);
+                  }}
+                >
+                  {banner.nome}
+                </button>
+              ))}
+            </nav>
+          )}
+          <article className={styles.banner}>
+            <div className={styles.bannerConteudo}>
+              <span className={styles.selo}>
+                Banner em destaque{" "}
+                {proximaRotacaoEm
+                  ? `· até ${new Date(proximaRotacaoEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`
+                  : ""}
               </span>
-              <h1>Gacha</h1>
-              <p>Invoque cartas e expanda suas possibilidades.</p>
-            </div>
-            <div className={styles.gachaTopoAcoes}>
-              <button
-                type="button"
-                onClick={() => void resgatarSemanal()}
-                disabled={!semanalDisponivel || resgatandoSemanal}
-                title="Renova toda segunda-feira às 13:00 UTC"
-              >
-                <CalendarDays aria-hidden="true" />
-                {semanalDisponivel
-                  ? `Semanal +${rubysSemanais.toLocaleString("pt-BR")}`
-                  : "Semanal resgatada"}
-              </button>
-              <button
-                type="button"
-                onClick={() => void resgatarDiario()}
-                disabled={resgatado || !bannerAtivo}
-              >
-                <Gift aria-hidden="true" />
-                {resgatado
-                  ? "Giro gratuito resgatado"
-                  : "Resgatar giro gratuito"}
-              </button>
-            </div>
-          </header>
-
-          <section className={styles.gachaPainel} data-estado={statusResultado}>
-            {invocando ? (
-              <div className={styles.invocando}>
-                <div className={styles.portal} aria-hidden="true">
-                  <div className={styles.cartasInvocacao}>
-                    <div className={styles.cartaPortal}>
-                      <IconeRuby tamanho={38} />
-                    </div>
-                  </div>
-                </div>
-                <strong>Invocando...</strong>
+              <h2>{bannerAtivo?.nome.toUpperCase() ?? "ECLIPSE ROXO"}</h2>
+              <p>
+                {cartaBanner
+                  ? `${cartaBanner.nome} está com taxa aumentada. A próxima UR está a no máximo ${Math.max(0, (bannerAtivo?.limitePity ?? 80) - pity)} invocações.`
+                  : "Nenhuma carta disponível neste banner."}
+              </p>
+              <PityProgress
+                atual={pity}
+                limite={bannerAtivo?.limitePity ?? 80}
+              />
+              <div className={styles.linksBanner}>
+                <button
+                  type="button"
+                  aria-expanded={painelInfo === "detalhes"}
+                  onClick={() =>
+                    setPainelInfo(painelInfo === "detalhes" ? null : "detalhes")
+                  }
+                >
+                  Detalhes
+                </button>
+                <button
+                  type="button"
+                  aria-expanded={painelInfo === "probabilidades"}
+                  onClick={() =>
+                    setPainelInfo(
+                      painelInfo === "probabilidades" ? null : "probabilidades",
+                    )
+                  }
+                >
+                  Probabilidades
+                </button>
               </div>
-            ) : resultado.length ? (
-              <div
-                className={
-                  resultadoMultiplo
-                    ? styles.resultadoMultiplo
-                    : styles.resultadoUnico
-                }
-              >
-                {resultadoMultiplo ? (
-                  <>
-                    <div className={styles.gradeResultado}>
-                      {resultado.map((carta, index) => {
-                        return (
-                          <article
-                            className={[
-                              styles.cartaResultado,
-                              carta.raridade === "UR"
-                                ? styles.cartaObtidaDestaque
-                                : "",
-                            ].join(" ")}
-                            style={{ "--indice": index } as CSSProperties}
-                            key={`${carta.nome}-${index}`}
-                          >
-                            <CartaVisualGacha carta={carta} />
-                            <small>{carta.subtitulo}</small>
-                          </article>
-                        );
-                      })}
-                    </div>
-                    <footer className={styles.resultadoAcoes}>
-                      <span>
-                        <IconeRuby />
-                        Rubys obtidos 30
-                      </span>
-                      <button
-                        type="button"
-                        className={styles.btnPrimario}
-                        onClick={() => invocar(10)}
-                      >
-                        Invocar 10x novamente
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.btnSecundario}
-                        onClick={resetar}
-                      >
-                        Voltar
-                      </button>
-                    </footer>
-                  </>
-                ) : (
-                  <>
-                    <strong className={styles.raridadeGrande}>
-                      {destaque.raridade}
-                    </strong>
-                    <article className={styles.cartaObtida}>
-                      <CartaVisualGacha carta={destaque} />
-                    </article>
-                    <p>Novo herói adicionado à sua coleção!</p>
-                    <div className={styles.resultadoBotoes}>
-                      <button type="button" className={styles.btnPrimario}>
-                        Ver detalhes
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.btnSecundario}
-                        onClick={resetar}
-                      >
-                        Continuar
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className={styles.gachaPrincipal}>
-                <div className={styles.abas}>
-                  {banners.map((item) => (
-                    <button
-                      type="button"
-                      key={item.id}
-                      className={aba === item.id ? styles.abaAtiva : styles.aba}
-                      onClick={() => {
-                        setAba(item.id);
-                        setPity(item.pity);
-                        setResgatado(!item.diarioDisponivel);
-                      }}
-                    >
-                      {item.nome}
-                    </button>
-                  ))}
-                </div>
-
-                <section className={styles.banner}>
-                  <div className={styles.bannerTexto}>
-                    <small className={styles.bannerSelo}>
-                      <Sparkles aria-hidden="true" /> Banner em destaque
-                    </small>
-                    <h2>{bannerAtivo?.nome.toUpperCase() ?? "SEM BANNERS"}</h2>
+              {painelInfo && (
+                <div className={styles.infoBanner}>
+                  {painelInfo === "detalhes" ? (
                     <p>
-                      {bannerAtivo
-                        ? `${bannerAtivo.cartas.length} cartas disponíveis neste banner. Cada invocação aproxima você da garantia UR.`
-                        : "Cadastre cartas ativas para habilitar o gacha."}
+                      A raridade é definida pelo servidor e a garantia UR é
+                      aplicada no limite indicado. O progresso permanece neste
+                      banner.
                     </p>
-                    {proximaRotacaoEm ? (
-                      <small className={styles.rotacaoAviso}>
-                        Próxima rotação automática às{" "}
-                        {new Date(proximaRotacaoEm).toLocaleTimeString(
-                          "pt-BR",
-                          { hour: "2-digit", minute: "2-digit" },
-                        )}
-                        .
-                      </small>
-                    ) : null}
-                    <div className={styles.pityPainel}>
-                      <span>
-                        <small>Garantia UR</small>
-                        <strong>
-                          {pity} / {bannerAtivo?.limitePity ?? 80}
-                        </strong>
+                  ) : (
+                    probabilidades.map((item) => (
+                      <span key={item.raridade}>
+                        <b>{item.raridade}</b>
+                        {item.percentual}%
                       </span>
-                      <span className={styles.pityBarra}>
-                        <span
-                          style={{
-                            width: `${(pity / (bannerAtivo?.limitePity ?? 80)) * 100}%`,
-                          }}
-                        />
-                      </span>
-                      <small>
-                        O progresso permanece entre as invocações deste banner.
-                      </small>
-                    </div>
-                    <div className={styles.bannerAcoes}>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setPainelInfo((atual) =>
-                            atual === "detalhes" ? null : "detalhes",
-                          )
-                        }
-                      >
-                        Detalhes
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setPainelInfo((atual) =>
-                            atual === "probabilidades"
-                              ? null
-                              : "probabilidades",
-                          )
-                        }
-                      >
-                        Probabilidades
-                      </button>
-                    </div>
-                    {painelInfo ? (
-                      <div className={styles.painelInfoBanner}>
-                        {painelInfo === "detalhes" ? (
-                          <p>
-                            O servidor escolhe a raridade, sorteia uma carta do
-                            grupo e registra o resultado. Se uma faixa não tiver
-                            cartas, ela passa para a próxima raridade
-                            disponível. A UR é garantida no giro{" "}
-                            {bannerAtivo?.limitePity ?? 80}.
-                          </p>
-                        ) : (
-                          probabilidades.map((item) => (
-                            <span key={item.raridade}>
-                              <b>{item.raridade}</b>
-                              <strong>{item.percentual}%</strong>
-                            </span>
-                          ))
-                        )}
-                      </div>
-                    ) : null}
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+            <div className={styles.bannerArte}>
+              {cartaBanner ? (
+                <>
+                  <div className={styles.flare}>
+                    <CartaReal carta={mapearCarta(cartaBanner)} />
                   </div>
-                  <div className={styles.bannerCartas}>
-                    {(
-                      bannerAtivo?.cartas.slice(0, 3).map(mapearCarta) ?? []
-                    ).map((carta, index) => (
-                      <article
-                        className={styles.cartaPequena}
-                        data-posicao={index}
-                        key={carta.nome}
-                      >
-                        <CartaVisualGacha carta={carta} />
-                      </article>
-                    ))}
+                  <div className={styles.nomeDestaque}>
+                    <strong>{cartaBanner.nome}</strong>
+                    <span>
+                      {cartaBanner.raridade} · {cartaBanner.elemento}
+                    </span>
                   </div>
-                </section>
-
-                <section className={styles.painelInvocacao}>
-                  <div className={styles.invocacoes}>
-                    <button
-                      type="button"
-                      className={styles.invocarUm}
-                      disabled={
-                        !bannerAtivo || rubys < (bannerAtivo?.custoGiro ?? 0)
-                      }
-                      onClick={() => void invocar(1)}
-                    >
-                      <span>Invocar 1x</span>
-                      <strong>
-                        <IconeRuby /> {bannerAtivo?.custoGiro ?? 0}
-                      </strong>
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.invocarDez}
-                      disabled={!bannerAtivo || rubys < custo10}
-                      onClick={() => void invocar(10)}
-                    >
-                      <span>Invocar 10x</span>
-                      <strong>
-                        <IconeRuby /> {custo10.toLocaleString("pt-BR")}
-                      </strong>
-                    </button>
-                  </div>
-                </section>
-              </div>
-            )}
+                </>
+              ) : (
+                <Sparkles aria-hidden="true" />
+              )}
+            </div>
+          </article>
+          <section
+            className={styles.painelResgates}
+            aria-label="Recompensas de acesso"
+          >
+            <button
+              type="button"
+              className={styles.resgateDiario}
+              data-disponivel={
+                !giroDiarioResgatado && !resgatandoDiario && !!bannerAtivo
+              }
+              disabled={
+                giroDiarioResgatado || resgatandoDiario || !bannerAtivo
+              }
+              onClick={() => void resgatarDiario()}
+            >
+              <span className={styles.iconeResgate}>
+                <Gift aria-hidden="true" />
+              </span>
+              <span className={styles.textoResgate}>
+                <small>Benefício diário</small>
+                <strong>
+                  {giroDiarioResgatado
+                    ? "Giro gratuito resgatado"
+                    : "Seu giro gratuito está pronto"}
+                </strong>
+                <em>
+                  {giroDiarioResgatado
+                    ? proximoGiroGratuitoEm
+                      ? `Próximo giro às ${new Date(proximoGiroGratuitoEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`
+                      : "Disponível novamente na próxima janela"
+                    : `Receba ${custo1.toLocaleString("pt-BR")} Rubys para invocar`}
+                </em>
+              </span>
+              <b className={styles.acaoResgate}>
+                {resgatandoDiario
+                  ? "Resgatando..."
+                  : giroDiarioResgatado
+                    ? "Resgatado"
+                    : "Resgatar giro"}
+              </b>
+            </button>
+            <button
+              type="button"
+              className={styles.resgateSemanal}
+              data-disponivel={semanalDisponivel && !resgatandoSemanal}
+              disabled={!semanalDisponivel || resgatandoSemanal}
+              onClick={() => void resgatarSemanal()}
+            >
+              <CalendarDays aria-hidden="true" />
+              <span>
+                <small>Recompensa semanal</small>
+                <strong>
+                  {semanalDisponivel
+                    ? `Receber +${rubysSemanais.toLocaleString("pt-BR")} Rubys`
+                    : "Já resgatada esta semana"}
+                </strong>
+              </span>
+            </button>
           </section>
+          <div className={styles.acoesInvocacao}>
+            <SummonButton
+              quantidade={1}
+              custo={custo1}
+              carregando={false}
+              desabilitado={!bannerAtivo || rubys < custo1}
+              onClick={() => void invocar(1)}
+            />
+            <SummonButton
+              quantidade={10}
+              custo={custo10}
+              principal
+              carregando={false}
+              desabilitado={!bannerAtivo || rubys < custo10}
+              onClick={() => void invocar(10)}
+            />
+          </div>
         </section>
-      </div>
+      )}
+
+      {estado === "carregando" && (
+        <section className={styles.carregando} aria-live="polite">
+          <div className={styles.portal}>
+            <IconeRuby tamanho={42} />
+          </div>
+          <strong>Invocando...</strong>
+          <span>O Eclipse está respondendo</span>
+        </section>
+      )}
+
+      {estado === "revelacao" && destaque && (
+        <section className={styles.revelacao} aria-live="polite">
+          <span className={styles.kicker}>
+            {destaque.nova
+              ? "Novo herói desbloqueado"
+              : "Carta duplicada vendida"}
+          </span>
+          <strong className={styles.raridadeRevelada}>
+            {destaque.raridade}
+          </strong>
+          <h2>{destaque.nome}</h2>
+          <p>
+            {destaque.elemento} · {destaque.nova ? "novo" : "vendida"}
+          </p>
+          <div className={styles.cartaRevelada}>
+            <CartaReal carta={destaque} />
+            {!destaque.nova && destaque.valorVenda ? (
+              <span className={styles.vendaDuplicata}>
+                <small>Carta repetida</small>
+                <strong>
+                  +{destaque.valorVenda.toLocaleString("pt-BR")} Rubys
+                </strong>
+              </span>
+            ) : null}
+          </div>
+          <div className={styles.revelacaoResumo}>
+            <Sparkles aria-hidden="true" />
+            <span>
+              <strong>
+                {destaque.nova
+                  ? "Nova carta adicionada à coleção"
+                  : `Carta vendida por ${destaque.valorVenda?.toLocaleString("pt-BR") ?? 0} Rubys`}
+              </strong>
+              <small>
+                {destaque.nova
+                  ? `${destaque.elemento} · quantidade ${destaque.quantidade ?? 1}`
+                  : "O valor já foi creditado no seu saldo."}
+              </small>
+            </span>
+          </div>
+          <div className={styles.botoesResultado}>
+            <button
+              type="button"
+              className={styles.primario}
+              onClick={() => setCartaDetalhada(destaque)}
+            >
+              Ver detalhes
+            </button>
+            <button type="button" onClick={voltarSelecao}>
+              Continuar
+            </button>
+          </div>
+        </section>
+      )}
+
+      {estado === "resultado" && destaque && (
+        <section className={styles.resultadoMultiplo}>
+          <header>
+            <span className={styles.kicker}>Resultado da invocação</span>
+            <h2>Seu 10x</h2>
+            <p>
+              {resumo.UR} UR · {resumo.SSR + resumo.SR} SR+ ·{" "}
+              {resumo.R + resumo.N} R/N · {copias}{" "}
+              {copias === 1 ? "cópia vendida" : "cópias vendidas"} · +
+              {rubysDuplicatas.toLocaleString("pt-BR")} Rubys
+            </p>
+          </header>
+          <div className={styles.resultadoCorpo}>
+            <article className={styles.destaqueResultado}>
+              <span>★ Destaque da invocação</span>
+              <RewardCard
+                carta={destaque}
+                destaque
+                onDetalhes={() => setCartaDetalhada(destaque)}
+              />
+            </article>
+            <div className={styles.recompensasGrade}>
+              <h3>Outras recompensas</h3>
+              <p>Clique em uma carta para abrir os detalhes.</p>
+              <div>
+                {restantes.map((carta, index) => (
+                  <RewardCard
+                    key={`${carta.id}-${index}`}
+                    carta={carta}
+                    onDetalhes={() => setCartaDetalhada(carta)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <footer className={styles.rodapeResultado}>
+            <span>
+              <RarityBadge raridade="UR" /> {resumo.UR}
+              <RarityBadge raridade="SR" /> {resumo.SR}
+              <RarityBadge raridade="R" /> {resumo.R}
+              <b className={styles.totalVenda}>
+                +{rubysDuplicatas.toLocaleString("pt-BR")} Rubys
+              </b>
+            </span>
+            <button
+              type="button"
+              className={styles.primario}
+              disabled={rubys < custo10}
+              onClick={() => void invocar(10)}
+            >
+              Invocar novamente · <IconeRuby />{" "}
+              {custo10.toLocaleString("pt-BR")}
+            </button>
+            <button type="button" onClick={voltarSelecao}>
+              Continuar
+            </button>
+          </footer>
+        </section>
+      )}
+
+      {cartaDetalhada && (
+        <div
+          className={styles.modalFundo}
+          role="presentation"
+          onMouseDown={(evento) => {
+            if (evento.target === evento.currentTarget) setCartaDetalhada(null);
+          }}
+        >
+          <section
+            className={styles.modalCarta}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="titulo-carta"
+          >
+            <button
+              type="button"
+              className={styles.fecharModal}
+              aria-label="Fechar detalhes"
+              onClick={() => setCartaDetalhada(null)}
+            >
+              <X />
+            </button>
+            <div>
+              <CartaReal carta={cartaDetalhada} />
+            </div>
+            <aside>
+              <RarityBadge raridade={cartaDetalhada.raridade} />
+              <h2 id="titulo-carta">{cartaDetalhada.nome}</h2>
+              <p>
+                Elemento {cartaDetalhada.elemento}.{" "}
+                {cartaDetalhada.nova
+                  ? "Nova na sua coleção."
+                  : `Cópia vendida automaticamente por ${cartaDetalhada.valorVenda?.toLocaleString("pt-BR") ?? 0} Rubys.`}
+              </p>
+              <button
+                type="button"
+                className={styles.primario}
+                onClick={() => setCartaDetalhada(null)}
+              >
+                Fechar
+              </button>
+            </aside>
+          </section>
+        </div>
+      )}
     </main>
   );
 }

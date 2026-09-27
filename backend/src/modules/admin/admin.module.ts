@@ -17,6 +17,8 @@ import { AdminUsuariosService } from './services/admin-usuarios.service';
 import { AdminNoticiasService } from './services/admin-noticias.service';
 import { AdminBannersService } from './services/admin-banners.service';
 import { AdminClassesService } from './services/admin-classes.service';
+import { AdminCampanhaController } from './controllers/admin-campanha.controller';
+import { AdminCampanhaService } from './services/admin-campanha.service';
 
 @Module({
   imports: [DatabaseModule, JogoModule],
@@ -29,6 +31,7 @@ import { AdminClassesService } from './services/admin-classes.service';
     AdminNoticiasController,
     AdminBannersController,
     AdminClassesController,
+    AdminCampanhaController,
   ],
   providers: [
     AdminCloudinaryService,
@@ -39,6 +42,7 @@ import { AdminClassesService } from './services/admin-classes.service';
     AdminNoticiasService,
     AdminBannersService,
     AdminClassesService,
+    AdminCampanhaService,
   ],
 })
 export class AdminModule {}

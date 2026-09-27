@@ -28,7 +28,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     void this.processarExclusoesPendentes();
@@ -117,13 +117,12 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       nivel: usuario.nivel ?? 1,
       idUser: this.formatarIdUsuario(usuario.id),
       biografia: perfil.biografia,
-      moldura:
-        perfil.cartaMolduraSelecionada?.nome
-          ? `Moldura de ${perfil.cartaMolduraSelecionada.nome}`
-          : perfil.molduraSelecionada?.nome ?? 'Padrão',
+      moldura: perfil.cartaMolduraSelecionada?.nome
+        ? `Moldura de ${perfil.cartaMolduraSelecionada.nome}`
+        : (perfil.molduraSelecionada?.nome ?? 'Padrão'),
       molduraClasse: perfil.cartaMolduraSelecionada
         ? 'molduraCarta'
-        : perfil.molduraSelecionada?.classe_css ?? 'molduraPadrao',
+        : (perfil.molduraSelecionada?.classe_css ?? 'molduraPadrao'),
       molduraUrl: perfil.cartaMolduraSelecionada?.moldura ?? null,
       molduraConfig: perfil.cartaMolduraSelecionada?.config_visual ?? null,
       avatarUrl: perfil.avatar_url,
@@ -444,17 +443,17 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       ...cartasComMoldura.flatMap((carta) =>
         carta.moldura
           ? [
-            {
-              id: `carta:${carta.id}`,
-              nome: `Moldura de ${carta.nome}`,
-              descricao: `Obtida com a carta ${carta.nome}.`,
-              classeCss: 'molduraCarta',
-              imagemUrl: carta.moldura,
-              configVisual: carta.config_visual,
-              requisito: `Obtenha a carta ${carta.nome}.`,
-              obtida: carta.inventarios.length > 0,
-            },
-          ]
+              {
+                id: `carta:${carta.id}`,
+                nome: `Moldura de ${carta.nome}`,
+                descricao: `Obtida com a carta ${carta.nome}.`,
+                classeCss: 'molduraCarta',
+                imagemUrl: carta.moldura,
+                configVisual: carta.config_visual,
+                requisito: `Obtenha a carta ${carta.nome}.`,
+                obtida: carta.inventarios.length > 0,
+              },
+            ]
           : [],
       ),
     ];
@@ -501,10 +500,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     };
   }
 
-  private async selecionarMolduraDeCarta(
-    idUsuario: string,
-    idCarta: string,
-  ) {
+  private async selecionarMolduraDeCarta(idUsuario: string, idCarta: string) {
     const item = await this.prisma.inventario.findFirst({
       where: {
         id_usuario: idUsuario,

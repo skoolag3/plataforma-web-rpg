@@ -1,4 +1,5 @@
 import { PrismaService } from '../../database/prisma.service';
+import { Prisma } from '@prisma/client';
 import { ExpedicoesService } from './expedicoes.service';
 import { gerarTrilhaExpedicao } from './expedicao.trilha';
 import { PartidasService } from './partidas.service';
@@ -54,6 +55,23 @@ function criarDependencias(expedicoes: Record<string, unknown>[]) {
 }
 
 describe('ExpedicoesService - progressão e recompensas', () => {
+  it('só permite abandonar antes da resposta ao boss', async () => {
+    const updateMany = jest.fn().mockResolvedValue({ count: 0 });
+    const prisma = { expedicao: { updateMany } } as unknown as PrismaService;
+    const service = new ExpedicoesService(prisma, {} as PartidasService);
+
+    await expect(service.abandonar('usuario-1', 'expedicao-1')).rejects.toThrow(
+      'após responder ao boss',
+    );
+    expect(updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          dialogo_boss: { equals: Prisma.DbNull },
+        }),
+      }),
+    );
+  });
+
   it('assegura a recompensa no checkpoint e libera a próxima etapa', async () => {
     const atual = criarExpedicao();
     const avancada = criarExpedicao({
@@ -86,7 +104,14 @@ describe('ExpedicoesService - progressão e recompensas', () => {
       }),
     });
     expect(res).toEqual(
-      expect.objectContaining({ etapaAtual: 1, rubysAssegurados: 25 }),
+      expect.objectContaining({
+        etapaAtual: 1,
+        rubysAssegurados: 25,
+        chefe: expect.objectContaining({ recompensa: 100 }),
+        opcoesAtuais: expect.arrayContaining([
+          expect.objectContaining({ recompensa: 25 }),
+        ]),
+      }),
     );
   });
 
@@ -139,7 +164,11 @@ describe('ExpedicoesService - progressão e recompensas', () => {
       }),
     });
     expect(res).toEqual(
-      expect.objectContaining({ status: 'FALHOU', rubysAssegurados: 43 }),
+      expect.objectContaining({
+        status: 'FALHOU',
+        rubysAssegurados: 43,
+        rubysPerdidos: 7,
+      }),
     );
   });
 
@@ -189,5 +218,53 @@ describe('ExpedicoesService - progressão e recompensas', () => {
     expect(res).toEqual(
       expect.objectContaining({ status: 'CONCLUIDA', rubysAssegurados: 100 }),
     );
+  });
+
+  it('aplica o multiplicador da resposta ao crédito do chefe', async () => {
+    const atual = criarExpedicao({
+      etapa_atual: 3,
+      escolhas: ['chefe-final'],
+      escolha_atual: 'chefe-final',
+      dialogo_boss: {
+        pergunta: 'Por quê?',
+        resposta: 'Pelo meu grupo.',
+        reacao: 'Veremos.',
+        nota: 4,
+        multiplicador: 2,
+      },
+      partidas: [
+        {
+          id: 'partida-chefe',
+          etapa_expedicao: 3,
+          resultado: 'VITORIA',
+          recompensa_rubys: 0,
+          timestamp_inicio: new Date(),
+        },
+      ],
+    });
+    const concluida = criarExpedicao({
+      ...atual,
+      status: 'CONCLUIDA',
+      partidas: [
+        {
+          id: 'partida-chefe',
+          etapa_expedicao: 3,
+          resultado: 'VITORIA',
+          recompensa_rubys: 200,
+          timestamp_inicio: new Date(),
+        },
+      ],
+    });
+    const { prisma, tx } = criarDependencias([atual, concluida]);
+    const service = new ExpedicoesService(prisma, {} as PartidasService);
+
+    await service.buscarAtual('usuario-1');
+
+    expect(tx.ledgerRuby.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        quantidade: 200,
+        motivo: 'EXPEDICAO_CONCLUIDA',
+      }),
+    });
   });
 });

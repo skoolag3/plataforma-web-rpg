@@ -4,8 +4,10 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import type { Request, Response } from 'express';
 
 type ErrorDetail = {
   field?: string;
@@ -20,11 +22,21 @@ type ErrorResponseBody = {
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const context = host.switchToHttp();
-    const response = context.getResponse();
-    const request = context.getRequest();
+    const response = context.getResponse<Response>();
+    const request = context.getRequest<Request>();
     const error = this.normalizeError(exception);
+
+    if (error.statusCode === Number(HttpStatus.INTERNAL_SERVER_ERROR)) {
+      const stack = exception instanceof Error ? exception.stack : undefined;
+      this.logger.error(
+        `Erro não tratado em ${request.method} ${request.url}`,
+        stack,
+      );
+    }
 
     response.status(error.statusCode).json({
       statusCode: error.statusCode,

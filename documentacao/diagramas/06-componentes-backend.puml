@@ -10,7 +10,7 @@ skinparam ArrowColor #52606D
 skinparam componentStyle rectangle
 
 component "Controllers HTTP" as controllers #EAF2FF
-component "Auth e Perfil" as auth #F0EAFE
+component "Auth e Perfil\nCookie HttpOnly + rate limit" as auth #F0EAFE
 component "Coleção e Decks" as colecao #F0EAFE
 component "Gacha e Recompensas" as gacha #F0EAFE
 component "Administração" as admin #F0EAFE
@@ -38,6 +38,6 @@ batalha --> prisma
 expedicao --> prisma
 auditoria --> prisma
 prisma --> banco
-expedicao ..> integracoes : IA prevista
+expedicao ..> integracoes : diálogo do chefe
 gacha --> integracoes : Stripe e mídia
 @enduml

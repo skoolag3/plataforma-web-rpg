@@ -49,9 +49,9 @@ export class UsuariosService {
     return usuario ? this.semSenha(usuario) : null;
   }
 
-  semSenha<T extends { senha_hash: string; token_verificacao_email?: string | null }>(
-    usuario: T,
-  ) {
+  semSenha<
+    T extends { senha_hash: string; token_verificacao_email?: string | null },
+  >(usuario: T) {
     const {
       senha_hash: _senhaHash,
       token_verificacao_email: _tokenVerificacaoEmail,

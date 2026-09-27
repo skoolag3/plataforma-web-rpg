@@ -41,6 +41,7 @@ type PropsMapaExpedicao = {
   expedicao: EstadoExpedicao;
   processando: boolean;
   onEscolher: (opcao: OpcaoExpedicao) => void;
+  onAbrirDialogoBoss: () => void;
 };
 
 type LayoutTrilha = {
@@ -56,6 +57,7 @@ export function MapaExpedicao({
   expedicao,
   processando,
   onEscolher,
+  onAbrirDialogoBoss,
 }: PropsMapaExpedicao) {
   const [zoom, setZoom] = useState(1);
   const [deslocamento, setDeslocamento] = useState({ x: 0, y: 0 });
@@ -71,8 +73,8 @@ export function MapaExpedicao({
   });
   const batalhaEmAndamento = expedicao.partidaAtual?.status === "EM_ANDAMENTO";
   const layout = useMemo(
-    () => gerarLayoutTrilha(expedicao.seed, expedicao.etapas.length),
-    [expedicao.etapas.length, expedicao.seed],
+    () => gerarLayoutTrilha(expedicao.etapas.length),
+    [expedicao.etapas.length],
   );
 
   function alterarZoom(proximoZoom: number) {
@@ -144,6 +146,7 @@ export function MapaExpedicao({
     const viewport = viewportRef.current;
     if (!viewport) return;
     const handleWheel = (event: globalThis.WheelEvent) => {
+      if (!event.ctrlKey) return;
       event.preventDefault();
       setZoom((atual) =>
         Math.min(
@@ -171,7 +174,7 @@ export function MapaExpedicao({
               ? "O guardião espera no fim da trilha"
               : "Escolha seu próximo confronto"}
           </h2>
-          <p>Explore a teia. O conteúdo será revelado conforme você avança.</p>
+          <p>Avance pela trilha. Cada etapa revela três rotas possíveis.</p>
         </div>
         <div className={styles.infoMapa}>
           <small>Progresso da expedição</small>
@@ -184,7 +187,7 @@ export function MapaExpedicao({
       </header>
 
       <div className={styles.barraMapa}>
-        <span>Role para aplicar zoom · arraste para explorar</span>
+        <span>Ctrl + roda para zoom · arraste para explorar</span>
         <div className={styles.controlesZoom} aria-label="Controles de zoom">
           <button
             type="button"
@@ -245,6 +248,7 @@ export function MapaExpedicao({
               processando={processando}
               batalhaEmAndamento={batalhaEmAndamento}
               onEscolher={onEscolher}
+              onAbrirDialogo={onAbrirDialogoBoss}
             />
           </div>
 
@@ -407,7 +411,9 @@ function NoConfronto({
       </span>
       <span className={styles.textoConfronto}>
         <small>
-          {conteudoVisivel ? `Risco ${opcao.risco}` : "Não explorado"}
+          {conteudoVisivel
+            ? `Risco ${opcao.risco} · ${opcao.recompensa} Rubys`
+            : "Não explorado"}
         </small>
         <strong>{titulo}</strong>
       </span>
@@ -421,11 +427,13 @@ function NoChefe({
   processando,
   batalhaEmAndamento,
   onEscolher,
+  onAbrirDialogo,
 }: {
   expedicao: EstadoExpedicao;
   processando: boolean;
   batalhaEmAndamento: boolean;
   onEscolher: (opcao: OpcaoExpedicao) => void;
+  onAbrirDialogo: () => void;
 }) {
   const disponivel = expedicao.chefe.status === "ATUAL" && !batalhaEmAndamento;
   const concluido = expedicao.chefe.status === "CONCLUIDA";
@@ -438,7 +446,16 @@ function NoChefe({
       data-status={expedicao.chefe.status}
       data-disponivel={disponivel || undefined}
       disabled={!disponivel || processando}
-      onClick={() => onEscolher(expedicao.chefe)}
+      onClick={() =>
+        expedicao.dialogoBoss
+          ? onAbrirDialogo()
+          : onEscolher(expedicao.chefe)
+      }
+      aria-label={
+        disponivel && expedicao.dialogoBoss
+          ? `Enfrentar ${expedicao.chefe.titulo}`
+          : expedicao.chefe.titulo
+      }
     >
       <span className={styles.iconeChefe}>
         {concluido ? <Check /> : revelado ? <Flag /> : <CircleHelp />}
@@ -453,7 +470,13 @@ function NoChefe({
         </small>
         <strong>{revelado ? expedicao.chefe.titulo : "Chefe oculto"}</strong>
       </span>
-      {disponivel ? <ChevronRight /> : null}
+      {revelado ? (
+        <span className={styles.recompensaChefe}>
+          +{expedicao.chefe.recompensa}
+          <Gem aria-hidden="true" />
+          {disponivel ? <ChevronRight aria-hidden="true" /> : null}
+        </span>
+      ) : null}
     </button>
   );
 }
@@ -474,47 +497,39 @@ function ConexoesTrilha({
     estado: EstadoConexao;
   }> = [];
 
-  layout.posicoesX[0].forEach((fimX, indiceDestino) => {
-    conexoes.push({
-      id: `entrada-${indiceDestino}`,
-      inicioX: 50,
-      inicioY: 94,
-      fimX,
-      fimY: layout.posicoesY[0] + 3,
-      estado: estadoConexao(expedicao, -1, indiceDestino),
-    });
-  });
-
   layout.posicoesX.forEach((posicoesEtapa, etapa) => {
-    posicoesEtapa.forEach((inicioX, indiceOrigem) => {
+    const posicaoY = layout.posicoesY[etapa];
+    const inicioY = etapa === 0 ? 94 : layout.checkpointsY[etapa - 1] - 2;
+    const estadoTrecho = estadoTrechoEtapa(expedicao, etapa);
+
+    conexoes.push({
+      id: `eixo-entrada-${etapa}`,
+      inicioX: 50,
+      inicioY,
+      fimX: 50,
+      fimY: posicaoY,
+      estado: estadoTrecho,
+    });
+
+    posicoesEtapa.forEach((fimX, indiceOpcao) => {
       conexoes.push({
-        id: `etapa-${etapa}-${indiceOrigem}`,
-        inicioX,
-        inicioY: layout.posicoesY[etapa] - 3,
-        fimX: layout.checkpointsX[etapa],
-        fimY: layout.checkpointsY[etapa] + 2,
-        estado: estadoConexaoCheckpoint(expedicao, etapa, indiceOrigem),
+        id: `opcao-${etapa}-${indiceOpcao}`,
+        inicioX: 50,
+        inicioY: posicaoY,
+        fimX,
+        fimY: posicaoY,
+        estado: estadoConexaoCheckpoint(expedicao, etapa, indiceOpcao),
       });
     });
 
-    const proximaEtapa = etapa + 1;
-    if (proximaEtapa < layout.posicoesX.length) {
-      layout.posicoesX[proximaEtapa].forEach((fimX, indiceDestino) => {
-        conexoes.push({
-          id: `checkpoint-${etapa}-${indiceDestino}`,
-          inicioX: layout.checkpointsX[etapa],
-          inicioY: layout.checkpointsY[etapa] - 2,
-          fimX,
-          fimY: layout.posicoesY[proximaEtapa] + 3,
-          estado: estadoConexao(
-            expedicao,
-            etapa,
-            indiceDestino,
-            buscarIndiceEscolhido(expedicao, etapa),
-          ),
-        });
-      });
-    }
+    conexoes.push({
+      id: `eixo-checkpoint-${etapa}`,
+      inicioX: 50,
+      inicioY: posicaoY,
+      fimX: 50,
+      fimY: layout.checkpointsY[etapa],
+      estado: estadoTrecho,
+    });
   });
 
   const ultimoCheckpoint = layout.checkpointsX.length - 1;
@@ -560,32 +575,21 @@ function estadoConexaoCheckpoint(
   if (etapa < expedicao.etapaAtual) {
     return escolha === indiceOrigem ? "percorrida" : "descartada";
   }
+  if (etapa === expedicao.etapaAtual && escolha === -1) {
+    return "disponivel";
+  }
   if (etapa === expedicao.etapaAtual && escolha === indiceOrigem) {
     return "disponivel";
   }
   return etapa === expedicao.etapaAtual ? "descartada" : "futura";
 }
 
-function estadoConexao(
+function estadoTrechoEtapa(
   expedicao: EstadoExpedicao,
-  etapaOrigem: number,
-  indiceDestino: number,
-  indiceOrigem = -1,
+  indiceEtapa: number,
 ): EstadoConexao {
-  const etapaDestino = etapaOrigem + 1;
-  const escolhaOrigem =
-    etapaOrigem < 0 ? -1 : buscarIndiceEscolhido(expedicao, etapaOrigem);
-  const escolhaDestino = buscarIndiceEscolhido(expedicao, etapaDestino);
-  const origemCorreta = etapaOrigem < 0 || escolhaOrigem === indiceOrigem;
-
-  if (etapaDestino < expedicao.etapaAtual) {
-    return origemCorreta && escolhaDestino === indiceDestino
-      ? "percorrida"
-      : "descartada";
-  }
-  if (etapaDestino === expedicao.etapaAtual) {
-    return origemCorreta ? "disponivel" : "descartada";
-  }
+  if (indiceEtapa < expedicao.etapaAtual) return "percorrida";
+  if (indiceEtapa === expedicao.etapaAtual) return "disponivel";
   return "futura";
 }
 
@@ -600,44 +604,15 @@ function buscarIndiceEscolhido(
   );
 }
 
-function gerarLayoutTrilha(seed: number, totalEtapas: number): LayoutTrilha {
-  const random = criarRandomVisual(seed);
-  const variacao = Math.abs(seed) % 3;
-  const basesPorForma = [
-    [17, 50, 83],
-    [13, 43, 76],
-    [24, 57, 87],
-  ];
+function gerarLayoutTrilha(totalEtapas: number): LayoutTrilha {
   const posicoesY = Array.from(
     { length: totalEtapas },
     (_, indice) => 76 - indice * 24,
   );
-  const posicoesX = Array.from({ length: totalEtapas }, (_, indiceEtapa) => {
-    const bases =
-      basesPorForma[(variacao + indiceEtapa) % basesPorForma.length];
-    const sentido = indiceEtapa % 2 === 0 ? 1 : -1;
-    return bases.map((base, indice) => {
-      const desvio = (random() - 0.5) * 8 + (indice - 1) * sentido * 2;
-      return Math.min(89, Math.max(11, base + desvio));
-    });
-  });
+  const posicoesX = Array.from({ length: totalEtapas }, () => [24, 50, 76]);
   const checkpointsY = posicoesY.map((posicao) => posicao - 10);
-  const checkpointsX = checkpointsY.map((_, indice) => {
-    const zigueZague = indice % 2 === 0 ? -1 : 1;
-    return limitar(50 + zigueZague * (8 + random() * 10), 30, 70);
-  });
+  const checkpointsX = checkpointsY.map(() => 50);
   return { posicoesX, posicoesY, checkpointsX, checkpointsY };
-}
-
-function criarRandomVisual(seed: number) {
-  let valor = seed >>> 0;
-  return () => {
-    valor += 0x6d2b79f5;
-    let nmr = valor;
-    nmr = Math.imul(nmr ^ (nmr >>> 15), nmr | 1);
-    nmr ^= nmr + Math.imul(nmr ^ (nmr >>> 7), nmr | 61);
-    return ((nmr ^ (nmr >>> 14)) >>> 0) / 4294967296;
-  };
 }
 
 function limitar(valor: number, minimo: number, maximo: number) {

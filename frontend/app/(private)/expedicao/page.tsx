@@ -1,9 +1,17 @@
 "use client";
 
-import { ChevronRight, Map, Route, Swords } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Map,
+  Route,
+  Sparkles,
+  Swords,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { IconeRuby } from "../../components/iconeRuby";
+import { CartaMontada } from "../../components/cartaMontada";
 import {
   abandonarExpedicao,
   buscarExpedicaoAtual,
@@ -16,6 +24,7 @@ import {
 } from "../../lib/jogo";
 import styles from "../../styles/expedicao.module.css";
 import { MapaExpedicao } from "./mapaExpedicao";
+import { ResultadoExpedicao } from "./resultadoExpedicao";
 
 export default function ExpedicaoPage() {
   const router = useRouter();
@@ -109,7 +118,8 @@ export default function ExpedicaoPage() {
             <h1>Expedição</h1>
             <p>Escolha uma rota, vença três confrontos e alcance o chefe.</p>
           </div>
-          {expedicao?.status === "EM_ANDAMENTO" ? (
+          {expedicao?.status === "EM_ANDAMENTO" &&
+          !expedicao.dialogoBoss?.resultado ? (
             <button
               type="button"
               className={styles.btnAbandonar}
@@ -126,20 +136,24 @@ export default function ExpedicaoPage() {
         {erro ? <p className={styles.erro}>{erro}</p> : null}
 
         {!expedicao || expedicao.status !== "EM_ANDAMENTO" ? (
-          <NovaExpedicao
-            decks={decks}
-            idDeck={idDeck}
-            expedicaoAnterior={expedicao}
-            processando={processando}
-            onSelecionar={setIdDeck}
-            onIniciar={() => void comecarExpedicao()}
-          />
+          <div className={styles.inicioExpedicao}>
+            {expedicao ? <ResultadoExpedicao expedicao={expedicao} /> : null}
+            <NovaExpedicao
+              decks={decks}
+              idDeck={idDeck}
+              expedicaoAnterior={expedicao}
+              processando={processando}
+              onSelecionar={setIdDeck}
+              onIniciar={() => void comecarExpedicao()}
+            />
+          </div>
         ) : (
           <>
             <MapaExpedicao
               expedicao={expedicao}
               processando={processando}
               onEscolher={(opcao) => void escolherRota(opcao)}
+              onAbrirDialogoBoss={() => router.push("/partida?boss=1")}
             />
             {expedicao.partidaAtual?.status === "EM_ANDAMENTO" ? (
               <section className={styles.batalhaPendente}>
@@ -175,7 +189,9 @@ function NovaExpedicao({
   onSelecionar: (id: string) => void;
   onIniciar: () => void;
 }) {
+  const [menuDeckAberto, setMenuDeckAberto] = useState(false);
   const decksValidos = decks.filter((deck) => deck.completo);
+  const deckSelecionado = decksValidos.find((deck) => deck.id === idDeck);
   return (
     <section className={styles.novaExpedicao}>
       <div className={styles.resumoNova}>
@@ -189,22 +205,96 @@ function NovaExpedicao({
           <h2>Prepare o deck para uma nova trilha</h2>
           <p>O mapa terá três escolhas e um chefe final.</p>
         </span>
-        <strong>
-          <IconeRuby /> {expedicaoAnterior?.recompensaFinal ?? 100} Rubys no
-          chefe
-        </strong>
       </div>
-      <label>
-        Deck da Expedição
-        <select value={idDeck} onChange={(e) => onSelecionar(e.target.value)}>
-          <option value="">Selecione um deck</option>
-          {decksValidos.map((deck) => (
-            <option value={deck.id} key={deck.id}>
-              {deck.nome} ({deck.cartas.length} cartas)
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className={styles.seletorDeck}>
+        <div className={styles.seletorDeckCustom}>
+          <span>Deck da Expedição</span>
+          <button
+            type="button"
+            className={styles.btnSelecionarDeck}
+            aria-expanded={menuDeckAberto}
+            aria-haspopup="listbox"
+            onClick={() => setMenuDeckAberto((aberto) => !aberto)}
+          >
+            <span>
+              <strong>{deckSelecionado?.nome ?? "Selecione um deck"}</strong>
+              {deckSelecionado ? (
+                <small>
+                  {deckSelecionado.cartas.length}{" "}
+                  {deckSelecionado.cartas.length === 1 ? "carta" : "cartas"}
+                </small>
+              ) : null}
+            </span>
+            <ChevronDown aria-hidden="true" />
+          </button>
+          {menuDeckAberto ? (
+            <div className={styles.menuDecks} role="listbox">
+              {decksValidos.map((deck) => (
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={deck.id === idDeck}
+                  onClick={() => {
+                    onSelecionar(deck.id);
+                    setMenuDeckAberto(false);
+                  }}
+                  key={deck.id}
+                >
+                  <span>
+                    <strong>{deck.nome}</strong>
+                    <small>
+                      {deck.cartas.length}{" "}
+                      {deck.cartas.length === 1
+                        ? "carta equipada"
+                        : "cartas equipadas"}
+                    </small>
+                  </span>
+                  {deck.id === idDeck ? <Check aria-hidden="true" /> : null}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        {deckSelecionado ? (
+          <div className={styles.previaDeck} aria-live="polite">
+            <small>{deckSelecionado.cartas.length} cartas equipadas</small>
+            <div>
+              {deckSelecionado.cartas.map((carta) => (
+                <div
+                  className={styles.miniCartaDeck}
+                  title={carta.nome}
+                  key={carta.id}
+                >
+                  <CartaMontada
+                    arte={carta.foto ?? undefined}
+                    moldura={carta.moldura ?? undefined}
+                    nome={carta.nome}
+                    raridade={carta.raridade}
+                    elemento={carta.elemento}
+                    config={carta.configVisual ?? undefined}
+                    placeholder={<Sparkles aria-hidden="true" />}
+                  />
+                </div>
+              ))}
+              {Array.from(
+                { length: Math.max(0, 6 - deckSelecionado.cartas.length) },
+                (_, indice) => (
+                  <div
+                    className={styles.slotCartaVazio}
+                    role="img"
+                    aria-label={`Espaço vazio ${deckSelecionado.cartas.length + indice + 1}`}
+                    key={`vazio-${indice}`}
+                  />
+                ),
+              )}
+            </div>
+          </div>
+        ) : (
+          <p className={styles.deckNaoSelecionado}>
+            Selecione um deck para conferir a formação.
+          </p>
+        )}
+      </div>
       <button
         type="button"
         className={styles.btnIniciar}

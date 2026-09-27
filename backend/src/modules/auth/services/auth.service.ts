@@ -285,6 +285,29 @@ export class AuthService {
     };
   }
 
+  async criarSessaoOAuth(usuario: Usuario) {
+    if (usuario.excluido_em || usuario.ativo === false) {
+      throw new ForbiddenException('Conta desativada ou excluida.');
+    }
+
+    if (usuario.bloqueado) {
+      throw new ForbiddenException('Conta bloqueada.');
+    }
+
+    const usuarioAtualizado = await this.prisma.usuario.update({
+      where: { id: usuario.id },
+      data: {
+        ultimo_login_em: new Date(),
+        tentativas_login: 0,
+      },
+    });
+
+    return {
+      usuario: this.removerSenha(usuarioAtualizado),
+      access_token: this.gerarToken(usuarioAtualizado),
+    };
+  }
+
   async buscarPerfil(id: string) {
     const usuario = await this.prisma.usuario.findUnique({
       where: { id },

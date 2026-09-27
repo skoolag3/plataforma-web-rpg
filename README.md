@@ -8,7 +8,7 @@ Plataforma web de RPG de cartas desenvolvida como Trabalho de Conclusão de Curs
 
 - cadastro, verificação de e-mail, login e recuperação de senha;
 - perfil, avatar, banner, preferências, troca de e-mail e exclusão de conta;
-- coleção do jogador e construção de decks com 3 a 6 cartas únicas;
+- coleção do jogador e construção de decks com 1 a 6 cartas únicas;
 - seleção de deck equipado;
 - gacha com custo em rubys, giro unitário ou de dez, pity e recompensa diária;
 - recompensa semanal e mensagens periódicas disponíveis na caixa de entrada;
@@ -24,14 +24,16 @@ Plataforma web de RPG de cartas desenvolvida como Trabalho de Conclusão de Curs
 - notícias públicas com imagem, conteúdo, anexos e página por ID;
 - landing page alimentada pelas cartas e notícias publicadas no banco.
 - loja de Rubys com pacotes, Checkout hospedado pelo Stripe e crédito confirmado por webhook idempotente;
-- ranking público por pontos ou cartas únicas colecionadas, incluindo jogadores sem partidas, e histórico paginado de partidas no perfil;
+- ranking público por pontos ou cartas únicas colecionadas, exibindo apenas jogadores que já pontuaram, e histórico paginado de partidas no perfil;
 - rotação automática do banner de gacha a cada 30 minutos, com opção administrativa para forçar o banner;
 - painel administrativo de usuários com busca, filtros, edição, bloqueio, coleção, ajuste de saldo e auditoria;
 - notificações globais temporárias com fechamento manual e indicador de duração.
+- criador do boss final no painel da campanha (personalidade, provocação, quatro perguntas e pool de cartas), diálogo antes do confronto e avaliação 0–4 da resposta; a nota ajusta dificuldade e Rubys do chefe, com validação e crédito pelo servidor.
 
 ### Parcial ou demonstrativo
 
 - o adversário atual é básico e a dificuldade é calculada no servidor, sem IA avançada;
+- o diálogo do boss usa Gemini (`GEMINI_API_KEY`) como primeira opção, OpenAI (`OPENAI_API_KEY`) como segunda e avaliação local se não houver chave ou a API falhar;
 - a tela administrativa de banners permite consultar a rotação e forçar um banner, mas ainda não possui CRUD completo de banners e pacotes;
 - o pagamento por Stripe está integrado em modo de teste; Pix e operação em produção ainda não foram configurados;
 - não existe PvP em tempo real;
@@ -166,7 +168,7 @@ Copie o segredo `whsec_...` exibido pela CLI para `STRIPE_WEBHOOK_SECRET` e rein
 
 ## Atualizações recentes
 
-- criação da Expedição com trilha procedural, três decisões, chefe final, integração com batalhas e recompensa de 100 Rubys;
+- criação da Expedição com trilha procedural, três decisões, chefe final, integração com batalhas e recompensa configurável pela campanha;
 - ações de atacar e defender adicionadas ao combate, com redução de dano na postura defensiva;
 - cadastro e edição de classes no painel administrativo, com prioridade para definir quem ataca primeiro e modificadores percentuais de atributos;
 - habilidades publicadas integradas ao motor de batalha por meio de snapshots, gatilhos, requisitos, escalas e duração de efeitos;
@@ -187,7 +189,7 @@ Copie o segredo `whsec_...` exibido pela CLI para `STRIPE_WEBHOOK_SECRET` e rein
 
 ## Regras atuais de combate
 
-- cada deck válido possui de 3 a 6 cartas únicas;
+- cada deck válido possui de 1 a 6 cartas únicas;
 - a prioridade de ataque vem da classe da carta: o menor número age primeiro e o jogador vence empates;
 - a classe pode modificar HP, ataque e defesa da carta antes do início da batalha;
 - defender reduz o dano do ataque inimigo naquele turno;
@@ -203,15 +205,15 @@ Copie o segredo `whsec_...` exibido pela CLI para `STRIPE_WEBHOOK_SECRET` e rein
 3. Cada escolha inicia uma batalha com a dificuldade indicada pela rota.
 4. Uma vitória libera a próxima etapa; uma derrota encerra a Expedição.
 5. Após as três etapas, o jogador enfrenta o chefe final.
-6. A primeira conclusão registra 100 Rubys no ledger e finaliza a jornada.
+6. A primeira conclusão registra no ledger a recompensa configurada para a campanha e finaliza a jornada.
 
 ## Versionamento de trabalho
 
 - `master`: base estável do projeto;
 - `backup-pre-aprovacao`: cópia preservada do estado anterior às mudanças de progressão;
-- `progresso`: desenvolvimento atual da Expedição, classes e habilidades de combate.
+- `codex/finalizacao-tcc`: consolidação atual das funcionalidades, segurança e documentação do TCC.
 
-Alterações novas devem continuar em `progresso`. A branch de backup não deve receber mudanças comuns de desenvolvimento.
+Alterações desta revisão devem continuar em `codex/finalizacao-tcc`. A branch de backup não deve receber mudanças comuns de desenvolvimento.
 
 ## Segurança aplicada
 
@@ -221,6 +223,10 @@ Alterações novas devem continuar em `progresso`. A branch de backup não deve 
 - senha protegida com bcrypt e tokens aleatórios para e-mail e recuperação;
 - respostas genéricas na solicitação de recuperação de senha;
 - limites de tamanho, quantidade e MIME nos uploads;
+- validação da assinatura real de imagens JPG, PNG, WebP e GIF;
+- rate limiting global e limites mais rígidos em login, cadastro, reenvio e recuperação;
+- Helmet, CSP, remoção de `X-Powered-By` e CORS restrito às origens configuradas;
+- JWT armazenado em cookie `HttpOnly`, `SameSite=Lax` e `Secure` em produção, mantendo no navegador apenas um marcador de sessão sem credenciais;
 - verificação de propriedade em decks e partidas;
 - transações serializáveis em operações econômicas do gacha;
 - ledger de rubys e logs administrativos sem confiar no saldo enviado pelo cliente;
@@ -228,13 +234,9 @@ Alterações novas devem continuar em `progresso`. A branch de backup não deve 
 
 ### Pendências de segurança antes de produção
 
-- aplicar rate limiting nas rotas públicas de login, cadastro, reenvio e recuperação;
-- migrar o token do `localStorage` para cookie `HttpOnly`, `Secure` e `SameSite` junto de uma estratégia CSRF;
-- definir headers HTTP de proteção com Helmet e uma Content Security Policy compatível com as imagens externas;
 - substituir o bloqueio permanente após cinco erros por janela temporária e limite por IP/conta;
-- validar o conteúdo real dos arquivos por assinatura, além do MIME informado pelo cliente;
 - adicionar testes E2E de autorização horizontal, concorrência do gacha e fluxo completo da partida;
-- revisar CORS e segredos no ambiente definitivo de implantação.
+- revisar segredos, origens CORS e redirects de Google/Stripe no ambiente definitivo de implantação.
 
 ## Validação
 

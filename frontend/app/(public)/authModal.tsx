@@ -23,7 +23,12 @@ import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
 import { useState } from "react";
 import { IndicadorSenha } from "../components/indicadorSenha";
-import { login, register, solicitarRedefinicaoSenha } from "../lib/auth";
+import {
+  login,
+  obterUrlLoginGoogle,
+  register,
+  solicitarRedefinicaoSenha,
+} from "../lib/auth";
 import {
   avaliarSenha,
   TAMANHO_MAXIMO_SENHA,
@@ -155,6 +160,23 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
     }
   }
 
+  async function entrarComGoogle() {
+    setErro("");
+    setCarregando(true);
+
+    try {
+      const { url } = await obterUrlLoginGoogle();
+      window.location.assign(url);
+    } catch (erroCapturado) {
+      setErro(
+        erroCapturado instanceof Error
+          ? erroCapturado.message
+          : "Não foi possível iniciar o login com Google.",
+      );
+      setCarregando(false);
+    }
+  }
+
   return (
     <EstruturaModal aoFechar={aoFechar}>
       <header className={styles.cabecalhoModal}>
@@ -234,9 +256,14 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
       </form>
 
       <Separador />
-      <button type="button" className={styles.btnGoogle}>
+      <button
+        type="button"
+        className={styles.btnGoogle}
+        onClick={entrarComGoogle}
+        disabled={carregando}
+      >
         <span className={styles.googleMark} aria-hidden="true">G</span>
-        Continuar com Google
+        {carregando ? "Abrindo Google..." : "Continuar com Google"}
       </button>
 
     </EstruturaModal>

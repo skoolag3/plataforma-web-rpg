@@ -43,6 +43,7 @@ export default function HomePage() {
 
   const deckAtivo = decks.find((deck) => deck.ativo);
   const cartasDeck = deckAtivo?.cartas.slice(0, 6) ?? [];
+  const hrefDeck = deckAtivo ? `/decks?deck=${deckAtivo.id}` : "/decks";
 
   return (
     <main className={styles.page}>
@@ -117,41 +118,51 @@ export default function HomePage() {
                       />
                     </div>
                   ))}
-                  {deckAtivo
-                    ? Array.from(
-                        { length: Math.max(0, 6 - cartasDeck.length) },
-                        (_, indice) => {
-                          const nmrSlot = cartasDeck.length + indice + 1;
-                          return (
-                            <Link
-                              href={`/decks?deck=${deckAtivo.id}`}
-                              className={`${styles.cartaDeck} ${styles.cartaPlaceholder}`}
-                              aria-label={`Adicionar carta no espaço ${nmrSlot} do deck ${deckAtivo.nome}`}
-                              key={`slot-${nmrSlot}`}
-                            >
-                              <span>
-                                <Plus aria-hidden="true" />
-                                <strong>Adicionar carta</strong>
-                                <small>{nmrSlot}º espaço</small>
-                              </span>
-                            </Link>
-                          );
-                        },
-                      )
-                    : null}
+                  {Array.from(
+                    { length: Math.max(0, 6 - cartasDeck.length) },
+                    (_, indice) => {
+                      const nmrSlot = cartasDeck.length + indice + 1;
+                      return (
+                        <Link
+                          href={hrefDeck}
+                          className={`${styles.cartaDeck} ${styles.cartaPlaceholder}`}
+                          aria-label={
+                            deckAtivo
+                              ? `Adicionar carta no espaço ${nmrSlot} do deck ${deckAtivo.nome}`
+                              : `Adicionar carta no espaço ${nmrSlot}`
+                          }
+                          key={`slot-${nmrSlot}`}
+                        >
+                          <span>
+                            <Plus aria-hidden="true" />
+                            <strong>Adicionar carta</strong>
+                          </span>
+                        </Link>
+                      );
+                    },
+                  )}
                 </>
               ) : (
-                <div className={styles.deckVazio}>
-                  <Layers />
-                  <span>Seu palco ainda está vazio</span>
-                </div>
+                Array.from({ length: 6 }, (_, indice) => {
+                  const nmrSlot = indice + 1;
+                  return (
+                    <Link
+                      href={hrefDeck}
+                      className={`${styles.cartaDeck} ${styles.cartaPlaceholder}`}
+                      aria-label={`Adicionar carta no espaço ${nmrSlot}`}
+                      key={`slot-vazio-${nmrSlot}`}
+                    >
+                      <span>
+                        <Plus aria-hidden="true" />
+                        <strong>Adicionar carta</strong>
+                      </span>
+                    </Link>
+                  );
+                })
               )}
             </div>
 
-            <Link
-              href={deckAtivo ? `/decks?deck=${deckAtivo.id}` : "/decks"}
-              className={styles.editarDeck}
-            >
+            <Link href={hrefDeck} className={styles.editarDeck}>
               {deckAtivo ? "Ajustar formação" : "Montar deck"} <ChevronRight />
             </Link>
           </div>

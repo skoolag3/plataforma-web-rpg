@@ -14,6 +14,7 @@ import { CartaVerso } from "../../components/cartaVerso";
 import { IconeRuby } from "../../components/iconeRuby";
 import type { AcaoTurno, CartaPartida, EstadoPartida } from "../../lib/jogo";
 import styles from "../../styles/partida.module.css";
+import { useAnimacaoTurno, type AnimacaoDano } from "./useAnimacaoTurno";
 
 type Props = {
   partida: EstadoPartida;
@@ -31,25 +32,30 @@ function percentualHp(carta: CartaPartida) {
 function CartaNaMesa({
   carta,
   lado,
+  animacao,
 }: {
   carta: CartaPartida;
   lado: "jogador" | "bot";
+  animacao: AnimacaoDano | null;
 }) {
   const passiva =
     typeof carta.passiva.nome === "string" ? carta.passiva.nome : "Sem passiva";
-  const classe =
-    typeof carta.passiva.classe === "string" ? carta.passiva.classe : null;
   return (
-    <article className={`${styles.cartaCampo} ${styles[lado]}`}>
-      <span className={styles.donoCarta} data-lado={lado}>
-        {lado === "jogador" ? "Sua carta" : "Inimigo"}
-      </span>
+    <article
+      className={`${styles.cartaCampo} ${styles[lado]}`}
+      data-animacao={
+        animacao?.origem === (lado === "jogador" ? "JOGADOR" : "BOT")
+          ? "atacando"
+          : animacao?.alvo === (lado === "jogador" ? "JOGADOR" : "BOT")
+            ? "recebendo"
+            : undefined
+      }
+    >
       <div className={styles.statusCarta}>
         <span>
           <strong>{carta.nome}</strong>
           <small>
-            {carta.raridade} · {carta.elemento}
-            {classe ? ` · ${classe}` : ""} · prioridade {carta.prioridadeAtaque}
+            {carta.raridade} · {carta.elemento} · P{carta.prioridadeAtaque}
           </small>
         </span>
         <b>
@@ -108,9 +114,11 @@ function CartaNaMesa({
           ) : null}
         </span>
       </div>
-      <p className={styles.passivaCarta}>
-        <Sparkles /> {passiva}
-      </p>
+      {passiva !== "Sem passiva" ? (
+        <p className={styles.passivaCarta}>
+          <Sparkles /> {passiva}
+        </p>
+      ) : null}
     </article>
   );
 }
@@ -212,9 +220,8 @@ function LogBatalha({ eventos }: { eventos: EstadoPartida["eventos"] }) {
     <aside className={styles.logBatalha}>
       <header>
         <h2>
-          <ScrollText /> Log da batalha
+          <ScrollText /> Combate
         </h2>
-        <p>{eventos.length} eventos auditados</p>
       </header>
       <div ref={listaRef} className={styles.listaTurnos}>
         {turnos.map((grupo) => (
@@ -223,7 +230,6 @@ function LogBatalha({ eventos }: { eventos: EstadoPartida["eventos"] }) {
               <strong>
                 {grupo.turno === 0 ? "Preparação" : `Turno ${grupo.turno}`}
               </strong>
-              <span>{grupo.eventos.length} eventos</span>
             </header>
             <div>
               {grupo.eventos.map((evento) => (
@@ -254,6 +260,10 @@ export function MesaBatalha({
   const cartaJogador = partida.jogador.cartas[partida.jogador.ativa];
   const cartaBot = partida.bot.cartas[partida.bot.ativa];
   const finalizada = partida.status === "FINALIZADA";
+  const { animacaoAtual, animando, pularAnimacao } = useAnimacaoTurno(
+    partida.eventos,
+  );
+  const bloqueado = processando || animando;
 
   return (
     <section className={styles.batalhaLayout}>
@@ -262,11 +272,15 @@ export function MesaBatalha({
           <span>
             <Bot />{" "}
             {partida.expedicao?.etapa === 3
-              ? "Chefe da Expedição"
-              : "Adversário da rota"}
+              ? "Chefe"
+              : "Adversário"}
           </span>
           <strong>Turno {partida.turno}</strong>
-          <span>{partida.deck?.nome}</span>
+          {animando ? (
+            <button type="button" onClick={pularAnimacao}>
+              Pular animação
+            </button>
+          ) : null}
         </header>
         <FilaDeck
           cartas={partida.bot.cartas}
@@ -274,9 +288,33 @@ export function MesaBatalha({
           lado="adversário"
         />
         <div className={styles.mesaCampo}>
-          <CartaNaMesa carta={cartaBot} lado="bot" />
-          <span className={styles.marcaArena}>VS</span>
-          <CartaNaMesa carta={cartaJogador} lado="jogador" />
+          {animacaoAtual ? (
+            <output
+              key={animacaoAtual.id}
+              className={styles.danoGlobal}
+              data-alvo={animacaoAtual.alvo}
+              aria-live="assertive"
+            >
+              <strong>-{animacaoAtual.dano}</strong>
+              <span>HP</span>
+            </output>
+          ) : null}
+          <CartaNaMesa carta={cartaBot} lado="bot" animacao={animacaoAtual} />
+          <div className={styles.centroArena}>
+            {animacaoAtual ? (
+              <span className={styles.acaoAtual} aria-live="polite">
+                {animacaoAtual.origem === "JOGADOR"
+                  ? "Você ataca"
+                  : "Adversário ataca"}
+              </span>
+            ) : null}
+            <span className={styles.marcaArena}>VS</span>
+          </div>
+          <CartaNaMesa
+            carta={cartaJogador}
+            lado="jogador"
+            animacao={animacaoAtual}
+          />
         </div>
         <div className={styles.rodapeArena}>
           <DeckJogador
@@ -308,7 +346,7 @@ export function MesaBatalha({
                   type="button"
                   data-acao="ATACAR"
                   onClick={() => onExecutarAcao("ATACAR")}
-                  disabled={processando}
+                  disabled={bloqueado}
                 >
                   <Swords />
                   <span>
@@ -320,7 +358,7 @@ export function MesaBatalha({
                   type="button"
                   data-acao="DEFENDER"
                   onClick={() => onExecutarAcao("DEFENDER")}
-                  disabled={processando}
+                  disabled={bloqueado}
                 >
                   <Shield />
                   <span>

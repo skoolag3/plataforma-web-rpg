@@ -14,6 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { AdminGuard } from '../../../common/guards/admin.guard';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { validarConteudoImagem } from '../../../common/validation/imagem.validation';
 import { AdminCloudinaryService } from '../services/admin-cloudinary.service';
 
 type CartaAssetFiles = {
@@ -59,6 +60,8 @@ export class AdminUploadsController {
   @Post('uploads/cartas')
   @UseInterceptors(cartaAssetInterceptor)
   uploadCartaAssets(@UploadedFiles() files: CartaAssetFiles) {
+    files.foto?.forEach((arquivo) => validarConteudoImagem(arquivo));
+    files.moldura?.forEach((arquivo) => validarConteudoImagem(arquivo));
     return this.cloudinaryService.uploadCartaAssets(files);
   }
 
@@ -72,6 +75,7 @@ export class AdminUploadsController {
   )
   uploadNoticiaImagem(@UploadedFile() imagem: Express.Multer.File) {
     if (!imagem) throw new BadRequestException('Envie a imagem da notícia.');
+    validarConteudoImagem(imagem);
     return this.cloudinaryService.uploadNoticiaImagem(imagem);
   }
 
@@ -81,6 +85,8 @@ export class AdminUploadsController {
     @Param('id') id: string,
     @UploadedFiles() files: CartaAssetFiles,
   ) {
+    files.foto?.forEach((arquivo) => validarConteudoImagem(arquivo));
+    files.moldura?.forEach((arquivo) => validarConteudoImagem(arquivo));
     return this.cloudinaryService.updateCartaAssets(id, files);
   }
 }

@@ -19,7 +19,7 @@ rectangle "Stripe" as stripe #FFF6D9
 rectangle "Cloudinary" as cloudinary #FFF6D9
 rectangle "Supabase Storage" as storage #FFF6D9
 rectangle "Servidor SMTP" as smtp #FFF6D9
-rectangle "IA generativa\n(prevista)" as ia #FCEBEC
+rectangle "IA generativa\nGemini ou OpenAI" as ia #FCEBEC
 
 usuario --> sistema : utiliza a plataforma
 admin --> sistema : mantém conteúdo e usuários

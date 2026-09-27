@@ -67,7 +67,7 @@ const multiplicadorDificuldade: Record<Dificuldade, number> = {
   FACIL: 0.86,
   MEDIA: 1,
   DIFICIL: 1.18,
-  CHEFE: 1.35,
+  CHEFE: 1,
 };
 
 export function analisarResposta(resposta: string): Dificuldade {
