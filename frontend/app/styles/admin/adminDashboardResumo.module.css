@@ -1,60 +1,73 @@
-.acoes {
+.cabecalhoOperacional {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  margin-bottom: 0.55rem;
-  border: 1px solid rgba(148, 163, 184, 0.13);
-  border-radius: 0.72rem;
-  background: rgba(8, 13, 27, 0.62);
-  padding: 0.4rem;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.85rem;
+  background:
+    radial-gradient(
+      circle at 68% 0%,
+      rgba(124, 58, 237, 0.14),
+      transparent 32%
+    ),
+    rgba(8, 13, 27, 0.7);
+  padding: 0.85rem 0.95rem;
 }
-.acoes > div {
+.statusOperacional {
   display: grid;
-  grid-template-columns: auto auto;
-  align-items: baseline;
-  gap: 0.08rem 0.4rem;
-  margin-right: auto;
-  padding: 0 0.4rem;
+  gap: 0.14rem;
 }
-.acoes > div span {
-  grid-column: 1/-1;
-  color: #707b91;
-  font-size: 0.55rem;
-  font-weight: 850;
-  letter-spacing: 0.12em;
+.statusOperacional > span {
+  display: flex;
+  align-items: center;
+  gap: 0.38rem;
+  color: #a3e635;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
-.acoes > div strong {
-  font-size: 0.9rem;
+.statusOperacional > span i {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 0.2rem rgba(163, 230, 53, 0.08);
 }
-.acoes > div small {
-  color: #7e879a;
-  font-size: 0.62rem;
+.statusOperacional strong {
+  font-size: 1rem;
+}
+.statusOperacional small {
+  color: #7f899d;
+  font-size: 0.63rem;
+}
+.acoes {
+  display: flex;
+  gap: 0.45rem;
 }
 .acoes > a,
 .acoes > button {
   display: flex;
-  min-height: 2.15rem;
+  min-height: 2.3rem;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
   border: 1px solid rgba(167, 139, 250, 0.2);
-  border-radius: 0.52rem;
-  background: rgba(124, 58, 237, 0.13);
+  border-radius: 0.56rem;
+  background: rgba(124, 58, 237, 0.11);
   color: #ddd6fe;
   cursor: pointer;
-  padding: 0 0.65rem;
+  padding: 0 0.72rem;
   font: inherit;
-  font-size: 0.63rem;
+  font-size: 0.62rem;
   font-weight: 850;
   text-decoration: none;
 }
 .acoes > a {
-  border-color: rgba(190, 242, 100, 0.25);
-  background: linear-gradient(
-    135deg,
-    rgba(124, 58, 237, 0.5),
-    rgba(101, 163, 13, 0.25)
-  );
+  border-color: rgba(190, 242, 100, 0.3);
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
   color: #fff;
 }
 .acoes svg {
@@ -70,89 +83,112 @@
 .metricas {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.55rem;
+  gap: 0.6rem;
 }
 .metrica {
   position: relative;
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.08rem 0.6rem;
-  min-height: 5.3rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  gap: 0.06rem 0.65rem;
+  min-height: 6.1rem;
   align-items: center;
   overflow: hidden;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 0.7rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.8rem;
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.025), transparent 42%),
-    rgba(10, 17, 33, 0.72);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.028), transparent 48%),
+    #0a1020;
   color: #fff;
-  padding: 0.65rem;
+  padding: 0.75rem;
   text-decoration: none;
-  transition: 160ms ease;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 .metrica:hover {
-  border-color: rgba(167, 139, 250, 0.38);
-  background-color: rgba(16, 22, 40, 0.9);
+  border-color: rgba(190, 242, 100, 0.32);
   transform: translateY(-2px);
 }
 .metricaIcone {
   grid-row: 1/4;
   display: grid;
-  width: 2.15rem;
-  height: 2.15rem;
+  width: 2.35rem;
+  height: 2.35rem;
   place-items: center;
-  border: 1px solid rgba(167, 139, 250, 0.22);
-  border-radius: 0.62rem;
-  background: rgba(124, 58, 237, 0.13);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  border-radius: 0.68rem;
+  background: rgba(124, 58, 237, 0.12);
   color: #c4b5fd;
 }
 .metricaIcone svg {
-  width: 1rem;
+  width: 1.05rem;
 }
-.metrica > span:not(.metricaIcone) {
+.metrica > span:not(.metricaIcone):not(.progresso) {
   align-self: end;
-  color: #8c96aa;
-  font-size: 0.56rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  color: #788399;
+  font-size: 0.54rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 .metrica > strong {
   align-self: center;
-  font-size: 1rem;
+  font-size: 1.14rem;
+  font-variant-numeric: tabular-nums;
 }
 .metrica > small {
   align-self: start;
   color: #7f899c;
-  font-size: 0.59rem;
+  font-size: 0.58rem;
+}
+.progresso {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.72rem;
+  left: 3.74rem;
+  height: 0.22rem;
+  border-radius: 999px;
+  background: #182033;
+}
+.progresso i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7c3aed, #bef264);
+}
+.progresso b {
+  position: absolute;
+  right: 0;
+  bottom: 0.42rem;
+  color: #69758a;
+  font-size: 0.5rem;
 }
 .metricaSeta {
   position: absolute;
-  top: 0.65rem;
-  right: 0.65rem;
-  width: 0.8rem;
-  color: #5f697d;
+  top: 0.7rem;
+  right: 0.7rem;
+  width: 0.78rem;
+  color: #536075;
 }
 @keyframes girar {
   to {
     transform: rotate(360deg);
   }
 }
-@media (max-width: 760px) {
-  .acoes {
-    align-items: stretch;
-    flex-wrap: wrap;
+@media (max-width: 900px) {
+  .metricas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .acoes > div {
-    width: 100%;
+}
+@media (max-width: 600px) {
+  .cabecalhoOperacional {
+    align-items: stretch;
+    flex-direction: column;
   }
   .acoes > a,
   .acoes > button {
     flex: 1;
-    justify-content: center;
-  }
-  .metricas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 440px) {

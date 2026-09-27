@@ -1,26 +1,26 @@
 .grid {
   display: grid;
-  grid-template-columns: minmax(20rem, 1.15fr) minmax(17rem, 0.9fr) minmax(
-      17rem,
-      0.9fr
-    );
-  gap: 0.55rem;
-  margin-top: 0.55rem;
+  grid-template-columns: minmax(22rem, 1.25fr) minmax(18rem, 0.75fr);
+  gap: 0.6rem;
+  margin-top: 0.6rem;
 }
 .grid > .card {
-  min-height: 13.2rem;
-  padding: 0.75rem;
+  min-height: 11.8rem;
+  padding: 0.85rem;
+}
+.grid > .card:first-child {
+  grid-row: span 2;
 }
 .card header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.7rem;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.75rem;
 }
 .card header h2 {
   margin: 0.1rem 0 0;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 .card header small {
   color: #6f7a8f;
@@ -33,53 +33,86 @@
   border-radius: 999px;
   background: rgba(124, 58, 237, 0.13);
   color: #c4b5fd;
-  padding: 0.32rem 0.52rem;
-  font-size: 0.6rem;
+  padding: 0.34rem 0.55rem;
+  font-size: 0.59rem;
 }
 .card header > svg {
   width: 0.9rem;
   color: #a78bfa;
 }
-.card header > a {
+.card header > a,
+.atalhos a {
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  color: #9f8cd4;
+  color: #a995dc;
   font-size: 0.59rem;
-  font-weight: 750;
+  font-weight: 780;
   text-decoration: none;
 }
-.card header > a svg {
-  width: 0.7rem;
+.card header > a svg,
+.atalhos a svg {
+  width: 0.72rem;
+}
+.faixaRaridades {
+  display: flex;
+  height: 0.62rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #182033;
+  margin-bottom: 0.95rem;
+}
+.faixaRaridades i {
+  min-width: 0.18rem;
+  height: 100%;
+}
+.faixaRaridades i[data-raridade="UR"] {
+  background: #8b5cf6;
+}
+.faixaRaridades i[data-raridade="SSR"] {
+  background: #f59e0b;
+}
+.faixaRaridades i[data-raridade="SR"] {
+  background: #06b6d4;
+}
+.faixaRaridades i[data-raridade="R"] {
+  background: #6366f1;
+}
+.faixaRaridades i[data-raridade="N"] {
+  background: #64748b;
 }
 .raridades {
   display: grid;
-  gap: 0.58rem;
-  padding: 0.1rem 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
 }
 .raridades > div {
   display: grid;
-  grid-template-columns: 2.4rem 1fr 1.7rem;
+  grid-template-columns: 2.25rem 1fr;
   align-items: center;
   gap: 0.55rem;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 0.62rem;
+  background: rgba(7, 12, 24, 0.48);
+  padding: 0.48rem;
 }
 .raridades span {
   display: grid;
-  height: 1.45rem;
+  height: 2rem;
   place-items: center;
-  border-radius: 0.38rem;
+  border-radius: 0.48rem;
   color: #fff;
-  font-size: 0.56rem;
+  font-size: 0.57rem;
   font-weight: 950;
 }
 .raridades span[data-raridade="UR"] {
   background: #7c3aed;
 }
 .raridades span[data-raridade="SSR"] {
-  background: #d97706;
+  background: #b86a06;
 }
 .raridades span[data-raridade="SR"] {
-  background: #0891b2;
+  background: #087f98;
 }
 .raridades span[data-raridade="R"] {
   background: #4f46e5;
@@ -87,23 +120,16 @@
 .raridades span[data-raridade="N"] {
   background: #475569;
 }
-.raridades i {
-  height: 0.35rem;
-  overflow: hidden;
-  border-radius: 999px;
-  background: #182033;
+.raridades div > div {
+  display: grid;
 }
-.raridades i b {
-  display: block;
-  min-width: 0.3rem;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #7c3aed, #bef264);
+.raridades div > div strong {
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
 }
-.raridades > div > strong {
-  color: #aeb7c8;
-  font-size: 0.64rem;
-  text-align: right;
+.raridades div > div small {
+  color: #68748a;
+  font-size: 0.51rem;
 }
 .atividade,
 .ranking {
@@ -112,7 +138,7 @@
 .atividade p,
 .ranking p {
   display: grid;
-  min-height: 2.15rem;
+  min-height: 2.45rem;
   align-items: center;
   gap: 0.5rem;
   margin: 0;
@@ -154,7 +180,7 @@
   grid-template-columns: 1.35rem minmax(0, 1fr) auto;
 }
 .ranking p > b {
-  color: #7c3aed;
+  color: #8b5cf6;
   font-size: 0.6rem;
 }
 .ranking em {
@@ -162,19 +188,73 @@
   font-size: 0.55rem;
   font-style: normal;
 }
-@media (max-width: 1100px) {
-  .grid {
-    grid-template-columns: minmax(20rem, 1.2fr) minmax(17rem, 0.8fr);
-  }
-  .grid > article:first-child {
-    grid-row: span 2;
-  }
+.atividade .estadoVazio,
+.ranking .estadoVazio {
+  display: grid;
+  min-height: 4rem;
+  place-items: center;
+  color: #64748b;
+  font-size: 0.6rem;
 }
-@media (max-width: 760px) {
+.atalhos {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 0.72rem;
+  background: rgba(8, 13, 27, 0.62);
+  padding: 0.42rem;
+}
+.atalhos > span {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: auto;
+  padding: 0 0.42rem;
+  color: #79849a;
+  font-size: 0.56rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.atalhos > span svg {
+  width: 0.8rem;
+  color: #a78bfa;
+}
+.atalhos a {
+  min-height: 1.95rem;
+  border-radius: 0.48rem;
+  padding: 0 0.55rem;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+.atalhos a:hover {
+  background: rgba(124, 58, 237, 0.12);
+  color: #ddd6fe;
+}
+@media (max-width: 900px) {
   .grid {
     grid-template-columns: 1fr;
   }
-  .grid > article:first-child {
+  .grid > .card:first-child {
     grid-row: auto;
+  }
+  .atalhos {
+    grid-column: auto;
+    flex-wrap: wrap;
+  }
+  .atalhos > span {
+    width: 100%;
+  }
+}
+@media (max-width: 520px) {
+  .raridades {
+    grid-template-columns: 1fr;
+  }
+  .atalhos a {
+    flex: 1;
+    justify-content: center;
   }
 }

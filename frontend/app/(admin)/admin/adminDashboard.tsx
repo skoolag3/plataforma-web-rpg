@@ -37,8 +37,8 @@ export function AdminDashboard() {
 
   return (
     <AdminLayout
-      title="Central de controle"
-      subtitle="Acompanhe o jogo e acesse o que precisa sem perder tempo."
+      title="Visão geral"
+      subtitle="Acompanhe a operação do AnimeCards e acesse os módulos principais."
     >
       {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
       {carregando ? (
@@ -49,7 +49,7 @@ export function AdminDashboard() {
         carregando={carregando}
         onAtualizar={carregarDashboard}
       />
-      <DashboardPainel resumo={resumo} />
+      <DashboardPainel resumo={resumo} carregando={carregando} />
     </AdminLayout>
   );
 }

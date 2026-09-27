@@ -1,4 +1,4 @@
-import { Activity, ArrowUpRight } from "lucide-react";
+import { Activity, ArrowUpRight, Layers3 } from "lucide-react";
 import Link from "next/link";
 import type { AdminDashboardResumo } from "../../lib/admin";
 import baseStyles from "../../styles/admin/adminShared.module.css";
@@ -17,8 +17,10 @@ const formatarData = (valor: string | null) =>
 
 export function DashboardPainel({
   resumo,
+  carregando,
 }: {
   resumo: AdminDashboardResumo | null;
+  carregando: boolean;
 }) {
   const dadosRaridade = resumo?.raridades ?? [];
   const totalRaridades = dadosRaridade.reduce(
@@ -36,6 +38,27 @@ export function DashboardPainel({
           </div>
           <strong>{formatarNmr(totalRaridades)} cartas</strong>
         </header>
+        <div
+          className={styles.faixaRaridades}
+          aria-label="Proporção por raridade"
+        >
+          {raridades.map((raridade) => {
+            const total =
+              dadosRaridade.find((item) => item.raridade === raridade)?.total ??
+              0;
+            const percentual = totalRaridades
+              ? (total / totalRaridades) * 100
+              : 0;
+            return percentual ? (
+              <i
+                key={raridade}
+                data-raridade={raridade}
+                style={{ width: `${percentual}%` }}
+                title={`${raridade}: ${Math.round(percentual)}%`}
+              />
+            ) : null;
+          })}
+        </div>
         <div className={styles.raridades}>
           {raridades.map((raridade) => {
             const total =
@@ -47,10 +70,10 @@ export function DashboardPainel({
             return (
               <div key={raridade}>
                 <span data-raridade={raridade}>{raridade}</span>
-                <i>
-                  <b style={{ width: `${percentual}%` }} />
-                </i>
-                <strong>{total}</strong>
+                <div>
+                  <strong>{total}</strong>
+                  <small>{Math.round(percentual)}% do catálogo</small>
+                </div>
               </div>
             );
           })}
@@ -75,8 +98,8 @@ export function DashboardPainel({
               <time>{formatarData(item.data)}</time>
             </p>
           ))}
-          {!resumo?.atividadeRecente.length ? (
-            <p>Nenhuma atividade recente</p>
+          {!carregando && !resumo?.atividadeRecente.length ? (
+            <p className={styles.estadoVazio}>Nenhuma atividade recente</p>
           ) : null}
         </div>
       </article>
@@ -101,11 +124,28 @@ export function DashboardPainel({
               <em>{formatarNmr(item.quantidade)} cópias</em>
             </p>
           ))}
-          {!resumo?.topCartas.length ? (
-            <p>Nenhum inventário registrado</p>
+          {!carregando && !resumo?.topCartas.length ? (
+            <p className={styles.estadoVazio}>Nenhum inventário registrado</p>
           ) : null}
         </div>
       </article>
+      <nav className={styles.atalhos} aria-label="Acessos rápidos">
+        <span>
+          <Layers3 /> Configuração do jogo
+        </span>
+        <Link href="/admin/habilidades">
+          Habilidades <ArrowUpRight />
+        </Link>
+        <Link href="/admin/decks-npc">
+          Decks NPC <ArrowUpRight />
+        </Link>
+        <Link href="/admin/banners">
+          Banners <ArrowUpRight />
+        </Link>
+        <Link href="/admin/campanha">
+          Campanha <ArrowUpRight />
+        </Link>
+      </nav>
     </section>
   );
 }
