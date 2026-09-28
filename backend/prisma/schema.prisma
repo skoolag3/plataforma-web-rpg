@@ -454,26 +454,58 @@ model LogPartida {
 }
 
 model Expedicao {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  id_usuario    String    @db.Uuid
-  id_deck       String    @db.Uuid
-  seed          Int
-  status        String    @default("EM_ANDAMENTO") @db.VarChar(20)
-  etapa_atual   Int       @default(0)
-  trilha        Json
-  escolhas      String[]  @default([])
-  escolha_atual String?   @db.VarChar(80)
-  dialogo_boss  Json?
-  criado_em     DateTime  @default(now()) @db.Timestamptz(0)
-  atualizado_em DateTime  @default(now()) @db.Timestamptz(0)
-  finalizado_em DateTime? @db.Timestamptz(0)
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id_usuario           String    @db.Uuid
+  id_deck              String    @db.Uuid
+  seed                 Int
+  status               String    @default("EM_ANDAMENTO") @db.VarChar(20)
+  etapa_atual          Int       @default(0)
+  trilha               Json
+  escolhas             String[]  @default([])
+  escolha_atual        String?   @db.VarChar(80)
+  dialogo_boss         Json?
+  criado_em            DateTime  @default(now()) @db.Timestamptz(0)
+  atualizado_em        DateTime  @default(now()) @db.Timestamptz(0)
+  finalizado_em        DateTime? @db.Timestamptz(0)
+  id_produto_expedicao String?   @db.Uuid
 
-  usuario  Usuario      @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
-  deck     Deck         @relation(fields: [id_deck], references: [id], onDelete: Restrict)
+  usuario  Usuario           @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+  deck     Deck              @relation(fields: [id_deck], references: [id], onDelete: Restrict)
   partidas LogPartida[]
+  produto  ProdutoExpedicao? @relation(fields: [id_produto_expedicao], references: [id], onDelete: SetNull)
 
   @@index([id_usuario, criado_em(sort: Desc)])
+  @@index([id_produto_expedicao])
   @@map("expedicao")
+}
+
+model ProdutoExpedicao {
+  id                         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome                       String    @db.VarChar(100)
+  descricao                  String    @db.VarChar(300)
+  tema                       String    @default("ARCANO") @db.VarChar(40)
+  tipo                       String    @default("RECORRENTE") @db.VarChar(20)
+  ativo                      Boolean   @default(true)
+  peso                       Int       @default(100)
+  inicio_em                  DateTime? @db.Timestamptz(0)
+  fim_em                     DateTime? @db.Timestamptz(0)
+  recompensa_facil           Int       @default(25)
+  recompensa_media           Int       @default(25)
+  recompensa_dificil         Int       @default(25)
+  recompensa_chefe           Int       @default(100)
+  percentual_mantido_derrota Int       @default(70)
+  boss_nome                  String    @default("Guardião da Expedição") @db.VarChar(100)
+  boss_personalidade         String    @default("Orgulhoso, estratégico e provocador, mas respeita a coragem.") @db.VarChar(600)
+  boss_provocacao            String    @default("Você atravessou minha trilha. Agora prove que merece sair dela.") @db.VarChar(500)
+  boss_perguntas             String[]  @default(["Por que você merece atravessar meu domínio?", "O que faria se sua carta mais forte caísse agora?", "Qual sacrifício aceitaria para vencer esta batalha?", "O que distingue coragem de imprudência?"])
+  boss_cartas                String[]  @default([])
+  criado_em                  DateTime  @default(now()) @db.Timestamptz(0)
+  atualizado_em              DateTime  @default(now()) @db.Timestamptz(0)
+
+  expedicoes Expedicao[]
+
+  @@index([ativo, inicio_em, fim_em])
+  @@map("produto_expedicao")
 }
 
 model ConfiguracaoCampanha {

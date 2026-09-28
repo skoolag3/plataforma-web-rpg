@@ -347,7 +347,37 @@ export type AdminCampanhaPainel = {
     criadoEm: string;
     finalizadoEm: string | null;
   }[];
+  produtos: AdminProdutoExpedicao[];
 };
+
+export type AdminProdutoExpedicao = {
+  id: string;
+  nome: string;
+  descricao: string;
+  tema: string;
+  tipo: "RECORRENTE" | "EVENTO";
+  ativo: boolean;
+  peso: number;
+  inicioEm: string | null;
+  fimEm: string | null;
+  recompensaFacil: number;
+  recompensaMedia: number;
+  recompensaDificil: number;
+  recompensaChefe: number;
+  percentualMantidoDerrota: number;
+  bossNome: string;
+  bossPersonalidade: string;
+  bossProvocacao: string;
+  bossPerguntas: string[];
+  bossCartas: string[];
+  criadoEm: string;
+  atualizadoEm: string;
+};
+
+export type SalvarProdutoExpedicaoPayload = Omit<
+  AdminProdutoExpedicao,
+  "id" | "criadoEm" | "atualizadoEm"
+>;
 
 export type AdminBoss = {
   nome: string;
@@ -628,6 +658,24 @@ export function atualizarAdminCampanha(
     method: "PATCH",
     body: JSON.stringify(configuracao),
   });
+}
+
+export function criarProdutoExpedicao(payload: SalvarProdutoExpedicaoPayload) {
+  return adminRequest<{ message: string; produto: AdminProdutoExpedicao }>(
+    "/admin/campanha/produtos",
+    { method: "POST", body: JSON.stringify(payload) },
+  );
+}
+
+export function atualizarProdutoExpedicao(id: string, payload: SalvarProdutoExpedicaoPayload) {
+  return adminRequest<{ message: string; produto: AdminProdutoExpedicao }>(
+    `/admin/campanha/produtos/${id}`,
+    { method: "PATCH", body: JSON.stringify(payload) },
+  );
+}
+
+export function excluirProdutoExpedicao(id: string) {
+  return adminRequest<{ message: string }>(`/admin/campanha/produtos/${id}`, { method: "DELETE" });
 }
 
 export function forcarAdminBanner(idBanner: string) {

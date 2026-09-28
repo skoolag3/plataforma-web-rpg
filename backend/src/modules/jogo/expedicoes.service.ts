@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { randomInt } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { PartidasService } from './partidas.service';
@@ -29,6 +30,9 @@ import {
 
 const expedicaoInclude = {
   deck: { select: { id: true, nome: true } },
+  produto: {
+    select: { id: true, nome: true, descricao: true, tema: true, tipo: true },
+  },
   partidas: {
     select: {
       id: true,
@@ -54,14 +58,7 @@ export class ExpedicoesService {
 
   async criar(idUsuario: string, idDeck: string) {
     await this.sincronizar(idUsuario);
-    const configuracao = await this.prisma.configuracaoCampanha.upsert({
-      where: { id: 1 },
-      create: { id: 1 },
-      update: {},
-    });
-    if (!configuracao.ativa) {
-      throw new ConflictException('A campanha está temporariamente pausada.');
-    }
+    const configuracao = await this.sortearProduto();
     const ativa = await this.prisma.expedicao.findFirst({
       where: { id_usuario: idUsuario, status: 'EM_ANDAMENTO' },
     });
@@ -80,6 +77,7 @@ export class ExpedicoesService {
       data: {
         id_usuario: idUsuario,
         id_deck: idDeck,
+        id_produto_expedicao: configuracao.id,
         seed,
         trilha: gerarTrilhaExpedicao(
           seed,
@@ -103,6 +101,34 @@ export class ExpedicoesService {
       },
     });
     return this.buscarAtual(idUsuario);
+  }
+
+  private async sortearProduto() {
+    const agora = new Date();
+    const produtos = await this.prisma.produtoExpedicao.findMany({
+      where: {
+        ativo: true,
+        AND: [
+          { OR: [{ inicio_em: null }, { inicio_em: { lte: agora } }] },
+          { OR: [{ fim_em: null }, { fim_em: { gte: agora } }] },
+        ],
+      },
+      orderBy: { criado_em: 'asc' },
+    });
+    if (!produtos.length)
+      throw new ConflictException(
+        'Nenhum produto de expedição está disponível agora.',
+      );
+    const pesoTotal = produtos.reduce(
+      (total, produto) => total + produto.peso,
+      0,
+    );
+    let sorteio = randomInt(pesoTotal);
+    for (const produto of produtos) {
+      sorteio -= produto.peso;
+      if (sorteio < 0) return produto;
+    }
+    return produtos[0];
   }
 
   async buscarAtual(idUsuario: string) {
@@ -461,6 +487,7 @@ export class ExpedicoesService {
       etapaAtual: expedicao.etapa_atual,
       totalEtapas: 4,
       deck: expedicao.deck,
+      produto: expedicao.produto,
       escolhas: expedicao.escolhas,
       etapas: trilha.etapas.map((etapa) => ({
         indice: etapa.indice,

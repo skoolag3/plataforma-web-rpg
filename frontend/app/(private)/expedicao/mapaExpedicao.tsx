@@ -167,7 +167,7 @@ export function MapaExpedicao({
       <header className={styles.headerMapa}>
         <div>
           <span className={styles.sobretituloMapa}>
-            <Footprints /> Trilha #{expedicao.seed.toString().slice(-6)}
+            <Footprints /> {expedicao.produto?.nome ?? `Trilha #${expedicao.seed.toString().slice(-6)}`}
           </span>
           <h2>
             {expedicao.etapaAtual === expedicao.etapas.length

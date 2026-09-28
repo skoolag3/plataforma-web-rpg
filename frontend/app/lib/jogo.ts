@@ -244,6 +244,13 @@ export type EstadoExpedicao = {
   etapaAtual: number;
   totalEtapas: number;
   deck: { id: string; nome: string };
+  produto: {
+    id: string;
+    nome: string;
+    descricao: string;
+    tema: string;
+    tipo: "RECORRENTE" | "EVENTO";
+  } | null;
   escolhas: string[];
   etapas: Array<{
     indice: number;
