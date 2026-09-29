@@ -270,11 +270,12 @@
   }
   .links > a {
     width: 100%;
-    min-height: 2.8rem;
+    min-height: 3.7rem;
+    flex-direction: column;
     justify-content: center;
-    gap: 0;
+    gap: 0.25rem;
     border-radius: 0.65rem;
-    padding-inline: 0;
+    padding: 0.3rem 0.2rem;
   }
   .links > a[aria-current="page"] {
     border-left-color: #bef264;
@@ -288,7 +289,15 @@
     color: #fff;
   }
   .links > a > span {
-    display: none;
+    display: block;
+    max-width: 100%;
+    overflow: visible;
+    opacity: 1;
+    transform: none;
+    font-size: 0.58rem;
+    line-height: 1.1;
+    text-align: center;
+    white-space: normal;
   }
   .usuario {
     display: flex;

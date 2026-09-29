@@ -352,12 +352,6 @@
   .usuarioModal .usuarioResumo {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .usuariosBarraCompacta {
-    grid-template-columns: 1fr;
-  }
-  .usuariosBarraCompacta > small {
-    display: none;
-  }
   .usuariosListaPanel .tableWrap table,
   .usuariosListaPanel .tableWrap tbody,
   .usuariosListaPanel .tableWrap tr,
@@ -403,9 +397,6 @@
   .usuariosListaPanel .tableWrap td:last-child {
     border-bottom: 0;
   }
-  .usuariosListaPanel .rowActions {
-    justify-content: flex-start;
-  }
   .usuarioTabs button {
     flex: 1;
     justify-content: center;
@@ -447,10 +438,16 @@
 
 @media (max-width: 430px) {
   .usuariosListaPanel .tableWrap tr {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .usuariosListaPanel .tableWrap td {
-    grid-column: 1 !important;
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+    padding: 0.45rem;
+  }
+  .usuariosListaPanel .tableWrap td:first-child,
+  .usuariosListaPanel .tableWrap td:last-child {
+    grid-column: 1 / -1;
   }
   .usuarioTabs button span {
     display: none;

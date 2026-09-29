@@ -582,7 +582,19 @@
     --xCarta: 6.625rem;
   }
   .caminhos {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+  .caminhos > a {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.45rem;
+    padding: 0.65rem 0.5rem;
+  }
+  .caminhos > a > svg {
+    display: none;
+  }
+  .caminhos strong {
+    font-size: 0.68rem;
   }
   .caminhos em {
     display: none;
