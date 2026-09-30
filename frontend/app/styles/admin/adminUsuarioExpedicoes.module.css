@@ -1,0 +1,20 @@
+.painel { padding: 1.1rem 1.25rem 1.3rem; }
+.painel header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.painel header > span { display: flex; align-items: center; gap: .7rem; }
+.painel header svg { width: 1.2rem; color: #9d7aff; }
+.painel header div { display: grid; gap: .15rem; }
+.painel header small, .lista small { color: #9b9aac; }
+.painel header strong { color: #f4f1ff; }
+.painel header b { color: #bcb4d8; font-size: .8rem; }
+.lista { display: grid; gap: .55rem; }
+.lista article { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; gap: 1rem; padding: .75rem .8rem; border: 1px solid rgba(255,255,255,.08); border-radius: .7rem; background: rgba(255,255,255,.025); }
+.lista article > div { display: grid; gap: .15rem; min-width: 0; }
+.lista article strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #f4f1ff; }
+.lista article > span { padding: .25rem .5rem; border-radius: 999px; background: rgba(157,122,255,.15); color: #c7b6ff; font-size: .75rem; white-space: nowrap; }
+.lista article > span[data-status="CONCLUIDA"] { color: #8ee0b0; background: rgba(74,190,125,.12); }
+.lista article > span[data-status="FALHOU"], .lista article > span[data-status="ABANDONADA"] { color: #ffaaa8; background: rgba(232,93,93,.12); }
+.lista article b { display: inline-flex; align-items: center; gap: .25rem; color: #f5cf6a; font-size: .8rem; }
+.lista article b svg { width: .9rem; }
+.mensagem, .erro, .vazio { padding: 1.5rem 0; color: #aaa5b9; }
+.erro { color: #ffaaa8; }
+@media (max-width: 650px) { .lista article { grid-template-columns: 1fr auto; } .lista article > small { text-align: right; } }

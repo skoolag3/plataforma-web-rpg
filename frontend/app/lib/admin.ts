@@ -226,6 +226,16 @@ export type AdminUsuarioAtividade = {
   detalhes: Record<string, unknown> | null;
 };
 
+export type AdminUsuarioExpedicao = {
+  id: string;
+  deck: string;
+  status: string;
+  etapaAtual: number;
+  rubys: number;
+  criadoEm: string;
+  finalizadoEm: string | null;
+};
+
 export type AjusteSaldoUsuarioPayload = {
   rubys: number;
   motivo: string;
@@ -735,6 +745,10 @@ export function obterAtividadeAdminUsuario(id: string, limite = 50) {
   return adminRequest<AdminUsuarioAtividade[]>(
     `/admin/usuarios/${id}/atividade?limite=${limite}`,
   );
+}
+
+export function obterExpedicoesAdminUsuario(id: string) {
+  return adminRequest<AdminUsuarioExpedicao[]>(`/admin/usuarios/${id}/expedicoes`);
 }
 
 export function ajustarColecaoAdminUsuario(

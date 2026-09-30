@@ -1,6 +1,6 @@
 "use client";
 
-import { Layers, ReceiptText, UserRound, X } from "lucide-react";
+import { Layers, Map, ReceiptText, UserRound, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import {
@@ -20,6 +20,7 @@ import financeiroStyles from "../../styles/admin/adminUsuarioFinanceiro.module.c
 
 import { AdminUsuarioColecao } from "./adminUsuarioColecao";
 import { AdminUsuarioFinanceiro } from "./adminUsuarioFinanceiro";
+import { AdminUsuarioExpedicoes } from "./adminUsuarioExpedicoes";
 import { combinarEstilos } from "./combinarEstilos";
 import {
   notificarErro,
@@ -33,7 +34,7 @@ const styles = combinarEstilos(
   financeiroStyles,
 );
 
-type AbaUsuario = "colecao" | "financeiro";
+type AbaUsuario = "colecao" | "financeiro" | "expedicoes";
 
 type Props = {
   usuario: AdminUsuario;
@@ -235,6 +236,13 @@ export function AdminUsuarioPainel({
           >
             <ReceiptText /> Financeiro
           </button>
+          <button
+            type="button"
+            className={aba === "expedicoes" ? styles.usuarioTabAtiva : ""}
+            onClick={() => setAba("expedicoes")}
+          >
+            <Map /> Expedições
+          </button>
         </nav>
 
         {erro ? <p className={styles.feedbackError}>{erro}</p> : null}
@@ -256,6 +264,7 @@ export function AdminUsuarioPainel({
             onAjustarSaldo={ajustarSaldo}
           />
         ) : null}
+        {aba === "expedicoes" ? <AdminUsuarioExpedicoes id={usuario.id} /> : null}
       </section>
     </div>
   );
