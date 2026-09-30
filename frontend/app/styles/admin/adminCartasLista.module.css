@@ -603,3 +603,22 @@
   top: auto;
   bottom: calc(100% + 0.3rem);
 }
+
+.btnHistoricoCartas {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  border: 1px solid rgba(167, 139, 250, .35);
+  border-radius: .55rem;
+  color: #ddd6fe;
+  background: rgba(124, 58, 237, .15);
+  text-decoration: none;
+  font-size: .7rem;
+  font-weight: 800;
+}
+.btnHistoricoCartas svg { width: .9rem; height: .9rem; }
+.btnHistoricoCartas:hover { background: rgba(124, 58, 237, .25); }
+.btnHistoricoCartas:focus-visible { outline: 2px solid #ddd6fe; outline-offset: 2px; }
+@media (max-width: 600px) { .btnHistoricoCartas { flex: 1 1 100%; } }

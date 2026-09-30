@@ -6,6 +6,7 @@ import {
   CircleOff,
   Gem,
   ImagePlus,
+  History,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -279,6 +280,9 @@ export function Cartas() {
               </small>
             </div>
             <div className={styles.cartasListaAcoes}>
+              <Link href="/admin/cartas/historico" className={styles.btnHistoricoCartas}>
+                <History aria-hidden="true" /> Histórico
+              </Link>
               <SelectPadrao
                 className={styles.ordenacaoCartas}
                 ariaLabel="Ordenar cartas"
