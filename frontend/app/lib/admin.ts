@@ -146,6 +146,21 @@ export type AdminCartaImpacto = {
   usuariosComCarta: number;
 };
 
+export type AdminCartaHistorico = {
+  id: string;
+  idCarta: string;
+  nomeCarta: string;
+  acao: 'CRIADA' | 'ALTERADA' | 'REMOVIDA' | 'RESTAURADA';
+  alteracoes: Record<string, { antes: unknown; depois: unknown }> | null;
+  criadoEm: string;
+  autor: { nome: string; email: string } | null;
+};
+
+export type AdminCartasHistoricoPainel = {
+  registros: AdminCartaHistorico[];
+  paginacao: { pagina: number; porPagina: number; total: number; totalPaginas: number };
+};
+
 export type AdminClasse = {
   id: string;
   nome: string;
@@ -540,6 +555,13 @@ export function criarAdminCarta(payload: CreateAdminCartaPayload) {
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+
+export function listarHistoricoAdminCartas(filtros: { pagina: number; busca: string; acao: string }) {
+  const params = new URLSearchParams({ pagina: String(filtros.pagina) });
+  if (filtros.busca) params.set('busca', filtros.busca);
+  if (filtros.acao) params.set('acao', filtros.acao);
+  return adminRequest<AdminCartasHistoricoPainel>(`/admin/cartas/historico?${params}`);
 }
 
 export function atualizarAdminCarta(

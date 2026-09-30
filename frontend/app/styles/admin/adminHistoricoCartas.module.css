@@ -1,0 +1,35 @@
+.topo { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; color: #bcb4d8; font-size: .78rem; }
+.topo a, .topo span { display: inline-flex; align-items: center; gap: .45rem; color: inherit; text-decoration: none; }
+.topo a:hover { color: #fff; }
+.topo svg, .paginacao svg { width: 1rem; height: 1rem; }
+.painel { border: 1px solid rgba(148,163,184,.16); border-radius: .8rem; background: #0b111d; overflow: hidden; }
+.filtros { display: flex; align-items: end; flex-wrap: wrap; gap: .55rem; padding: 1rem; border-bottom: 1px solid rgba(148,163,184,.14); }
+.filtros label { display: grid; gap: .3rem; min-width: 11rem; color: #a7b1c7; font-size: .72rem; }
+.campoAcao { display: grid; gap: .3rem; width: 11rem; color: #a7b1c7; font-size: .72rem; }
+.seletorAcao { min-height: 2.45rem; height: 2.45rem; }
+.filtros input, .filtros select { height: 2.45rem; border: 1px solid rgba(148,163,184,.25); border-radius: .5rem; background: #111827; color: #f8fafc; padding: 0 .7rem; font: inherit; }
+.filtros > button { display: grid; place-items: center; height: 2.45rem; width: 2.45rem; padding: 0; border: 1px solid rgba(148,163,184,.25); border-radius: .5rem; background: #241642; color: #ddd6fe; cursor: pointer; }
+.filtros > button svg { display: block; width: 1rem; height: 1rem; }
+.lista article { display: grid; grid-template-columns: 6rem minmax(0,1fr) 11rem 9rem; align-items: center; gap: .8rem; padding: .85rem 1rem; border-bottom: 1px solid rgba(148,163,184,.1); color: #cbd5e1; font-size: .76rem; }
+.lista article > div { display: grid; gap: .22rem; min-width: 0; }
+.lista strong { color: #f8fafc; overflow: hidden; text-overflow: ellipsis; }
+.lista small { color: #94a3b8; }
+.detalhes { color: #aab7d0; font-size: .7rem; }
+.detalhes summary { cursor: pointer; }
+.detalhes ul { margin: .45rem 0 0; padding-left: 1rem; }
+.detalhes li { margin: .2rem 0; overflow-wrap: anywhere; }
+.acao { display: inline-flex; width: fit-content; align-items: center; gap: .28rem; padding: .28rem .55rem; border-radius: 999px; color: #a9e9bd; background: rgba(34,197,94,.12); font-size: .68rem; font-weight: 800; white-space: nowrap; }
+.acao svg { width: .78rem; height: .78rem; flex: none; }
+.acao[data-acao="ALTERADA"] { color: #c7b6ff; background: rgba(124,58,237,.18); }
+.acao[data-acao="REMOVIDA"] { color: #ffb4b4; background: rgba(239,68,68,.15); }
+.acao[data-acao="RESTAURADA"] { color: #9de6d7; background: rgba(20,184,166,.15); }
+.autor { color: #a7b1c7; }
+.lista time { color: #94a3b8; white-space: nowrap; }
+.mensagem, .erro { padding: 1.3rem; color: #a7b1c7; }
+.erro { color: #fca5a5; }
+.erro button { margin-left: .5rem; color: inherit; background: transparent; border: 0; text-decoration: underline; cursor: pointer; }
+.paginacao { display: flex; align-items: center; justify-content: flex-end; gap: .7rem; padding: .8rem 1rem; color: #a7b1c7; font-size: .75rem; }
+.paginacao button { display: inline-flex; align-items: center; gap: .2rem; border: 1px solid rgba(148,163,184,.25); border-radius: .5rem; background: #151d2d; color: #e2e8f0; padding: .4rem .6rem; cursor: pointer; }
+.paginacao button:disabled { opacity: .45; cursor: default; }
+.legado { color: #94a3b8; font-size: .72rem; margin-top: .75rem; }
+@media (max-width: 700px) { .lista article { grid-template-columns: 6rem minmax(0,1fr); } .autor, .lista time { grid-column: 2; } }
