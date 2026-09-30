@@ -31,22 +31,28 @@ describe('AdminClassesService', () => {
     service = new AdminClassesService(prisma as never);
   });
 
-  it('cria uma classe com prioridade e modificadores', async () => {
+  it('cria uma classe apenas com prioridade', async () => {
     await expect(
       service.criar({
         nome: 'Assassino',
         descricao: 'Ataca primeiro.',
         prioridadeAtaque: 1,
-        modificadorHp: 0,
-        modificadorAtaque: 15,
-        modificadorDefesa: -15,
       }),
     ).resolves.toMatchObject({
       nome: 'Assassino',
       prioridadeAtaque: 1,
-      modificadorAtaque: 15,
       totalCartas: 2,
     });
+    expect(prisma.classeCarta.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          prioridade_ataque: 1,
+          modificador_hp: 0,
+          modificador_ataque: 0,
+          modificador_defesa: 0,
+        }),
+      }),
+    );
   });
 
   it('rejeita nome de classe duplicado', async () => {
@@ -56,9 +62,6 @@ describe('AdminClassesService', () => {
       service.criar({
         nome: 'assassino',
         prioridadeAtaque: 1,
-        modificadorHp: 0,
-        modificadorAtaque: 0,
-        modificadorDefesa: 0,
       }),
     ).rejects.toBeInstanceOf(ConflictException);
   });

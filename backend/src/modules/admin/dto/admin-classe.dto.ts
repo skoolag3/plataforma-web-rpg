@@ -23,20 +23,6 @@ export class CriarAdminClasseDto {
   @Max(99)
   prioridadeAtaque!: number;
 
-  @IsInt()
-  @Min(-90)
-  @Max(300)
-  modificadorHp!: number;
-
-  @IsInt()
-  @Min(-90)
-  @Max(300)
-  modificadorAtaque!: number;
-
-  @IsInt()
-  @Min(-90)
-  @Max(300)
-  modificadorDefesa!: number;
 }
 
 export class AtualizarAdminClasseDto extends CriarAdminClasseDto {

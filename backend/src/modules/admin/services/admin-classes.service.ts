@@ -62,9 +62,9 @@ export class AdminClassesService {
       nome: dto.nome.trim(),
       descricao: dto.descricao?.trim() || null,
       prioridade_ataque: dto.prioridadeAtaque,
-      modificador_hp: dto.modificadorHp,
-      modificador_ataque: dto.modificadorAtaque,
-      modificador_defesa: dto.modificadorDefesa,
+      modificador_hp: 0,
+      modificador_ataque: 0,
+      modificador_defesa: 0,
     };
   }
 
@@ -73,9 +73,6 @@ export class AdminClassesService {
     nome: string;
     descricao: string | null;
     prioridade_ataque: number;
-    modificador_hp: number;
-    modificador_ataque: number;
-    modificador_defesa: number;
     ativo: boolean;
     _count: { cartas: number };
   }) {
@@ -84,9 +81,6 @@ export class AdminClassesService {
       nome: classe.nome,
       descricao: classe.descricao,
       prioridadeAtaque: classe.prioridade_ataque,
-      modificadorHp: classe.modificador_hp,
-      modificadorAtaque: classe.modificador_ataque,
-      modificadorDefesa: classe.modificador_defesa,
       ativo: classe.ativo,
       totalCartas: classe._count.cartas,
     };

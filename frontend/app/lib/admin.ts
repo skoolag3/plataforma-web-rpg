@@ -151,9 +151,6 @@ export type AdminClasse = {
   nome: string;
   descricao: string | null;
   prioridadeAtaque: number;
-  modificadorHp: number;
-  modificadorAtaque: number;
-  modificadorDefesa: number;
   ativo: boolean;
   totalCartas: number;
 };
@@ -162,9 +159,6 @@ export type SalvarAdminClassePayload = {
   nome: string;
   descricao?: string;
   prioridadeAtaque: number;
-  modificadorHp: number;
-  modificadorAtaque: number;
-  modificadorDefesa: number;
   ativo?: boolean;
 };
 

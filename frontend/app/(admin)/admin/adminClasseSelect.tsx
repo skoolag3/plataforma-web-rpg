@@ -16,9 +16,6 @@ const classeVazia: SalvarAdminClassePayload = {
   nome: "",
   descricao: "",
   prioridadeAtaque: 3,
-  modificadorHp: 0,
-  modificadorAtaque: 0,
-  modificadorDefesa: 0,
   ativo: true,
 };
 
@@ -51,9 +48,6 @@ export function AdminClasseSelect({
             nome: classe.nome,
             descricao: classe.descricao ?? "",
             prioridadeAtaque: classe.prioridadeAtaque,
-            modificadorHp: classe.modificadorHp,
-            modificadorAtaque: classe.modificadorAtaque,
-            modificadorDefesa: classe.modificadorDefesa,
             ativo: classe.ativo,
           }
         : classeVazia,
@@ -135,13 +129,7 @@ export function AdminClasseSelect({
           <Pencil />
         </button>
       </div>
-      {selecionada ? (
-        <small>
-          HP {formatarBonus(selecionada.modificadorHp)} · ATK{" "}
-          {formatarBonus(selecionada.modificadorAtaque)} · DEF{" "}
-          {formatarBonus(selecionada.modificadorDefesa)}
-        </small>
-      ) : null}
+      {selecionada ? <small>Prioridade {selecionada.prioridadeAtaque}</small> : null}
 
       {editando !== undefined ? (
         <div className={styles.fundoModal} role="presentation">
@@ -183,25 +171,6 @@ export function AdminClasseSelect({
                 max={99}
                 onChange={(valor) =>
                   setForm({ ...form, prioridadeAtaque: valor })
-                }
-              />
-              <CampoNumero
-                label="HP %"
-                value={form.modificadorHp}
-                onChange={(valor) => setForm({ ...form, modificadorHp: valor })}
-              />
-              <CampoNumero
-                label="ATK %"
-                value={form.modificadorAtaque}
-                onChange={(valor) =>
-                  setForm({ ...form, modificadorAtaque: valor })
-                }
-              />
-              <CampoNumero
-                label="DEF %"
-                value={form.modificadorDefesa}
-                onChange={(valor) =>
-                  setForm({ ...form, modificadorDefesa: valor })
                 }
               />
             </div>
@@ -261,8 +230,4 @@ function CampoNumero({
       />
     </label>
   );
-}
-
-function formatarBonus(valor: number) {
-  return `${valor > 0 ? "+" : ""}${valor}%`;
 }
