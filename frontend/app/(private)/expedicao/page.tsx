@@ -109,7 +109,9 @@ export default function ExpedicaoPage() {
 
   return (
     <main className={styles.pagina}>
-      <section className={styles.container}>
+      <section
+        className={`${styles.container} ${!expedicao || expedicao.status !== "EM_ANDAMENTO" ? styles.containerInicio : ""}`}
+      >
         <header className={styles.topo}>
           <div>
             <span>

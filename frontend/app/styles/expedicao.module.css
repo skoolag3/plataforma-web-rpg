@@ -13,6 +13,15 @@
   width: min(76rem, 100%);
   margin: auto;
 }
+.containerInicio {
+  width: min(64rem, 100%);
+}
+.containerInicio .topo {
+  margin-bottom: 0.8rem;
+}
+.containerInicio .topo h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
 .estado {
   display: grid;
   min-height: calc(100dvh - 4.7rem);
@@ -98,7 +107,7 @@
 }
 .inicioExpedicao {
   display: grid;
-  gap: 0.85rem;
+  gap: 0.65rem;
 }
 .mapa {
   width: min(58rem, 100%);
@@ -160,7 +169,7 @@
 }
 .resumoEtapas::before {
   position: absolute;
-  top: 1.12rem;
+  top: 1.2rem;
   right: calc(12.5% + 1rem);
   left: calc(12.5% + 1rem);
   height: 1px;
@@ -171,25 +180,33 @@
   position: relative;
   z-index: 1;
   display: grid;
+  grid-template-rows: 1.3rem auto;
   justify-items: center;
-  gap: 0.22rem;
+  align-content: start;
+  gap: 0.25rem;
   color: #626b80;
 }
 .resumoEtapas li > span {
   display: grid;
-  width: 1.18rem;
-  height: 1.18rem;
+  box-sizing: border-box;
+  width: 1.3rem;
+  height: 1.3rem;
   place-items: center;
   border: 1px solid #30364a;
   border-radius: 50%;
   background: #0b0f1a;
-  font-size: 0.5rem;
+  font-size: 0.55rem;
   font-weight: 900;
+  line-height: 1;
 }
 .resumoEtapas li svg {
-  width: 0.58rem;
+  display: block;
+  width: 0.65rem;
+  height: 0.65rem;
 }
 .resumoEtapas li small {
+  line-height: 1.2;
+  text-align: center;
   font-size: 0.48rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -262,6 +279,7 @@
 
 .controlesZoom svg {
   width: 0.8rem;
+  height: 0.8rem;
 }
 
 .controlesZoom output {
@@ -286,6 +304,10 @@
 
 .viewportTrilha[data-arrastando="true"] {
   cursor: grabbing;
+}
+
+.viewportTrilha[data-ampliado="true"] {
+  touch-action: none;
 }
 
 .viewportTrilha::before {
@@ -436,11 +458,11 @@
 }
 .noConfronto[data-lado="direita"]:hover,
 .noConfronto[data-lado="direita"]:focus-visible {
-  transform: translate(0, -50%);
+  transform: translate(-50%, -50%);
 }
 .noConfronto[data-lado="esquerda"]:hover,
 .noConfronto[data-lado="esquerda"]:focus-visible {
-  transform: translate(-100%, -50%);
+  transform: translate(-50%, -50%);
 }
 .noConfronto[data-dificuldade="FACIL"] {
   --cor-no: #c8f77a;
@@ -476,17 +498,17 @@
 }
 .noConfronto[data-disponivel="true"]:hover {
   border-color: var(--cor-no);
-  transform: translate(-50%, calc(-50% - 0.18rem));
+  transform: translate(-50%, -50%);
   box-shadow: 0 0.8rem 1.8rem color-mix(in srgb, var(--cor-no) 13%, transparent);
 }
 .noConfronto[data-disponivel="true"][data-lado="direita"]:hover {
-  transform: translate(0, calc(-50% - 0.18rem));
+  transform: translate(-50%, -50%);
 }
 .noConfronto[data-disponivel="true"][data-lado="esquerda"]:hover {
-  transform: translate(-100%, calc(-50% - 0.18rem));
+  transform: translate(-50%, -50%);
 }
 .noConfronto[data-disponivel="true"]:active {
-  transform: translate(-50%, calc(-50% + 1px));
+  transform: translate(-50%, -50%);
 }
 .noConfronto[data-disponivel="true"]:focus-visible,
 .noChefe[data-disponivel="true"]:focus-visible {
@@ -530,6 +552,7 @@
 .iconeConfronto svg,
 .setaConfronto {
   width: 0.82rem;
+  height: 0.82rem;
   stroke-width: 1.7;
 }
 .textoConfronto {
@@ -635,6 +658,7 @@
 .iconeChefe svg,
 .noChefe > svg {
   width: 0.82rem;
+  height: 0.82rem;
   stroke-width: 1.7;
 }
 .noChefe small,
@@ -678,6 +702,7 @@
 }
 .checkpointTrilha svg {
   width: 0.72rem;
+  height: 0.72rem;
   stroke-width: 1.7;
 }
 .checkpointTrilha small {
@@ -739,6 +764,7 @@
 }
 .marcaEntrada svg {
   width: 0.78rem;
+  height: 0.78rem;
   stroke-width: 1.7;
 }
 .entradaTrilha small {
@@ -836,17 +862,17 @@
 
 .novaExpedicao {
   display: grid;
-  grid-template-columns: minmax(18rem, 1fr) minmax(22rem, 0.7fr) auto;
-  gap: 1.25rem;
+  grid-template-columns: minmax(15rem, 1fr) minmax(20rem, 0.9fr) auto;
+  gap: 0.9rem;
   align-items: center;
-  padding: 1.1rem;
+  padding: 0.9rem;
 }
 .resumoNova {
   justify-content: flex-start;
   align-items: flex-start;
 }
 .resumoNova > svg {
-  width: 2rem;
+  width: 1.5rem;
   color: #a78bfa;
 }
 .resumoNova > span {
@@ -859,12 +885,12 @@
 }
 .resumoNova h2 {
   margin: 0.2rem 0 0;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
 }
 .seletorDeck {
   display: grid;
   min-width: 0;
-  gap: 0.65rem;
+  gap: 0.45rem;
 }
 .seletorDeckCustom {
   position: relative;
@@ -881,7 +907,7 @@
 .btnSelecionarDeck {
   display: flex;
   width: 100%;
-  min-height: 3.1rem;
+  min-height: 2.8rem;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -977,8 +1003,8 @@
 }
 .previaDeck > div {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 3.7rem));
-  min-height: 5.4rem;
+  grid-template-columns: repeat(6, minmax(0, 3.1rem));
+  min-height: 4.5rem;
   align-items: center;
   gap: 0.35rem;
   overflow: visible;
@@ -1094,13 +1120,68 @@
     min-width: auto;
   }
   .viewportTrilha {
-    height: 25rem;
+    height: 30rem;
   }
-  .barraMapa > span {
+  .areaTrilha {
+    left: 0;
+    width: 100%;
+    transform: translate(var(--pan-x), var(--pan-y)) scale(var(--zoom-trilha));
+    transform-origin: center top;
+  }
+  .noConfronto:not([data-disponivel="true"]):is(:hover, :focus-visible) {
+    width: 2.65rem;
+    height: 2.65rem;
+    grid-template-columns: auto 0 0;
+    gap: 0;
+    transform: translate(-50%, -50%);
+  }
+  .noConfronto[data-disponivel="true"] {
+    box-sizing: border-box;
+    width: min(30%, 6rem);
+    height: 4.25rem;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    align-content: center;
+    gap: 0.22rem;
+    padding: 0.35rem 0.25rem;
+    background: #0d121b;
+    text-align: center;
+  }
+  .noConfronto[data-disponivel="true"]:is(:hover, :focus-visible, :active),
+  .noConfronto[data-disponivel="true"][data-lado]:is(:hover, :focus-visible, :active) {
+    width: min(30%, 6rem);
+    height: 4.25rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.22rem;
+    transform: translate(-50%, -50%);
+  }
+  .noConfronto[data-disponivel="true"] .iconeConfronto {
+    width: 1.55rem;
+    height: 1.55rem;
+    flex: 0 0 auto;
+  }
+  .noConfronto[data-disponivel="true"] .iconeConfronto svg {
+    display: block;
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+  .noConfronto[data-disponivel="true"] .textoConfronto {
+    width: 100%;
+  }
+  .noConfronto[data-disponivel="true"] .setaConfronto {
     display: none;
   }
+  .barraMapa > span {
+    max-width: 8.5rem;
+    font-size: 0;
+  }
+  .barraMapa > span::after {
+    content: "Amplie para mover o mapa";
+    font-size: 0.48rem;
+    line-height: 1.2;
+  }
   .barraMapa {
-    justify-content: flex-end;
+    justify-content: space-between;
   }
   .resumoEtapas {
     padding-inline: 0.55rem;
@@ -1109,11 +1190,15 @@
     font-size: 0.42rem;
   }
   .textoConfronto strong {
-    max-width: 4.7rem;
+    max-width: 100%;
     font-size: 0.56rem;
+    line-height: 1.15;
   }
   .textoConfronto small {
-    font-size: 0.43rem;
+    max-height: 1rem;
+    overflow: hidden;
+    font-size: 0.42rem;
+    line-height: 1.2;
   }
   .setaConfronto {
     width: 0.72rem;

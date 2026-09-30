@@ -84,6 +84,7 @@ export function MapaExpedicao({
   function iniciarPan(event: ReactPointerEvent<HTMLDivElement>) {
     if (event.button !== 0 || (event.target as HTMLElement).closest("button"))
       return;
+    if (event.pointerType === "touch" && zoom <= 1) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     arrasteRef.current = {
       ativo: true,
@@ -248,6 +249,7 @@ export function MapaExpedicao({
       <div
         className={styles.viewportTrilha}
         data-arrastando={arrastando || undefined}
+        data-ampliado={zoom > 1 || undefined}
         ref={viewportRef}
         onPointerDown={iniciarPan}
         onPointerMove={moverPan}
@@ -633,7 +635,7 @@ function gerarLayoutTrilha(totalEtapas: number): LayoutTrilha {
     { length: totalEtapas },
     (_, indice) => 76 - indice * 24,
   );
-  const posicoesX = Array.from({ length: totalEtapas }, () => [24, 50, 76]);
+  const posicoesX = Array.from({ length: totalEtapas }, () => [17, 50, 83]);
   const checkpointsY = posicoesY.map((posicao) => posicao - 10);
   const checkpointsX = checkpointsY.map(() => 50);
   return { posicoesX, posicoesY, checkpointsX, checkpointsY };
