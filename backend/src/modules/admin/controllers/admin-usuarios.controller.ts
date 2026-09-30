@@ -43,6 +43,11 @@ export class AdminUsuariosController {
     return this.usuariosService.buscarAtividade(id, limite);
   }
 
+  @Get(':id/expedicoes')
+  buscarExpedicoes(@Param('id') id: string) {
+    return this.usuariosService.buscarExpedicoes(id);
+  }
+
   @Patch(':id/colecao')
   ajustarColecao(
     @Param('id') id: string,

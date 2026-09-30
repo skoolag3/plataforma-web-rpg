@@ -73,6 +73,28 @@ export class AdminUsuariosService {
     return this.toResponse(usuario);
   }
 
+  async buscarExpedicoes(id: string) {
+    await this.buscar(id);
+    const expedicoes = await this.prisma.expedicao.findMany({
+      where: { id_usuario: id },
+      orderBy: [{ criado_em: 'desc' }, { id: 'desc' }],
+      take: 50,
+      include: {
+        deck: { select: { nome: true } },
+        partidas: { select: { recompensa_rubys: true } },
+      },
+    });
+    return expedicoes.map((expedicao) => ({
+      id: expedicao.id,
+      deck: expedicao.deck.nome,
+      status: expedicao.status,
+      etapaAtual: expedicao.etapa_atual,
+      rubys: expedicao.partidas.reduce((total, partida) => total + partida.recompensa_rubys, 0),
+      criadoEm: expedicao.criado_em,
+      finalizadoEm: expedicao.finalizado_em,
+    }));
+  }
+
   async atualizar(id: string, dto: UpdateAdminUsuarioDto, idAdmin: string) {
     const atual = await this.buscar(id);
     if (atual.admin && (dto.bloqueado === true || dto.ativo === false)) {
