@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -14,6 +15,7 @@ import type { AuthenticatedUser } from '../../../common/decorators/current-user.
 import {
   AjustarColecaoUsuarioDto,
   AjustarSaldoUsuarioDto,
+  RemoverAdminUsuarioDto,
   UpdateAdminUsuarioDto,
 } from '../dto/admin-usuario.dto';
 import { AdminUsuariosService } from '../services/admin-usuarios.service';
@@ -73,5 +75,14 @@ export class AdminUsuariosController {
     @CurrentUser() admin: AuthenticatedUser,
   ) {
     return this.usuariosService.atualizar(id, dto, admin.id);
+  }
+
+  @Delete(':id')
+  remover(
+    @Param('id') id: string,
+    @Body() dto: RemoverAdminUsuarioDto,
+    @CurrentUser() admin: AuthenticatedUser,
+  ) {
+    return this.usuariosService.remover(id, dto, admin.id);
   }
 }

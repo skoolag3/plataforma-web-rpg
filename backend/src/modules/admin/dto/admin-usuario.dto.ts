@@ -36,6 +36,16 @@ export class UpdateAdminUsuarioDto {
   emailVerificado?: boolean;
 }
 
+export class RemoverAdminUsuarioDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  confirmarNome: string;
+
+  @IsBoolean()
+  confirmarImpacto: boolean;
+}
+
 export class AjustarSaldoUsuarioDto {
   @IsInt()
   @Min(-1000000)

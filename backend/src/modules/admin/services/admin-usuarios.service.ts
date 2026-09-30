@@ -8,6 +8,7 @@ import { PrismaService } from '../../../database/prisma.service';
 import {
   AjustarColecaoUsuarioDto,
   AjustarSaldoUsuarioDto,
+  RemoverAdminUsuarioDto,
   UpdateAdminUsuarioDto,
 } from '../dto/admin-usuario.dto';
 
@@ -155,6 +156,61 @@ export class AdminUsuariosService {
     });
 
     return this.toResponse(usuario);
+  }
+
+  async remover(id: string, dto: RemoverAdminUsuarioDto, idAdmin: string) {
+    if (id === idAdmin) {
+      throw new BadRequestException('Você não pode remover sua própria conta.');
+    }
+    if (!dto.confirmarImpacto) {
+      throw new BadRequestException('Confirme o impacto da remoção.');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      const usuario = await tx.usuario.findFirst({
+        where: { id, excluido_em: null },
+        select: { nome: true, email: true, is_admin: true },
+      });
+      if (!usuario) throw new NotFoundException('Usuário não encontrado.');
+      if (usuario.is_admin) {
+        throw new BadRequestException(
+          'Contas administrativas não podem ser removidas.',
+        );
+      }
+      if (dto.confirmarNome.trim() !== usuario.nome) {
+        throw new BadRequestException(
+          'O nome de confirmação não corresponde ao usuário.',
+        );
+      }
+
+      const removido = await tx.usuario.updateMany({
+        where: { id, excluido_em: null, is_admin: { not: true } },
+        data: {
+          ativo: false,
+          bloqueado: true,
+          excluido_em: new Date(),
+          atualizado_em: new Date(),
+        },
+      });
+      if (removido.count !== 1) {
+        throw new BadRequestException(
+          'A conta foi alterada. Atualize a lista e tente novamente.',
+        );
+      }
+
+      await tx.logAdminUsuario.create({
+        data: {
+          id_admin: idAdmin,
+          id_usuario: id,
+          acao: 'CONTA_REMOVIDA',
+          categoria: 'CONTA',
+          descricao: 'Conta removida logicamente por um administrador.',
+          detalhes: { nome: usuario.nome, email: usuario.email },
+        },
+      });
+    });
+
+    return { message: 'Usuário removido.' };
   }
 
   async buscarColecao(id: string) {
@@ -500,6 +556,7 @@ export class AdminUsuariosService {
       REEMBOLSO: 'Reembolso',
       ESTORNO: 'Estorno',
       PERFIL_ATUALIZADO: 'Conta atualizada',
+      CONTA_REMOVIDA: 'Conta removida',
       CARTA_ADICIONADA: 'Ação administrativa: carta adicionada',
       CARTA_REMOVIDA: 'Ação administrativa: carta removida',
       SALDO_AJUSTADO: 'Ação administrativa: saldo ajustado',
