@@ -228,9 +228,13 @@ export class ExpedicoesService {
     resposta: string,
   ) {
     const texto = resposta.trim();
-    if (texto.length < 20)
+    if (texto.length < 5)
       throw new BadRequestException(
-        'Escreva uma resposta com pelo menos 20 caracteres.',
+        'Escreva uma resposta com pelo menos 5 caracteres.',
+      );
+    if (texto.length > 200)
+      throw new BadRequestException(
+        'A resposta deve ter no máximo 200 caracteres.',
       );
     const expedicao = await this.prisma.expedicao.findFirst({
       where: {
