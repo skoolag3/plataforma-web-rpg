@@ -257,12 +257,12 @@ export function MesaBatalha({
   onNovaBatalha,
   textoFinal = "Escolher outro deck",
 }: Props) {
-  const cartaJogador = partida.jogador.cartas[partida.jogador.ativa];
-  const cartaBot = partida.bot.cartas[partida.bot.ativa];
   const finalizada = partida.status === "FINALIZADA";
   const { animacaoAtual, animando, pularAnimacao } = useAnimacaoTurno(
-    partida.eventos,
+    partida,
   );
+  const cartaJogador = animacaoAtual?.cartaJogador ?? partida.jogador.cartas[partida.jogador.ativa];
+  const cartaBot = animacaoAtual?.cartaBot ?? partida.bot.cartas[partida.bot.ativa];
   const bloqueado = processando || animando;
 
   return (
@@ -276,15 +276,10 @@ export function MesaBatalha({
               : "Adversário"}
           </span>
           <strong>Turno {partida.turno}</strong>
-          {animando ? (
-            <button type="button" onClick={pularAnimacao}>
-              Pular animação
-            </button>
-          ) : null}
         </header>
         <FilaDeck
           cartas={partida.bot.cartas}
-          ativa={partida.bot.ativa}
+          ativa={animacaoAtual?.ativaBot ?? partida.bot.ativa}
           lado="adversário"
         />
         <div className={styles.mesaCampo}>
@@ -316,10 +311,17 @@ export function MesaBatalha({
             animacao={animacaoAtual}
           />
         </div>
+        {animando ? (
+          <div className={styles.controlesAnimacao}>
+            <button type="button" onClick={pularAnimacao}>
+              Pular animação
+            </button>
+          </div>
+        ) : null}
         <div className={styles.rodapeArena}>
           <DeckJogador
             cartas={partida.jogador.cartas}
-            ativa={partida.jogador.ativa}
+            ativa={animacaoAtual?.ativaJogador ?? partida.jogador.ativa}
           />
           {finalizada ? (
             <div className={styles.fimBatalha}>
