@@ -1,7 +1,7 @@
 .page {
-  width: min(100%, 76rem);
+  width: min(100%, 78rem);
   margin: 0 auto;
-  padding: 1.25rem 1rem 3rem;
+  padding: 1.5rem 1rem 3rem;
 }
 
 .header {
@@ -30,8 +30,8 @@
 }
 
 .header h1 {
-  margin: 0.35rem 0 0.15rem;
-  font-size: clamp(1.65rem, 3vw, 2.4rem);
+  margin: 0.45rem 0 0.2rem;
+  font-size: clamp(1.75rem, 3vw, 2.6rem);
   letter-spacing: -0.045em;
 }
 
@@ -50,22 +50,24 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.65rem;
-  margin-top: 1rem;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
 }
 
 .card {
   display: flex;
-  min-height: 19rem;
+  min-width: 0;
+  min-height: 21rem;
   flex-direction: column;
   border: 1px solid var(--member-border);
-  border-radius: 0.9rem;
+  border-radius: 1rem;
   background: linear-gradient(
-    145deg,
-    rgba(124, 58, 237, 0.1),
-    rgba(13, 16, 26, 0.9)
+    160deg,
+    rgba(40, 35, 62, 0.85),
+    rgba(13, 16, 26, 0.96) 58%
   );
-  padding: 0.9rem;
+  padding: 1rem;
   transition:
     transform 180ms ease,
     border-color 180ms ease,
@@ -79,8 +81,9 @@
 }
 
 .destaque {
-  border-color: rgba(190, 242, 100, 0.5);
-  box-shadow: 0 0 1.6rem rgba(124, 58, 237, 0.13);
+  border-color: rgba(190, 242, 100, 0.72);
+  background: linear-gradient(155deg, rgba(71, 91, 39, 0.27), #10151d 48%);
+  box-shadow: 0 0 0 1px rgba(190, 242, 100, 0.1);
 }
 
 .cardTopo {
@@ -126,12 +129,13 @@
 }
 
 .card h2 {
-  margin: 0.85rem 0 0.3rem;
-  font-size: 0.94rem;
+  margin: 1rem 0 0.35rem;
+  font-size: 1rem;
+  line-height: 1.2;
 }
 
 .descricao {
-  min-height: 2.5rem;
+  min-height: 2.7rem;
   margin: 0;
   color: #828ca0;
   font-size: 0.61rem;
@@ -139,9 +143,10 @@
 }
 
 .quantidade {
-  margin-top: 0.9rem;
+  margin-top: 1rem;
   color: #fff;
-  font-size: 1.35rem;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  font-variant-numeric: tabular-nums;
 }
 
 .quantidade em {
@@ -152,23 +157,49 @@
 
 .preco {
   display: grid;
-  gap: 0.08rem;
-  margin-top: 0.5rem;
+  gap: 0.12rem;
+  margin-top: auto;
+  padding-top: 1rem;
 }
 
 .preco strong {
   color: #d9f99d;
-  font-size: 0.8rem;
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .preco small {
-  color: #69758a;
-  font-size: 0.5rem;
+  color: #9aa5b7;
+  font-size: 0.66rem;
+}
+
+.beneficios {
+  display: grid;
+  gap: 0.45rem;
+  margin: 1.1rem 0 0;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--member-border);
+  list-style: none;
+  color: #adb8c9;
+  font-size: 0.66rem;
+}
+
+.beneficios li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.beneficios svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: 0 0 auto;
+  color: #bef264;
 }
 
 .card button {
-  min-height: 2.35rem;
-  margin-top: auto;
+  min-height: 2.65rem;
+  margin-top: 0.85rem;
   border: 1px solid rgba(190, 242, 100, 0.3);
   border-radius: 0.55rem;
   color: #0b0d14;
@@ -177,6 +208,20 @@
   font: inherit;
   font-size: 0.64rem;
   font-weight: 900;
+  transition: filter 180ms ease, transform 180ms ease;
+}
+
+.card button:not(:disabled):hover {
+  filter: brightness(1.12);
+}
+
+.card button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.card button:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 3px;
 }
 
 .card button:disabled {
@@ -185,7 +230,8 @@
 }
 
 .error,
-.empty {
+.empty,
+.aviso {
   margin-top: 1rem;
   color: #fca5a5;
   font-size: 0.72rem;
@@ -195,16 +241,55 @@
   color: #8994a8;
 }
 
+.aviso {
+  border: 1px solid rgba(190, 242, 100, 0.28);
+  border-radius: 0.65rem;
+  background: rgba(190, 242, 100, 0.07);
+  padding: 0.7rem 0.85rem;
+  color: #d9f99d;
+}
+
 @media (max-width: 1050px) {
   .grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 700px) {
+  .page {
+    padding: 0.55rem 0.75rem 2.5rem;
+  }
+
+  .header {
+    padding: 0.35rem 0 0.9rem;
+  }
+
+  .header h1 {
+    max-width: 18rem;
+    font-size: clamp(1.55rem, 7vw, 2rem);
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  .header p {
+    max-width: 22rem;
+    line-height: 1.45;
+  }
+
+  .notaStripe {
+    align-items: flex-start;
+    line-height: 1.35;
+  }
+
+  .notaStripe svg {
+    height: 0.85rem;
+    flex: 0 0 0.85rem;
+  }
+
   .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.45rem;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    margin-top: 0.8rem;
   }
 
   .card,
@@ -212,23 +297,67 @@
     min-height: 0;
   }
   .card {
-    min-width: 0;
-    padding: 0.65rem;
+    padding: 0.85rem 0.95rem;
   }
+
+  .cardTopo {
+    min-height: 1.8rem;
+    align-items: center;
+  }
+
+  .icone {
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 0.5rem;
+  }
+
+  .icone svg {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
   .card h2 {
-    font-size: 0.8rem;
+    margin: 0.55rem 0 0.2rem;
+    font-size: 0.95rem;
   }
-  .selo {
-    white-space: normal;
+
+  .descricao {
+    font-size: 0.66rem;
+  }
+
+  .quantidade {
+    margin-top: 0.55rem;
+    font-size: 1.45rem;
+  }
+
+  .beneficios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    font-size: 0.6rem;
+  }
+
+  .preco {
+    margin-top: 0.6rem;
+    padding-top: 0;
   }
 
   .card button {
-    margin-top: 1rem;
+    min-height: 2.75rem;
+    margin-top: 0.7rem;
+    font-size: 0.72rem;
+  }
+
+  .selo {
+    white-space: normal;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card {
+  .card,
+  .card button {
     transition: none;
   }
 }

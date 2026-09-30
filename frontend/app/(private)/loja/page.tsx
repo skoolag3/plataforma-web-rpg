@@ -1,7 +1,8 @@
 "use client";
 
-import { Gem, ShieldCheck, ShoppingBag, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Check, Gem, ShieldCheck, ShoppingBag, Sparkles } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import {
   iniciarCheckoutRuby,
   listarPacotesRuby,
@@ -36,10 +37,20 @@ const moeda = new Intl.NumberFormat("pt-BR", {
 });
 
 export default function LojaPage() {
+  return (
+    <Suspense fallback={<main className={styles.page}>Carregando loja...</main>}>
+      <LojaConteudo />
+    </Suspense>
+  );
+}
+
+function LojaConteudo() {
+  const parametros = useSearchParams();
   const [pacotes, setPacotes] = useState<PacoteRuby[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [processando, setProcessando] = useState("");
   const [erro, setErro] = useState("");
+  const pagamento = parametros.get("pagamento");
 
   useEffect(() => {
     listarPacotesRuby()
@@ -76,16 +87,27 @@ export default function LojaPage() {
         <span>
           <ShoppingBag /> Loja de Rubys
         </span>
-        <h1>Bundles para cada jornada</h1>
-        <p>Escolha uma reserva de Rubys para suas próximas invocações.</p>
+        <h1>Escolha seu pacote de Rubys</h1>
+        <p>Compare as opções e pague uma única vez, sem assinatura.</p>
         <small className={styles.notaStripe}>
           <ShieldCheck /> Crédito liberado após confirmação segura do Stripe.
         </small>
       </header>
 
-      {erro ? <p className={styles.error}>{erro}</p> : null}
+      {pagamento === "sucesso" ? (
+        <p className={styles.aviso} role="status">
+          Retorno do pagamento recebido. Os Rubys serão liberados após a confirmação do Stripe.
+        </p>
+      ) : pagamento === "cancelado" ? (
+        <p className={styles.aviso} role="status">
+          Pagamento cancelado. Nenhum pacote foi comprado.
+        </p>
+      ) : null}
+      {erro ? <p className={styles.error} role="alert">{erro}</p> : null}
       {carregando ? (
         <p className={styles.empty}>Carregando bundles...</p>
+      ) : pacotes.length === 0 ? (
+        <p className={styles.empty}>Nenhum pacote disponível no momento.</p>
       ) : (
         <section className={styles.grid} aria-label="Bundles de Rubys">
           {pacotes.map((pacote) => {
@@ -115,11 +137,14 @@ export default function LojaPage() {
                   {pacote.quantidade_rubys.toLocaleString("pt-BR")}{" "}
                   <em>Rubys</em>
                 </strong>
+                <ul className={styles.beneficios}>
+                  <li><Check /> Pagamento único</li>
+                  <li><Check /> Crédito após confirmação</li>
+                </ul>
                 <div className={styles.preco}>
                   <strong>{moeda.format(preco)}</strong>
                   <small>
-                    {moeda.format((preco / pacote.quantidade_rubys) * 100)} a
-                    cada 100
+                    {moeda.format((preco / pacote.quantidade_rubys) * 100)} por 100 Rubys
                   </small>
                 </div>
                 <button
@@ -129,7 +154,7 @@ export default function LojaPage() {
                 >
                   {processando === pacote.id
                     ? "Abrindo pagamento..."
-                    : "Escolher bundle"}
+                    : `Comprar ${pacote.quantidade_rubys.toLocaleString("pt-BR")} Rubys`}
                 </button>
               </article>
             );
