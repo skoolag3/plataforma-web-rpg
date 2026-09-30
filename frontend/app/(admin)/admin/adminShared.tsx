@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Bot,
   Edit3,
   Eye,
   Gem,
@@ -25,10 +24,9 @@ const nav = [
   { href: "/admin", label: "Dashboard", icon: Home },
   { href: "/admin/cartas", label: "Cartas", icon: Layers },
   { href: "/admin/habilidades", label: "Habilidades", icon: Sparkles },
-  { href: "/admin/decks-npc", label: "Decks NPC", icon: Bot },
   { href: "/admin/usuarios", label: "Usuários", icon: Users },
   { href: "/admin/banners", label: "Gacha (Banners)", icon: ImagePlus },
-  { href: "/admin/campanha", label: "Campanha", icon: Map },
+  { href: "/admin/campanha", label: "Campanhas", icon: Map },
   { href: "/admin/noticias", label: "Notícias", icon: Newspaper },
 ];
 
