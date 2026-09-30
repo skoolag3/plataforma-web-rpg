@@ -27,6 +27,42 @@ type CartaComHabilidades = Prisma.CartaGetPayload<{
 export class AdminCartasService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async historico(filtros: { pagina?: string; busca?: string; acao?: string }) {
+    const pagina = Math.max(1, Math.min(100000, Number.parseInt(filtros.pagina ?? '1', 10) || 1));
+    const porPagina = 20;
+    const acao = ['CRIADA', 'ALTERADA', 'REMOVIDA', 'RESTAURADA'].includes(filtros.acao ?? '')
+      ? filtros.acao
+      : undefined;
+    const where: Prisma.LogAdminCartaWhereInput = {
+      ...(acao ? { acao } : {}),
+      ...(filtros.busca?.trim()
+        ? { nome_carta: { contains: filtros.busca.trim().slice(0, 150), mode: 'insensitive' } }
+        : {}),
+    };
+    const [total, registros] = await Promise.all([
+      this.prisma.logAdminCarta.count({ where }),
+      this.prisma.logAdminCarta.findMany({
+        where,
+        orderBy: [{ criado_em: 'desc' }, { id: 'desc' }],
+        skip: (pagina - 1) * porPagina,
+        take: porPagina,
+        include: { admin: { select: { nome: true, email: true } } },
+      }),
+    ]);
+    return {
+      registros: registros.map((item) => ({
+        id: item.id,
+        idCarta: item.id_carta,
+        nomeCarta: item.nome_carta,
+        acao: item.acao,
+        alteracoes: item.alteracoes,
+        criadoEm: item.criado_em,
+        autor: item.admin ? { nome: item.admin.nome, email: item.admin.email } : null,
+      })),
+      paginacao: { pagina, porPagina, total, totalPaginas: Math.max(1, Math.ceil(total / porPagina)) },
+    };
+  }
+
   async listar(filtros: {
     busca?: string;
     raridade?: string;
@@ -137,18 +173,24 @@ export class AdminCartasService {
     return { usuariosComCarta };
   }
 
-  async criar(dto: CreateAdminCartaDto) {
+  async criar(dto: CreateAdminCartaDto, idAdmin?: string) {
     await this.validarHabilidades(dto.habilidadesIds);
     const classe = await this.resolverClasse(dto.idClasse, dto.classe);
-    const carta = await this.prisma.carta.create({
-      data: this.toCreateData(dto, classe),
-      include: cartaInclude,
+    const carta = await this.prisma.$transaction(async (tx) => {
+      const criada = await tx.carta.create({
+        data: this.toCreateData(dto, classe),
+        include: cartaInclude,
+      });
+      await tx.logAdminCarta.create({
+        data: { id_carta: criada.id, nome_carta: criada.nome, acao: 'CRIADA', id_admin: idAdmin },
+      });
+      return criada;
     });
 
     return this.toResponse(carta);
   }
 
-  async atualizar(id: string, dto: UpdateAdminCartaDto) {
+  async atualizar(id: string, dto: UpdateAdminCartaDto, idAdmin?: string) {
     const atual = await this.buscar(id);
     await this.validarHabilidades(dto.habilidadesIds);
     const classe =
@@ -162,19 +204,29 @@ export class AdminCartasService {
       );
     }
 
-    const carta = await this.prisma.carta.update({
-      where: { id },
-      data: {
-        ...this.toUpdateData(dto, atual.raridade, atual.passiva, classe),
-        atualizado_em: new Date(),
-      },
-      include: cartaInclude,
+    const carta = await this.prisma.$transaction(async (tx) => {
+      const editada = await tx.carta.update({
+        where: { id },
+        data: {
+          ...this.toUpdateData(dto, atual.raridade, atual.passiva, classe),
+          atualizado_em: new Date(),
+        },
+        include: cartaInclude,
+      });
+      const depois = this.toResponse(editada);
+      const alteracoes = this.obterAlteracoes(atual, depois);
+      if (Object.keys(alteracoes).length) {
+        await tx.logAdminCarta.create({
+          data: { id_carta: id, nome_carta: editada.nome, acao: 'ALTERADA', id_admin: idAdmin, alteracoes: alteracoes as Prisma.InputJsonValue },
+        });
+      }
+      return editada;
     });
 
     return this.toResponse(carta);
   }
 
-  async remover(id: string, confirmarNome: string, confirmarImpacto: boolean) {
+  async remover(id: string, confirmarNome: string, confirmarImpacto: boolean, idAdmin?: string) {
     const atual = await this.buscar(id);
 
     if (confirmarNome !== atual.nome) {
@@ -189,20 +241,33 @@ export class AdminCartasService {
       );
     }
 
-    const carta = await this.prisma.carta.update({
-      where: { id },
-      data: {
-        ativo: false,
-        excluido_em: new Date(),
-        atualizado_em: new Date(),
-      },
-      include: cartaInclude,
+    const carta = await this.prisma.$transaction(async (tx) => {
+      const removida = await tx.carta.update({
+        where: { id },
+        data: { ativo: false, excluido_em: new Date(), atualizado_em: new Date() },
+        include: cartaInclude,
+      });
+      await tx.logAdminCarta.create({
+        data: { id_carta: id, nome_carta: removida.nome, acao: 'REMOVIDA', id_admin: idAdmin },
+      });
+      return removida;
     });
 
     return {
       message: 'Carta removida.',
       carta: this.toResponse(carta),
     };
+  }
+
+  private obterAlteracoes(antes: ReturnType<AdminCartasService['toResponse']>, depois: ReturnType<AdminCartasService['toResponse']>) {
+    const campos = ['nome', 'elemento', 'raridade', 'idClasse', 'hpBase', 'danoBase', 'defesaBase', 'passiva', 'foto', 'moldura', 'configVisual', 'ativo', 'habilidades'] as const;
+    const alteracoes: Record<string, { antes: unknown; depois: unknown }> = {};
+    for (const campo of campos) {
+      if (JSON.stringify(antes[campo]) !== JSON.stringify(depois[campo])) {
+        alteracoes[campo] = { antes: antes[campo] ?? null, depois: depois[campo] ?? null };
+      }
+    }
+    return alteracoes;
   }
 
   private toCreateData(

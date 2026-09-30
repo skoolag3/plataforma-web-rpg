@@ -52,6 +52,7 @@ model Usuario {
   expedicoes           Expedicao[]
   logsAdminComoAutor   LogAdminUsuario[]     @relation("LogAdminAutor")
   logsAdminComoAlvo    LogAdminUsuario[]     @relation("LogAdminAlvo")
+  logsAdminCartas       LogAdminCarta[]
 
   @@map("usuario")
 }
@@ -209,6 +210,22 @@ model LogAdminUsuario {
   @@index([id_admin, criado_em(sort: Desc)])
   @@index([id_usuario, criado_em(sort: Desc)])
   @@map("log_admin_usuario")
+}
+
+model LogAdminCarta {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id_carta   String   @db.Uuid
+  nome_carta String   @db.VarChar(150)
+  id_admin   String?  @db.Uuid
+  acao       String   @db.VarChar(20)
+  alteracoes Json?
+  criado_em  DateTime @default(now()) @db.Timestamptz(0)
+
+  admin Usuario? @relation(fields: [id_admin], references: [id], onDelete: SetNull)
+
+  @@index([criado_em(sort: Desc)])
+  @@index([id_carta, criado_em(sort: Desc)])
+  @@map("log_admin_carta")
 }
 
 model Carta {

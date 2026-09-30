@@ -11,6 +11,8 @@ import {
 } from '@nestjs/common';
 import { AdminGuard } from '../../../common/guards/admin.guard';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../../common/decorators/current-user.decorator';
 import {
   CreateAdminCartaDto,
   RemoveAdminCartaDto,
@@ -44,6 +46,15 @@ export class AdminCartasController {
     });
   }
 
+  @Get('historico')
+  historico(
+    @Query('pagina') pagina?: string,
+    @Query('busca') busca?: string,
+    @Query('acao') acao?: string,
+  ) {
+    return this.cartasService.historico({ pagina, busca, acao });
+  }
+
   @Get(':id')
   buscar(@Param('id') id: string) {
     return this.cartasService.buscar(id);
@@ -55,21 +66,22 @@ export class AdminCartasController {
   }
 
   @Post()
-  criar(@Body() dto: CreateAdminCartaDto) {
-    return this.cartasService.criar(dto);
+  criar(@Body() dto: CreateAdminCartaDto, @CurrentUser() admin: AuthenticatedUser) {
+    return this.cartasService.criar(dto, admin.id);
   }
 
   @Patch(':id')
-  atualizar(@Param('id') id: string, @Body() dto: UpdateAdminCartaDto) {
-    return this.cartasService.atualizar(id, dto);
+  atualizar(@Param('id') id: string, @Body() dto: UpdateAdminCartaDto, @CurrentUser() admin: AuthenticatedUser) {
+    return this.cartasService.atualizar(id, dto, admin.id);
   }
 
   @Delete(':id')
-  remover(@Param('id') id: string, @Body() dto: RemoveAdminCartaDto) {
+  remover(@Param('id') id: string, @Body() dto: RemoveAdminCartaDto, @CurrentUser() admin: AuthenticatedUser) {
     return this.cartasService.remover(
       id,
       dto.confirmarNome,
       dto.confirmarImpacto,
+      admin.id,
     );
   }
 }

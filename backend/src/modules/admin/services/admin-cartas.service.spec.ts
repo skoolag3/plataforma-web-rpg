@@ -20,6 +20,7 @@ describe('AdminCartasService', () => {
     excluido_em: null,
   };
   const prisma = {
+    $transaction: jest.fn(),
     carta: {
       findFirst: jest.fn(),
       findMany: jest.fn(),
@@ -32,6 +33,7 @@ describe('AdminCartasService', () => {
     inventario: {
       count: jest.fn(),
     },
+    logAdminCarta: { create: jest.fn() },
   };
   let service: AdminCartasService;
 
@@ -41,6 +43,8 @@ describe('AdminCartasService', () => {
     prisma.carta.findMany.mockResolvedValue([]);
     prisma.carta.create.mockResolvedValue(carta);
     prisma.habilidade.findMany.mockResolvedValue([]);
+    prisma.$transaction.mockImplementation((operacao) => operacao(prisma));
+    prisma.logAdminCarta.create.mockResolvedValue({ id: 'log-id' });
     service = new AdminCartasService(prisma as never);
   });
 
@@ -115,6 +119,9 @@ describe('AdminCartasService', () => {
         atualizado_em: expect.any(Date),
       }),
       include: expect.any(Object),
+    });
+    expect(prisma.logAdminCarta.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ id_carta: carta.id, acao: 'REMOVIDA' }),
     });
   });
 
