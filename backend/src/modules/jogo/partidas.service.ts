@@ -556,16 +556,9 @@ export class PartidasService {
     return {
       id: carta.id,
       nome: carta.nome,
-      hp: this.aplicarModificador(carta.hp_base, classe?.modificador_hp),
-      ataque: this.aplicarModificador(
-        carta.dano_base,
-        classe?.modificador_ataque,
-      ),
-      defesa: this.aplicarModificador(
-        carta.defesa_base,
-        classe?.modificador_defesa,
-        true,
-      ),
+      hp: carta.hp_base,
+      ataque: carta.dano_base,
+      defesa: carta.defesa_base,
       velocidade: classe?.prioridade_ataque ?? 50,
       elemento: carta.elemento,
       passiva: {
@@ -579,15 +572,6 @@ export class PartidasService {
         habilidades,
       },
     };
-  }
-
-  private aplicarModificador(
-    valor: number,
-    percentual = 0,
-    aceitaZero = false,
-  ) {
-    const calculado = Math.round(valor * (1 + percentual / 100));
-    return Math.max(aceitaZero ? 0 : 1, calculado);
   }
 
   private normalizarPassiva(passiva: unknown) {

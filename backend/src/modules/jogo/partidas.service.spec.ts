@@ -74,3 +74,33 @@ describe('PartidasService - ranking', () => {
     });
   });
 });
+
+describe('PartidasService - atributos da classe', () => {
+  it('usa atributos base e conserva apenas a prioridade da classe', () => {
+    const service = new PartidasService({} as PrismaService);
+    const carta = service['mapearCarta']({
+      id: 'carta-1',
+      nome: 'Carta teste',
+      hp_base: 100,
+      dano_base: 20,
+      defesa_base: 10,
+      elemento: 'fogo',
+      passiva: null,
+      classe: {
+        nome: 'Assassino',
+        prioridade_ataque: 1,
+        modificador_hp: 50,
+        modificador_ataque: 50,
+        modificador_defesa: 50,
+      },
+      habilidades: [],
+    } as never);
+
+    expect(carta).toMatchObject({
+      hp: 100,
+      ataque: 20,
+      defesa: 10,
+      velocidade: 1,
+    });
+  });
+});
