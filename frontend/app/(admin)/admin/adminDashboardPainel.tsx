@@ -136,9 +136,6 @@ export function DashboardPainel({
         <Link href="/admin/habilidades">
           Habilidades <ArrowUpRight />
         </Link>
-        <Link href="/admin/decks-npc">
-          Decks NPC <ArrowUpRight />
-        </Link>
         <Link href="/admin/banners">
           Banners <ArrowUpRight />
         </Link>
