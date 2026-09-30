@@ -22,6 +22,7 @@ describe('CorreioService', () => {
         id: 'noticia',
         titulo: 'Evento de setembro',
         resumo: 'Novas recompensas por tempo limitado.',
+        imagem: 'https://res.cloudinary.com/exemplo/evento.jpg',
         categoria: 'EVENTO',
         criado_em: new Date('2026-09-01T13:00:00.000Z'),
       },
@@ -34,10 +35,21 @@ describe('CorreioService', () => {
 
     expect(res.itens).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ tipo: 'RECOMPENSA', href: '/gacha' }),
+        expect.objectContaining({
+          tipo: 'RECOMPENSA',
+          chave: expect.stringMatching(/^giro:/),
+          idBanner: 'banner',
+          acao: 'Reivindicar',
+        }),
+        expect.objectContaining({
+          tipo: 'RECOMPENSA',
+          chave: expect.stringMatching(/^semanal:/),
+          acao: 'Reivindicar',
+        }),
         expect.objectContaining({
           chave: 'noticia:noticia',
           tipo: 'EVENTO',
+          imagem: 'https://res.cloudinary.com/exemplo/evento.jpg',
         }),
       ]),
     );

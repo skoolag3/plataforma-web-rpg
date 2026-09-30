@@ -13,12 +13,15 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   buscarCorreio,
   marcarMensagemLida,
   type ItemCorreio,
 } from "../lib/correio";
+import { resgatarGiroDiario, resgatarRecompensaSemanal } from "../lib/jogo";
+import { notificarErro, notificarSucesso } from "./notificacoesGlobais";
 import styles from "../styles/correio.module.css";
 
 const icones = {
@@ -57,6 +60,7 @@ export function Correio() {
   const [itens, setItens] = useState<ItemCorreio[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [falha, setFalha] = useState(false);
+  const [resgatando, setResgatando] = useState("");
   const raizRef = useRef<HTMLDivElement>(null);
 
   const carregar = useCallback(() => {
@@ -124,6 +128,37 @@ export function Correio() {
     void Promise.all(
       pendentes.map((item) => marcarMensagemLida(item.chave)),
     ).catch(() => carregar());
+  }
+
+  async function reivindicar(item: ItemCorreio) {
+    if (resgatando) return;
+    const diario = item.chave.startsWith("giro:");
+    if (diario && !item.idBanner) {
+      notificarErro("Não foi possível identificar o banner. Reabra o correio.");
+      return;
+    }
+    setResgatando(item.chave);
+    try {
+      const resposta = diario
+        ? await resgatarGiroDiario(item.idBanner!)
+        : await resgatarRecompensaSemanal();
+      setItens((atuais) => atuais.filter((atual) => atual.chave !== item.chave));
+      window.dispatchEvent(new CustomEvent("rubys-reivindicados", {
+        detail: { rubysRecebidos: resposta.rubysRecebidos },
+      }));
+      window.dispatchEvent(new Event("perfil-atualizado"));
+      notificarSucesso(
+        `Você recebeu ${resposta.rubysRecebidos.toLocaleString("pt-BR")} Rubys.`,
+        diario ? "Giro diário reivindicado" : "Recompensa semanal reivindicada",
+      );
+    } catch (erro) {
+      notificarErro(
+        erro instanceof Error ? erro.message : "Não foi possível reivindicar a recompensa.",
+      );
+      carregar();
+    } finally {
+      setResgatando("");
+    }
   }
 
   return (
@@ -223,7 +258,46 @@ export function Correio() {
             ) : itensVisiveis.length ? (
               itensVisiveis.map((item) => {
                 const Icone = icones[item.tipo];
-                return (
+                const recompensa = item.chave.startsWith("giro:") || item.chave.startsWith("semanal:");
+                const conteudo = (
+                  <>
+                    <span className={styles.icone}>
+                      <Icone aria-hidden="true" />
+                    </span>
+                    <div className={styles.conteudo}>
+                      <span className={styles.cabecalhoMensagem}>
+                        <small>{item.tipo.toLowerCase()}</small>
+                        {!item.lida ? <i>Nova</i> : null}
+                      </span>
+                      <strong className={styles.tituloMensagem}>{item.titulo}</strong>
+                      <p>{item.resumo}</p>
+                      <span className={styles.rodapeMensagem}>
+                        {!recompensa ? <em>{item.acao}</em> : null}
+                        <time dateTime={item.criadoEm}>
+                          {formatarData(item.criadoEm)}
+                        </time>
+                      </span>
+                    </div>
+                  </>
+                );
+                return recompensa ? (
+                  <article
+                    key={item.chave}
+                    className={`${styles.mensagem} ${styles.mensagemRecompensa}`}
+                    data-lida={item.lida}
+                    data-tipo={item.tipo}
+                  >
+                    {conteudo}
+                    <button
+                      type="button"
+                      className={styles.btnReivindicar}
+                      disabled={resgatando !== ""}
+                      onClick={() => void reivindicar(item)}
+                    >
+                      {resgatando === item.chave ? "Reivindicando..." : "Reivindicar"}
+                    </button>
+                  </article>
+                ) : (
                   <Link
                     href={item.href}
                     key={item.chave}
@@ -235,23 +309,12 @@ export function Correio() {
                       setAberto(false);
                     }}
                   >
-                    <span className={styles.icone}>
-                      <Icone aria-hidden="true" />
-                    </span>
-                    <span className={styles.conteudo}>
-                      <span>
-                        <small>{item.tipo.toLowerCase()}</small>
-                        {!item.lida ? <i>Nova</i> : null}
+                    {conteudo}
+                    {item.imagem ? (
+                      <span className={styles.arteMensagem} aria-hidden="true">
+                        <Image src={item.imagem} alt="" fill sizes="220px" />
                       </span>
-                      <strong>{item.titulo}</strong>
-                      <p>{item.resumo}</p>
-                      <span className={styles.rodapeMensagem}>
-                        <em>{item.acao}</em>
-                        <time dateTime={item.criadoEm}>
-                          {formatarData(item.criadoEm)}
-                        </time>
-                      </span>
-                    </span>
+                    ) : null}
                     <ChevronRight aria-hidden="true" />
                   </Link>
                 );

@@ -18,11 +18,13 @@ type ItemCorreio = {
   tipo: 'RECOMPENSA' | 'EVENTO' | 'PROMOCAO' | 'AVISO' | 'NOVIDADE';
   titulo: string;
   resumo: string;
+  imagem?: string | null;
   href: string;
   acao: string;
   criadoEm: Date;
   expiraEm: Date | null;
   lida: boolean;
+  idBanner?: string;
 };
 
 @Injectable()
@@ -60,6 +62,7 @@ export class CorreioService {
           id: true,
           titulo: true,
           resumo: true,
+          imagem: true,
           categoria: true,
           criado_em: true,
         },
@@ -81,9 +84,10 @@ export class CorreioService {
         chave: `giro:${inicio.toISOString()}`,
         tipo: 'RECOMPENSA',
         titulo: 'Giro gratuito disponível',
-        resumo: 'Seu giro gratuito já pode ser resgatado no portal do gacha.',
+        resumo: 'Receba Rubys para um giro gratuito no banner em destaque.',
         href: '/gacha',
-        acao: 'Ir para o gacha',
+        acao: 'Reivindicar',
+        idBanner: rotacao.idBanner,
         criadoEm: inicio,
         expiraEm: obterProximoGiroGratuito(agora),
         lida: chavesLidas.has(`giro:${inicio.toISOString()}`),
@@ -100,7 +104,7 @@ export class CorreioService {
         titulo: 'Recompensa semanal disponível',
         resumo: `${RECOMPENSA_SEMANAL_RUBYS} Rubys estão esperando seu resgate.`,
         href: '/gacha',
-        acao: 'Resgatar no gacha',
+        acao: 'Reivindicar',
         criadoEm: inicio,
         expiraEm: obterProximaRecompensaSemanal(agora),
         lida: chavesLidas.has(`semanal:${inicio.toISOString()}`),
@@ -119,6 +123,7 @@ export class CorreioService {
         tipo,
         titulo: noticia.titulo,
         resumo: noticia.resumo,
+        imagem: noticia.imagem,
         href: `/noticias/${noticia.id}`,
         acao: 'Ler comunicado',
         criadoEm: noticia.criado_em,

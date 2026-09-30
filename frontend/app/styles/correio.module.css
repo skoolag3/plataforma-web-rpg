@@ -213,6 +213,8 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.65rem;
   align-items: start;
+  isolation: isolate;
+  overflow: hidden;
   border-radius: 0.7rem;
   color: inherit;
   padding: 0.68rem 0.55rem;
@@ -237,6 +239,8 @@
 }
 
 .icone {
+  position: relative;
+  z-index: 1;
   display: grid;
   width: 2rem;
   height: 2rem;
@@ -245,6 +249,22 @@
   border-radius: 0.6rem;
   color: #c4b5fd;
   background: rgba(91, 54, 168, 0.15);
+}
+
+.arteMensagem {
+  position: absolute;
+  z-index: 0;
+  inset: 0 0 0 auto;
+  width: 58%;
+  pointer-events: none;
+  opacity: 0.72;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 45%);
+  mask-image: linear-gradient(90deg, transparent, #000 45%);
+}
+
+.arteMensagem img {
+  object-fit: cover;
+  object-position: center;
 }
 
 .mensagem[data-tipo="RECOMPENSA"] .icone {
@@ -258,50 +278,56 @@
 }
 
 .conteudo {
+  position: relative;
+  z-index: 1;
   display: block;
   min-width: 0;
 }
 
-.conteudo > span {
+.cabecalhoMensagem {
   display: flex;
-  align-items: center;
-  gap: 0.35rem;
+  align-items: baseline;
+  gap: 0.4rem;
+  min-height: 0.8rem;
 }
 
-.conteudo > span small {
+.cabecalhoMensagem small {
   color: #7f8ba0;
   font-size: 0.48rem;
   font-weight: 800;
   letter-spacing: 0.07em;
+  line-height: 1;
   text-transform: uppercase;
 }
 
-.conteudo i {
+.cabecalhoMensagem i {
   color: #bef264;
   font-size: 0.48rem;
   font-style: normal;
   font-weight: 850;
+  line-height: 1;
 }
 
-.conteudo strong {
+.conteudo .tituloMensagem {
   display: block;
-  overflow: hidden;
+  width: 100%;
+  max-width: none;
   margin-top: 0.12rem;
   color: #eef2ff;
   font-size: 0.7rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .conteudo p {
-  display: -webkit-box;
-  overflow: hidden;
   margin: 0.2rem 0 0;
   color: #8994a8;
   font-size: 0.59rem;
   line-height: 1.45;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
 }
 
 .rodapeMensagem {
@@ -326,9 +352,45 @@
 }
 
 .mensagem > svg {
+  position: relative;
+  z-index: 1;
   align-self: center;
   width: 0.78rem;
   color: #596276;
+}
+
+.mensagemRecompensa {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.btnReivindicar {
+  grid-column: 2;
+  justify-self: start;
+  min-height: 2rem;
+  margin-top: 0.25rem;
+  border: 1px solid rgba(190, 242, 100, 0.45);
+  border-radius: 0.5rem;
+  background: #bef264;
+  color: #11150b;
+  padding: 0.35rem 0.75rem;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.btnReivindicar:hover:not(:disabled) {
+  background: #d9f99d;
+}
+
+.btnReivindicar:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.btnReivindicar:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 2px;
 }
 
 .carregando,

@@ -2,9 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  CalendarDays,
   Flame,
-  Gift,
   Leaf,
   Moon,
   Sparkles,
@@ -14,16 +12,10 @@ import {
 } from "lucide-react";
 import { CartaMontada } from "../../components/cartaMontada";
 import { IconeRuby } from "../../components/iconeRuby";
-import {
-  notificarErro,
-  notificarSucesso,
-} from "../../components/notificacoesGlobais";
+import { notificarErro } from "../../components/notificacoesGlobais";
 import {
   buscarGacha,
-  buscarRecompensas,
   girarGacha,
-  resgatarGiroDiario,
-  resgatarRecompensaSemanal,
   type BannerGacha,
   type CartaGachaApi,
 } from "../../lib/jogo";
@@ -81,14 +73,6 @@ export default function GachaPage() {
   const [cartaDetalhada, setCartaDetalhada] = useState<CartaGachaVisual | null>(
     null,
   );
-  const [giroDiarioResgatado, setGiroDiarioResgatado] = useState(false);
-  const [resgatandoDiario, setResgatandoDiario] = useState(false);
-  const [proximoGiroGratuitoEm, setProximoGiroGratuitoEm] = useState<
-    string | null
-  >(null);
-  const [semanalDisponivel, setSemanalDisponivel] = useState(false);
-  const [rubysSemanais, setRubysSemanais] = useState(500);
-  const [resgatandoSemanal, setResgatandoSemanal] = useState(false);
   const [probabilidades, setProbabilidades] = useState<
     { raridade: CartaGachaApi["raridade"]; percentual: number }[]
   >([]);
@@ -133,25 +117,30 @@ export default function GachaPage() {
   );
 
   useEffect(() => {
-    Promise.all([buscarGacha(), buscarRecompensas()])
-      .then(([dados, recompensas]) => {
+    buscarGacha()
+      .then((dados) => {
         const primeiro = dados.banners[0];
         setBanners(dados.banners);
         setIdBanner(primeiro?.id ?? "");
         setRubys(dados.jogador.rubys);
         setPity(primeiro?.pity ?? 0);
-        setGiroDiarioResgatado(!primeiro?.diarioDisponivel);
-        setProximoGiroGratuitoEm(dados.proximoGiroGratuitoEm ?? null);
         setProbabilidades(dados.probabilidades);
         setProximaRotacaoEm(dados.rotacao?.proximaRotacaoEm ?? null);
-        setSemanalDisponivel(recompensas.semanal.disponivel);
-        setRubysSemanais(recompensas.semanal.rubys);
       })
       .catch((erro) =>
         notificarErro(
           erro instanceof Error ? erro.message : "Erro ao carregar gacha.",
         ),
       );
+  }, []);
+
+  useEffect(() => {
+    const atualizarRubys = (evento: Event) => {
+      const { rubysRecebidos } = (evento as CustomEvent<{ rubysRecebidos: number }>).detail;
+      setRubys((valor) => valor + rubysRecebidos);
+    };
+    window.addEventListener("rubys-reivindicados", atualizarRubys);
+    return () => window.removeEventListener("rubys-reivindicados", atualizarRubys);
   }, []);
 
   async function invocar(quantidade: 1 | 10) {
@@ -177,46 +166,6 @@ export default function GachaPage() {
     }
   }
 
-  async function resgatarDiario() {
-    if (!bannerAtivo || resgatandoDiario) return;
-    setResgatandoDiario(true);
-    try {
-      const resposta = await resgatarGiroDiario(bannerAtivo.id);
-      setRubys((valor) => valor + resposta.rubysRecebidos);
-      setGiroDiarioResgatado(true);
-      notificarSucesso(
-        `Você recebeu ${resposta.rubysRecebidos} Rubys.`,
-        "Giro gratuito resgatado",
-      );
-      window.dispatchEvent(new Event("perfil-atualizado"));
-    } catch (erro) {
-      notificarErro(
-        erro instanceof Error ? erro.message : "Erro ao resgatar recompensa.",
-      );
-    } finally {
-      setResgatandoDiario(false);
-    }
-  }
-
-  async function resgatarSemanal() {
-    setResgatandoSemanal(true);
-    try {
-      const resposta = await resgatarRecompensaSemanal();
-      setRubys((valor) => valor + resposta.rubysRecebidos);
-      setSemanalDisponivel(false);
-      notificarSucesso(
-        `Você recebeu ${resposta.rubysRecebidos.toLocaleString("pt-BR")} Rubys.`,
-        "Recompensa semanal",
-      );
-      window.dispatchEvent(new Event("perfil-atualizado"));
-    } catch (erro) {
-      notificarErro(
-        erro instanceof Error ? erro.message : "Erro ao resgatar recompensa.",
-      );
-    } finally {
-      setResgatandoSemanal(false);
-    }
-  }
 
   function voltarSelecao() {
     setResultado([]);
@@ -244,7 +193,6 @@ export default function GachaPage() {
                   onClick={() => {
                     setIdBanner(banner.id);
                     setPity(banner.pity);
-                    setGiroDiarioResgatado(!banner.diarioDisponivel);
                   }}
                 >
                   {banner.nome}
@@ -329,65 +277,6 @@ export default function GachaPage() {
               )}
             </div>
           </article>
-          <section
-            className={styles.painelResgates}
-            aria-label="Recompensas de acesso"
-          >
-            <button
-              type="button"
-              className={styles.resgateDiario}
-              data-disponivel={
-                !giroDiarioResgatado && !resgatandoDiario && !!bannerAtivo
-              }
-              disabled={
-                giroDiarioResgatado || resgatandoDiario || !bannerAtivo
-              }
-              onClick={() => void resgatarDiario()}
-            >
-              <span className={styles.iconeResgate}>
-                <Gift aria-hidden="true" />
-              </span>
-              <span className={styles.textoResgate}>
-                <small>Benefício diário</small>
-                <strong>
-                  {giroDiarioResgatado
-                    ? "Giro gratuito resgatado"
-                    : "Seu giro gratuito está pronto"}
-                </strong>
-                <em>
-                  {giroDiarioResgatado
-                    ? proximoGiroGratuitoEm
-                      ? `Próximo giro às ${new Date(proximoGiroGratuitoEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`
-                      : "Disponível novamente na próxima janela"
-                    : `Receba ${custo1.toLocaleString("pt-BR")} Rubys para invocar`}
-                </em>
-              </span>
-              <b className={styles.acaoResgate}>
-                {resgatandoDiario
-                  ? "Resgatando..."
-                  : giroDiarioResgatado
-                    ? "Resgatado"
-                    : "Resgatar giro"}
-              </b>
-            </button>
-            <button
-              type="button"
-              className={styles.resgateSemanal}
-              data-disponivel={semanalDisponivel && !resgatandoSemanal}
-              disabled={!semanalDisponivel || resgatandoSemanal}
-              onClick={() => void resgatarSemanal()}
-            >
-              <CalendarDays aria-hidden="true" />
-              <span>
-                <small>Recompensa semanal</small>
-                <strong>
-                  {semanalDisponivel
-                    ? `Receber +${rubysSemanais.toLocaleString("pt-BR")} Rubys`
-                    : "Já resgatada esta semana"}
-                </strong>
-              </span>
-            </button>
-          </section>
           <div className={styles.acoesInvocacao}>
             <SummonButton
               quantidade={1}

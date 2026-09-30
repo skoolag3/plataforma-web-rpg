@@ -7,11 +7,13 @@ export type ItemCorreio = {
   tipo: "RECOMPENSA" | "EVENTO" | "PROMOCAO" | "AVISO" | "NOVIDADE";
   titulo: string;
   resumo: string;
+  imagem?: string | null;
   href: string;
   acao: string;
   criadoEm: string;
   expiraEm: string | null;
   lida: boolean;
+  idBanner?: string;
 };
 
 export type CorreioResponse = {
