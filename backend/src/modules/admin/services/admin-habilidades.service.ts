@@ -251,6 +251,9 @@ export class AdminHabilidadesService {
   }
 
   private toRequisito(dto: CreateAdminHabilidadeDto): RequisitoHabilidade {
+    if (dto.requisitoTipo === 'CHANCE') {
+      return { tipo: 'CHANCE', percentual: dto.requisitoValor ?? Number.NaN };
+    }
     if (dto.requisitoTipo === 'CONTADOR_ATAQUES') {
       return {
         tipo: dto.requisitoTipo,
@@ -307,6 +310,9 @@ export class AdminHabilidadesService {
   private toRequisitoFromRecord(
     habilidade: Prisma.HabilidadeGetPayload<Record<string, never>>,
   ): RequisitoHabilidade {
+    if (habilidade.requisito_tipo === 'CHANCE') {
+      return { tipo: 'CHANCE', percentual: habilidade.requisito_valor ?? Number.NaN };
+    }
     if (habilidade.requisito_tipo === 'CONTADOR_ATAQUES') {
       return {
         tipo: 'CONTADOR_ATAQUES',
@@ -343,7 +349,9 @@ export class AdminHabilidadesService {
     configuracao: ConfiguracaoHabilidade,
   ): Prisma.HabilidadeCreateInput {
     const requisitoValor =
-      configuracao.requisito.tipo === 'CONTADOR_ATAQUES'
+      configuracao.requisito.tipo === 'CHANCE'
+        ? configuracao.requisito.percentual
+        : configuracao.requisito.tipo === 'CONTADOR_ATAQUES'
         ? configuracao.requisito.quantidade
         : configuracao.requisito.tipo === 'HP_ABAIXO'
           ? configuracao.requisito.percentual

@@ -36,7 +36,9 @@ export function simularHabilidade(
     valorCalculado,
     percentualHp,
     resumo: requisitoAtendido
-      ? `${habilidade.nome} seria ativada com valor ${valorCalculado}.`
+      ? habilidade.tipoEfeito === 'CRITICO' && habilidade.requisito.tipo === 'CHANCE'
+        ? `${habilidade.requisito.percentual}% de chance de causar +${valorCalculado}% de dano no ataque.`
+        : `${habilidade.nome} seria ativada com valor ${valorCalculado}.`
       : `${habilidade.nome} não seria ativada porque o requisito não foi alcançado.`,
   };
 }

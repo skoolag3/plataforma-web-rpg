@@ -584,7 +584,9 @@ export class PartidasService {
     habilidade: CartaCompleta['habilidades'][number]['habilidade'],
   ): ConfiguracaoHabilidade {
     const requisito =
-      habilidade.requisito_tipo === 'CONTADOR_ATAQUES'
+      habilidade.requisito_tipo === 'CHANCE'
+        ? { tipo: 'CHANCE' as const, percentual: habilidade.requisito_valor ?? 0 }
+        : habilidade.requisito_tipo === 'CONTADOR_ATAQUES'
         ? {
             tipo: 'CONTADOR_ATAQUES' as const,
             quantidade: habilidade.requisito_valor ?? 1,

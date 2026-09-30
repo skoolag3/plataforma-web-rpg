@@ -5,7 +5,8 @@ export type TipoEfeitoHabilidade =
   | 'CURA'
   | 'ESCUDO'
   | 'ROUBO_VIDA'
-  | 'EVASAO';
+  | 'EVASAO'
+  | 'CRITICO';
 
 export type GatilhoHabilidade =
   | 'AO_ENTRAR'
@@ -28,6 +29,7 @@ export type StatusHabilidade = 'RASCUNHO' | 'PUBLICADA' | 'INATIVA';
 
 export type RequisitoHabilidade =
   | { tipo: 'NENHUM' }
+  | { tipo: 'CHANCE'; percentual: number }
   | { tipo: 'CONTADOR_ATAQUES'; quantidade: number }
   | { tipo: 'HP_ABAIXO'; percentual: number }
   | { tipo: 'TURNO_MINIMO'; turno: number };

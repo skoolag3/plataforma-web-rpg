@@ -17,6 +17,7 @@ const tiposEfeito = [
   'ESCUDO',
   'ROUBO_VIDA',
   'EVASAO',
+  'CRITICO',
 ] as const;
 const gatilhos = [
   'AO_ENTRAR',
@@ -35,6 +36,7 @@ const formasAplicacao = [
 ] as const;
 const requisitos = [
   'NENHUM',
+  'CHANCE',
   'CONTADOR_ATAQUES',
   'HP_ABAIXO',
   'TURNO_MINIMO',

@@ -341,12 +341,30 @@ function acionarHabilidades(
     const valor = calcularValorHabilidade(habilidade, dono, estado.turno);
     const alvo = obterAlvoHabilidade(estado, origem, habilidade);
 
+    if (habilidade.tipoEfeito === 'CRITICO') {
+      const chance = habilidade.requisito.tipo === 'CHANCE'
+        ? habilidade.requisito.percentual / 100
+        : 0;
+      if (Math.random() < chance) {
+        res.multiplicadorAtaque = (res.multiplicadorAtaque ?? 1) * (1 + valor / 100);
+        estado.eventos.push({
+          turno: estado.turno,
+          tipo: 'HABILIDADE',
+          origem,
+          valor,
+          texto: `${dono.nome} acertou um crítico com ${habilidade.nome} (+${valor}% de dano).`,
+        });
+      }
+      continue;
+    }
+
     if (
       habilidade.tipoEfeito === 'DANO' &&
       habilidade.formaAplicacao === 'SUBSTITUI_ATAQUE'
     ) {
       res.multiplicadorAtaque =
-        habilidade.unidade === 'PERCENTUAL' ? valor / 100 : 1;
+        (res.multiplicadorAtaque ?? 1) *
+        (habilidade.unidade === 'PERCENTUAL' ? valor / 100 : 1);
       registrarAtivacao(estado, origem, habilidade, valor);
       continue;
     }

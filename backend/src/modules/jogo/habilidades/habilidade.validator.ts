@@ -54,6 +54,7 @@ export function validarHabilidade(
 }
 
 function obterLimiteValor(habilidade: ConfiguracaoHabilidade): Intervalo {
+  if (habilidade.tipoEfeito === 'CRITICO') return limitesHabilidade.valorPercentual;
   if (habilidade.tipoEfeito === 'EVASAO') {
     return limitesHabilidade.percentualEvasao;
   }
@@ -71,6 +72,21 @@ function validarCompatibilidadeEfeito(
 ) {
   const alteraAtributo =
     habilidade.tipoEfeito === 'BUFF' || habilidade.tipoEfeito === 'DEBUFF';
+
+  if (habilidade.tipoEfeito === 'CRITICO') {
+    if (habilidade.gatilho !== 'AO_ATACAR' ||
+        habilidade.formaAplicacao !== 'ANTES_ACAO' ||
+        habilidade.alvo !== 'INIMIGO_ATIVO' ||
+        habilidade.unidade !== 'PERCENTUAL' ||
+        habilidade.requisito.tipo !== 'CHANCE' ||
+        habilidade.escala.tipo !== 'NENHUMA') {
+      adicionarErro(erros, 'tipoEfeito', 'CRITICO_INCOMPATIVEL',
+        'Crítico exige: ao atacar, antes da ação, inimigo ativo, percentual e chance sem escala.');
+    }
+  } else if (habilidade.requisito.tipo === 'CHANCE') {
+    adicionarErro(erros, 'requisito', 'CHANCE_INCOMPATIVEL',
+      'A chance é exclusiva do efeito crítico.');
+  }
 
   if (alteraAtributo && !habilidade.atributo) {
     adicionarErro(
@@ -124,6 +140,11 @@ function validarRequisito(
   habilidade: ConfiguracaoHabilidade,
 ) {
   const requisito = habilidade.requisito;
+
+  if (requisito.tipo === 'CHANCE') {
+    validarInteiroNoIntervalo(erros, 'requisito.percentual', requisito.percentual,
+      { minimo: 1, maximo: 100 }, 'CHANCE_FORA_LIMITE');
+  }
 
   if (requisito.tipo === 'CONTADOR_ATAQUES') {
     validarInteiroNoIntervalo(

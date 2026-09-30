@@ -40,6 +40,42 @@ const habilidadeBase: ConfiguracaoHabilidade = {
 };
 
 describe('motor de batalha', () => {
+  it('aplica bônus crítico somente quando a chance é sorteada', () => {
+    const critico: ConfiguracaoHabilidade = {
+      ...habilidadeBase,
+      nome: 'Golpe crítico',
+      tipoEfeito: 'CRITICO',
+      gatilho: 'AO_ATACAR',
+      alvo: 'INIMIGO_ATIVO',
+      atributo: undefined,
+      unidade: 'PERCENTUAL',
+      valorBase: 50,
+      formaAplicacao: 'ANTES_ACAO',
+      requisito: { tipo: 'CHANCE', percentual: 25 },
+    };
+    const sorteio = jest.spyOn(Math, 'random').mockReturnValue(0.1);
+    try {
+      const estado = iniciarBatalha(
+        [carta('Jogador', 1, comHabilidade(critico))],
+        [carta('Bot', 2)],
+        'MEDIA',
+      );
+      executarTurno(estado);
+      expect(estado.eventos.find((evento) => evento.tipo === 'DANO')?.valor).toBe(68);
+      expect(estado.eventos.some((evento) => evento.texto.includes('crítico'))).toBe(true);
+
+      sorteio.mockReturnValue(0.9);
+      const semCritico = iniciarBatalha(
+        [carta('Jogador', 1, comHabilidade(critico))],
+        [carta('Bot', 2)],
+        'MEDIA',
+      );
+      executarTurno(semCritico);
+      expect(semCritico.eventos.find((evento) => evento.tipo === 'DANO')?.valor).toBe(46);
+    } finally {
+      sorteio.mockRestore();
+    }
+  });
   it('mantém os atributos básicos das cartas no confronto com o chefe', () => {
     const estado = iniciarBatalha(
       [carta('Jogador', 3)],

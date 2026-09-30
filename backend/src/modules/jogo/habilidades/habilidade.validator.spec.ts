@@ -27,6 +27,19 @@ function codigos(habilidade: ConfiguracaoHabilidade) {
 }
 
 describe('validador de habilidades', () => {
+  it('aceita crítico com chance e rejeita chance fora do limite', () => {
+    const critico = criarHabilidade({
+      tipoEfeito: 'CRITICO',
+      gatilho: 'AO_ATACAR',
+      alvo: 'INIMIGO_ATIVO',
+      unidade: 'PERCENTUAL',
+      valorBase: 50,
+      formaAplicacao: 'ANTES_ACAO',
+      requisito: { tipo: 'CHANCE', percentual: 25 },
+    });
+    expect(validarHabilidade(critico).valida).toBe(true);
+    expect(codigos({ ...critico, requisito: { tipo: 'CHANCE', percentual: 0 } })).toContain('CHANCE_FORA_LIMITE');
+  });
   it('aceita o especial executado depois de três ataques', () => {
     expect(validarHabilidade(criarHabilidade())).toEqual({
       valida: true,
