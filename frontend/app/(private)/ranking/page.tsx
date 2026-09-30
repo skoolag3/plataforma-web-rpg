@@ -21,11 +21,14 @@ import { getStoredUser, subscribeAuthChange } from "../../lib/auth";
 import { buscarRanking, type JogadorRanking } from "../../lib/jogo";
 import styles from "../../styles/ranking.module.css";
 
+const jogadoresPorPagina = 10;
+
 export default function RankingPage() {
   const [jogadores, setJogadores] = useState<JogadorRanking[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [criterio, setCriterio] = useState<"pontos" | "colecao">("pontos");
+  const [paginaAtual, setPaginaAtual] = useState(1);
   const usuario = useSyncExternalStore(
     subscribeAuthChange,
     getStoredUser,
@@ -70,6 +73,14 @@ export default function RankingPage() {
   );
   const podio = jogadoresOrdenados.slice(0, 3);
   const classificacao = jogadoresOrdenados.slice(3);
+  const totalPaginas = Math.ceil(classificacao.length / jogadoresPorPagina);
+  const jogadoresPagina = classificacao.slice(
+    (paginaAtual - 1) * jogadoresPorPagina,
+    paginaAtual * jogadoresPorPagina,
+  );
+  const minhaPosicao = jogadoresOrdenados.find(
+    (jogador) => jogador.id === usuario?.id,
+  );
   const totalPartidas = jogadores.reduce(
     (total, jogador) => total + jogador.partidas,
     0,
@@ -132,18 +143,34 @@ export default function RankingPage() {
               <button
                 type="button"
                 data-ativo={criterio === "pontos" || undefined}
-                onClick={() => setCriterio("pontos")}
+                onClick={() => {
+                  setCriterio("pontos");
+                  setPaginaAtual(1);
+                }}
               >
                 <Trophy /> Pontos
               </button>
               <button
                 type="button"
                 data-ativo={criterio === "colecao" || undefined}
-                onClick={() => setCriterio("colecao")}
+                onClick={() => {
+                  setCriterio("colecao");
+                  setPaginaAtual(1);
+                }}
               >
                 <Layers3 /> Cartas colecionadas
               </button>
             </nav>
+            {minhaPosicao ? (
+              <div className={styles.minhaPosicao}>
+                <span>Sua posição <strong>#{minhaPosicao.posicao}</strong></span>
+                <span>
+                  {criterio === "pontos"
+                    ? `${minhaPosicao.pontos.toLocaleString("pt-BR")} pts`
+                    : `${minhaPosicao.cartasColecionadas.toLocaleString("pt-BR")} cartas únicas`}
+                </span>
+              </div>
+            ) : null}
             <section className={styles.podio} aria-label="Pódio do ranking">
               {podio.map((jogador) => (
                 <article
@@ -180,15 +207,16 @@ export default function RankingPage() {
               <section
                 className={styles.classificacao}
                 aria-label="Classificação geral"
+                data-criterio={criterio}
               >
                 <header>
                   <span>Posição</span>
                   <span>Jogador</span>
                   <span>Partidas</span>
-                  <span>Cartas</span>
-                  <span>Pontos</span>
+                  <span data-ativo={criterio === "colecao" || undefined}>Cartas</span>
+                  <span data-ativo={criterio === "pontos" || undefined}>Pontos</span>
                 </header>
-                {classificacao.map((jogador) => (
+                {jogadoresPagina.map((jogador) => (
                   <article
                     className={styles.linha}
                     data-atual={jogador.id === usuario?.id || undefined}
@@ -215,6 +243,25 @@ export default function RankingPage() {
                     </strong>
                   </article>
                 ))}
+                {totalPaginas > 1 ? (
+                  <nav className={styles.paginacao} aria-label="Páginas do ranking">
+                    <button
+                      type="button"
+                      disabled={paginaAtual === 1}
+                      onClick={() => setPaginaAtual((pagina) => pagina - 1)}
+                    >
+                      Anterior
+                    </button>
+                    <span>Página {paginaAtual} de {totalPaginas}</span>
+                    <button
+                      type="button"
+                      disabled={paginaAtual === totalPaginas}
+                      onClick={() => setPaginaAtual((pagina) => pagina + 1)}
+                    >
+                      Próxima
+                    </button>
+                  </nav>
+                ) : null}
               </section>
             ) : null}
           </>

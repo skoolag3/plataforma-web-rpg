@@ -110,6 +110,29 @@
 .criterios svg {
   width: 0.8rem;
 }
+.criterios button:focus-visible,
+.paginacao button:focus-visible {
+  outline: 2px solid var(--member-lime);
+  outline-offset: 2px;
+}
+.minhaPosicao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.8rem;
+  border: 1px solid rgba(190, 242, 100, 0.28);
+  border-radius: 0.75rem;
+  background: rgba(190, 242, 100, 0.055);
+  padding: 0.65rem 0.85rem;
+  color: #cbd5e1;
+  font-size: 0.7rem;
+}
+.minhaPosicao strong,
+.minhaPosicao > span:last-child {
+  color: var(--member-lime);
+  font-variant-numeric: tabular-nums;
+}
 
 .podio {
   display: grid;
@@ -278,6 +301,9 @@
 .classificacao > header span:nth-last-child(-n + 2) {
   text-align: right;
 }
+.classificacao > header span[data-ativo="true"] {
+  color: var(--member-lime);
+}
 .linha {
   min-height: 3.9rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.08);
@@ -331,6 +357,30 @@
   font-size: 0.7rem;
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+.paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-top: 1px solid var(--member-border);
+  padding: 0.75rem;
+  color: var(--member-muted);
+  font-size: 0.66rem;
+}
+.paginacao button {
+  min-height: 2rem;
+  border: 1px solid var(--member-border);
+  border-radius: 0.5rem;
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--member-text);
+  padding: 0.3rem 0.65rem;
+  font: inherit;
+  cursor: pointer;
+}
+.paginacao button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .estado {
@@ -461,12 +511,20 @@
     display: none;
   }
   .linha {
-    grid-template-columns: 2.4rem minmax(0, 1fr) 3rem auto;
+    grid-template-columns: 2.4rem minmax(0, 1fr) auto;
     gap: 0.45rem;
     padding-inline: 0.6rem;
   }
   .partidas {
     display: none;
+  }
+  .classificacao[data-criterio="pontos"] .cartas,
+  .classificacao[data-criterio="colecao"] .pontos {
+    display: none;
+  }
+  .pontos,
+  .cartas {
+    white-space: nowrap;
   }
 }
 
