@@ -3,13 +3,15 @@
 import {
   Edit3,
   FlaskConical,
+  ListFilter,
+  MoreHorizontal,
   Plus,
   Rocket,
   Search,
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   atualizarAdminHabilidade,
   criarAdminHabilidade,
@@ -19,8 +21,8 @@ import {
   type AdminHabilidade,
   type SalvarAdminHabilidadePayload,
 } from "../../lib/admin";
-import { SelectPadrao } from "../../components/ui/controlesFormulario";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
+import listaStyles from "../../styles/admin/adminCartasLista.module.css";
 import featureStyles from "../../styles/admin/adminHabilidades.module.css";
 import {
   notificarErro,
@@ -34,8 +36,9 @@ import {
 import { AdminHabilidadeTeste } from "./adminHabilidadeTeste";
 import { AdminLayout } from "./adminShared";
 import { combinarEstilos } from "./combinarEstilos";
+import { FiltroHabilidadesModal } from "./filtroHabilidadesModal";
 
-const styles = combinarEstilos(sharedStyles, featureStyles);
+const styles = combinarEstilos(sharedStyles, listaStyles, featureStyles);
 
 const formularioVazio: FormHabilidade = {
   nome: "",
@@ -119,6 +122,8 @@ export function Habilidades() {
   const [busca, setBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
+  const [modalFiltrosAberto, setModalFiltrosAberto] = useState(false);
+  const btnFiltrosRef = useRef<HTMLButtonElement>(null);
   const [form, setForm] = useState<FormHabilidade | null>(null);
   const [habilidadeTeste, setHabilidadeTeste] =
     useState<AdminHabilidade | null>(null);
@@ -127,6 +132,11 @@ export function Habilidades() {
   const [processandoId, setProcessandoId] = useState("");
   const [erro, setErro] = useState("");
   const [feedback, setFeedback] = useState("");
+
+  function fecharModalFiltros() {
+    setModalFiltrosAberto(false);
+    requestAnimationFrame(() => btnFiltrosRef.current?.focus());
+  }
 
   useEffect(() => {
     if (erro) notificarErro(erro);
@@ -224,12 +234,7 @@ export function Habilidades() {
         };
       }
       if (campo === "tipoEfeito" && atual.tipoEfeito === "CRITICO") {
-        return {
-          ...atual,
-          tipoEfeito: valor as AdminHabilidade["tipoEfeito"],
-          requisitoTipo: "NENHUM",
-          requisitoValor: undefined,
-        };
+        return { ...atual, tipoEfeito: valor as AdminHabilidade["tipoEfeito"], requisitoTipo: "NENHUM", requisitoValor: undefined };
       }
       return { ...atual, [campo]: valor };
     });
@@ -322,29 +327,65 @@ export function Habilidades() {
       title="Habilidades"
       subtitle="Crie e organize as regras executadas pelo servidor."
     >
-      <div className={styles.cartasWorkspace}>
+      <div className={`${styles.cartasWorkspace} ${styles.cartasWorkspaceUnica}`}>
         <section
           className={`${styles.cartasListaPanel} ${styles.habilidadesListaPanel}`}
         >
           <header className={styles.cartasListaTopo}>
-            <div>
-              <strong>Habilidades cadastradas</strong>
-              <small>
-                {carregando
-                  ? "Carregando..."
-                  : `${habilidadesFiltradas.length} resultados`}
-              </small>
+            <div className={styles.cartasListaEsquerda}>
+              <div className={styles.cartasListaTitulo}>
+                <strong>Habilidades cadastradas</strong>
+                <small>
+                  {carregando
+                    ? "Carregando..."
+                    : `${habilidadesFiltradas.length} ${habilidadesFiltradas.length === 1 ? "resultado" : "resultados"}`}
+                </small>
+              </div>
+              <form className={styles.pesquisaCartas} role="search" onSubmit={(evento) => evento.preventDefault()}>
+                <input
+                  type="search"
+                  placeholder="Buscar habilidade..."
+                  value={busca}
+                  onChange={(evento) => setBusca(evento.target.value)}
+                  aria-label="Buscar habilidades"
+                />
+                <button type="submit" aria-label="Pesquisar habilidades" title="Pesquisar habilidades">
+                  <Search aria-hidden="true" />
+                </button>
+              </form>
+              <button
+                ref={btnFiltrosRef}
+                type="button"
+                className={styles.btnFiltros}
+                aria-haspopup="dialog"
+                aria-expanded={modalFiltrosAberto}
+                aria-label="Abrir filtros de habilidades"
+                data-ativo={filtroTipo || filtroStatus ? "true" : undefined}
+                onClick={() => setModalFiltrosAberto(true)}
+              >
+                <ListFilter aria-hidden="true" /> Filtros
+              </button>
             </div>
-            <button
-              type="button"
-              className={styles.primaryBtn}
-              onClick={() => setForm({ ...formularioVazio })}
-            >
-              <Plus aria-hidden="true" /> Nova habilidade
-            </button>
+            <div className={styles.cartasListaAcoes}>
+              <button
+                type="button"
+                className={styles.primaryBtn}
+                onClick={() => setForm({ ...formularioVazio })}
+              >
+                <Plus aria-hidden="true" /> Nova habilidade
+              </button>
+            </div>
           </header>
           <div className={styles.tableWrap}>
             <table>
+              <colgroup>
+                <col className={styles.colunaHabilidade} />
+                <col className={styles.colunaTipo} />
+                <col className={styles.colunaGatilho} />
+                <col className={styles.colunaAlvo} />
+                <col className={styles.colunaStatus} />
+                <col className={styles.colunaAcoes} />
+              </colgroup>
               <thead>
                 <tr>
                   <th>Habilidade</th>
@@ -384,49 +425,42 @@ export function Habilidades() {
                       <Status status={habilidade.status} />
                     </td>
                     <td>
-                      <span className={styles.rowActions}>
-                        <button
-                          type="button"
-                          onClick={() => setForm(toForm(habilidade))}
-                          aria-label={`Editar ${habilidade.nome}`}
-                        >
-                          <Edit3 aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setHabilidadeTeste(habilidade)}
-                          disabled={habilidade.status === "INATIVA"}
-                          aria-label={`Testar ${habilidade.nome}`}
-                          title="Testar cenário"
-                        >
-                          <FlaskConical aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void publicar(habilidade)}
-                          disabled={
-                            habilidade.status !== "RASCUNHO" ||
-                            !habilidade.testadaEm ||
-                            processandoId === habilidade.id
-                          }
-                          aria-label={`Publicar ${habilidade.nome}`}
-                          title={
-                            habilidade.testadaEm
-                              ? "Publicar versão testada"
-                              : "Teste esta versão antes de publicar"
-                          }
-                        >
-                          <Rocket aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void inativar(habilidade)}
-                          disabled={habilidade.status === "INATIVA"}
-                          aria-label={`Inativar ${habilidade.nome}`}
-                        >
-                          <Trash2 aria-hidden="true" />
-                        </button>
-                      </span>
+                      <details className={styles.menuAcoesCarta} name="acoes-habilidades">
+                        <summary aria-label={`Ações de ${habilidade.nome}`}>
+                          <MoreHorizontal aria-hidden="true" />
+                        </summary>
+                        <div>
+                          <button type="button" onClick={(evento) => {
+                            evento.currentTarget.closest("details")?.removeAttribute("open");
+                            setForm(toForm(habilidade));
+                          }}>
+                            <Edit3 aria-hidden="true" /> Editar
+                          </button>
+                          <button type="button" disabled={habilidade.status === "INATIVA"} onClick={(evento) => {
+                            evento.currentTarget.closest("details")?.removeAttribute("open");
+                            setHabilidadeTeste(habilidade);
+                          }}>
+                            <FlaskConical aria-hidden="true" /> Testar
+                          </button>
+                          <button
+                            type="button"
+                            disabled={habilidade.status !== "RASCUNHO" || !habilidade.testadaEm || processandoId === habilidade.id}
+                            title={habilidade.testadaEm ? "Publicar versão testada" : "Teste esta versão antes de publicar"}
+                            onClick={(evento) => {
+                              evento.currentTarget.closest("details")?.removeAttribute("open");
+                              void publicar(habilidade);
+                            }}
+                          >
+                            <Rocket aria-hidden="true" /> Publicar
+                          </button>
+                          <button type="button" disabled={habilidade.status === "INATIVA"} onClick={(evento) => {
+                            evento.currentTarget.closest("details")?.removeAttribute("open");
+                            void inativar(habilidade);
+                          }}>
+                            <Trash2 aria-hidden="true" /> Inativar
+                          </button>
+                        </div>
+                      </details>
                     </td>
                   </tr>
                 ))}
@@ -435,46 +469,16 @@ export function Habilidades() {
           </div>
         </section>
 
-        <aside
-          className={`${styles.toolbar} ${styles.cartasToolbar}`}
-          aria-label="Filtros de habilidades"
-        >
-          <header className={styles.filtrosTopo}>
-            <strong>Filtros</strong>
-            <small>Atualização local</small>
-          </header>
-          <label>
-            <Search aria-hidden="true" />
-            <input
-              placeholder="Buscar habilidade..."
-              value={busca}
-              onChange={(event) => setBusca(event.target.value)}
-            />
-          </label>
-          <SelectPadrao
-            valor={filtroTipo}
-            aoAlterar={setFiltroTipo}
-            placeholder="Tipo"
-            ariaLabel="Filtrar por tipo"
-            opcoes={[
-              { valor: "", label: "Todos os tipos", labelCurto: "Tipo" },
-              ...tipos.map((tipo) => ({ valor: tipo, label: tipo })),
-            ]}
-          />
-          <SelectPadrao
-            valor={filtroStatus}
-            aoAlterar={setFiltroStatus}
-            placeholder="Status"
-            ariaLabel="Filtrar por status"
-            opcoes={[
-              { valor: "", label: "Todos os status", labelCurto: "Status" },
-              { valor: "RASCUNHO", label: "Rascunhos", cor: "#fbbf24" },
-              { valor: "PUBLICADA", label: "Publicadas", cor: "#4ade80" },
-              { valor: "INATIVA", label: "Inativas", cor: "#94a3b8" },
-            ]}
-          />
-        </aside>
       </div>
+
+      {modalFiltrosAberto ? <FiltroHabilidadesModal
+        tipo={filtroTipo}
+        setTipo={setFiltroTipo}
+        status={filtroStatus}
+        setStatus={setFiltroStatus}
+        tipos={tipos}
+        aoFechar={fecharModalFiltros}
+      /> : null}
 
       {form ? (
         <AdminHabilidadeFormulario

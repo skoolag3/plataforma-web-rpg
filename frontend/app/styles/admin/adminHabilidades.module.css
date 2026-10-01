@@ -47,10 +47,82 @@
 .habilidadeModalAjustes > header { top: -1rem; }
 .habilidadeModalAjustes > .acoesHabilidade { bottom: -1rem; padding-bottom: 0.45rem; }
 
+.habilidadesListaPanel .cartasListaTopo > .cartasListaAcoes {
+  display: grid;
+  width: min(100%, 10rem);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (max-width: 720px) {
+  .habilidadesListaPanel .cartasListaTopo > .cartasListaAcoes {
+    width: 100%;
+  }
+}
 
 .habilidadesListaPanel .tableWrap{ border: 0; border-radius: 0; box-shadow: none; }
 
-.habilidadesListaPanel .tableWrap table{ min-width: 39rem; }
+.habilidadesListaPanel .tableWrap table {
+  min-width: 52rem;
+  table-layout: fixed;
+}
+
+.colunaHabilidade { width: 27%; }
+.colunaTipo { width: 14%; }
+.colunaGatilho { width: 21%; }
+.colunaAlvo { width: 20%; }
+.colunaStatus { width: 11%; }
+.colunaAcoes { width: 7%; }
+
+.habilidadesListaPanel .tableWrap th,
+.habilidadesListaPanel .tableWrap td {
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.habilidadesListaPanel .tableWrap th {
+  height: 2.45rem;
+}
+
+.habilidadesListaPanel .tableWrap td {
+  height: 3.4rem;
+}
+
+.habilidadesListaPanel .tableWrap th:not(:first-child),
+.habilidadesListaPanel .tableWrap td:not(:first-child) {
+  text-align: center;
+}
+
+.habilidadesListaPanel .tableWrap td:not(:first-child) {
+  white-space: nowrap;
+}
+
+.habilidadesListaPanel .tableWrap td:last-child .menuAcoesCarta {
+  margin-inline: auto;
+}
+
+.habilidadesListaPanel .habilidadeNome {
+  max-width: 100%;
+}
+
+.habilidadesListaPanel .habilidadeNome > svg {
+  flex: none;
+}
+
+.habilidadesListaPanel .habilidadeNome > span {
+  min-width: 0;
+}
+
+.habilidadesListaPanel .habilidadeNome strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.habilidadesListaPanel .tableWrap tbody tr:nth-last-child(-n + 3) .menuAcoesCarta > div {
+  top: auto;
+  bottom: calc(100% + .3rem);
+}
 
 .statusRascunho{
   display: inline-flex;
@@ -62,4 +134,3 @@
   font-size: 0.65rem;
   font-weight: 850;
 }
-

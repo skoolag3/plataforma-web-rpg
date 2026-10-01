@@ -748,3 +748,11 @@
 @media (max-width: 720px) {
   .cartasListaTopo > .cartasListaEsquerda { width: 100%; flex-wrap: wrap; }
 }
+
+.cartasWorkspaceUnica {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cartasWorkspaceUnica > .cartasListaPanel {
+  grid-row: auto;
+}
