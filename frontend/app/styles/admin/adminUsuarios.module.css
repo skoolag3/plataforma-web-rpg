@@ -1,6 +1,7 @@
 .usuariosListaPanel {
   min-width: 0;
   margin-bottom: 0.8rem;
+  overflow: visible;
 }
 
 .usuariosListaPanel .tableWrap {
@@ -10,7 +11,7 @@
 }
 
 .usuariosListaPanel .tableWrap {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .usuariosListaPanel .tableWrap table {
@@ -18,87 +19,42 @@
   table-layout: fixed;
 }
 
-.usuariosListaPanel .tableWrap th:first-child {
-  width: 34%;
+.colunaUsuario { width: 40%; }
+.colunaProgresso { width: 16%; }
+.colunaSaldos { width: 19%; }
+.colunaStatus { width: 15%; }
+.colunaAcoes { width: 10%; }
+
+.usuariosListaPanel .tableWrap th,
+.usuariosListaPanel .tableWrap td {
+  box-sizing: border-box;
+  vertical-align: middle;
 }
 
-.usuariosListaPanel .tableWrap th:nth-child(2) {
-  width: 16%;
+.usuariosListaPanel .tableWrap th {
+  height: 2.45rem;
 }
 
-.usuariosListaPanel .tableWrap th:nth-child(3) {
-  width: 19%;
+.usuariosListaPanel .tableWrap td {
+  height: 3.55rem;
 }
 
-.usuariosListaPanel .tableWrap th:nth-child(4) {
-  width: 13%;
+.usuariosListaPanel .tableWrap th:not(:first-child),
+.usuariosListaPanel .tableWrap td:not(:first-child) {
+  text-align: center;
 }
 
-.usuariosListaPanel .tableWrap th:last-child {
-  width: 18%;
+.usuariosListaPanel .tableWrap td:last-child .menuAcoesCarta {
+  margin-inline: auto;
+}
+
+.usuariosListaPanel .tableWrap tbody:has(tr:nth-child(4)) tr:nth-last-child(-n + 3) .menuAcoesCarta > div {
+  top: auto;
+  bottom: calc(100% + .3rem);
 }
 
 .usuariosWorkspace {
   min-width: 0;
-}
-
-.usuariosBarraCompacta {
-  display: grid;
-  grid-template-columns: minmax(14rem, 1fr) minmax(10rem, 13rem) auto;
-  gap: 0.55rem;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  border: 1px solid rgba(148, 163, 184, 0.13);
-  border-radius: 0.72rem;
-  background: rgba(7, 12, 25, 0.72);
-  padding: 0.5rem;
-}
-
-.usuariosBarraCompacta > label {
-  display: flex;
-  min-width: 0;
-  height: 2.35rem;
-  align-items: center;
-  gap: 0.55rem;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 0.55rem;
-  background: rgba(2, 6, 18, 0.65);
-  padding: 0 0.7rem;
-}
-
-.usuariosBarraCompacta svg {
-  width: 0.9rem;
-  color: #71809a;
-}
-
-.usuariosBarraCompacta input {
-  min-width: 0;
-  flex: 1;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: #fff;
-  font: inherit;
-  font-size: 0.74rem;
-}
-
-.usuariosBarraCompacta select {
-  height: 2.35rem;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 0.55rem;
-  outline: 0;
-  background: #0b1220;
-  color: #e2e8f0;
-  padding: 0 0.7rem;
-  font: inherit;
-  font-size: 0.72rem;
-  font-weight: 750;
-}
-
-.usuariosBarraCompacta > small {
-  color: #64748b;
-  font-size: 0.62rem;
-  white-space: nowrap;
 }
 
 .usuarioDadoDuplo {
@@ -113,6 +69,7 @@
   font-size: 0.74rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .usuarioDadoDuplo small {
@@ -122,6 +79,7 @@
 
 .usuarioCell {
   display: grid;
+  min-width: 0;
   gap: 0.2rem;
 }
 
@@ -140,6 +98,33 @@
 .usuarioCell small {
   color: #71809a;
   font-size: 0.67rem;
+}
+
+@media (max-width: 720px) {
+  .usuariosListaPanel .tableWrap colgroup {
+    display: none;
+  }
+
+  .usuariosListaPanel .tableWrap tbody td {
+    height: auto;
+    text-align: left;
+  }
+
+  .usuariosListaPanel .tableWrap tbody td:last-child .menuAcoesCarta {
+    justify-self: end;
+    margin-inline: 0;
+  }
+
+  .usuariosListaPanel .tableWrap tbody tr:has(details[open]) {
+    position: relative;
+    z-index: 2;
+    overflow: visible;
+  }
+
+  .usuariosListaPanel .tableWrap tbody tr .menuAcoesCarta > div {
+    top: calc(100% + .3rem);
+    bottom: auto;
+  }
 }
 
 .usuarioResumo {

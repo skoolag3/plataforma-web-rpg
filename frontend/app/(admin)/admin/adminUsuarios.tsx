@@ -2,30 +2,38 @@
 
 import {
   Edit3,
+  ListFilter,
+  Lock,
   MoreHorizontal,
   Save,
   Search,
   SlidersHorizontal,
+  Trash2,
+  Unlock,
   X,
 } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   atualizarAdminUsuario,
   listarAdminUsuarios,
+  removerAdminUsuario,
   type AdminUsuario,
 } from "../../lib/admin";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
+import listaStyles from "../../styles/admin/adminCartasLista.module.css";
 import featureStyles from "../../styles/admin/adminUsuarios.module.css";
 import colecaoStyles from "../../styles/admin/adminUsuarioColecao.module.css";
-import { SelectPadrao } from "../../components/ui/controlesFormulario";
 import financeiroStyles from "../../styles/admin/adminUsuarioFinanceiro.module.css";
 
 import { AdminLayout } from "./adminShared";
 import { AdminUsuarioPainel } from "./adminUsuarioPainel";
 import { combinarEstilos } from "./combinarEstilos";
+import { FiltroUsuariosModal } from "./filtroUsuariosModal";
+import { ConfirmarRemocaoUsuario } from "./confirmarRemocaoUsuario";
 
 const styles = combinarEstilos(
   sharedStyles,
+  listaStyles,
   featureStyles,
   colecaoStyles,
   financeiroStyles,
@@ -49,8 +57,13 @@ export function Usuarios() {
   const [busca, setBusca] = useState("");
   const [buscaAplicada, setBuscaAplicada] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
+  const [modalFiltrosAberto, setModalFiltrosAberto] = useState(false);
+  const btnFiltrosRef = useRef<HTMLButtonElement>(null);
   const [selecionado, setSelecionado] = useState<AdminUsuario | null>(null);
   const [editando, setEditando] = useState<AdminUsuario | null>(null);
+  const [usuarioParaRemover, setUsuarioParaRemover] = useState<AdminUsuario | null>(null);
+  const [removendo, setRemovendo] = useState(false);
+  const [erroRemocao, setErroRemocao] = useState<string | null>(null);
   const [nomeEdicao, setNomeEdicao] = useState("");
   const [nivelEdicao, setNivelEdicao] = useState("1");
   const [ativoEdicao, setAtivoEdicao] = useState(true);
@@ -59,6 +72,11 @@ export function Usuarios() {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  function fecharModalFiltros() {
+    setModalFiltrosAberto(false);
+    requestAnimationFrame(() => btnFiltrosRef.current?.focus());
+  }
 
   async function carregarUsuarios() {
     setCarregando(true);
@@ -165,6 +183,24 @@ export function Usuarios() {
     }
   }
 
+  async function confirmarRemocao() {
+    if (!usuarioParaRemover || removendo) return;
+    setRemovendo(true);
+    setErroRemocao(null);
+    try {
+      await removerAdminUsuario(usuarioParaRemover.id, usuarioParaRemover.nome);
+      setUsuariosApi((atuais) => atuais.filter((usuario) => usuario.id !== usuarioParaRemover.id));
+      setSelecionado(null);
+      setEditando(null);
+      setUsuarioParaRemover(null);
+      setFeedback("Usuário removido. A conta perdeu o acesso; os dados foram preservados.");
+    } catch (error) {
+      setErroRemocao(error instanceof Error ? error.message : "Não foi possível remover o usuário.");
+    } finally {
+      setRemovendo(false);
+    }
+  }
+
   useEffect(() => {
     const timer = window.setTimeout(() => setBuscaAplicada(busca.trim()), 280);
     return () => window.clearTimeout(timer);
@@ -209,48 +245,57 @@ export function Usuarios() {
       {carregando ? (
         <p className={styles.feedbackInfo}>Carregando usuários...</p>
       ) : null}
-      <div
-        className={styles.usuariosBarraCompacta}
-        aria-label="Filtros de usuários"
-      >
-        <label>
-          <Search aria-hidden="true" />
-          <input
-            placeholder="Buscar por nome ou e-mail..."
-            value={busca}
-            onChange={(event) => setBusca(event.target.value)}
-          />
-        </label>
-        <SelectPadrao
-          valor={filtroStatus}
-          aoAlterar={setFiltroStatus}
-          placeholder="Status"
-          ariaLabel="Filtrar usuários por status"
-          opcoes={[
-            { valor: "", label: "Todos os status", labelCurto: "Status" },
-            { valor: "ativos", label: "Ativos", cor: "#4ade80" },
-            { valor: "bloqueados", label: "Bloqueados", cor: "#f87171" },
-            { valor: "inativos", label: "Inativos", cor: "#fbbf24" },
-            { valor: "admins", label: "Administradores", cor: "#c4b5fd" },
-          ]}
-        />
-        <small>Atualização automática</small>
-      </div>
       <div className={styles.usuariosWorkspace}>
         <section
           className={`${styles.cartasListaPanel} ${styles.usuariosListaPanel}`}
         >
           <header className={styles.cartasListaTopo}>
-            <div>
-              <strong>Usuários cadastrados</strong>
-              <small>
-                {usuariosApi.length}{" "}
-                {usuariosApi.length === 1 ? "resultado" : "resultados"}
-              </small>
+            <div className={styles.cartasListaEsquerda}>
+              <div className={styles.cartasListaTitulo}>
+                <strong>Usuários cadastrados</strong>
+                <small>
+                  {usuariosApi.length}{" "}
+                  {usuariosApi.length === 1 ? "resultado" : "resultados"}
+                </small>
+              </div>
+              <form className={styles.pesquisaCartas} role="search" onSubmit={(evento) => {
+                evento.preventDefault();
+                setBuscaAplicada(busca.trim());
+              }}>
+                <input
+                  type="search"
+                  placeholder="Buscar por nome ou e-mail..."
+                  value={busca}
+                  onChange={(evento) => setBusca(evento.target.value)}
+                  aria-label="Buscar usuários por nome ou e-mail"
+                />
+                <button type="submit" aria-label="Pesquisar usuários" title="Pesquisar usuários">
+                  <Search aria-hidden="true" />
+                </button>
+              </form>
+              <button
+                ref={btnFiltrosRef}
+                type="button"
+                className={styles.btnFiltros}
+                aria-haspopup="dialog"
+                aria-expanded={modalFiltrosAberto}
+                aria-label="Abrir filtros de usuários"
+                data-ativo={filtroStatus ? "true" : undefined}
+                onClick={() => setModalFiltrosAberto(true)}
+              >
+                <ListFilter aria-hidden="true" /> Filtros
+              </button>
             </div>
           </header>
           <div className={styles.tableWrap}>
             <table>
+              <colgroup>
+                <col className={styles.colunaUsuario} />
+                <col className={styles.colunaProgresso} />
+                <col className={styles.colunaSaldos} />
+                <col className={styles.colunaStatus} />
+                <col className={styles.colunaAcoes} />
+              </colgroup>
               <thead>
                 <tr>
                   <th>Usuário</th>
@@ -297,56 +342,51 @@ export function Usuarios() {
                       />
                     </td>
                     <td data-label="Ações">
-                      <span className={styles.rowActions}>
-                        <button
-                          type="button"
-                          className={
-                            selecionado?.id === usuario.id
-                              ? styles.rowActionSelected
-                              : undefined
-                          }
-                          onClick={() => {
+                      <details className={styles.menuAcoesCarta} name="acoes-usuarios">
+                        <summary aria-label={`Ações de ${usuario.nome}`}>
+                          <MoreHorizontal aria-hidden="true" />
+                        </summary>
+                        <div>
+                          <button type="button" onClick={(evento) => {
+                            evento.currentTarget.closest("details")?.removeAttribute("open");
                             setEditando(null);
                             setSelecionado(usuario);
-                          }}
-                          title="Gerenciar usuário"
-                          aria-label={`Gerenciar ${usuario.nome}`}
-                        >
-                          <SlidersHorizontal aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          className={
-                            editando?.id === usuario.id
-                              ? styles.rowActionSelected
-                              : undefined
-                          }
-                          onClick={() =>
-                            editando?.id === usuario.id
-                              ? fecharEdicao()
-                              : abrirEdicao(usuario)
-                          }
-                          title="Editar usuário"
-                          aria-label={`Editar ${usuario.nome}`}
-                        >
-                          <Edit3 aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void alternarBloqueio(usuario)}
-                          disabled={salvando || usuario.admin}
-                          title={
-                            usuario.admin
-                              ? "Conta administrativa protegida"
-                              : usuario.bloqueado
-                                ? "Desbloquear usuário"
-                                : "Bloquear usuário"
-                          }
-                          aria-label={`${usuario.bloqueado ? "Desbloquear" : "Bloquear"} ${usuario.nome}`}
-                        >
-                          <MoreHorizontal aria-hidden="true" />
-                        </button>
-                      </span>
+                          }}>
+                            <SlidersHorizontal aria-hidden="true" /> Gerenciar
+                          </button>
+                          <button type="button" onClick={(evento) => {
+                            evento.currentTarget.closest("details")?.removeAttribute("open");
+                            abrirEdicao(usuario);
+                          }}>
+                            <Edit3 aria-hidden="true" /> Editar
+                          </button>
+                          <button
+                            type="button"
+                            disabled={salvando || usuario.admin}
+                            title={usuario.admin ? "Conta administrativa protegida" : undefined}
+                            onClick={(evento) => {
+                              evento.currentTarget.closest("details")?.removeAttribute("open");
+                              void alternarBloqueio(usuario);
+                            }}
+                          >
+                            {usuario.bloqueado ? <Unlock aria-hidden="true" /> : <Lock aria-hidden="true" />}
+                            {usuario.bloqueado ? "Desbloquear" : "Bloquear"}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={salvando || removendo || usuario.admin}
+                            title={usuario.admin ? "Conta administrativa protegida" : undefined}
+                            onClick={(evento) => {
+                              evento.currentTarget.closest("details")?.removeAttribute("open");
+                              setErroRemocao(null);
+                              setFeedback(null);
+                              setUsuarioParaRemover(usuario);
+                            }}
+                          >
+                            <Trash2 aria-hidden="true" /> Remover
+                          </button>
+                        </div>
+                      </details>
                     </td>
                   </tr>
                 ))}
@@ -355,6 +395,18 @@ export function Usuarios() {
           </div>
         </section>
       </div>
+      {modalFiltrosAberto ? <FiltroUsuariosModal
+        status={filtroStatus}
+        setStatus={setFiltroStatus}
+        aoFechar={fecharModalFiltros}
+      /> : null}
+      {usuarioParaRemover ? <ConfirmarRemocaoUsuario
+        usuario={usuarioParaRemover}
+        removendo={removendo}
+        erro={erroRemocao}
+        aoFechar={() => { if (!removendo) setUsuarioParaRemover(null); }}
+        aoConfirmar={() => { void confirmarRemocao(); }}
+      /> : null}
       {selecionado ? (
         <AdminUsuarioPainel
           usuario={selecionado}

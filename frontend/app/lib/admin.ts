@@ -769,6 +769,13 @@ export function atualizarAdminUsuario(
   });
 }
 
+export function removerAdminUsuario(id: string, confirmarNome: string) {
+  return adminRequest<{ message: string }>(`/admin/usuarios/${id}`, {
+    method: "DELETE",
+    body: JSON.stringify({ confirmarNome, confirmarImpacto: true }),
+  });
+}
+
 export function obterColecaoAdminUsuario(id: string) {
   return adminRequest<AdminUsuarioCarta[]>(`/admin/usuarios/${id}/colecao`);
 }
