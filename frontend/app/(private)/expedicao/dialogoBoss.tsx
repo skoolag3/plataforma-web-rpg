@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import VLabel8 from "@/components/ui/v-label-8";
 import type { EstadoExpedicao } from "../../lib/jogo";
 import styles from "../../styles/dialogoBoss.module.css";
 
@@ -46,11 +47,11 @@ export function DialogoBoss({
             onResponder(resposta.trim());
           }}
         >
-          <label htmlFor="respostaBoss">Sua resposta</label>
-          <textarea
+          <VLabel8
             id="respostaBoss"
-            minLength={20}
-            maxLength={600}
+            rotulo="Sua resposta"
+            minLength={5}
+            maxLength={200}
             required
             value={resposta}
             onChange={(evento) => setResposta(evento.target.value)}
@@ -58,7 +59,7 @@ export function DialogoBoss({
           />
           <button
             type="submit"
-            disabled={processando || resposta.trim().length < 20}
+            disabled={processando || resposta.trim().length < 5}
           >
             {processando ? "O boss está ouvindo..." : "Responder ao boss"}
           </button>
