@@ -2,7 +2,6 @@
 
 import {
   FileText,
-  ImagePlus,
   Link2,
   Pencil,
   Plus,
@@ -11,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   atualizarAdminNoticia,
   criarAdminNoticia,
@@ -23,6 +22,7 @@ import {
   type SalvarAdminNoticiaPayload,
 } from "../../lib/admin";
 import { SelectPadrao } from "../../components/ui/controlesFormulario";
+import AnimatedFileUpload from "@/components/ui/animated-file-upload";
 import styles from "../../styles/admin/adminNoticias.module.css";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
 import {
@@ -48,6 +48,8 @@ export function AdminNoticias() {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
   const [excluindo, setExcluindo] = useState<AdminNoticia | null>(null);
+  const campoTituloRef = useRef<HTMLInputElement>(null);
+  const btnCriarRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     void carregar();
@@ -56,6 +58,21 @@ export function AdminNoticias() {
   useEffect(() => {
     if (erro) notificarErro(erro);
   }, [erro]);
+
+  useEffect(() => {
+    if (!editorAberto) return;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    campoTituloRef.current?.focus();
+    function fecharComEscape(evento: KeyboardEvent) {
+      if (evento.key === "Escape") fecharEditor();
+    }
+    document.addEventListener("keydown", fecharComEscape);
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      document.removeEventListener("keydown", fecharComEscape);
+    };
+  }, [editorAberto]);
 
   async function carregar() {
     try {
@@ -84,6 +101,7 @@ export function AdminNoticias() {
     setForm(formularioVazio);
     setErro("");
     setEditorAberto(false);
+    btnCriarRef.current?.focus();
   }
 
   function editar(noticia: AdminNoticia) {
@@ -100,8 +118,8 @@ export function AdminNoticias() {
     });
   }
 
-  async function enviarImagem(event: ChangeEvent<HTMLInputElement>) {
-    const arquivo = event.target.files?.[0];
+  async function enviarImagem(arquivos: File[]) {
+    const arquivo = arquivos[0];
     if (!arquivo) return;
     const dados = new FormData();
     dados.append("imagem", arquivo);
@@ -168,9 +186,7 @@ export function AdminNoticias() {
       title="Notícias e propaganda"
       subtitle="Crie chamadas para a página inicial e conteúdos completos por assunto."
     >
-      <div
-        className={`${styles.layout} ${!editorAberto ? styles.layoutFechado : ""}`}
-      >
+      <div className={styles.layout}>
         <section className={`${sharedStyles.cartasListaPanel} ${styles.lista}`}>
           <header className={sharedStyles.cartasListaTopo}>
             <div>
@@ -180,7 +196,7 @@ export function AdminNoticias() {
                 {noticias.length === 1 ? "cadastrada" : "cadastradas"}
               </small>
             </div>
-            <button className={sharedStyles.primaryBtn} onClick={novo}>
+            <button ref={btnCriarRef} className={sharedStyles.primaryBtn} onClick={novo}>
               <Plus /> Criar publicação
             </button>
           </header>
@@ -261,11 +277,14 @@ export function AdminNoticias() {
           </div>
         </section>
 
+      </div>
+
         {editorAberto ? (
-          <section className={styles.formulario}>
+          <div className={styles.modalFundo} role="presentation">
+          <section className={styles.formulario} role="dialog" aria-modal="true" aria-labelledby="titulo-editor-noticia">
             <header>
               <div>
-                <strong>
+                <strong id="titulo-editor-noticia">
                   {editando ? "Editar publicação" : "Nova publicação"}
                 </strong>
                 <small>
@@ -273,7 +292,7 @@ export function AdminNoticias() {
                   interna.
                 </small>
               </div>
-              <button onClick={fecharEditor} title="Fechar editor">
+              <button type="button" onClick={fecharEditor} title="Fechar editor" aria-label="Fechar editor">
                 <X />
               </button>
             </header>
@@ -281,6 +300,7 @@ export function AdminNoticias() {
               <label>
                 <span>Título</span>
                 <input
+                  ref={campoTituloRef}
                   value={form.titulo}
                   onChange={(e) => atualizar("titulo", e.target.value)}
                 />
@@ -327,15 +347,14 @@ export function AdminNoticias() {
               />
             </label>
             <div className={styles.imagemCampo}>
-              <label>
-                <ImagePlus />
-                <span>Imagem de capa</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => void enviarImagem(e)}
-                />
-              </label>
+              <AnimatedFileUpload
+                accept="image/png,image/jpeg,image/webp"
+                maxSize={5 * 1024 * 1024}
+                rotulo="Imagem de capa"
+                ajuda="Arraste ou clique para escolher · PNG, JPG ou WEBP · Até 5 MB"
+                disabled={salvando}
+                onFilesSelected={(arquivos) => { if (arquivos.length) void enviarImagem(arquivos); }}
+              />
               {form.imagem ? (
                 <Image
                   src={form.imagem}
@@ -411,8 +430,8 @@ export function AdminNoticias() {
                   : "Criar publicação"}
             </button>
           </section>
+          </div>
         ) : null}
-      </div>
 
       {excluindo ? (
         <div className={styles.modalFundo} role="presentation">

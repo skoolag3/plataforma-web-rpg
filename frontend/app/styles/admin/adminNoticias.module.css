@@ -1,15 +1,8 @@
 .layout {
-  display: grid;
-  grid-template-columns: minmax(19rem, 0.72fr) minmax(28rem, 1.28fr);
-  gap: 0.8rem;
-  align-items: start;
-}
-
-.layoutFechado {
   display: block;
 }
 
-.layoutFechado .lista {
+.lista {
   width: 100%;
 }
 
@@ -251,8 +244,19 @@
 }
 .formulario {
   display: grid;
+  width: min(100%, 48rem);
+  max-height: min(92dvh, 52rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   gap: 0.5rem;
   padding-bottom: 0.65rem;
+  box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.52);
+}
+.formulario > header {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  background: #080d1a;
 }
 .formulario > label,
 .camposDuplos label {
@@ -300,25 +304,9 @@
   gap: 0.65rem;
   margin: 0 0.75rem;
 }
-.imagemCampo label {
-  display: flex;
-  min-height: 2.6rem;
+.imagemCampo > :first-child {
   flex: 1;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  border: 1px dashed rgba(167, 139, 250, 0.35);
-  border-radius: 0.5rem;
-  color: #c4b5fd;
-  cursor: pointer;
-  font-size: 0.62rem;
-  font-weight: 800;
-}
-.imagemCampo label svg {
-  width: 0.9rem;
-}
-.imagemCampo input {
-  display: none;
+  min-width: 0;
 }
 .imagemCampo img {
   width: 7rem;
@@ -393,14 +381,21 @@
   text-align: center;
 }
 @media (max-width: 900px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
   .lista > div {
-    max-height: 20rem;
+    max-height: none;
   }
 }
 @media (max-width: 560px) {
+  .modalFundo {
+    padding: 0.55rem;
+  }
+  .formulario {
+    max-height: calc(100dvh - 1.1rem);
+  }
+  .imagemCampo {
+    align-items: stretch;
+    flex-direction: column;
+  }
   .camposDuplos {
     grid-template-columns: 1fr;
   }
@@ -409,7 +404,5 @@
   }
   .anexos > div input:nth-child(2) {
     grid-column: 1;
-  }
-  .deck {
   }
 }
