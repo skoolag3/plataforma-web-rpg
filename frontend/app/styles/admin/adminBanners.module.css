@@ -6,17 +6,40 @@
   background: #080d19;
 }
 
-.listaBanners {
-  overflow: hidden;
+.listaBanners.listaBanners {
+  overflow: visible;
   padding: 0;
 }
 .listaBanners > header {
-  min-height: 3.75rem;
-  padding: 0.55rem 0.7rem 0.55rem 0.85rem;
+  min-height: 4.5rem;
+  padding: .75rem .85rem;
 }
 .tabelaBanners {
-  min-width: 48rem !important;
+  min-width: 0 !important;
+  table-layout: fixed;
 }
+.colunaBanner { width: 31%; }
+.colunaPool { width: 40%; }
+.colunaStatus { width: 19%; }
+.colunaAcoes { width: 10%; }
+.listaBanners .tableWrap.tableWrap { overflow: visible; border: 0; border-radius: 0; }
+.tabelaBanners th, .tabelaBanners td { box-sizing: border-box; vertical-align: middle; }
+.tabelaBanners th { height: 2.45rem; }
+.tabelaBanners td { height: 3.55rem; }
+.tabelaBanners th:nth-child(n+3), .tabelaBanners td:nth-child(n+3) { text-align: center; }
+.tabelaBanners td:last-child details { margin-inline: auto; }
+.tabelaBanners tbody tr:last-child details > div { top: auto; bottom: calc(100% + .3rem); }
+.tabelaBanners tbody tr:nth-child(-n + 3):last-child details > div { top: calc(100% + .3rem); bottom: auto; }
+.iconeBusca { display: grid; width: 2.5rem; height: 2.5rem; flex: none; place-items: center; border-left: 1px solid rgba(148,163,184,.14); color: #c4b5fd; }
+.iconeBusca svg { width: .95rem; height: .95rem; }
+.listaBanners > header > div:last-child { display: flex; width: auto; }
+.listaBanners > header button { height: 2.5rem; min-height: 2.5rem; }
+.listaBanners > header > div:last-child button:last-child { min-width: 8.5rem; }
+.listaBanners > header .btnAtualizar { width: 2.5rem; min-width: 2.5rem; padding: 0; }
+.opcoesStatus { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .5rem; }
+.opcoesStatus button { min-height: 2.5rem; border: 1px solid rgba(148,163,184,.2); border-radius: .5rem; background: #0b111d; color: #cbd5e1; cursor: pointer; font: inherit; font-size: .72rem; font-weight: 750; }
+.opcoesStatus button[aria-pressed="true"] { border-color: #a78bfa; background: rgba(124,58,237,.2); color: #fff; }
+.opcoesStatus button:focus-visible { outline: 2px solid #ddd6fe; outline-offset: 2px; }
 .tabelaBanners tr[data-atual] {
   background: rgba(190, 242, 100, 0.035);
   box-shadow: inset 3px 0 rgba(190, 242, 100, 0.7);
@@ -50,30 +73,6 @@
   margin-left: 0.2rem;
   color: #758299;
   font-size: 0.56rem;
-}
-.tabelaBanners .acoesBanner {
-  display: flex;
-  justify-content: flex-end;
-  white-space: nowrap;
-}
-.tabelaBanners .acoesBanner button {
-  display: inline-flex;
-  min-height: 1.9rem;
-  align-items: center;
-  gap: 0.28rem;
-  border: 1px solid rgba(167, 139, 250, 0.2);
-  border-radius: 0.4rem;
-  background: rgba(124, 58, 237, 0.1);
-  color: #d8ccf7;
-  cursor: pointer;
-  padding: 0 0.45rem;
-  font: inherit;
-  font-size: 0.57rem;
-  font-weight: 800;
-}
-.tabelaBanners .acoesBanner button:disabled {
-  cursor: default;
-  opacity: 0.45;
 }
 
 .resumoRotacao {
@@ -272,20 +271,6 @@
   opacity: 0.48;
 }
 
-.acoesBanner {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-}
-
-.acoesBanner button {
-  padding: 0 0.55rem;
-}
-
-.acoesBanner .btnExcluir {
-  border-color: rgba(248, 113, 113, 0.24);
-  color: #fca5a5;
-  background: rgba(127, 29, 29, 0.12);
-}
 
 .modalFundo {
   position: fixed;
@@ -494,10 +479,22 @@
   cursor: pointer;
 }
 
-.formBanner > footer button:last-child {
-  color: #10131d;
-  background: linear-gradient(135deg, #bef264, #8b5cf6);
+.formBanner > footer .btnSalvarBanner {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  border-color: rgba(168, 85, 247, .55);
+  color: #fff;
+  background: linear-gradient(135deg, #6d28d9, #9333ea);
+  transition: filter 150ms ease, transform 150ms ease;
 }
+
+.formBanner > footer .btnSalvarBanner svg { width: .9rem; height: .9rem; }
+.formBanner > footer .btnSalvarBanner:hover:not(:disabled) { filter: brightness(1.12); }
+.formBanner > footer .btnSalvarBanner:active:not(:disabled) { transform: translateY(1px); }
+.formBanner > footer button:focus-visible { outline: 2px solid #ddd6fe; outline-offset: 2px; }
 
 .formBanner button:disabled,
 .confirmarExclusao button:disabled {
@@ -577,4 +574,42 @@
   .acoesLista button {
     flex: 1;
   }
+}
+
+@media (max-width: 720px) {
+  .listaBanners .tableWrap table,
+  .listaBanners .tableWrap tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .listaBanners .tableWrap colgroup,
+  .listaBanners .tableWrap thead { display: none; }
+
+  .listaBanners .tableWrap tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .65rem;
+    border-top: 1px solid rgba(148,163,184,.14);
+    padding: .8rem;
+  }
+
+  .listaBanners .tableWrap tbody td {
+    display: block;
+    height: auto;
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    text-align: left;
+  }
+
+  .listaBanners .tableWrap tbody td:first-child { grid-column: 1; }
+  .listaBanners .tableWrap tbody td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+  .listaBanners .tableWrap tbody td:nth-child(3) { grid-column: 1; grid-row: 3; text-align: left; }
+  .listaBanners .tableWrap tbody td:last-child { grid-column: 2; grid-row: 1; }
+  .listaBanners .tableWrap tbody td:last-child details { margin-inline: 0; }
+  .listaBanners .tableWrap tbody tr:has(details[open]) { position: relative; z-index: 2; }
+  .listaBanners .tableWrap tbody tr details > div { top: calc(100% + .3rem); bottom: auto; }
+  .listaBanners .tableWrap tbody td[colspan] { grid-column: 1 / -1; }
 }

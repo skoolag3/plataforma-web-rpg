@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Search, X } from "lucide-react";
+import { Check, Save, Search, X } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import type {
   AdminBanner,
@@ -155,8 +155,10 @@ export function FormBanner({
           </button>
           <button
             type="submit"
+            className={styles.btnSalvarBanner}
             disabled={salvando || !nome.trim() || cartasIds.size === 0}
           >
+            <Save aria-hidden="true" />
             {salvando
               ? "Salvando..."
               : banner

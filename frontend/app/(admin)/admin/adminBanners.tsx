@@ -2,9 +2,12 @@
 
 import {
   Clock3,
+  ListFilter,
+  MoreHorizontal,
   Pencil,
   Plus,
   RefreshCw,
+  Search,
   ShieldCheck,
   Trash2,
 } from "lucide-react";
@@ -27,8 +30,13 @@ import {
 } from "../../lib/admin";
 import styles from "../../styles/admin/adminBanners.module.css";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
+import listaStyles from "../../styles/admin/adminCartasLista.module.css";
 import { AdminLayout } from "./adminShared";
+import { combinarEstilos } from "./combinarEstilos";
+import { FiltroBannersModal } from "./filtroBannersModal";
 import { FormBanner } from "./formBanner";
+
+const lista = combinarEstilos(sharedStyles, listaStyles);
 
 function formatarTempo(ms: number) {
   const segundos = Math.max(0, Math.floor(ms / 1000));
@@ -44,6 +52,9 @@ export function AdminBanners() {
   const [editando, setEditando] = useState<AdminBanner | "novo" | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [excluindo, setExcluindo] = useState<AdminBanner | null>(null);
+  const [busca, setBusca] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState("");
+  const [modalFiltrosAberto, setModalFiltrosAberto] = useState(false);
 
   const carregar = useCallback(async () => {
     try {
@@ -79,6 +90,15 @@ export function AdminBanners() {
   const tempoRestante = dados?.rotacao
     ? new Date(dados.rotacao.proximaRotacaoEm).getTime() - agora
     : 0;
+  const bannersFiltrados = (dados?.banners ?? []).filter((banner) => {
+    const atual = banner.id === dados?.rotacao?.bannerAtualId;
+    const correspondeBusca = banner.nome.toLocaleLowerCase("pt-BR").includes(busca.trim().toLocaleLowerCase("pt-BR"));
+    const correspondeStatus = !filtroStatus ||
+      (filtroStatus === "destaque" && atual) ||
+      (filtroStatus === "ativos" && banner.ativo) ||
+      (filtroStatus === "inativos" && !banner.ativo);
+    return correspondeBusca && correspondeStatus;
+  });
 
   async function forcarBanner(idBanner: string) {
     setForcandoId(idBanner);
@@ -177,29 +197,44 @@ export function AdminBanners() {
       </section>
 
       <section
-        className={`${sharedStyles.cartasListaPanel} ${styles.listaBanners}`}
+        className={`${lista.cartasListaPanel} ${styles.listaBanners}`}
       >
-        <header className={sharedStyles.cartasListaTopo}>
-          <div>
-            <h2>Banners cadastrados</h2>
-            <p>Somente banners ativos participam da rotação automática.</p>
+        <header className={lista.cartasListaTopo}>
+          <div className={lista.cartasListaEsquerda}>
+            <div className={lista.cartasListaTitulo}>
+              <strong>Banners cadastrados</strong>
+              <small>{bannersFiltrados.length} {bannersFiltrados.length === 1 ? "resultado" : "resultados"}</small>
+            </div>
+            <div className={lista.pesquisaCartas} role="search">
+              <input type="search" value={busca} onChange={(evento) => setBusca(evento.target.value)} placeholder="Buscar banner..." aria-label="Buscar banner por nome" />
+              <span className={styles.iconeBusca}><Search aria-hidden="true" /></span>
+            </div>
+            <button type="button" className={lista.btnFiltros} data-ativo={filtroStatus ? "true" : undefined} aria-haspopup="dialog" aria-expanded={modalFiltrosAberto} onClick={() => setModalFiltrosAberto(true)}>
+              <ListFilter aria-hidden="true" /> Filtros
+            </button>
           </div>
-          <div className={styles.acoesLista}>
+          <div className={lista.cartasListaAcoes}>
+            <button className={styles.btnAtualizar} type="button" onClick={() => void carregar()} aria-label="Atualizar banners" title="Atualizar banners">
+              <RefreshCw aria-hidden="true" />
+            </button>
             <button
-              className={sharedStyles.primaryBtn}
+              className={lista.primaryBtn}
               type="button"
               onClick={() => setEditando("novo")}
             >
               <Plus aria-hidden="true" /> Novo banner
             </button>
-            <button type="button" onClick={() => void carregar()}>
-              <RefreshCw aria-hidden="true" /> Atualizar
-            </button>
           </div>
         </header>
 
-        <div className={sharedStyles.tableWrap}>
+        <div className={`${lista.tableWrap} ${styles.tableWrap}`}>
           <table className={styles.tabelaBanners}>
+            <colgroup>
+              <col className={styles.colunaBanner} />
+              <col className={styles.colunaPool} />
+              <col className={styles.colunaStatus} />
+              <col className={styles.colunaAcoes} />
+            </colgroup>
             <thead>
               <tr>
                 <th>Banner</th>
@@ -209,17 +244,17 @@ export function AdminBanners() {
               </tr>
             </thead>
             <tbody>
-              {(dados?.banners ?? []).map((banner) => {
+              {bannersFiltrados.map((banner) => {
                 const atual = banner.id === dados?.rotacao?.bannerAtualId;
                 return (
                   <tr key={banner.id} data-atual={atual || undefined}>
-                    <td>
+                    <td data-label="Banner">
                       <div className={styles.bannerPrincipal}>
                         <strong>{banner.nome}</strong>
                         <small>{banner.custoGiro} Rubys por giro</small>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Pool">
                       <div className={styles.raridadesBanner}>
                         {banner.raridades.map((item) => (
                           <span key={item.raridade}>
@@ -229,12 +264,12 @@ export function AdminBanners() {
                         <small>{banner.totalCartas} cartas</small>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span
                         className={
                           atual || banner.ativo
-                            ? sharedStyles.statusAtivo
-                            : sharedStyles.statusInativo
+                            ? lista.statusAtivo
+                            : lista.statusInativo
                         }
                       >
                         {atual
@@ -244,14 +279,19 @@ export function AdminBanners() {
                             : "Inativo"}
                       </span>
                     </td>
-                    <td>
-                      <div className={styles.acoesBanner}>
+                    <td data-label="Ações">
+                      <details className={lista.menuAcoesCarta} name="acoes-banners">
+                        <summary aria-label={`Ações de ${banner.nome}`}><MoreHorizontal aria-hidden="true" /></summary>
+                        <div>
                         <button
                           type="button"
                           disabled={
                             !banner.ativo || atual || Boolean(forcandoId)
                           }
-                          onClick={() => void forcarBanner(banner.id)}
+                          onClick={(evento) => {
+                            evento.currentTarget.closest("details")?.removeAttribute("open");
+                            void forcarBanner(banner.id);
+                          }}
                         >
                           {forcandoId === banner.id
                             ? "Alterando..."
@@ -261,31 +301,39 @@ export function AdminBanners() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setEditando(banner)}
+                          onClick={(evento) => {
+                            evento.currentTarget.closest("details")?.removeAttribute("open");
+                            setEditando(banner);
+                          }}
                         >
                           <Pencil aria-hidden="true" /> Editar
                         </button>
                         <button
                           type="button"
-                          className={styles.btnExcluir}
-                          onClick={() => setExcluindo(banner)}
+                          onClick={(evento) => {
+                            evento.currentTarget.closest("details")?.removeAttribute("open");
+                            setExcluindo(banner);
+                          }}
                         >
                           <Trash2 aria-hidden="true" /> Excluir
                         </button>
-                      </div>
+                        </div>
+                      </details>
                     </td>
                   </tr>
                 );
               })}
-              {!dados?.banners.length ? (
-                <tr className={sharedStyles.emptyTableRow}>
-                  <td colSpan={4}>Nenhum banner cadastrado.</td>
+              {dados && bannersFiltrados.length === 0 ? (
+                <tr className={lista.emptyTableRow}>
+                  <td colSpan={4}>{dados.banners.length ? "Nenhum banner encontrado." : "Nenhum banner cadastrado."}</td>
                 </tr>
               ) : null}
             </tbody>
           </table>
         </div>
       </section>
+
+      {modalFiltrosAberto ? <FiltroBannersModal status={filtroStatus} setStatus={setFiltroStatus} aoFechar={() => setModalFiltrosAberto(false)} /> : null}
 
       {editando ? (
         <FormBanner
