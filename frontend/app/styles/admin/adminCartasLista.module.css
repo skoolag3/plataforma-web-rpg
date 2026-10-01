@@ -18,18 +18,172 @@
   background: linear-gradient(180deg, #cbd5e1, #64748b 58%, #334155);
 }
 
-.cartasListaTopo > .cartasListaAcoes {
+.cartasWorkspaceUnica {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cartasWorkspaceUnica > .cartasListaPanel {
+  grid-row: auto;
+}
+
+.cartasListaTopo {
+  flex-wrap: wrap;
+}
+
+.cartasListaTopo > .cartasListaEsquerda {
   display: flex;
-  grid-auto-flow: initial;
+  flex: 1 1 35rem;
+  min-width: 0;
+  align-items: center;
+  gap: .55rem;
+}
+
+.cartasListaTitulo {
+  display: grid;
+  min-width: 11rem;
+  gap: .14rem;
+}
+
+.pesquisaCartas {
+  display: flex;
+  width: min(100%, 16rem);
+  height: 2.5rem;
+  min-width: 9rem;
+  align-items: center;
+  border: 1px solid rgba(148, 163, 184, .2);
+  border-radius: .62rem;
+  background: #0b111d;
+}
+
+.pesquisaCartas:focus-within {
+  border-color: rgba(190, 242, 100, .72);
+  outline: 2px solid rgba(190, 242, 100, .16);
+}
+
+.pesquisaCartas input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #f8fafc;
+  padding: 0 .65rem;
+  font: inherit;
+  font-size: .7rem;
+}
+
+.pesquisaCartas input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.pesquisaCartas button {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+  place-items: center;
+  border: 0;
+  border-left: 1px solid rgba(148, 163, 184, .14);
+  border-radius: 0 .62rem .62rem 0;
+  background: transparent;
+  color: #c4b5fd;
+  cursor: pointer;
+}
+
+.pesquisaCartas button:hover {
+  background: rgba(124, 58, 237, .16);
+}
+
+.pesquisaCartas button svg {
+  width: .95rem;
+  height: .95rem;
+}
+
+.cartasListaTopo > .cartasListaAcoes {
+  display: grid;
+  width: min(100%, 29rem);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
   gap: 0.45rem;
 }
 
+.btnHistoricoCartas {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  border: 1px solid rgba(167, 139, 250, .35);
+  border-radius: .55rem;
+  color: #ddd6fe;
+  background: rgba(124, 58, 237, .15);
+  text-decoration: none;
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+.btnHistoricoCartas svg { width: .9rem; height: .9rem; }
+.btnHistoricoCartas:hover { background: rgba(124, 58, 237, .25); }
+.btnHistoricoCartas:focus-visible { outline: 2px solid #ddd6fe; outline-offset: 2px; }
+
+@media (max-width: 600px) {
+  .cartasListaTopo > .cartasListaAcoes { grid-template-columns: 1fr 1fr; }
+  .btnHistoricoCartas { grid-column: 1 / -1; }
+}
+
 .ordenacaoCartas {
-  width: 9.5rem;
-  min-height: 2.35rem;
+  width: 100%;
+  height: 2.5rem;
+  min-height: 2.5rem;
   padding-top: 0;
   padding-bottom: 0;
+}
+
+.cartasListaTopo > .cartasListaEsquerda > .btnFiltros,
+.cartasListaTopo > .cartasListaAcoes > .primaryBtn {
+  display: inline-flex;
+  width: 100%;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: .38rem;
+  border-radius: .62rem;
+  padding: 0 .55rem;
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.cartasListaTopo > .cartasListaEsquerda > .btnFiltros {
+  width: 7rem;
+  flex: none;
+}
+
+.btnFiltros {
+  border: 1px solid rgba(148, 163, 184, .2);
+  background: #0b111d;
+  color: #d8cafd;
+  cursor: pointer;
+}
+
+.btnFiltros[data-ativo],
+.btnFiltros:hover {
+  border-color: rgba(167, 139, 250, .55);
+  background: rgba(124, 58, 237, .16);
+}
+
+.btnFiltros:focus-visible {
+  outline: 2px solid #ddd6fe;
+  outline-offset: 2px;
+}
+
+.btnFiltros svg,
+.cartasListaTopo > .cartasListaAcoes > .primaryBtn svg {
+  width: .9rem;
+  height: .9rem;
+  flex: none;
 }
 
 .controlePadrao {
@@ -133,82 +287,6 @@
 .cartasWorkspace > .cartasToolbar .statusSelectIcone {
   width: 1rem;
   height: 1rem;
-}
-
-.periodoFiltro {
-  display: grid;
-  grid-column: 1 / -1;
-  gap: 0.45rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.1);
-  padding: 0.55rem 0.1rem 0.12rem;
-}
-
-.periodoCabecalho {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  color: #71809a;
-  font-size: 0.61rem;
-  font-weight: 700;
-}
-
-.periodoCabecalho strong {
-  color: #c4b5fd;
-  font-size: 0.64rem;
-}
-
-.periodoFiltro input[type="range"] {
-  width: 100%;
-  height: 0.34rem;
-  min-height: 0;
-  appearance: none;
-  border: 0;
-  border-radius: 999px;
-  outline: 0;
-  background: linear-gradient(
-    to right,
-    #8b5cf6 0 var(--periodo-progresso),
-    #273247 var(--periodo-progresso) 100%
-  );
-  cursor: pointer;
-}
-
-.periodoFiltro input[type="range"]::-webkit-slider-thumb {
-  width: 0.9rem;
-  height: 0.9rem;
-  appearance: none;
-  border: 2px solid #ddd6fe;
-  border-radius: 50%;
-  background: #7c3aed;
-  box-shadow: 0 0 0 3px #080d19;
-}
-
-.periodoFiltro input[type="range"]::-moz-range-thumb {
-  width: 0.72rem;
-  height: 0.72rem;
-  border: 2px solid #ddd6fe;
-  border-radius: 50%;
-  background: #7c3aed;
-  box-shadow: 0 0 0 3px #080d19;
-}
-
-.periodoMetas {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  color: #66748c;
-  font-size: 0.5rem;
-  font-weight: 700;
-  line-height: 1.15;
-  text-align: center;
-}
-
-.periodoMetas span:first-child {
-  text-align: left;
-}
-
-.periodoMetas span:last-child {
-  text-align: right;
 }
 
 .cartasListaPanel .cardCell {
@@ -528,8 +606,23 @@
 }
 
 @media (max-width: 720px) {
+  .cartasListaTopo > .cartasListaEsquerda {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
   .cartasListaTopo > .cartasListaAcoes {
-    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .cartasListaTitulo {
+    width: 100%;
+  }
+
+  .pesquisaCartas {
+    flex: 1 1 9rem;
   }
 }
 .menuAcoesCarta {
@@ -602,157 +695,4 @@
 .tableWrap tbody tr:last-child .menuAcoesCarta > div {
   top: auto;
   bottom: calc(100% + 0.3rem);
-}
-
-.btnHistoricoCartas {
-  display: inline-flex;
-  min-height: 2.5rem;
-  align-items: center;
-  justify-content: center;
-  gap: .4rem;
-  border: 1px solid rgba(167, 139, 250, .35);
-  border-radius: .55rem;
-  color: #ddd6fe;
-  background: rgba(124, 58, 237, .15);
-  text-decoration: none;
-  font-size: .7rem;
-  font-weight: 800;
-}
-.btnHistoricoCartas svg { width: .9rem; height: .9rem; }
-.btnHistoricoCartas:hover { background: rgba(124, 58, 237, .25); }
-.btnHistoricoCartas:focus-visible { outline: 2px solid #ddd6fe; outline-offset: 2px; }
-@media (max-width: 600px) { .btnHistoricoCartas { flex: 1 1 100%; } }
-
-.cartasListaTopo {
-  flex-wrap: wrap;
-}
-
-.cartasListaTopo > .cartasListaEsquerda {
-  display: flex;
-  flex: 1 1 35rem;
-  min-width: 0;
-  align-items: center;
-  gap: .55rem;
-}
-
-.cartasListaTitulo {
-  display: grid;
-  min-width: 11rem;
-  gap: .14rem;
-}
-
-.pesquisaCartas {
-  display: flex;
-  width: min(100%, 16rem);
-  height: 2.5rem;
-  min-width: 9rem;
-  align-items: center;
-  border: 1px solid rgba(148, 163, 184, .2);
-  border-radius: .62rem;
-  background: #0b111d;
-}
-
-.pesquisaCartas:focus-within {
-  border-color: rgba(190, 242, 100, .72);
-  outline: 2px solid rgba(190, 242, 100, .16);
-}
-
-.pesquisaCartas input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: #f8fafc;
-  padding: 0 .65rem;
-  font: inherit;
-  font-size: .7rem;
-}
-
-.pesquisaCartas input::-webkit-search-cancel-button {
-  display: none;
-}
-
-.pesquisaCartas button {
-  display: grid;
-  width: 2.5rem;
-  height: 2.5rem;
-  flex: none;
-  place-items: center;
-  border: 0;
-  border-left: 1px solid rgba(148, 163, 184, .14);
-  border-radius: 0 .62rem .62rem 0;
-  background: transparent;
-  color: #c4b5fd;
-  cursor: pointer;
-}
-
-.pesquisaCartas button:hover {
-  background: rgba(124, 58, 237, .16);
-}
-
-.pesquisaCartas button svg {
-  width: .95rem;
-  height: .95rem;
-}
-
-
-.cartasListaTopo > .cartasListaEsquerda > .btnFiltros,
-.cartasListaTopo > .cartasListaAcoes > .primaryBtn {
-  display: inline-flex;
-  width: 100%;
-  height: 2.5rem;
-  min-height: 2.5rem;
-  align-items: center;
-  justify-content: center;
-  gap: .38rem;
-  border-radius: .62rem;
-  padding: 0 .55rem;
-  font: inherit;
-  font-size: .68rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.cartasListaTopo > .cartasListaEsquerda > .btnFiltros {
-  width: 7rem;
-  flex: none;
-}
-
-.btnFiltros {
-  border: 1px solid rgba(148, 163, 184, .2);
-  background: #0b111d;
-  color: #d8cafd;
-  cursor: pointer;
-}
-
-.btnFiltros[data-ativo],
-.btnFiltros:hover {
-  border-color: rgba(167, 139, 250, .55);
-  background: rgba(124, 58, 237, .16);
-}
-
-.btnFiltros:focus-visible {
-  outline: 2px solid #ddd6fe;
-  outline-offset: 2px;
-}
-
-.btnFiltros svg,
-.cartasListaTopo > .cartasListaAcoes > .primaryBtn svg {
-  width: .9rem;
-  height: .9rem;
-  flex: none;
-}
-
-
-@media (max-width: 720px) {
-  .cartasListaTopo > .cartasListaEsquerda { width: 100%; flex-wrap: wrap; }
-}
-
-.cartasWorkspaceUnica {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.cartasWorkspaceUnica > .cartasListaPanel {
-  grid-row: auto;
 }

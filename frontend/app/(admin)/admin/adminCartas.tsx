@@ -2,21 +2,18 @@
 
 import {
   ArrowUpDown,
-  CheckCircle2,
-  CircleOff,
-  Gem,
+  ListFilter,
   ImagePlus,
   History,
   MoreHorizontal,
   Pencil,
   Plus,
-  Shapes,
-  Shield,
+  Search,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   atualizarAdminCarta,
   listarAdminCartas,
@@ -27,7 +24,6 @@ import {
   type UpdateAdminCartaPayload,
 } from "../../lib/admin";
 import {
-  CampoBusca,
   SelectPadrao,
 } from "../../components/ui/controlesFormulario";
 import {
@@ -41,13 +37,12 @@ import listaStyles from "../../styles/admin/adminCartasLista.module.css";
 import {
   ElementoVisual,
   Raridade,
-  elementos,
   obterElementoVisual,
-  raridades,
 } from "./adminCartaVisual";
 import { AdminLayout } from "./adminShared";
 import { CartaEditor } from "./adminCartaEditor";
 import { combinarEstilos } from "./combinarEstilos";
+import { FiltroCartasModal } from "./filtroCartasModal";
 
 const styles = combinarEstilos(
   sharedStyles,
@@ -59,9 +54,9 @@ const styles = combinarEstilos(
 const periodosFiltro = [
   { value: "", label: "Todos" },
   { value: "1a", label: "1 ano" },
-  { value: "6m", label: "6 meses" },
-  { value: "1m", label: "1 mês" },
-  { value: "1s", label: "1 semana" },
+  { value: "6m", label: "6 meses", labelCurto: "6m" },
+  { value: "1m", label: "1 mês", labelCurto: "1m" },
+  { value: "1s", label: "1 semana", labelCurto: "7d" },
   { value: "24h", label: "24h" },
 ] as const;
 
@@ -83,6 +78,8 @@ export function Cartas() {
   const [filtroStatus, setFiltroStatus] = useState("");
   const [filtroClasse, setFiltroClasse] = useState("");
   const [filtroPeriodo, setFiltroPeriodo] = useState("");
+  const [modalFiltrosAberto, setModalFiltrosAberto] = useState(false);
+  const btnFiltrosRef = useRef<HTMLButtonElement>(null);
   const [ordem, setOrdem] = useState("recentes");
   const [cartasApi, setCartasApi] = useState<AdminCarta[]>([]);
   const [classesApi, setClassesApi] = useState<AdminClasse[]>([]);
@@ -93,6 +90,11 @@ export function Cartas() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [editorAlterado, setEditorAlterado] = useState(false);
   const [excluindo, setExcluindo] = useState<AdminCarta | null>(null);
+
+  function fecharModalFiltros() {
+    setModalFiltrosAberto(false);
+    requestAnimationFrame(() => btnFiltrosRef.current?.focus());
+  }
 
   useEffect(() => {
     if (erro) notificarErro(erro);
@@ -269,15 +271,44 @@ export function Cartas() {
 
   return (
     <AdminLayout title="Cartas" subtitle="Gerencie todas as cartas do jogo.">
-      <div className={styles.cartasWorkspace}>
+      <div className={`${styles.cartasWorkspace} ${listaStyles.cartasWorkspaceUnica}`}>
         <section className={styles.cartasListaPanel}>
           <header className={styles.cartasListaTopo}>
-            <div>
-              <strong>Cartas cadastradas</strong>
-              <small>
-                {cartasApi.length}{" "}
-                {cartasApi.length === 1 ? "resultado" : "resultados"}
-              </small>
+            <div className={styles.cartasListaEsquerda}>
+              <div className={styles.cartasListaTitulo}>
+                <strong>Cartas cadastradas</strong>
+                <small>
+                  {cartasApi.length}{" "}
+                  {cartasApi.length === 1 ? "resultado" : "resultados"}
+                </small>
+              </div>
+              <form className={styles.pesquisaCartas} role="search" onSubmit={(evento) => {
+                evento.preventDefault();
+                setBuscaAplicada(busca.trim());
+              }}>
+                <input
+                  type="search"
+                  value={busca}
+                  onChange={(evento) => setBusca(evento.target.value)}
+                  placeholder="Buscar cartas..."
+                  aria-label="Buscar cartas"
+                />
+                <button type="submit" aria-label="Pesquisar cartas" title="Pesquisar cartas">
+                  <Search aria-hidden="true" />
+                </button>
+              </form>
+              <button
+                ref={btnFiltrosRef}
+                type="button"
+                className={styles.btnFiltros}
+                aria-haspopup="dialog"
+                aria-expanded={modalFiltrosAberto}
+                aria-label="Abrir filtros de cartas"
+                data-ativo={filtroRaridade || filtroElemento || filtroStatus || filtroClasse || filtroPeriodo ? "true" : undefined}
+                onClick={() => setModalFiltrosAberto(true)}
+              >
+                <ListFilter aria-hidden="true" /> Filtros
+              </button>
             </div>
             <div className={styles.cartasListaAcoes}>
               <Link href="/admin/cartas/historico" className={styles.btnHistoricoCartas}>
@@ -411,167 +442,23 @@ export function Cartas() {
           </div>
         </section>
 
-        <aside
-          className={`${styles.toolbar} ${styles.cartasToolbar}`}
-          aria-label="Filtros de cartas"
-        >
-          <header className={styles.filtrosTopo}>
-            <strong>Filtros</strong>
-            <small>Atualização automática</small>
-          </header>
-          <CampoBusca
-            className={styles.buscaCartas}
-            placeholder="Buscar cartas..."
-            value={busca}
-            onChange={(event) => setBusca(event.target.value)}
-            aoLimpar={() => setBusca("")}
-          />
-          <SelectPadrao
-            className={styles.controlePadrao}
-            placeholder="Raridade"
-            valor={filtroRaridade}
-            aoAlterar={setFiltroRaridade}
-            opcoes={[
-              {
-                valor: "",
-                label: "Todas as raridades",
-                labelCurto: "Raridade",
-                icone: <Gem />,
-              },
-              ...raridades.map((raridade) => ({
-                valor: raridade,
-                label: raridade,
-                icone: <Gem />,
-                cor: {
-                  UR: "#e879f9",
-                  SSR: "#facc15",
-                  SR: "#67e8f9",
-                  R: "#a78bfa",
-                  N: "#94a3b8",
-                }[raridade],
-              })),
-            ]}
-          />
-          <SelectPadrao
-            className={styles.controlePadrao}
-            placeholder="Elemento"
-            valor={filtroElemento}
-            aoAlterar={setFiltroElemento}
-            opcoes={[
-              {
-                valor: "",
-                label: "Todos os elementos",
-                labelCurto: "Elemento",
-                icone: <Shapes />,
-              },
-              ...elementos.map((elemento) => ({
-                valor: elemento.value,
-                label: elemento.label,
-                cor: elemento.cor,
-                icone: (
-                  <span
-                    className={styles.iconeOpcaoElemento}
-                    style={{ backgroundImage: `url("${elemento.icone}")` }}
-                  />
-                ),
-              })),
-            ]}
-          />
-          <SelectPadrao
-            className={styles.controlePadrao}
-            placeholder="Status"
-            valor={filtroStatus}
-            aoAlterar={setFiltroStatus}
-            opcoes={[
-              {
-                valor: "",
-                label: "Todos os status",
-                labelCurto: "Status",
-                icone: <Shield />,
-              },
-              {
-                valor: "ativas",
-                label: "Ativas",
-                cor: "#4ade80",
-                icone: <CheckCircle2 />,
-              },
-              {
-                valor: "inativas",
-                label: "Inativas",
-                cor: "#fbbf24",
-                icone: <CircleOff />,
-              },
-              {
-                valor: "removidas",
-                label: "Removidas",
-                cor: "#f87171",
-                icone: <Trash2 />,
-              },
-            ]}
-          />
-          <SelectPadrao
-            className={styles.controlePadrao}
-            placeholder="Classe"
-            valor={filtroClasse}
-            aoAlterar={setFiltroClasse}
-            opcoes={[
-              {
-                valor: "",
-                label: "Todas as classes",
-                labelCurto: "Classe",
-                icone: <Shield />,
-              },
-              ...classesApi.map((classe) => ({
-                valor: classe.nome,
-                label: classe.nome,
-                icone: <Shield />,
-              })),
-            ]}
-          />
-          <div className={styles.periodoFiltro}>
-            <div className={styles.periodoCabecalho}>
-              <span>Período de cadastro</span>
-              <strong>
-                {
-                  periodosFiltro.find(
-                    (periodo) => periodo.value === filtroPeriodo,
-                  )?.label
-                }
-              </strong>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max={periodosFiltro.length - 1}
-              step="1"
-              value={periodosFiltro.findIndex(
-                (periodo) => periodo.value === filtroPeriodo,
-              )}
-              aria-label="Período de cadastro"
-              aria-valuetext={
-                periodosFiltro.find(
-                  (periodo) => periodo.value === filtroPeriodo,
-                )?.label
-              }
-              style={
-                {
-                  "--periodo-progresso": `${(periodosFiltro.findIndex((periodo) => periodo.value === filtroPeriodo) / (periodosFiltro.length - 1)) * 100}%`,
-                } as CSSProperties
-              }
-              onChange={(event) =>
-                setFiltroPeriodo(
-                  periodosFiltro[Number(event.target.value)].value,
-                )
-              }
-            />
-            <div className={styles.periodoMetas} aria-hidden="true">
-              {periodosFiltro.map((periodo) => (
-                <span key={periodo.value || "todos"}>{periodo.label}</span>
-              ))}
-            </div>
-          </div>
-        </aside>
       </div>
+
+      {modalFiltrosAberto ? <FiltroCartasModal
+        raridade={filtroRaridade}
+        setRaridade={setFiltroRaridade}
+        elemento={filtroElemento}
+        setElemento={setFiltroElemento}
+        status={filtroStatus}
+        setStatus={setFiltroStatus}
+        classe={filtroClasse}
+        setClasse={setFiltroClasse}
+        periodo={filtroPeriodo}
+        setPeriodo={setFiltroPeriodo}
+        periodos={periodosFiltro}
+        classes={classesApi}
+        aoFechar={fecharModalFiltros}
+      /> : null}
 
       {selecionada ? (
         <div className={styles.modalCartaBackdrop} role="presentation">
