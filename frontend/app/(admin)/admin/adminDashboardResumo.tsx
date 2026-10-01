@@ -58,7 +58,7 @@ export function DashboardResumo({ resumo, carregando, onAtualizar }: Props) {
       valor: formatarNmr(metricas?.partidas ?? 0),
       detalhe: "duelos registrados",
       icon: Swords,
-      href: "/admin/decks-npc",
+      href: "/admin/usuarios/expedicoes",
     },
     {
       label: "Rubys",

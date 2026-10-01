@@ -5,6 +5,7 @@ import { AdminHistoricoCartas } from "./adminHistoricoCartas";
 import { AdminDashboard } from "./adminDashboard";
 import { AdminBanners } from "./adminBanners";
 import { AdminCampanha } from "./adminCampanha";
+import { AdminExpedicoes } from "./adminExpedicoes";
 import { Habilidades } from "./adminHabilidades";
 import { Usuarios } from "./adminUsuarios";
 
@@ -16,7 +17,8 @@ type AdminView =
   | "habilidades"
   | "usuarios"
   | "banners"
-  | "campanha";
+  | "campanha"
+  | "expedicoes";
 
 export function AdminScreen({ view }: { view: AdminView }) {
   if (view === "cartas") return <Cartas />;
@@ -26,5 +28,6 @@ export function AdminScreen({ view }: { view: AdminView }) {
   if (view === "usuarios") return <Usuarios />;
   if (view === "banners") return <AdminBanners />;
   if (view === "campanha") return <AdminCampanha />;
+  if (view === "expedicoes") return <AdminExpedicoes />;
   return <AdminDashboard />;
 }
