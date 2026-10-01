@@ -1,0 +1,18 @@
+.upload { display: grid; min-width: 0; gap: .45rem; }
+.area { display: flex; min-height: 7.5rem; flex-direction: column; align-items: center; justify-content: center; gap: .25rem; border: 2px dashed rgba(167,139,250,.34); border-radius: .65rem; background: rgba(9,14,29,.74); color: #e9e2ff; cursor: pointer; padding: .9rem; text-align: center; transition: border-color .2s, background .2s; }
+.area:hover, .area:focus-visible, .arrastando { border-color: #a78bfa; background: rgba(124,58,237,.11); }
+.area:focus-visible, .lista button:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 2px; }
+.desativado { cursor: not-allowed; opacity: .5; }
+.iconeUpload { width: 1.65rem; height: 1.65rem; color: #bba4fa; }
+.area strong { font-size: .73rem; font-weight: 800; }
+.area span { color: #95a2b9; font-size: .64rem; line-height: 1.4; }
+.inputOculto { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.erro { margin: 0; color: #fca5a5; font-size: .67rem; }
+.lista { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.lista li { display: flex; min-width: 0; align-items: center; gap: .5rem; border: 1px solid rgba(148,163,184,.18); border-radius: .45rem; background: rgba(13,20,37,.86); padding: .35rem .5rem; }
+.arquivoIcone { color: #bba4fa; font-size: 1.1rem; }
+.arquivoInfo { display: grid; min-width: 0; flex: 1; gap: .08rem; }
+.arquivoInfo strong { overflow: hidden; color: #e9e2ff; font-size: .66rem; text-overflow: ellipsis; white-space: nowrap; }
+.arquivoInfo small { color: #95a2b9; font-size: .58rem; }
+.lista button { border: 0; border-radius: .35rem; background: transparent; color: #aab5c8; cursor: pointer; font-size: 1.1rem; }
+.lista button:hover { background: rgba(148,163,184,.15); color: #fff; }

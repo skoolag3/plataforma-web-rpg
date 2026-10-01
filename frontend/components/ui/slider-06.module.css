@@ -1,0 +1,10 @@
+.filtro { display: grid; grid-column: 1 / -1; gap: .85rem; border-top: 1px solid rgba(148,163,184,.12); padding: .8rem .1rem .2rem; }
+.cabecalho { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+.cabecalho span { color: #8291aa; font-size: .61rem; font-weight: 750; }
+.cabecalho strong { color: #ece5ff; font-size: .83rem; font-weight: 850; }
+.corpo { display: grid; gap: .25rem; }
+.trilho { position: relative; }
+.preview { position: absolute; z-index: 0; top: 50%; height: .45rem; border-radius: 999px; background: rgba(167,139,250,.28); pointer-events: none; transform: translateY(-50%); }
+.marcas { display: flex; justify-content: space-between; gap: .15rem; color: #7b8aa4; font-size: .55rem; font-weight: 750; user-select: none; }
+.marcas span:first-child { text-align: left; }
+.marcas span:last-child { text-align: right; }
