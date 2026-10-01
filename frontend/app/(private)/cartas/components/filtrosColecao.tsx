@@ -1,4 +1,3 @@
-import { CampoBusca } from "../../../components/ui/controlesFormulario";
 import { CLASSES, ELEMENTOS, RARIDADES, VALORES_VENDA } from "../cardData";
 import { styles } from "../styles";
 import { FiltroSelect } from "./filtroSelect";
@@ -9,26 +8,18 @@ type FiltrosColecaoProps = {
   classe: string;
   custo: string;
   ordenacao: string;
-  busca: string;
   somenteFavoritas: boolean;
   aoAlterarRaridade: (valor: string) => void;
   aoAlterarElemento: (valor: string) => void;
   aoAlterarClasse: (valor: string) => void;
   aoAlterarCusto: (valor: string) => void;
   aoAlterarOrdenacao: (valor: string) => void;
-  aoAlterarBusca: (valor: string) => void;
   aoAlterarSomenteFavoritas: (valor: boolean) => void;
 };
 
 export function FiltrosColecao(props: FiltrosColecaoProps) {
   return (
     <div className={styles.filtros}>
-      <CampoBusca
-        value={props.busca}
-        onChange={(evento) => props.aoAlterarBusca(evento.target.value)}
-        aoLimpar={() => props.aoAlterarBusca("")}
-        placeholder="Buscar carta..."
-      />
       <FiltroSelect
         rotulo="Raridade"
         valor={props.raridade}

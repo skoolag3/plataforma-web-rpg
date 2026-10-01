@@ -1,11 +1,138 @@
 .filtros {
   display: grid;
   grid-template-columns:
-    minmax(9rem, 1.45fr) repeat(5, minmax(5.7rem, 0.82fr))
+    repeat(5, minmax(5.7rem, 1fr))
     auto;
   gap: 0.35rem;
   align-items: center;
   margin-bottom: 0.55rem;
+}
+
+.barraBuscaFiltros {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.barraBuscaFiltros .busca {
+  width: min(100%, 18rem);
+}
+
+.btnFiltros {
+  display: inline-flex;
+  min-height: 2.4rem;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0;
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  border-radius: 0.58rem;
+  background: rgba(124, 58, 237, 0.14);
+  color: #eee9ff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.4rem 0.7rem;
+}
+
+.btnFiltros svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.btnFiltros:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 2px;
+}
+
+.modalFiltros {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  background: rgba(2, 6, 23, 0.78);
+  backdrop-filter: blur(0.35rem);
+  padding: 0.75rem;
+}
+
+.painelFiltros {
+  width: min(100%, 37rem);
+  max-height: calc(100dvh - 1.5rem);
+  overflow-y: auto;
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  border-radius: 1rem;
+  background: #10131d;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.45);
+  color: #f8fafc;
+  padding: 1rem;
+}
+
+.cabecalhoFiltros {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cabecalhoFiltros span {
+  color: #a78bfa;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.cabecalhoFiltros h2 {
+  margin: 0.2rem 0 0;
+  font-size: 1.15rem;
+}
+
+.cabecalhoFiltros button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 0.5rem;
+  background: #171b29;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.cabecalhoFiltros button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.painelFiltros .filtros {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.painelFiltros .favoritos {
+  grid-column: 1 / -1;
+}
+
+.btnMostrarCartas {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: #8338ec;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 850;
+}
+
+.cabecalhoFiltros button:focus-visible,
+.btnMostrarCartas:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 2px;
 }
 
 .selectVisual,
@@ -182,9 +309,15 @@
 }
 
 .busca {
-  grid-template-columns: auto minmax(0, 1fr);
+  display: flex;
+  min-height: 2.65rem;
   align-items: center;
   gap: 0.55rem;
+}
+
+.busca input {
+  flex: 1 1 auto;
+  width: auto;
 }
 
 .busca input::placeholder {
@@ -337,5 +470,12 @@
 
   .busca {
     grid-column: 1/-1;
+  }
+}
+
+@media (max-width: 440px) {
+  .barraBuscaFiltros .busca {
+    flex: 1;
+    width: auto;
   }
 }

@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { SlidersHorizontal, X } from "lucide-react";
+import { createPortal } from "react-dom";
+import { CampoBusca } from "../../components/ui/controlesFormulario";
 
 import { buscarColecao } from "../../lib/jogo";
 import { CARTAS_POR_PAGINA, FALLBACK_CARDS, mapearCarta } from "./cardData";
@@ -42,17 +45,25 @@ export default function CartasPage() {
   const [ordenacao, setOrdenacao] = useState("Raridade");
   const [busca, setBusca] = useState("");
   const [somenteFavoritas, setSomenteFavoritas] = useState(false);
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
 
   const [favoritas, setFavoritas] = useState<Set<string>>(
     new Set(["Kael Arcano"]),
   );
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [pagina, setPagina] = useState(1);
-  const [detalhesAbertos, setDetalhesAbertos] = useState(false);
   const [deckSlots, setDeckSlots] = useState<Array<string | null>>(
     Array.from({ length: 6 }, () => null),
   );
   const [modalDeckAberto, setModalDeckAberto] = useState(false);
+  const [portalPronto, setPortalPronto] = useState(false);
+  const botaoCartaAtivo = useRef<HTMLElement | null>(null);
+  const botaoFiltros = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setPortalPronto(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     buscarColecao("obtidas")
@@ -132,15 +143,53 @@ export default function CartasPage() {
     ? cards.find((card) => card.nome === selecionada)
     : undefined;
 
+  useEffect(() => {
+    if (!cartaSelecionada) return;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function fecharComEscape(evento: KeyboardEvent) {
+      if (evento.key === "Escape" && !modalDeckAberto) {
+        setSelecionada(null);
+        requestAnimationFrame(() => botaoCartaAtivo.current?.focus());
+      }
+    }
+    document.addEventListener("keydown", fecharComEscape);
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      document.removeEventListener("keydown", fecharComEscape);
+    };
+  }, [cartaSelecionada, modalDeckAberto]);
+
+  useEffect(() => {
+    if (!filtrosAbertos) return;
+    const botaoFiltrosAtual = botaoFiltros.current;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function fecharComEscape(evento: KeyboardEvent) {
+      if (evento.key === "Escape") setFiltrosAbertos(false);
+    }
+    document.addEventListener("keydown", fecharComEscape);
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      document.removeEventListener("keydown", fecharComEscape);
+      botaoFiltrosAtual?.focus();
+    };
+  }, [filtrosAbertos]);
+
   function atualizarFiltro(setter: (valor: string) => void, valor: string) {
     setter(valor);
     setPagina(1);
   }
 
   function selecionarCarta(nome: string) {
+    botaoCartaAtivo.current = document.activeElement as HTMLElement;
     setSelecionada(nome);
-    setDetalhesAbertos(false);
     setModalDeckAberto(false);
+  }
+
+  function fecharDetalhe() {
+    setSelecionada(null);
+    requestAnimationFrame(() => botaoCartaAtivo.current?.focus());
   }
 
   function alternarFavorita() {
@@ -210,7 +259,7 @@ export default function CartasPage() {
         <section className={styles.conteudo}>
           <CabecalhoColecao resumo={resumo} />
 
-          <div className={styles.workspace}>
+          <div className={`${styles.workspace} ${styles.workspaceSemDetalhe}`}>
             <section className={styles.lista} aria-label="Lista de cartas">
               {erro ? (
                 <p className={styles.semResultados} role="alert">
@@ -218,31 +267,29 @@ export default function CartasPage() {
                 </p>
               ) : null}
 
-              <FiltrosColecao
-                raridade={raridade}
-                elemento={elemento}
-                classe={classe}
-                custo={custo}
-                ordenacao={ordenacao}
-                busca={busca}
-                somenteFavoritas={somenteFavoritas}
-                aoAlterarRaridade={(valor) =>
-                  atualizarFiltro(setRaridade, valor)
-                }
-                aoAlterarElemento={(valor) =>
-                  atualizarFiltro(setElemento, valor)
-                }
-                aoAlterarClasse={(valor) => atualizarFiltro(setClasse, valor)}
-                aoAlterarCusto={(valor) => atualizarFiltro(setCusto, valor)}
-                aoAlterarOrdenacao={(valor) =>
-                  atualizarFiltro(setOrdenacao, valor)
-                }
-                aoAlterarBusca={(valor) => atualizarFiltro(setBusca, valor)}
-                aoAlterarSomenteFavoritas={(valor) => {
-                  setSomenteFavoritas(valor);
-                  setPagina(1);
-                }}
-              />
+              <div className={styles.barraBuscaFiltros}>
+                <CampoBusca
+                  className={styles.busca}
+                  value={busca}
+                  onChange={(evento) =>
+                    atualizarFiltro(setBusca, evento.target.value)
+                  }
+                  aoLimpar={() => atualizarFiltro(setBusca, "")}
+                  placeholder="Buscar carta..."
+                  aria-label="Buscar carta"
+                />
+                <button
+                  ref={botaoFiltros}
+                  type="button"
+                  className={styles.btnFiltros}
+                  aria-expanded={filtrosAbertos}
+                  aria-controls="filtros-colecao"
+                  onClick={() => setFiltrosAbertos(true)}
+                >
+                  <SlidersHorizontal aria-hidden="true" />
+                  Filtros
+                </button>
+              </div>
 
               <GradeCartas
                 cartas={cartasVisiveis}
@@ -256,20 +303,96 @@ export default function CartasPage() {
                 aoAlterar={setPagina}
               />
             </section>
-
-            <DetalheCarta
-              carta={cartaSelecionada}
-              favorita={
-                cartaSelecionada ? favoritas.has(cartaSelecionada.nome) : false
-              }
-              detalhesAbertos={detalhesAbertos}
-              aoAlternarFavorita={alternarFavorita}
-              aoAlternarDetalhes={() => setDetalhesAbertos((aberto) => !aberto)}
-              aoAdicionarAoDeck={adicionarAoDeck}
-            />
           </div>
         </section>
       </div>
+
+      {filtrosAbertos && portalPronto
+        ? createPortal(
+            <div
+              className={styles.modalFiltros}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="titulo-filtros-colecao"
+              onClick={(evento) => {
+                if (evento.target === evento.currentTarget) {
+                  setFiltrosAbertos(false);
+                }
+              }}
+            >
+              <section id="filtros-colecao" className={styles.painelFiltros}>
+                <header className={styles.cabecalhoFiltros}>
+                  <div>
+                    <span>Minha coleção</span>
+                    <h2 id="titulo-filtros-colecao">Filtros</h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFiltrosAbertos(false)}
+                    aria-label="Fechar filtros"
+                    autoFocus
+                  >
+                    <X aria-hidden="true" />
+                  </button>
+                </header>
+                <FiltrosColecao
+                  raridade={raridade}
+                  elemento={elemento}
+                  classe={classe}
+                  custo={custo}
+                  ordenacao={ordenacao}
+                  somenteFavoritas={somenteFavoritas}
+                  aoAlterarRaridade={(valor) =>
+                    atualizarFiltro(setRaridade, valor)
+                  }
+                  aoAlterarElemento={(valor) =>
+                    atualizarFiltro(setElemento, valor)
+                  }
+                  aoAlterarClasse={(valor) => atualizarFiltro(setClasse, valor)}
+                  aoAlterarCusto={(valor) => atualizarFiltro(setCusto, valor)}
+                  aoAlterarOrdenacao={(valor) =>
+                    atualizarFiltro(setOrdenacao, valor)
+                  }
+                  aoAlterarSomenteFavoritas={(valor) => {
+                    setSomenteFavoritas(valor);
+                    setPagina(1);
+                  }}
+                />
+                <button
+                  type="button"
+                  className={styles.btnMostrarCartas}
+                  onClick={() => setFiltrosAbertos(false)}
+                >
+                  Mostrar {filtradas.length} cartas
+                </button>
+              </section>
+            </div>,
+            document.body,
+          )
+        : null}
+
+      {cartaSelecionada && portalPronto
+        ? createPortal(
+            <div
+              className={styles.modalDetalhe}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Detalhes da carta ${cartaSelecionada.nome}`}
+              onClick={(evento) => {
+                if (evento.target === evento.currentTarget) fecharDetalhe();
+              }}
+            >
+              <DetalheCarta
+                carta={cartaSelecionada}
+                favorita={favoritas.has(cartaSelecionada.nome)}
+                aoAlternarFavorita={alternarFavorita}
+                aoAdicionarAoDeck={adicionarAoDeck}
+                aoFechar={fecharDetalhe}
+              />
+            </div>,
+            document.body,
+          )
+        : null}
 
       <ModalDeck
         aberto={modalDeckAberto}

@@ -172,21 +172,22 @@
 
 @media (max-width: 760px) {
   .gridCartas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
   }
 
   .card {
-    min-height: 12rem;
+    min-height: 0;
   }
 }
 
 @media (max-width: 440px) {
   .gridCartas {
-    gap: 1.15rem 0.65rem;
-    padding: 1rem 0;
+    gap: 0.4rem;
+    padding: 0.55rem 0;
   }
 
-  .cardArtefato { padding: 0.55rem; }
+  .cardArtefato { padding: 0.1rem; }
 
   .cardInfo {
     padding: 0.62rem;

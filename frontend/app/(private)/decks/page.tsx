@@ -18,7 +18,8 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CartaMontada } from "../../components/cartaMontada";
 import {
   notificar,
@@ -26,6 +27,9 @@ import {
   notificarSucesso,
 } from "../../components/notificacoesGlobais";
 import { FiltroSelect } from "../cartas/components/filtroSelect";
+import { DetalheCarta } from "../cartas/components/detalheCarta";
+import { mapearCarta } from "../cartas/cardData";
+import { styles as estilosInventario } from "../cartas/styles";
 import {
   ativarDeck,
   atualizarDeck,
@@ -73,6 +77,47 @@ export default function DecksPage() {
   const [excluindo, setExcluindo] = useState(false);
   const [erro, setErro] = useState("");
   const [mensagem, setMensagem] = useState("");
+  const [decksAbertos, setDecksAbertos] = useState(false);
+  const [cartaDetalhada, setCartaDetalhada] = useState<CartaColecao | null>(null);
+  const [portalPronto, setPortalPronto] = useState(false);
+  const btnMeusDecks = useRef<HTMLButtonElement>(null);
+  const focoAntesDetalhe = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setPortalPronto(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    if (!decksAbertos) return;
+    const btnMeusDecksAtual = btnMeusDecks.current;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function fecharComEscape(evento: KeyboardEvent) {
+      if (evento.key === "Escape") setDecksAbertos(false);
+    }
+    document.addEventListener("keydown", fecharComEscape);
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      document.removeEventListener("keydown", fecharComEscape);
+      btnMeusDecksAtual?.focus();
+    };
+  }, [decksAbertos]);
+
+  useEffect(() => {
+    if (!cartaDetalhada) return;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function fecharComEscape(evento: KeyboardEvent) {
+      if (evento.key === "Escape") setCartaDetalhada(null);
+    }
+    document.addEventListener("keydown", fecharComEscape);
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      document.removeEventListener("keydown", fecharComEscape);
+      focoAntesDetalhe.current?.focus();
+    };
+  }, [cartaDetalhada]);
 
   useEffect(() => {
     if (erro) notificarErro(erro);
@@ -163,6 +208,7 @@ export default function DecksPage() {
   const deckCompleto = cartasSelecionadas.length >= 1;
 
   function novoDeck() {
+    setDecksAbertos(false);
     setEditandoId(null);
     setNome(`Meu Deck ${decks.length + 1}`);
     setSlots(Array(SLOT_COUNT).fill(null));
@@ -172,6 +218,7 @@ export default function DecksPage() {
   }
 
   function editar(deck: Deck) {
+    setDecksAbertos(false);
     setEditandoId(deck.id);
     setNome(deck.nome);
     setSlots(montarSlots(deck, colecao));
@@ -286,87 +333,19 @@ export default function DecksPage() {
       </header>
 
       <div className={styles.layout}>
-        <aside className={styles.listaDecks}>
-          <div className={styles.listaDecksTopo}>
-            <h2>
-              Meus decks <span>{decks.length}</span>
-            </h2>
+        <section className={styles.editor}>
+          <div className={styles.acoesEditor}>
             <button
+              ref={btnMeusDecks}
               type="button"
-              className={styles.novoDeckLista}
-              onClick={novoDeck}
+              className={styles.btnMeusDecks}
+              onClick={() => setDecksAbertos(true)}
+              aria-haspopup="dialog"
             >
-              <Plus aria-hidden="true" /> Novo
+              <Layers aria-hidden="true" />
+              Meus decks <span>{decks.length}</span>
             </button>
           </div>
-          {!decks.length && (
-            <p className={styles.vazio}>Nenhum deck salvo ainda.</p>
-          )}
-          {decks.map((deck) => (
-            <article
-              key={deck.id}
-              className={`${styles.deckResumo} ${editandoId === deck.id ? styles.selecionado : ""}`}
-            >
-              <button
-                type="button"
-                className={styles.editarDeck}
-                onClick={() => editar(deck)}
-              >
-                <span className={styles.deckIcone}>
-                  <Layers aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>{deck.nome}</strong>
-                  <small>{deck.cartas.length}/6 cartas</small>
-                </span>
-                {deck.ativo && (
-                  <em>
-                    <CheckCircle2 aria-hidden="true" /> Equipado
-                  </em>
-                )}
-              </button>
-              <div className={styles.deckAcoes}>
-                <button
-                  type="button"
-                  onClick={() => editar(deck)}
-                  aria-label={`Editar ${deck.nome}`}
-                >
-                  <Edit3 aria-hidden="true" />
-                </button>
-                {!deck.ativo && (
-                  <button
-                    type="button"
-                    onClick={() => void equiparDeck(deck)}
-                    disabled={!deck.completo}
-                    aria-label={`Equipar ${deck.nome}`}
-                    title={
-                      deck.completo
-                        ? "Equipar deck"
-                        : "Adicione pelo menos uma carta"
-                    }
-                  >
-                    <Check aria-hidden="true" />
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setDeckParaExcluir(deck)}
-                  disabled={deck.ativo}
-                  aria-label={`Excluir ${deck.nome}`}
-                  title={
-                    deck.ativo
-                      ? "O deck equipado não pode ser excluído"
-                      : "Excluir deck"
-                  }
-                >
-                  <Trash2 aria-hidden="true" />
-                </button>
-              </div>
-            </article>
-          ))}
-        </aside>
-
-        <section className={styles.editor}>
           <div className={styles.editorTopo}>
             <label>
               Nome do deck
@@ -397,9 +376,16 @@ export default function DecksPage() {
                 type="button"
                 key={index}
                 className={`${styles.slot} ${carta ? styles.slotPreenchido : ""} ${slotSelecionado === index ? styles.slotAtivo : ""}`}
-                onClick={() => setSlotSelecionado(index)}
+                onClick={() => {
+                  setSlotSelecionado(index);
+                  if (carta) {
+                    focoAntesDetalhe.current = document.activeElement as HTMLElement;
+                    setCartaDetalhada(carta);
+                  }
+                }}
+                aria-label={carta ? `Ver detalhes de ${carta.nome}` : `Selecionar slot ${index + 1}`}
               >
-                <span className={styles.numero}>{index + 1}</span>
+                {!carta ? <span className={styles.numero}>{index + 1}</span> : null}
                 {carta ? (
                   <>
                     <span className={styles.slotCartaVisual}>
@@ -445,8 +431,11 @@ export default function DecksPage() {
                         removerCarta(index);
                       }}
                       onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ")
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          event.stopPropagation();
                           removerCarta(index);
+                        }
                       }}
                       aria-label={`Remover ${carta.nome}`}
                     >
@@ -517,26 +506,28 @@ export default function DecksPage() {
                   key={carta.id}
                   disabled={usada}
                   onClick={() => selecionarCarta(carta)}
+                  aria-label={`${usada ? "Carta já no deck" : "Adicionar ao deck"}: ${carta.nome}`}
                 >
-                  {carta.foto ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={carta.foto} alt="" />
-                  ) : (
-                    <span>
-                      <Layers aria-hidden="true" />
+                  <span className={styles.cartaColecaoVisual}>
+                    <CartaMontada
+                      arte={carta.foto ?? undefined}
+                      moldura={carta.moldura ?? undefined}
+                      nome={carta.nome}
+                      raridade={carta.raridade}
+                      elemento={carta.elemento}
+                      config={carta.configVisual ?? undefined}
+                      placeholder={<Layers aria-hidden="true" />}
+                    />
+                    <span className={styles.cartaColecaoMarca}>
+                      {usada ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}
                     </span>
-                  )}
-                  <span>
+                  </span>
+                  <span className={styles.cartaColecaoNome}>
                     <strong>{carta.nome}</strong>
                     <small>
                       {carta.raridade} · {carta.classe}
                     </small>
                   </span>
-                  {usada ? (
-                    <Check aria-label="Ja adicionada" />
-                  ) : (
-                    <Plus aria-label="Adicionar" />
-                  )}
                 </button>
               );
             })}
@@ -548,6 +539,113 @@ export default function DecksPage() {
           </div>
         </aside>
       </div>
+
+      {decksAbertos && portalPronto
+        ? createPortal(
+            <div
+              className={styles.fundoDecks}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="titulo-meus-decks"
+              onClick={(event) => {
+                if (event.target === event.currentTarget) setDecksAbertos(false);
+              }}
+            >
+              <section className={styles.listaDecks}>
+                <div className={styles.listaDecksTopo}>
+                  <h2 id="titulo-meus-decks">
+                    Meus decks <span>{decks.length}</span>
+                  </h2>
+                  <div className={styles.listaDecksBotoes}>
+                    <button type="button" className={styles.novoDeckLista} onClick={novoDeck}>
+                      <Plus aria-hidden="true" /> Novo
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.fecharListaDecks}
+                      onClick={() => setDecksAbertos(false)}
+                      aria-label="Fechar meus decks"
+                      autoFocus
+                    >
+                      <X aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+                {!decks.length && <p className={styles.vazio}>Nenhum deck salvo ainda.</p>}
+                <div className={styles.gradeDecks}>
+                  {decks.map((deck) => (
+                    <article
+                      key={deck.id}
+                      className={`${styles.deckResumo} ${editandoId === deck.id ? styles.selecionado : ""}`}
+                    >
+                      <button type="button" className={styles.editarDeck} onClick={() => editar(deck)}>
+                        <span className={styles.deckIcone}><Layers aria-hidden="true" /></span>
+                        <span>
+                          <strong>{deck.nome}</strong>
+                          <small>{deck.cartas.length}/6 cartas</small>
+                        </span>
+                        {deck.ativo && <em><CheckCircle2 aria-hidden="true" /> Equipado</em>}
+                      </button>
+                      <div className={styles.deckAcoes}>
+                        <button type="button" onClick={() => editar(deck)} aria-label={`Editar ${deck.nome}`}>
+                          <Edit3 aria-hidden="true" />
+                        </button>
+                        {!deck.ativo && (
+                          <button
+                            type="button"
+                            onClick={() => void equiparDeck(deck)}
+                            disabled={!deck.completo}
+                            aria-label={`Equipar ${deck.nome}`}
+                            title={deck.completo ? "Equipar deck" : "Adicione pelo menos uma carta"}
+                          >
+                            <Check aria-hidden="true" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDecksAbertos(false);
+                            setDeckParaExcluir(deck);
+                          }}
+                          disabled={deck.ativo}
+                          aria-label={`Excluir ${deck.nome}`}
+                          title={deck.ativo ? "O deck equipado não pode ser excluído" : "Excluir deck"}
+                        >
+                          <Trash2 aria-hidden="true" />
+                        </button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            </div>,
+            document.body,
+          )
+        : null}
+
+      {cartaDetalhada && portalPronto
+        ? createPortal(
+            <div
+              className={estilosInventario.modalDetalhe}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Detalhes da carta ${cartaDetalhada.nome}`}
+              onClick={(evento) => {
+                if (evento.target === evento.currentTarget) setCartaDetalhada(null);
+              }}
+            >
+              <DetalheCarta
+                carta={mapearCarta(cartaDetalhada)}
+                favorita={false}
+                aoAlternarFavorita={() => {}}
+                aoAdicionarAoDeck={() => {}}
+                aoFechar={() => setCartaDetalhada(null)}
+                modoDeck
+              />
+            </div>,
+            document.body,
+          )
+        : null}
 
       {deckParaExcluir ? (
         <div

@@ -1,11 +1,11 @@
 import {
   Heart,
   PackagePlus,
-  Search,
   Shield,
   Star,
   Swords,
   Wand2,
+  X,
 } from "lucide-react";
 
 import { CartaMontada } from "../../../components/cartaMontada";
@@ -16,19 +16,19 @@ import type { Card } from "../types";
 type DetalheCartaProps = {
   carta?: Card;
   favorita: boolean;
-  detalhesAbertos: boolean;
   aoAlternarFavorita: () => void;
-  aoAlternarDetalhes: () => void;
   aoAdicionarAoDeck: () => void;
+  aoFechar: () => void;
+  modoDeck?: boolean;
 };
 
 export function DetalheCarta({
   carta,
   favorita,
-  detalhesAbertos,
   aoAlternarFavorita,
-  aoAlternarDetalhes,
   aoAdicionarAoDeck,
+  aoFechar,
+  modoDeck = false,
 }: DetalheCartaProps) {
   if (!carta) {
     return (
@@ -50,7 +50,10 @@ export function DetalheCarta({
   const Elemento = carta.elementoIcone;
 
   return (
-    <aside className={styles.detalhe} aria-label="Detalhe da carta">
+    <aside id="detalhe-carta" className={styles.detalhe} aria-label="Detalhe da carta">
+      <button type="button" className={styles.btnFecharDetalhe} onClick={aoFechar} aria-label="Fechar detalhes da carta" autoFocus>
+        <X aria-hidden="true" />
+      </button>
       <div className={styles.detalheTopo}>
         <article className={styles.cardGrande} style={cardStyle(carta)}>
           {carta.foto || carta.moldura ? (
@@ -75,7 +78,7 @@ export function DetalheCarta({
         </article>
 
         <div className={styles.detalheTitulo}>
-          <button
+          {!modoDeck && <button
             type="button"
             className={[
               styles.favoritoIcone,
@@ -86,7 +89,7 @@ export function DetalheCarta({
             aria-label="Alternar favorita"
           >
             <Star aria-hidden="true" />
-          </button>
+          </button>}
           <h2>{carta.nome}</h2>
           <div className={styles.estrelas} aria-label="5 estrelas">
             {Array.from({ length: 5 }).map((_, index) => (
@@ -157,32 +160,15 @@ export function DetalheCarta({
         <p>Gacha</p>
       </section>
 
-      {detalhesAbertos ? (
-        <section className={styles.detalhesExtras}>
-          <strong>Detalhes completos</strong>
-          <span>Cópias: {carta.copias}</span>
-          <span>Classe: {carta.classe}</span>
-          <span>Status: {carta.obtida ? "Obtida" : "Não obtida"}</span>
-        </section>
-      ) : null}
-
       <div className={styles.acoesDetalhe}>
         <button
           className={styles.botaoPrimario}
           type="button"
-          onClick={aoAdicionarAoDeck}
-          disabled={!carta.obtida}
+          onClick={modoDeck ? aoFechar : aoAdicionarAoDeck}
+          disabled={!modoDeck && !carta.obtida}
         >
           <PackagePlus aria-hidden="true" />
-          {carta.obtida ? "Adicionar a um deck" : "Carta não obtida"}
-        </button>
-        <button
-          className={styles.botaoSecundario}
-          type="button"
-          onClick={aoAlternarDetalhes}
-        >
-          <Search aria-hidden="true" />
-          {detalhesAbertos ? "Ocultar detalhes" : "Ver detalhes completos"}
+          {modoDeck ? "Voltar ao deck" : carta.obtida ? "Adicionar a um deck" : "Carta não obtida"}
         </button>
       </div>
     </aside>

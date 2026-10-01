@@ -32,6 +32,45 @@
   color: #94a3b8;
   font-size: 12px;
 }
+.btnMeusDecks {
+  display: inline-flex;
+  min-height: 2.6rem;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(190, 242, 100, 0.42);
+  border-radius: 0.65rem;
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 850;
+  padding: 0.45rem 0.85rem;
+}
+.btnMeusDecks svg {
+  width: 1rem;
+  height: 1rem;
+}
+.btnMeusDecks span {
+  display: grid;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(8, 11, 18, 0.28);
+  color: #fff;
+  font-size: 0.65rem;
+}
+.acoesEditor {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0.75rem;
+}
+.btnMeusDecks:focus-visible,
+.fecharListaDecks:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 2px;
+}
 .voltar {
   display: inline-flex;
   gap: 5px;
@@ -63,7 +102,7 @@
   max-width: 1320px;
   margin: auto;
   display: grid;
-  grid-template-columns: 210px minmax(430px, 1fr) 270px;
+  grid-template-columns: minmax(0, 1fr) 270px;
   gap: 10px;
   align-items: start;
 }
@@ -84,6 +123,54 @@
 .listaDecks,
 .colecao {
   padding: 10px;
+}
+.fundoDecks {
+  --member-border: rgba(165, 174, 199, 0.14);
+  --member-radius: 1.15rem;
+  --member-surface: rgba(16, 19, 29, 0.98);
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  background: rgba(3, 5, 12, 0.8);
+  backdrop-filter: blur(0.4rem);
+  padding: 0.75rem;
+}
+.fundoDecks .listaDecks {
+  width: min(100%, 44rem);
+  max-height: calc(100dvh - 1.5rem);
+  overflow-y: auto;
+  color: #eef2ff;
+  padding: 1rem;
+}
+.listaDecksBotoes {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.fecharListaDecks {
+  display: grid;
+  width: 1.9rem;
+  height: 1.9rem;
+  place-items: center;
+  border: 1px solid #31394a;
+  border-radius: 0.45rem;
+  background: #1b2030;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+.fecharListaDecks svg {
+  width: 1rem;
+  height: 1rem;
+}
+.gradeDecks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+.gradeDecks .deckResumo {
+  margin-bottom: 0;
 }
 .editor {
   padding: 12px;
@@ -499,18 +586,17 @@
   margin: 9px 0 12px;
 }
 .cartas {
-  max-height: 440px;
-  overflow: auto;
-  padding-right: 3px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  overflow: visible;
 }
 .cartas > button {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 34px 1fr 17px;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 5px;
-  padding: 5px;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.35rem;
   border: 1px solid #293143;
   border-radius: 12px;
   color: #e2e8f0;
@@ -525,37 +611,51 @@
 .cartas > button:not(:disabled):hover {
   border-color: var(--member-border-hover);
   background: rgba(124, 58, 237, 0.1);
-  transform: translateX(2px);
+  transform: translateY(-2px);
 }
-.cartas img,
-.cartas button > span:first-child {
-  width: 34px;
-  height: 42px;
-  object-fit: cover;
-  display: grid;
-  place-items: center;
-  border-radius: 5px;
-  background: #27233e;
-}
-.cartas button > span:nth-child(2) {
+.cartaColecaoVisual {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
   min-width: 0;
 }
-.cartas strong,
-.cartas small {
+.cartaColecaoMarca {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(7, 10, 18, 0.85);
+  color: #bef264;
+}
+.cartaColecaoMarca svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+.cartaColecaoNome {
+  width: 100%;
+  min-width: 0;
+}
+.cartaColecaoNome strong,
+.cartaColecaoNome small {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.cartas strong {
+.cartaColecaoNome strong {
   font-size: 11px;
 }
-.cartas small {
+.cartaColecaoNome small {
   margin-top: 2px;
   color: #94a3b8;
   font-size: 9px;
 }
-.cartas svg {
+.cartaColecaoVisual > svg {
   width: 16px;
 }
 .vazio {
@@ -567,7 +667,7 @@
 
 .fundoConfirmacao {
   position: fixed;
-  z-index: 80;
+  z-index: 110;
   inset: 0;
   display: grid;
   place-items: center;
@@ -690,16 +790,7 @@
 
 @media (max-width: 980px) {
   .layout {
-    grid-template-columns: 220px 1fr;
-  }
-  .colecao {
-    grid-column: 1 / -1;
-  }
-  .cartas {
-    max-height: 320px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 7px;
+    grid-template-columns: minmax(0, 1fr) 250px;
   }
 }
 
@@ -724,7 +815,7 @@
     grid-template-columns: repeat(2, minmax(120px, 1fr));
   }
   .cartas {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .salvarAcoes {
     flex-direction: column;
@@ -735,6 +826,9 @@
 }
 
 @media (max-width: 520px) {
+  .gradeDecks {
+    grid-template-columns: 1fr;
+  }
   .fundoConfirmacao {
     align-items: end;
     padding: 0.65rem;
