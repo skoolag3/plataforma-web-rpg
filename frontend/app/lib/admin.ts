@@ -17,7 +17,8 @@ export type TipoEfeitoHabilidade =
   | "CURA"
   | "ESCUDO"
   | "ROUBO_VIDA"
-  | "EVASAO";
+  | "EVASAO"
+  | "CRITICO";
 
 export type AdminHabilidade = {
   id: string;
@@ -36,7 +37,7 @@ export type AdminHabilidade = {
   unidade: "FIXO" | "PERCENTUAL";
   valorBase: number;
   formaAplicacao: "ANTES_ACAO" | "APOS_ACAO" | "SUBSTITUI_ATAQUE";
-  requisitoTipo: "NENHUM" | "CONTADOR_ATAQUES" | "HP_ABAIXO" | "TURNO_MINIMO";
+  requisitoTipo: "NENHUM" | "CHANCE" | "CONTADOR_ATAQUES" | "HP_ABAIXO" | "TURNO_MINIMO";
   requisitoValor: number | null;
   escalaTipo: "NENHUMA" | "POR_TURNO" | "POR_ATAQUE";
   escalaValor: number | null;

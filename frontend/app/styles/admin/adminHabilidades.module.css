@@ -1,5 +1,53 @@
 .habilidadesListaPanel{ margin-bottom: 0.8rem; }
 
+.dicaCritico {
+  grid-column: 1 / -1;
+  margin: 0;
+  border-left: 2px solid #a78bfa;
+  border-radius: 0.35rem;
+  background: rgba(124, 58, 237, 0.1);
+  color: #c4b5fd;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.habilidadeModalAjustes textarea {
+  width: 100%;
+  min-height: 4.5rem;
+  resize: vertical;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.5rem;
+  background: rgba(2, 6, 18, 0.72);
+  color: #fff;
+  padding: 0.65rem 0.7rem;
+  font: inherit;
+  line-height: 1.4;
+}
+
+.habilidadeModalAjustes textarea:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+.habilidadeModalAjustes label small {
+  color: #8993a7;
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.habilidadeModalAjustes > header,
+.habilidadeModalAjustes > .acoesHabilidade {
+  position: sticky;
+  z-index: 2;
+  background: #080d19;
+}
+
+.habilidadeModalAjustes > header { top: -1rem; }
+.habilidadeModalAjustes > .acoesHabilidade { bottom: -1rem; padding-bottom: 0.45rem; }
+
+
 .habilidadesListaPanel .tableWrap{ border: 0; border-radius: 0; box-shadow: none; }
 
 .habilidadesListaPanel .tableWrap table{ min-width: 39rem; }

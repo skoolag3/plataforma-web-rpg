@@ -205,7 +205,34 @@ export function Habilidades() {
     campo: K,
     valor: FormHabilidade[K],
   ) {
-    setForm((atual) => (atual ? { ...atual, [campo]: valor } : atual));
+    setForm((atual) => {
+      if (!atual) return atual;
+      if (campo === "tipoEfeito" && valor === "CRITICO") {
+        return {
+          ...atual,
+          tipoEfeito: "CRITICO",
+          gatilho: "AO_ATACAR",
+          alvo: "INIMIGO_ATIVO",
+          atributo: undefined,
+          unidade: "PERCENTUAL",
+          valorBase: 50,
+          formaAplicacao: "ANTES_ACAO",
+          requisitoTipo: "CHANCE",
+          requisitoValor: 25,
+          escalaTipo: "NENHUMA",
+          duracaoTurnos: undefined,
+        };
+      }
+      if (campo === "tipoEfeito" && atual.tipoEfeito === "CRITICO") {
+        return {
+          ...atual,
+          tipoEfeito: valor as AdminHabilidade["tipoEfeito"],
+          requisitoTipo: "NENHUM",
+          requisitoValor: undefined,
+        };
+      }
+      return { ...atual, [campo]: valor };
+    });
   }
 
   async function salvar(event: FormEvent<HTMLFormElement>) {

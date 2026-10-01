@@ -59,6 +59,7 @@ const opcoesTipo: { valor: AdminHabilidade["tipoEfeito"]; texto: string }[] = [
   { valor: "ESCUDO", texto: "Escudo" },
   { valor: "ROUBO_VIDA", texto: "Roubo de vida" },
   { valor: "EVASAO", texto: "Evasão" },
+  { valor: "CRITICO", texto: "Crítico" },
 ];
 
 export function AdminHabilidadeFormulario({
@@ -73,6 +74,7 @@ export function AdminHabilidadeFormulario({
   const aceitaDuracao = alteraAtributo || form.tipoEfeito === "ESCUDO";
   const possuiRequisito = form.requisitoTipo !== "NENHUM";
   const possuiEscala = form.escalaTipo !== "NENHUMA";
+  const critico = form.tipoEfeito === "CRITICO";
 
   return (
     <div
@@ -85,7 +87,7 @@ export function AdminHabilidadeFormulario({
     >
       <form
         data-modal-panel
-        className={`${styles.usuarioEditor} ${styles.habilidadeEditor} ${styles.habilidadeModal}`}
+        className={`${styles.usuarioEditor} ${styles.habilidadeEditor} ${styles.habilidadeModal} ${featureStyles.habilidadeModalAjustes}`}
         onSubmit={aoSalvar}
         role="dialog"
         aria-modal="true"
@@ -129,6 +131,11 @@ export function AdminHabilidadeFormulario({
             label: opcao.texto,
           }))}
         />
+        {critico ? (
+          <p className={styles.dicaCritico}>
+            Crítico: a cada ataque, sorteia a chance abaixo. Se ativar, aumenta o dano daquele golpe. Não altera os atributos da carta.
+          </p>
+        ) : null}
         <label className={styles.fullField}>
           Descrição
           <textarea
@@ -138,7 +145,7 @@ export function AdminHabilidadeFormulario({
             rows={3}
           />
         </label>
-        <CampoDropdown
+        {!critico && <CampoDropdown
           rotulo="Gatilho"
           valor={form.gatilho}
           aoAlterar={(valor) =>
@@ -151,8 +158,8 @@ export function AdminHabilidadeFormulario({
             { valor: "INICIO_TURNO", label: "Início do turno" },
             { valor: "FIM_TURNO", label: "Fim do turno" },
           ]}
-        />
-        <CampoDropdown
+        />}
+        {!critico && <CampoDropdown
           rotulo="Alvo"
           valor={form.alvo}
           aoAlterar={(valor) =>
@@ -163,7 +170,7 @@ export function AdminHabilidadeFormulario({
             { valor: "ALIADO_ATIVO", label: "Aliado ativo" },
             { valor: "INIMIGO_ATIVO", label: "Inimigo ativo" },
           ]}
-        />
+        />}
         {alteraAtributo ? (
           <CampoDropdown
             rotulo="Atributo"
@@ -181,7 +188,7 @@ export function AdminHabilidadeFormulario({
             ]}
           />
         ) : null}
-        <CampoDropdown
+        {!critico && <CampoDropdown
           rotulo="Unidade"
           valor={form.unidade}
           aoAlterar={(valor) =>
@@ -191,21 +198,22 @@ export function AdminHabilidadeFormulario({
             { valor: "FIXO", label: "Valor fixo" },
             { valor: "PERCENTUAL", label: "Percentual" },
           ]}
-        />
+        />}
         <label>
-          Valor base
+          {critico ? "Bônus de dano no crítico (%)" : "Valor base"}
           <input
             type="number"
             min={1}
-            max={9999}
+            max={critico ? 500 : 9999}
             value={form.valorBase}
             onChange={(event) =>
               aoAtualizar("valorBase", Number(event.target.value))
             }
             required
           />
+          {critico ? <small>Ex.: +50% aumenta pela metade o dano final do golpe.</small> : null}
         </label>
-        <CampoDropdown
+        {!critico && <CampoDropdown
           rotulo="Aplicação"
           valor={form.formaAplicacao}
           aoAlterar={(valor) =>
@@ -219,8 +227,8 @@ export function AdminHabilidadeFormulario({
             { valor: "APOS_ACAO", label: "Após a ação" },
             { valor: "SUBSTITUI_ATAQUE", label: "Substitui o ataque" },
           ]}
-        />
-        <CampoDropdown
+        />}
+        {!critico && <CampoDropdown
           rotulo="Requisito"
           valor={form.requisitoTipo}
           aoAlterar={(valor) =>
@@ -235,10 +243,10 @@ export function AdminHabilidadeFormulario({
             { valor: "HP_ABAIXO", label: "HP abaixo de (%)" },
             { valor: "TURNO_MINIMO", label: "Turno mínimo" },
           ]}
-        />
+        />}
         {possuiRequisito ? (
           <label>
-            Valor do requisito
+            {critico ? "Chance de crítico (%)" : "Valor do requisito"}
             <input
               type="number"
               min={1}
@@ -249,9 +257,10 @@ export function AdminHabilidadeFormulario({
               }
               required
             />
+            {critico ? <small>Valor entre 1% e 100%. Um sorteio novo é feito a cada ataque.</small> : null}
           </label>
         ) : null}
-        <CampoDropdown
+        {!critico && <CampoDropdown
           rotulo="Escala"
           valor={form.escalaTipo}
           aoAlterar={(valor) =>
@@ -262,7 +271,7 @@ export function AdminHabilidadeFormulario({
             { valor: "POR_TURNO", label: "Por turno" },
             { valor: "POR_ATAQUE", label: "Por ataque" },
           ]}
-        />
+        />}
         {possuiEscala ? (
           <>
             <label>
@@ -312,7 +321,7 @@ export function AdminHabilidadeFormulario({
           </label>
         ) : null}
 
-        <div className={styles.editorActions}>
+        <div className={`${styles.editorActions} ${featureStyles.acoesHabilidade}`}>
           <button type="button" onClick={aoFechar} disabled={salvando}>
             Cancelar
           </button>
