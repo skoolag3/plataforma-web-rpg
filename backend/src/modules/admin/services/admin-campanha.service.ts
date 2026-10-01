@@ -5,6 +5,7 @@ import {
   AtualizarAdminCampanhaDto,
   AtualizarBossDto,
   SalvarProdutoExpedicaoDto,
+  CriarTemaExpedicaoDto,
 } from '../dto/admin-campanha.dto';
 
 @Injectable()
@@ -21,6 +22,7 @@ export class AdminCampanhaService {
       abandonadas,
       recentes,
       produtos,
+      temas,
     ] = await Promise.all([
       this.obterConfiguracao(),
       this.prisma.expedicao.count(),
@@ -40,6 +42,7 @@ export class AdminCampanhaService {
       this.prisma.produtoExpedicao.findMany({
         orderBy: [{ ativo: 'desc' }, { criado_em: 'desc' }],
       }),
+      this.prisma.temaExpedicao.findMany({ orderBy: { nome: 'asc' } }),
     ]);
 
     return {
@@ -61,7 +64,19 @@ export class AdminCampanhaService {
         finalizadoEm: expedicao.finalizado_em,
       })),
       produtos: produtos.map((produto) => this.formatarProduto(produto)),
+      temas: temas.map((tema) => ({ nome: tema.nome })),
     };
+  }
+
+  async criarTema(dto: CriarTemaExpedicaoDto) {
+    const nome = dto.nome.trim().toUpperCase();
+    if (!nome) throw new BadRequestException('Informe o nome do tema.');
+    const existente = await this.prisma.temaExpedicao.findUnique({
+      where: { nome },
+    });
+    if (existente) throw new BadRequestException('Este tema já existe.');
+    const tema = await this.prisma.temaExpedicao.create({ data: { nome } });
+    return { message: 'Tema criado.', tema: { nome: tema.nome } };
   }
 
   async criarProduto(dto: SalvarProdutoExpedicaoDto) {

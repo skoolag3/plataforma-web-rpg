@@ -525,6 +525,13 @@ model ProdutoExpedicao {
   @@map("produto_expedicao")
 }
 
+model TemaExpedicao {
+  nome      String   @id @db.VarChar(40)
+  criado_em DateTime @default(now()) @db.Timestamptz(0)
+
+  @@map("tema_expedicao")
+}
+
 model ConfiguracaoCampanha {
   id                         Int      @id @default(1)
   ativa                      Boolean  @default(true)

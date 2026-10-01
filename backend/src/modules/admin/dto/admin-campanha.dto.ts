@@ -48,6 +48,10 @@ export class SalvarProdutoExpedicaoDto {
   bossCartas!: string[];
 }
 
+export class CriarTemaExpedicaoDto {
+  @IsString() @MaxLength(40) nome!: string;
+}
+
 export class AtualizarAdminCampanhaDto {
   @IsBoolean()
   ativa!: boolean;

@@ -14,6 +14,7 @@ import {
   AtualizarAdminCampanhaDto,
   AtualizarBossDto,
   SalvarProdutoExpedicaoDto,
+  CriarTemaExpedicaoDto,
 } from '../dto/admin-campanha.dto';
 import { AdminCampanhaService } from '../services/admin-campanha.service';
 
@@ -25,6 +26,11 @@ export class AdminCampanhaController {
   @Get()
   obterPainel() {
     return this.campanhaService.obterPainel();
+  }
+
+  @Post('temas')
+  criarTema(@Body() dto: CriarTemaExpedicaoDto) {
+    return this.campanhaService.criarTema(dto);
   }
 
   @Patch()
