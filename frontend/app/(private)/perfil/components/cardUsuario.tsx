@@ -11,8 +11,10 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { criarEstiloMolduraPerfil } from "../../../components/cartaMontada";
+import AnimatedFileUpload from "@/components/ui/animated-file-upload";
+import VLabel8 from "@/components/ui/v-label-8";
 import type { MolduraConta, PerfilConta } from "../../../lib/perfil";
 import styles from "../../../styles/perfil/cardUsuario.module.css";
 import modalStyles from "../../../styles/perfil/modalPerfil.module.css";
@@ -40,11 +42,24 @@ export function CardUsuario({
 }: PropsCardUsuario) {
   const [copiado, setCopiado] = useState(false);
   const [editandoNome, setEditandoNome] = useState(false);
-  const [modalPerfil, setModalPerfil] = useState<"bio" | "moldura" | null>(null);
+  const [modalPerfil, setModalPerfil] = useState<"bio" | "moldura" | "avatar" | "banner" | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
-  const inputAvatar = useRef<HTMLInputElement>(null);
-  const inputBanner = useRef<HTMLInputElement>(null);
+
+  async function enviarImagemSelecionada(tipo: "avatar" | "banner", arquivos: File[]) {
+    const arquivo = arquivos[0];
+    if (!arquivo) return;
+    setSalvando(true);
+    setErro("");
+    try {
+      await aoEnviarImagem(tipo, arquivo);
+      setModalPerfil(null);
+    } catch (erroCapturado) {
+      setErro(erroCapturado instanceof Error ? erroCapturado.message : "Não foi possível enviar a imagem.");
+    } finally {
+      setSalvando(false);
+    }
+  }
 
   async function copiarId() {
     await navigator.clipboard.writeText(perfil.idUser);
@@ -72,7 +87,7 @@ export function CardUsuario({
               : "Storage ainda não configurado"
           }
           disabled={!perfil.storageConfigurado}
-          onClick={() => inputBanner.current?.click()}
+          onClick={() => { setErro(""); setModalPerfil("banner"); }}
         >
           <Pencil aria-hidden="true" />
         </button>
@@ -114,7 +129,7 @@ export function CardUsuario({
                 : "Storage ainda não configurado"
             }
             disabled={!perfil.storageConfigurado}
-            onClick={() => inputAvatar.current?.click()}
+            onClick={() => { setErro(""); setModalPerfil("avatar"); }}
           >
             <Pencil aria-hidden="true" />
           </button>
@@ -191,26 +206,23 @@ export function CardUsuario({
         </div>
       </dl>
 
-      <input
-        ref={inputAvatar}
-        className={styles.inputArquivo}
-        type="file"
-        accept="image/png,image/jpeg,image/webp"
-        onChange={(evento) => {
-          const arquivo = evento.target.files?.[0];
-          if (arquivo) void aoEnviarImagem("avatar", arquivo);
-        }}
-      />
-      <input
-        ref={inputBanner}
-        className={styles.inputArquivo}
-        type="file"
-        accept="image/png,image/jpeg,image/webp"
-        onChange={(evento) => {
-          const arquivo = evento.target.files?.[0];
-          if (arquivo) void aoEnviarImagem("banner", arquivo);
-        }}
-      />
+      {modalPerfil === "avatar" || modalPerfil === "banner" ? (
+        <ModalEdicao
+          titulo={modalPerfil === "avatar" ? "Editar avatar" : "Editar banner"}
+          descricao="Escolha uma imagem PNG, JPG ou WEBP."
+          aoFechar={() => { if (!salvando) setModalPerfil(null); }}
+        >
+          <AnimatedFileUpload
+            accept="image/png,image/jpeg,image/webp"
+            maxSize={modalPerfil === "avatar" ? 2 * 1024 * 1024 : 5 * 1024 * 1024}
+            rotulo={modalPerfil === "avatar" ? "Escolher avatar" : "Escolher banner"}
+            disabled={salvando}
+            onFilesSelected={(arquivos) => void enviarImagemSelecionada(modalPerfil, arquivos)}
+          />
+          {salvando ? <p className={modalStyles.erroForm}>Enviando imagem...</p> : null}
+          {erro ? <p className={modalStyles.erroForm} role="alert">{erro}</p> : null}
+        </ModalEdicao>
+      ) : null}
 
       {editandoNome ? (
         <ModalEdicao
@@ -287,15 +299,14 @@ export function CardUsuario({
                 .finally(() => setSalvando(false));
             }}
           >
-            <label>
-              Biografia
-              <textarea
-                name="biografia"
-                defaultValue={perfil.biografia}
-                maxLength={280}
-                rows={5}
-              />
-            </label>
+            <VLabel8
+              rotulo="Biografia"
+              name="biografia"
+              defaultValue={perfil.biografia}
+              maxLength={280}
+              rows={5}
+              placeholder="Conte um pouco sobre você..."
+            />
             {erro ? <p className={modalStyles.erroForm}>{erro}</p> : null}
             <div className={modalStyles.acoesModal}>
               <button type="button" onClick={() => setModalPerfil(null)}>
