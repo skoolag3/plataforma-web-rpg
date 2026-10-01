@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   useEffect,
   useState,
-  type ChangeEvent,
   type CSSProperties,
   type FormEvent,
 } from "react";
@@ -140,8 +139,8 @@ export function NovaCarta() {
     }));
   }
 
-  function handleFotoChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0] ?? null;
+  function handleFotoChange(arquivos: File[]) {
+    const file = arquivos[0] ?? null;
     setFoto(file);
     setPreviewUrl((current) => {
       if (current) URL.revokeObjectURL(current);
@@ -149,8 +148,8 @@ export function NovaCarta() {
     });
   }
 
-  function handleMolduraChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0] ?? null;
+  function handleMolduraChange(arquivos: File[]) {
+    const file = arquivos[0] ?? null;
     setMoldura(file);
     setMolduraPreviewUrl((current) => {
       if (current) URL.revokeObjectURL(current);
@@ -385,13 +384,13 @@ export function NovaCarta() {
                 rotulo="Foto/personagem"
                 accept="image/*"
                 ajuda="PNG, JPG ou WEBP, até 5 MB."
-                onChange={handleFotoChange}
+                onFilesSelected={handleFotoChange}
               />
               <CampoArquivo
                 rotulo="Moldura"
                 accept="image/png,image/webp"
                 ajuda="PNG ou WEBP transparente, proporção 2:3."
-                onChange={handleMolduraChange}
+                onFilesSelected={handleMolduraChange}
               />
               <ControleVisualCarta
                 value={form.configVisual}

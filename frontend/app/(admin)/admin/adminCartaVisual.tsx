@@ -14,7 +14,6 @@ import {
   useEffect,
   useRef,
   useState,
-  type ChangeEvent,
   type CSSProperties,
 } from "react";
 import {
@@ -26,6 +25,7 @@ import {
   type DimensoesImagem,
 } from "../../components/cartaMontada";
 import { CartaVerso } from "../../components/cartaVerso";
+import AnimatedFileUpload from "@/components/ui/animated-file-upload";
 import { elementosCarta } from "../../components/elementosCarta";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
 import editorStyles from "../../styles/admin/adminCartaEditor.module.css";
@@ -313,37 +313,24 @@ export function CampoArquivo({
   rotulo,
   accept,
   ajuda,
-  onChange,
+  onFilesSelected,
 }: {
   rotulo: string;
   accept: string;
   ajuda?: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onFilesSelected: (files: File[]) => void;
 }) {
-  const [nomeArquivo, setNomeArquivo] = useState("Nenhum arquivo selecionado");
-
   return (
-    <label className={styles.campoArquivo}>
+    <div className={styles.campoArquivo}>
       <span className={styles.rotuloCampo}>{rotulo}</span>
-      <input
-        className={styles.inputArquivoOculto}
-        type="file"
+      <AnimatedFileUpload
         accept={accept}
-        onChange={(event) => {
-          setNomeArquivo(
-            event.target.files?.[0]?.name ?? "Nenhum arquivo selecionado",
-          );
-          onChange(event);
-        }}
+        maxSize={5 * 1024 * 1024}
+        rotulo={`Escolher ${rotulo.toLowerCase()}`}
+        ajuda={ajuda}
+        onFilesSelected={onFilesSelected}
       />
-      <span className={styles.seletorArquivo}>
-        <span className={styles.botaoArquivo}>Escolher</span>
-        <span className={styles.nomeArquivo} title={nomeArquivo}>
-          {nomeArquivo}
-        </span>
-      </span>
-      {ajuda ? <small>{ajuda}</small> : null}
-    </label>
+    </div>
   );
 }
 
