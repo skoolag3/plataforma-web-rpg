@@ -13,32 +13,8 @@ export class AdminCampanhaService {
   constructor(private readonly prisma: PrismaService) {}
 
   async obterPainel() {
-    const [
-      configuracao,
-      total,
-      ativas,
-      concluidas,
-      falhas,
-      abandonadas,
-      recentes,
-      produtos,
-      temas,
-    ] = await Promise.all([
+    const [configuracao, produtos, temas] = await Promise.all([
       this.obterConfiguracao(),
-      this.prisma.expedicao.count(),
-      this.prisma.expedicao.count({ where: { status: 'EM_ANDAMENTO' } }),
-      this.prisma.expedicao.count({ where: { status: 'CONCLUIDA' } }),
-      this.prisma.expedicao.count({ where: { status: 'FALHOU' } }),
-      this.prisma.expedicao.count({ where: { status: 'ABANDONADA' } }),
-      this.prisma.expedicao.findMany({
-        take: 12,
-        orderBy: { criado_em: 'desc' },
-        include: {
-          usuario: { select: { nome: true, email: true } },
-          deck: { select: { nome: true } },
-          partidas: { select: { recompensa_rubys: true } },
-        },
-      }),
       this.prisma.produtoExpedicao.findMany({
         orderBy: [{ ativo: 'desc' }, { criado_em: 'desc' }],
       }),
@@ -48,21 +24,6 @@ export class AdminCampanhaService {
     return {
       configuracao: this.formatarConfiguracao(configuracao),
       boss: this.formatarBoss(configuracao),
-      metricas: { total, ativas, concluidas, falhas, abandonadas },
-      recentes: recentes.map((expedicao) => ({
-        id: expedicao.id,
-        jogador: expedicao.usuario.nome,
-        email: expedicao.usuario.email,
-        deck: expedicao.deck.nome,
-        status: expedicao.status,
-        etapaAtual: expedicao.etapa_atual,
-        rubys: expedicao.partidas.reduce(
-          (soma, partida) => soma + partida.recompensa_rubys,
-          0,
-        ),
-        criadoEm: expedicao.criado_em,
-        finalizadoEm: expedicao.finalizado_em,
-      })),
       produtos: produtos.map((produto) => this.formatarProduto(produto)),
       temas: temas.map((tema) => ({ nome: tema.nome })),
     };
@@ -174,6 +135,10 @@ export class AdminCampanhaService {
   private async validarProduto(dto: SalvarProdutoExpedicaoDto) {
     if (!dto.nome.trim() || !dto.descricao.trim() || !dto.tema.trim())
       throw new BadRequestException('Preencha nome, descrição e tema.');
+    const tema = await this.prisma.temaExpedicao.findUnique({
+      where: { nome: dto.tema.trim().toUpperCase() },
+    });
+    if (!tema) throw new BadRequestException('Escolha um tema cadastrado.');
     if (
       dto.inicioEm &&
       dto.fimEm &&

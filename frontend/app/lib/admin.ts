@@ -349,25 +349,8 @@ export type AdminCampanhaConfiguracao = {
 export type AdminCampanhaPainel = {
   configuracao: AdminCampanhaConfiguracao;
   boss: AdminBoss;
-  metricas: {
-    total: number;
-    ativas: number;
-    concluidas: number;
-    falhas: number;
-    abandonadas: number;
-  };
-  recentes: {
-    id: string;
-    jogador: string;
-    email: string;
-    deck: string;
-    status: string;
-    etapaAtual: number;
-    rubys: number;
-    criadoEm: string;
-    finalizadoEm: string | null;
-  }[];
   produtos: AdminProdutoExpedicao[];
+  temas: { nome: string }[];
 };
 
 export type AdminExpedicoesPainel = {
@@ -700,6 +683,13 @@ export function removerAdminBanner(id: string) {
 
 export function obterAdminCampanha() {
   return adminRequest<AdminCampanhaPainel>("/admin/campanha");
+}
+
+export function criarTemaExpedicao(nome: string) {
+  return adminRequest<{ message: string; tema: { nome: string } }>(
+    "/admin/campanha/temas",
+    { method: "POST", body: JSON.stringify({ nome }) },
+  );
 }
 
 export function obterAdminExpedicoes(pagina: number) {
