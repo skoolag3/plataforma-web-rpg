@@ -1,11 +1,14 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../../common/guards/admin.guard';
@@ -26,6 +29,13 @@ export class AdminCampanhaController {
   @Get()
   obterPainel() {
     return this.campanhaService.obterPainel();
+  }
+
+  @Get('expedicoes')
+  obterExpedicoes(
+    @Query('pagina', new DefaultValuePipe(1), ParseIntPipe) pagina: number,
+  ) {
+    return this.campanhaService.obterExpedicoes(pagina);
   }
 
   @Post('temas')

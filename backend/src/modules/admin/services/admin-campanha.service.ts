@@ -79,6 +79,48 @@ export class AdminCampanhaService {
     return { message: 'Tema criado.', tema: { nome: tema.nome } };
   }
 
+  async obterExpedicoes(paginaSolicitada: number) {
+    const porPagina = 12;
+    const [total, ativas, concluidas, falhas, abandonadas] = await Promise.all([
+      this.prisma.expedicao.count(),
+      this.prisma.expedicao.count({ where: { status: 'EM_ANDAMENTO' } }),
+      this.prisma.expedicao.count({ where: { status: 'CONCLUIDA' } }),
+      this.prisma.expedicao.count({ where: { status: 'FALHOU' } }),
+      this.prisma.expedicao.count({ where: { status: 'ABANDONADA' } }),
+    ]);
+    const totalPaginas = Math.max(1, Math.ceil(total / porPagina));
+    const pagina = Math.min(Math.max(1, paginaSolicitada), totalPaginas);
+    const expedicoes = await this.prisma.expedicao.findMany({
+      skip: (pagina - 1) * porPagina,
+      take: porPagina,
+      orderBy: [{ criado_em: 'desc' }, { id: 'desc' }],
+      include: {
+        usuario: { select: { nome: true, email: true } },
+        deck: { select: { nome: true } },
+        partidas: { select: { recompensa_rubys: true } },
+      },
+    });
+
+    return {
+      metricas: { total, ativas, concluidas, falhas, abandonadas },
+      paginacao: { pagina, porPagina, total, totalPaginas },
+      expedicoes: expedicoes.map((expedicao) => ({
+        id: expedicao.id,
+        jogador: expedicao.usuario.nome,
+        email: expedicao.usuario.email,
+        deck: expedicao.deck.nome,
+        status: expedicao.status,
+        etapaAtual: expedicao.etapa_atual,
+        rubys: expedicao.partidas.reduce(
+          (soma, partida) => soma + partida.recompensa_rubys,
+          0,
+        ),
+        criadoEm: expedicao.criado_em,
+        finalizadoEm: expedicao.finalizado_em,
+      })),
+    };
+  }
+
   async criarProduto(dto: SalvarProdutoExpedicaoDto) {
     await this.validarProduto(dto);
     const produto = await this.prisma.produtoExpedicao.create({
