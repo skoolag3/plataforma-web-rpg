@@ -4,11 +4,12 @@ import { useEffect, useRef } from "react";
 import { CheckCircle2, CircleOff, Gem, Shapes, Shield, Trash2, X } from "lucide-react";
 import Slider06, { type OpcaoPeriodo } from "@/components/ui/slider-06";
 import { SelectPadrao } from "../../components/ui/controlesFormulario";
-import type { AdminClasse } from "../../lib/admin";
-import { elementos, raridades } from "./adminCartaVisual";
+import type { AdminClasse, AdminRaridade } from "../../lib/admin";
+import { elementos } from "./adminCartaVisual";
 import styles from "../../styles/admin/filtroCartasModal.module.css";
 
 type Props = {
+  raridades: AdminRaridade[];
   raridade: string;
   setRaridade: (valor: string) => void;
   elemento: string;
@@ -25,7 +26,7 @@ type Props = {
 };
 
 export function FiltroCartasModal({
-  raridade, setRaridade, elemento, setElemento,
+  raridades, raridade, setRaridade, elemento, setElemento,
   status, setStatus, classe, setClasse, periodo, setPeriodo,
   periodos, classes, aoFechar,
 }: Props) {
@@ -84,9 +85,7 @@ export function FiltroCartasModal({
         <div className={styles.grade}>
           <SelectPadrao className={styles.seletor} rotulo="Raridade" placeholder="Raridade" valor={raridade} aoAlterar={setRaridade} opcoes={[
             { valor: "", label: "Todas as raridades", labelCurto: "Todas", icone: <Gem /> },
-            ...raridades.map((item) => ({ valor: item, label: item, icone: <Gem />, cor: {
-              UR: "#e879f9", SSR: "#facc15", SR: "#67e8f9", R: "#a78bfa", N: "#94a3b8",
-            }[item] })),
+            ...raridades.map((item) => ({ valor: item.codigo, label: item.nome, icone: <Gem />, cor: item.cor })),
           ]} />
           <SelectPadrao className={styles.seletor} rotulo="Elemento" placeholder="Elemento" valor={elemento} aoAlterar={setElemento} opcoes={[
             { valor: "", label: "Todos os elementos", labelCurto: "Todos", icone: <Shapes /> },

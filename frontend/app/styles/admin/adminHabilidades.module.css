@@ -1,5 +1,118 @@
 .habilidadesListaPanel{ margin-bottom: 0.8rem; }
 
+.habilidadeModalAjustes { display: grid; gap: 0.9rem; overflow: hidden; grid-template-rows: auto auto minmax(0, 1fr) auto; }
+.etapasHabilidade { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+.etapasHabilidade button { display: flex; min-width: 0; min-height: 2.6rem; align-items: center; gap: .45rem; border: 1px solid rgba(148,163,184,.2); border-radius: .5rem; background: #111827; color: #94a3b8; padding: .55rem; font: inherit; font-size: .72rem; cursor: pointer; }
+.etapasHabilidade button[aria-current="step"] { border-color: #a78bfa; background: #21193d; color: #fff; }
+.etapasHabilidade button span { display: grid; width: 1.3rem; height: 1.3rem; flex: none; place-items: center; border-radius: 50%; background: #35265b; font-weight: 800; }
+.conteudoEtapa { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .8rem; min-height: 0; overflow-y: auto; scrollbar-width: none; align-content: start; }
+.conteudoEtapaQuando { grid-template-columns: minmax(0, 1fr); gap: .55rem; }
+.conteudoEtapaQuando > * { min-width: 0; }
+.campoEventos { min-width: 0; }
+.gradeEventos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem; }
+.gradeCondicoes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem; }
+.opcaoEvento {
+  --evento-cor: #a78bfa;
+  display: flex;
+  min-width: 0;
+  min-height: 3.5rem;
+  align-items: flex-start;
+  gap: .55rem;
+  border: 1px solid rgba(148,163,184,.24);
+  border-radius: .58rem;
+  background: #0e1422;
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: .55rem;
+  text-align: left;
+  font: inherit;
+}
+.opcaoEvento[data-evento="AO_ATACAR"] { --evento-cor: #fb7185; }
+.opcaoEvento[data-evento="AO_RECEBER_DANO"] { --evento-cor: #fb923c; }
+.opcaoEvento[data-evento="INICIO_TURNO"], .opcaoEvento[data-evento="A_CADA_X_TURNOS"] { --evento-cor: #38bdf8; }
+.opcaoEvento[data-evento="FIM_TURNO"] { --evento-cor: #2dd4bf; }
+.opcaoCondicao[data-evento="NENHUM"] { --evento-cor: #4ade80; }
+.opcaoCondicao[data-evento="TURNO_MINIMO"] { --evento-cor: #38bdf8; }
+.opcaoCondicao[data-evento="CONTADOR_ATAQUES"] { --evento-cor: #fb7185; }
+.opcaoCondicao[data-evento="HP_ABAIXO"] { --evento-cor: #fbbf24; }
+.opcaoCondicao { min-height: 3.4rem; }
+.avisoCondicao { display: block; margin-top: .35rem; color: #94a3b8; font-size: .66rem; }
+.opcaoEvento > svg { flex: none; color: var(--evento-cor); }
+.opcaoEvento > span { display: grid; min-width: 0; gap: .2rem; }
+.opcaoEvento strong { color: var(--evento-cor); font-size: .73rem; line-height: 1.2; }
+.opcaoEvento small { color: #9caac0; font-size: .65rem; font-weight: 500; line-height: 1.3; }
+.opcaoEvento:hover, .opcaoEvento[aria-pressed="true"] { border-color: var(--evento-cor); background: color-mix(in srgb, var(--evento-cor) 12%, #0e1422); }
+.opcaoEvento[aria-pressed="true"] { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--evento-cor) 32%, transparent); }
+.opcaoEvento:focus-visible { outline: 2px solid var(--evento-cor); outline-offset: 2px; }
+.conteudoEtapaResultado { align-items: start; }
+.conteudoEtapaResultado > .campoValorEfeito { display: grid; min-width: 0; grid-template-rows: 1.15rem 2.65rem minmax(2.4rem, auto); gap: .35rem; align-content: start; }
+.conteudoEtapaResultado > .campoValorEfeito > input { height: 2.65rem; min-height: 2.65rem; box-sizing: border-box; }
+.conteudoEtapaResultado > .campoValorEfeito > small { margin: 0; line-height: 1.35; }
+.campoDescricaoDetalhe { display: grid; gap: .4rem; padding: .8rem; border-top: 1px solid rgba(148,163,184,.14); color: #cbd5e1; font-size: .74rem; font-weight: 800; }
+.conteudoEtapa::-webkit-scrollbar { display: none; }
+.conteudoEtapaQuando { scrollbar-width: thin; scrollbar-color: #6d5a94 transparent; }
+.conteudoEtapaQuando::-webkit-scrollbar { display: block; width: .35rem; }
+.conteudoEtapaQuando::-webkit-scrollbar-thumb { border-radius: 1rem; background: #6d5a94; }
+.conteudoEtapa > label { display: grid; gap: .35rem; color: #cbd5e1; font-size: .74rem; font-weight: 800; }
+.conteudoEtapa > .fullField { grid-column: 1 / -1; }
+.notaRegra { grid-column: 1 / -1; margin: 0; padding: .7rem; border: 1px solid rgba(167,139,250,.25); border-radius: .5rem; background: #151329; color: #d4c5ff; font-size: .72rem; line-height: 1.5; }
+.notaAlvo { margin: 0; padding: .6rem .7rem; border-left: 2px solid #a78bfa; color: #94a3b8; background: #101827; font-size: .72rem; line-height: 1.45; }
+.notaAlvo strong { color: #e2e8f0; }
+.notaRegra strong { color: #f3e8ff; }
+.resumoHabilidade { grid-column: 1 / -1; padding: .85rem; border: 1px solid rgba(167,139,250,.35); border-radius: .6rem; background: #151329; }
+.resumoHabilidade > strong { color: #e9d5ff; font-size: .76rem; }
+.resumoHabilidade p { margin: .45rem 0; color: #e2e8f0; font-size: .74rem; line-height: 1.55; }
+.resumoHabilidade small { color: #aab5c5; font-size: .67rem; line-height: 1.4; }
+.etapasHabilidade button:focus-visible { outline: 2px solid #a78bfa; outline-offset: 2px; }
+.avisoEtapa { grid-column: 1 / -1; margin: 0; color: #fca5a5; font-size: .75rem; }
+.campoCompleto, .introducaoHabilidade, .regrasExtras { grid-column: 1 / -1; }
+.introducaoHabilidade { display: flex; align-items: center; gap: 0.75rem; padding-top: 0.4rem; border-top: 1px solid rgba(148,163,184,.14); }
+.introducaoHabilidade > svg { flex: none; color: #a78bfa; }
+.introducaoHabilidade strong, .introducaoHabilidade span { display: block; }
+.introducaoHabilidade strong { color: #f8fafc; font-size: .86rem; }
+.introducaoHabilidade span { color: #94a3b8; font-size: .72rem; margin-top: .15rem; }
+.rotuloGrupo { display: flex; align-items: center; gap: .4rem; margin: 0 0 .5rem; color: #cbd5e1; font-size: .75rem; font-weight: 800; }
+.gradeEfeitos { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .5rem; }
+.opcaoEfeito { display: flex; align-items: flex-start; gap: .55rem; min-height: 4rem; padding: .7rem; text-align: left; border: 1px solid rgba(148,163,184,.22); border-radius: .6rem; background: #0e1422; color: #cbd5e1; cursor: pointer; }
+.opcaoEfeito > svg { flex: none; color: var(--tipo-cor, #a78bfa); }
+.opcaoEfeito span, .opcaoEfeito strong, .opcaoEfeito small { display: block; }
+.opcaoEfeito strong { color: var(--tipo-cor, #cbd5e1); font-size: .72rem; line-height: 1.2; text-decoration: underline; text-underline-offset: .2em; }
+.opcaoEfeito small { margin-top: .25rem; color: #94a3b8; font-size: .65rem; font-weight: 500; line-height: 1.25; }
+.opcaoEfeito:hover { border-color: #8b5cf6; background: #17132b; }
+.opcaoEfeito:focus-visible, .regrasExtras summary:focus-visible { outline: 2px solid #a78bfa; outline-offset: 2px; }
+.opcaoEfeitoAtiva { border-color: #a78bfa; background: rgba(124,58,237,.2); box-shadow: inset 0 0 0 1px rgba(167,139,250,.25); }
+.opcaoEfeitoAtiva[data-tipo] { border-color: var(--tipo-cor); background: color-mix(in srgb, var(--tipo-cor) 13%, #0e1422); }
+.tituloTipo { display: inline-flex; align-items: center; gap: .4rem; }
+.regrasExtras { border: 1px solid rgba(148,163,184,.2); border-radius: .65rem; background: #0d1320; }
+.regrasExtras summary { display: flex; align-items: center; gap: .65rem; padding: .75rem; cursor: pointer; list-style: none; }
+.regrasExtras summary::-webkit-details-marker { display: none; }
+.regrasExtras summary > svg { color: #a78bfa; }
+.regrasExtras summary span, .regrasExtras summary strong, .regrasExtras summary small { display: block; }
+.regrasExtras summary strong { color: #e2e8f0; font-size: .76rem; }
+.regrasExtras summary small { color: #94a3b8; font-size: .68rem; margin-top: .15rem; }
+.gradeRegras { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; gap: .8rem; padding: .8rem; border-top: 1px solid rgba(148,163,184,.14); }
+.gradeRegras > * { min-width: 0; }
+.gradeRegras label { display: grid; align-content: start; gap: .35rem; color: #cbd5e1; font-size: .74rem; font-weight: 800; }
+.gradeRegras > div { align-content: start; }
+.gradeRegras > div > div:nth-child(2) { width: 100%; height: 2.65rem; box-sizing: border-box; }
+.gradeRegras label > input { width: 100%; height: 2.65rem; box-sizing: border-box; }
+.habilidadeModalAjustes .campoDropdown small { color: #94a3b8; font-size: .68rem; font-weight: 500; line-height: 1.3; }
+
+@media (max-width: 720px) {
+  .gradeEfeitos { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .gradeEventos { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .gradeCondicoes { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .gradeRegras { grid-template-columns: 1fr; }
+  .conteudoEtapa { grid-template-columns: 1fr; }
+  .conteudoEtapaResultado > .campoValorEfeito { grid-template-rows: auto 2.65rem auto; }
+  .etapasHabilidade button { font-size: .62rem; }
+}
+
+@media (max-width: 480px) {
+  .gradeEventos { grid-template-columns: minmax(0,1fr); }
+  .gradeCondicoes { grid-template-columns: minmax(0,1fr); }
+}
+
 .dicaCritico {
   grid-column: 1 / -1;
   margin: 0;
@@ -39,13 +152,10 @@
 
 .habilidadeModalAjustes > header,
 .habilidadeModalAjustes > .acoesHabilidade {
-  position: sticky;
-  z-index: 2;
   background: #080d19;
 }
 
-.habilidadeModalAjustes > header { top: -1rem; }
-.habilidadeModalAjustes > .acoesHabilidade { bottom: -1rem; padding-bottom: 0.45rem; }
+.habilidadeModalAjustes > .acoesHabilidade { padding-bottom: 0.45rem; }
 
 .habilidadesListaPanel .cartasListaTopo > .cartasListaAcoes {
   display: grid;
@@ -58,7 +168,6 @@
     width: 100%;
   }
 }
-
 .habilidadesListaPanel .tableWrap{ border: 0; border-radius: 0; box-shadow: none; }
 
 .habilidadesListaPanel .tableWrap table {
@@ -124,6 +233,98 @@
   bottom: calc(100% + .3rem);
 }
 
+@media (max-width: 720px) {
+  .habilidadesListaPanel .tableWrap {
+    overflow: visible;
+  }
+
+  .habilidadesListaPanel .tableWrap table,
+  .habilidadesListaPanel .tableWrap tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .habilidadesListaPanel .tableWrap colgroup,
+  .habilidadesListaPanel .tableWrap thead {
+    display: none;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody tr:not(.emptyTableRow) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: 0.45rem 0.6rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+    padding: 0.75rem 0.8rem;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody td {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: auto;
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    text-align: left;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody td[data-label="Habilidade"] {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody td[data-label="Ações"] {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody td[data-label="Ações"] .menuAcoesCarta {
+    margin-inline: 0;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody td[data-label="Tipo"] {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody td[data-label="Status"] {
+    grid-column: 2;
+    grid-row: 2;
+    justify-content: flex-end;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody td[data-label="Gatilho"],
+  .habilidadesListaPanel .tableWrap tbody td[data-label="Alvo"] {
+    color: #94a3b8;
+    font-size: 0.66rem;
+    font-weight: 700;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody td[data-label="Gatilho"] {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody td[data-label="Alvo"] {
+    grid-column: 2;
+    grid-row: 3;
+    justify-content: flex-end;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody tr:has(details[open]) {
+    position: relative;
+    z-index: 5;
+  }
+
+  .habilidadesListaPanel .tableWrap tbody tr .menuAcoesCarta > div {
+    top: calc(100% + 0.3rem);
+    bottom: auto;
+  }
+}
+
 .statusRascunho{
   display: inline-flex;
   border: 1px solid rgba(250, 204, 21, 0.22);
@@ -134,3 +335,88 @@
   font-size: 0.65rem;
   font-weight: 850;
 }
+
+.confirmarAcaoHabilidade {
+  width: min(100%, 26rem);
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  border-radius: 0.85rem;
+  background: #090d18;
+  color: #f8fafc;
+  padding: 1rem;
+  box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.55);
+}
+
+.confirmarAcaoHabilidade[data-tipo="inativar"] {
+  border-color: rgba(248, 113, 113, 0.28);
+}
+
+.confirmarAcaoHabilidade > svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #a78bfa;
+}
+
+.confirmarAcaoHabilidade[data-tipo="inativar"] > svg {
+  color: #f87171;
+}
+
+.confirmarAcaoHabilidade h2 {
+  margin: 0.55rem 0 0;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.confirmarAcaoHabilidade p {
+  margin: 0.35rem 0 1rem;
+  color: #8b97aa;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.confirmarAcaoHabilidade > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.confirmarAcaoHabilidade button {
+  min-height: 2.4rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.48rem;
+  background: rgba(15, 23, 42, 0.72);
+  color: #dbe4f4;
+  cursor: pointer;
+  padding: 0 0.75rem;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.confirmarAcaoHabilidade button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.confirmarAcaoHabilidade button:last-child {
+  border-color: rgba(74, 222, 128, 0.42);
+  background: rgba(20, 83, 45, 0.86);
+  color: #dcfce7;
+}
+
+.confirmarAcaoHabilidade[data-tipo="inativar"] button:last-child {
+  border-color: rgba(248, 113, 113, 0.34);
+  background: rgba(127, 29, 29, 0.42);
+  color: #fecaca;
+}
+
+@media (max-width: 480px) {
+  .confirmarAcaoHabilidade {
+    margin: auto 0 0;
+    border-radius: 0.9rem;
+    padding: 0.9rem;
+  }
+  .confirmarAcaoHabilidade > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+

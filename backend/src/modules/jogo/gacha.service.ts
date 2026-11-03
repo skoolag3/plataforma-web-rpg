@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { randomInt } from 'crypto';
 import { PrismaService } from '../../database/prisma.service';
 import { BannerRotacaoService } from './banner-rotacao.service';
 import {
@@ -16,6 +17,7 @@ import {
   type RaridadeGacha,
 } from './gacha.config';
 import { obterValorVendaPorRaridade } from './valor-venda-raridade';
+import { calcularContadoresPity, lerConfiguracaoBanner, sortearRaridadeBanner } from './banner-configuracao';
 
 const PESOS: Record<string, number> = { UR: 1, SSR: 3, SR: 8, R: 18, N: 35 };
 
@@ -57,8 +59,8 @@ export class GachaService {
         id_banner: { in: banners.map((b) => b.id) },
       },
       orderBy: { timestamp_pull: 'desc' },
-      distinct: ['id_banner'],
-      select: { id_banner: true, pity_contador: true },
+      take: 10000,
+      select: { id_banner: true, pity_contador: true, cartaObtida: { select: { raridade: true } } },
     });
     const agora = horarioBanco[0].agora.getTime();
     return {
@@ -74,11 +76,13 @@ export class GachaService {
             forcadoPorAdmin: rotacao.forcadoPorAdmin,
           }
         : null,
-      probabilidades: this.calcularProbabilidadesEfetivas(
-        banners[0]?.cartas ?? [],
-      ),
+      probabilidades: banners[0] ? lerConfiguracaoBanner(banners[0].configuracao, banners[0].cartas.map((item) => item.carta.raridade)).chances : [],
       proximoGiroGratuitoEm: obterProximoGiroGratuito(agora),
       banners: banners.map((banner) => ({
+        pities: calcularContadoresPity(
+          lerConfiguracaoBanner(banner.configuracao, banner.cartas.map((item) => item.carta.raridade)).pities,
+          logs.filter((log) => log.id_banner === banner.id).map((log) => log.cartaObtida.raridade),
+        ),
         id: banner.id,
         nome: banner.nome,
         custoGiro: banner.custo_giro,
@@ -105,6 +109,8 @@ export class GachaService {
   }
 
   async girar(idUsuario: string, idBanner: string, quantidade: 1 | 10) {
+    const atual = await this.bannerRotacaoService.obterAtual();
+    if (atual?.idBanner !== idBanner) throw new ConflictException('Este banner não está disponível agora. Atualize a página.');
     return this.prisma.$transaction(
       async (tx) => {
         const [usuario, banner, ultimo] = await Promise.all([
@@ -121,6 +127,10 @@ export class GachaService {
         if (!usuario) throw new NotFoundException('Usuário não encontrado.');
         if (!banner || !banner.cartas.length)
           throw new NotFoundException('Banner indisponível.');
+        const configuracao = lerConfiguracaoBanner(banner.configuracao, banner.cartas.map((item) => item.carta.raridade));
+        const maiorLimite = Math.max(0, ...configuracao.pities.map((item) => item.limite));
+        const historico = maiorLimite ? await tx.logGacha.findMany({ where: { id_usuario: idUsuario, id_banner: idBanner }, orderBy: { timestamp_pull: 'desc' }, take: maiorLimite, select: { cartaObtida: { select: { raridade: true } } } }) : [];
+        let contadores = calcularContadoresPity(configuracao.pities, historico.map((item) => item.cartaObtida.raridade));
         const custo = banner.custo_giro * (quantidade === 10 ? 9 : 1);
         if ((usuario.saldo_rubys_cache ?? 0) < custo) {
           throw new BadRequestException('Rubys insuficientes.');
@@ -152,10 +162,17 @@ export class GachaService {
         let rubysGanhosDuplicatas = 0;
         for (let index = 0; index < quantidade; index += 1) {
           pity += 1;
-          const forcarUr = pity >= LIMITE_PITY;
-          const pool = this.obterPoolSorteio(banner.cartas, forcarUr);
+          const garantida = [...contadores].filter((item) => item.atual + 1 >= item.limite).sort((a, b) => {
+            const chanceA = configuracao.chances.find((chance) => chance.raridade === a.raridade)?.percentual ?? 100;
+            const chanceB = configuracao.chances.find((chance) => chance.raridade === b.raridade)?.percentual ?? 100;
+            return chanceA - chanceB || a.raridade.localeCompare(b.raridade);
+          })[0];
+          const raridade = garantida?.raridade ?? sortearRaridadeBanner(configuracao.chances, this.numeroAleatorio());
+          const pool = banner.cartas.filter((item) => item.carta.raridade === raridade);
+          if (!pool.length) throw new ConflictException('Banner sem cartas para a raridade sorteada.');
           const sorteada = this.sortear(pool);
           pity = sorteada.carta.raridade === 'UR' ? 0 : pity;
+          contadores = contadores.map((item) => ({ ...item, atual: item.raridade === sorteada.carta.raridade ? 0 : Math.min(item.limite - 1, item.atual + 1) }));
 
           const inventarioAtual = await tx.inventario.findUnique({
             where: {
@@ -165,10 +182,10 @@ export class GachaService {
               },
             },
           });
-          const nova = !inventarioAtual || (inventarioAtual.quantidade ?? 0) < 1;
-          const valorVenda = nova
-            ? 0
-            : obterValorVendaPorRaridade(sorteada.carta.raridade);
+          const nova =
+            !inventarioAtual || (inventarioAtual.quantidade ?? 0) < 1;
+          const raridadeVenda = nova ? null : await tx.raridadeCarta.findUnique({ where: { codigo: sorteada.carta.raridade } });
+          const valorVenda = nova ? 0 : (raridadeVenda?.valor_venda ?? obterValorVendaPorRaridade(sorteada.carta.raridade));
           const inventario = nova
             ? await tx.inventario.upsert({
                 where: {
@@ -224,6 +241,7 @@ export class GachaService {
         return {
           cartas: obtidas,
           pity,
+          pities: contadores,
           rubys:
             (usuario.saldo_rubys_cache ?? 0) - custo + rubysGanhosDuplicatas,
           custo,
@@ -235,6 +253,8 @@ export class GachaService {
   }
 
   async resgatarDiario(idUsuario: string, idBanner: string) {
+    const atual = await this.bannerRotacaoService.obterAtual();
+    if (atual?.idBanner !== idBanner) throw new ConflictException('Este banner não está disponível agora. Atualize a página.');
     return this.prisma.$transaction(
       async (tx) => {
         const [banner, horarioBanco] = await Promise.all([
@@ -281,9 +301,13 @@ export class GachaService {
     );
   }
 
+  private numeroAleatorio() {
+    return randomInt(0, 1_000_000) / 1_000_000;
+  }
+
   private sortear<T extends { taxa_drop: Prisma.Decimal }>(pool: T[]): T {
     const total = pool.reduce((soma, item) => soma + Number(item.taxa_drop), 0);
-    let alvo = Math.random() * total;
+    let alvo = this.numeroAleatorio() * total;
     for (const item of pool) {
       alvo -= Number(item.taxa_drop);
       if (alvo <= 0) return item;
@@ -308,7 +332,7 @@ export class GachaService {
   }
 
   private sortearRaridade(): RaridadeGacha {
-    let alvo = Math.random() * 100;
+    let alvo = this.numeroAleatorio() * 100;
 
     for (const item of PROBABILIDADES_RARIDADE) {
       alvo -= item.percentual;

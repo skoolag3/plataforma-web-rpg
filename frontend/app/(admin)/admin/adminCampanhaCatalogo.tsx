@@ -39,7 +39,6 @@ export function AdminCampanhaCatalogo({
   const temaAtual = temaSelecionado && temas.some((tema) => tema.nome === temaSelecionado)
     ? temaSelecionado : null;
   const campanhasDoTema = produtos.filter((produto) => produto.tema.trim().toUpperCase() === temaAtual);
-  const campanhasAtivas = produtos.filter((produto) => situacaoCampanha(produto) === "disponivel");
 
   async function handleCriarTema(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -68,14 +67,20 @@ export function AdminCampanhaCatalogo({
             <button type="button" className={styles.voltarTemas} onClick={() => selecionarTema(null)}><ArrowLeft aria-hidden="true" /> Voltar aos temas</button>
             <span className={styles.sobretitulo}>Tema · {formatarTema(temaAtual)}</span>
             <h2 id="titulo-catalogo">Campanhas de {formatarTema(temaAtual)}</h2>
-            <p>Cenários, regras e bosses criados para este tema.</p>
+            <p>Escolha uma campanha para editar ou crie outra jornada dentro deste tema.</p>
           </div>
           <button type="button" className={styles.novaCampanha} onClick={() => novaCampanha(temaAtual)}>
             <Plus aria-hidden="true" /> Nova campanha
           </button>
         </header>
-        {campanhasDoTema.length ? <div className={styles.campanhasGrid}>
-          {campanhasDoTema.map((produto) => <CampanhaCard key={produto.id} produto={produto} editarCampanha={editarCampanha} />)}
+        {campanhasDoTema.length ? <div className={styles.listaCampanhas}>
+          <div className={styles.listaCampanhasTopo}>
+            <h3>Campanhas neste tema <span>{campanhasDoTema.length}</span></h3>
+            <p>Selecione uma campanha para configurar a jornada.</p>
+          </div>
+          <div className={styles.campanhasGrid}>
+            {campanhasDoTema.map((produto) => <CampanhaCard key={produto.id} produto={produto} editarCampanha={editarCampanha} />)}
+          </div>
         </div> : <div className={styles.catalogoVazio}>
           <Sparkles aria-hidden="true" />
           <h3>Nenhuma campanha neste tema ainda</h3>
@@ -86,9 +91,9 @@ export function AdminCampanhaCatalogo({
         <section className={styles.catalogo} aria-labelledby="titulo-catalogo">
           <header className={styles.cabecalhoCatalogo}>
             <div>
-              <span className={styles.sobretitulo}>Biblioteca de expedições</span>
-              <h2 id="titulo-catalogo">Temas</h2>
-              <p>Abra um tema para ver e criar as campanhas dele.</p>
+              <span className={styles.sobretitulo}>Expedições</span>
+              <h2 id="titulo-catalogo">Campanhas por tema</h2>
+              <p>Abra um tema para editar uma campanha ou criar outra. As campanhas disponíveis entram no sorteio dos jogadores.</p>
             </div>
             <button type="button" className={styles.novaCampanha} onClick={() => { setMostrarNovoTema(true); setErroNovoTema(""); }}>
               <Plus aria-hidden="true" /> Novo tema
@@ -104,7 +109,8 @@ export function AdminCampanhaCatalogo({
                     <span className={styles.iconeTema} aria-hidden="true">{nome === "FOGO" ? <Flame /> : <Layers3 />}</span>
                     <strong>{formatarTema(nome)}</strong>
                     <small>{campanhas.length} {campanhas.length === 1 ? "campanha" : "campanhas"}</small>
-                    <span className={styles.temaRodape}>{ativas} {ativas === 1 ? "disponível agora" : "disponíveis agora"}<ArrowUpRight aria-hidden="true" /></span>
+                    <span className={styles.temaCampanhas}>{campanhas.length ? campanhas.slice(0, 3).map((produto) => <span key={produto.id}>{produto.nome} <em>{rotulosSituacao[situacaoCampanha(produto)]}</em></span>) : <span>Nenhuma campanha criada</span>}{campanhas.length > 3 ? <span>+ {campanhas.length - 3} outras</span> : null}</span>
+                    <span className={styles.temaRodape}>{ativas} {ativas === 1 ? "campanha no sorteio" : "campanhas no sorteio"}<ArrowUpRight aria-hidden="true" /></span>
                   </button>
                 );
               })}
@@ -116,26 +122,6 @@ export function AdminCampanhaCatalogo({
           </div>}
         </section>
 
-        <section className={styles.vitrineAtivas} aria-labelledby="titulo-ativas">
-        <div className={styles.vitrineTopo}>
-          <div>
-            <span className={styles.sobretitulo}>Acesso rápido</span>
-            <h2 id="titulo-ativas">Campanhas ativas agora <span>{campanhasAtivas.length}</span></h2>
-            <p>Estas campanhas estão no sorteio de novas expedições neste momento.</p>
-          </div>
-        </div>
-        {campanhasAtivas.length ? (
-          <div className={styles.ativasGrid}>
-            {campanhasAtivas.map((produto) => (
-              <button key={produto.id} type="button" className={styles.ativaItem} onClick={() => editarCampanha(produto)}>
-                <span className={styles.ativaPonto} aria-hidden="true" />
-                <span><small>{formatarTema(produto.tema)}</small><strong>{produto.nome}</strong><em>Boss: {produto.bossNome}</em></span>
-                <ArrowUpRight aria-hidden="true" />
-              </button>
-            ))}
-          </div>
-        ) : <p className={styles.vitrineVazia}>Nenhuma campanha está disponível para sorteio agora.</p>}
-        </section>
       </>}
 
       {mostrarNovoTema ? <div className={styles.modalTemaBackdrop} role="presentation">
@@ -157,12 +143,14 @@ function CampanhaCard({ produto, editarCampanha }: {
   const situacao = situacaoCampanha(produto);
   return (
     <article className={styles.campanhaCard}>
-      <div className={styles.campanhaCardTopo}>
-        <span className={styles.situacaoCampanha} data-situacao={situacao}>{rotulosSituacao[situacao]}</span>
-        <span>{produto.tipo === "EVENTO" ? "Evento" : "Recorrente"}</span>
+      <div className={styles.campanhaPrincipal}>
+        <div className={styles.campanhaCardTopo}>
+          <span className={styles.situacaoCampanha} data-situacao={situacao}>{rotulosSituacao[situacao]}</span>
+          <span>{produto.tipo === "EVENTO" ? "Evento" : "Recorrente"}</span>
+        </div>
+        <h4>{produto.nome}</h4>
+        <p>{produto.descricao}</p>
       </div>
-      <h4>{produto.nome}</h4>
-      <p>{produto.descricao}</p>
       <div className={styles.campanhaDados}>
         <span><small>Boss</small><strong>{produto.bossNome}</strong></span>
         <span><small>Chefe final</small><strong>{produto.recompensaChefe} Rubys</strong></span>

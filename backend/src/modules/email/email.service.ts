@@ -124,13 +124,16 @@ export class EmailService {
       },
     });
 
+    const nomeSeguro = this.escaparHtml(nome);
+    const novoEmailSeguro = this.escaparHtml(novoEmail);
+
     await transporter.sendMail({
       from: smtpConfig.from,
       to: email,
       subject: 'Confirme a troca do seu e-mail',
       html: `
-        <p>Ola, ${nome}.</p>
-        <p>Recebemos uma solicitacao para trocar seu e-mail para ${novoEmail}.</p>
+        <p>Ola, ${nomeSeguro}.</p>
+        <p>Recebemos uma solicitacao para trocar seu e-mail para ${novoEmailSeguro}.</p>
         <p><a href="${confirmationUrl}">Confirmar troca de e-mail</a></p>
         <p>Esse link expira em 30 minutos. Se voce nao solicitou a troca, ignore esta mensagem.</p>
       `,
@@ -164,13 +167,16 @@ export class EmailService {
       },
     });
 
+    const nomeSeguro = this.escaparHtml(nome);
+    const emailAtualSeguro = this.escaparHtml(emailAtual);
+
     await transporter.sendMail({
       from: smtpConfig.from,
       to: email,
       subject: 'Confirme seu novo e-mail',
       html: `
-        <p>Ola, ${nome}.</p>
-        <p>O endereco atual ${emailAtual} autorizou a troca para este e-mail.</p>
+        <p>Ola, ${nomeSeguro}.</p>
+        <p>O endereco atual ${emailAtualSeguro} autorizou a troca para este e-mail.</p>
         <p><a href="${confirmationUrl}">Concluir troca de e-mail</a></p>
         <p>Esse link expira em 30 minutos. A troca so acontece depois deste clique.</p>
       `,
@@ -219,8 +225,9 @@ export class EmailService {
   }
 
   private buildVerificationHtml(nome: string, verificationUrl: string) {
+    const nomeSeguro = this.escaparHtml(nome);
     return `
-      <p>Ola, ${nome}.</p>
+      <p>Ola, ${nomeSeguro}.</p>
       <p>Confirme seu e-mail para verificar sua conta.</p>
       <p><a href="${verificationUrl}">Verificar e-mail</a></p>
       <p>Esse link expira em 24 horas.</p>
@@ -228,12 +235,22 @@ export class EmailService {
   }
 
   private buildPasswordResetHtml(nome: string, resetUrl: string) {
+    const nomeSeguro = this.escaparHtml(nome);
     return `
-      <p>Ola, ${nome}.</p>
+      <p>Ola, ${nomeSeguro}.</p>
       <p>Recebemos uma solicitacao para alterar sua senha.</p>
       <p><a href="${resetUrl}">Alterar senha</a></p>
       <p>Esse link expira em 1 hora. Se voce nao pediu isso, ignore este e-mail.</p>
     `;
+  }
+
+  private escaparHtml(valor: string) {
+    return valor
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
   }
 
   private buildVerificationUrl(token: string) {

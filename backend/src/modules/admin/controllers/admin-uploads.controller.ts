@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Controller,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UploadedFiles,
@@ -19,6 +20,7 @@ import { AdminCloudinaryService } from '../services/admin-cloudinary.service';
 
 type CartaAssetFiles = {
   foto?: Express.Multer.File[];
+  fotoPerfil?: Express.Multer.File[];
   moldura?: Express.Multer.File[];
 };
 
@@ -40,13 +42,14 @@ function imageFileFilter(
 const cartaAssetInterceptor = FileFieldsInterceptor(
   [
     { name: 'foto', maxCount: 1 },
+    { name: 'fotoPerfil', maxCount: 1 },
     { name: 'moldura', maxCount: 1 },
   ],
   {
     storage: memoryStorage(),
     limits: {
       fileSize: maxAssetSizeBytes,
-      files: 2,
+      files: 3,
     },
     fileFilter: imageFileFilter,
   },
@@ -61,6 +64,9 @@ export class AdminUploadsController {
   @UseInterceptors(cartaAssetInterceptor)
   uploadCartaAssets(@UploadedFiles() files: CartaAssetFiles) {
     files.foto?.forEach((arquivo) => validarConteudoImagem(arquivo));
+    files.fotoPerfil?.forEach((arquivo) =>
+      validarConteudoImagem(arquivo, ['image/jpeg', 'image/png', 'image/webp']),
+    );
     files.moldura?.forEach((arquivo) => validarConteudoImagem(arquivo));
     return this.cloudinaryService.uploadCartaAssets(files);
   }
@@ -82,10 +88,13 @@ export class AdminUploadsController {
   @Patch('cartas/:id/assets')
   @UseInterceptors(cartaAssetInterceptor)
   updateCartaAssets(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @UploadedFiles() files: CartaAssetFiles,
   ) {
     files.foto?.forEach((arquivo) => validarConteudoImagem(arquivo));
+    files.fotoPerfil?.forEach((arquivo) =>
+      validarConteudoImagem(arquivo, ['image/jpeg', 'image/png', 'image/webp']),
+    );
     files.moldura?.forEach((arquivo) => validarConteudoImagem(arquivo));
     return this.cloudinaryService.updateCartaAssets(id, files);
   }

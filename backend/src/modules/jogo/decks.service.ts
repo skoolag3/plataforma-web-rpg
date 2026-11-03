@@ -16,6 +16,7 @@ export class DecksService {
       where: { id_usuario: idUsuario, excluido_em: null },
       include: {
         cartas: {
+          where: { carta: { ativo: true, excluido_em: null } },
           include: { carta: true },
           orderBy: { posicao_slot: 'asc' },
         },
@@ -197,6 +198,7 @@ export class DecksService {
       where: { id, id_usuario: idUsuario, excluido_em: null },
       include: {
         cartas: {
+          where: { carta: { ativo: true, excluido_em: null } },
           include: { carta: true },
           orderBy: { posicao_slot: 'asc' },
         },

@@ -82,3 +82,14 @@
   border-color: #94a3b8;
   color: #e2e8f0;
 }
+
+@container (max-width: 90px) {
+  .elemento {
+    width: 19cqw;
+    border-width: 1px;
+    box-shadow: 0 0 0 1px rgba(3, 6, 15, 0.78);
+  }
+  .titulo { left: 5%; right: 5%; bottom: 8%; gap: 1px; padding: 0; }
+  .titulo strong { font-size: clamp(0.36rem, 8cqw, 0.55rem); }
+  .titulo small { font-size: clamp(0.32rem, 5.5cqw, 0.42rem); padding: 1px 3px; }
+}

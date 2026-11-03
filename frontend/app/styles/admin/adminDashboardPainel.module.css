@@ -1,26 +1,28 @@
 .grid {
   display: grid;
-  grid-template-columns: minmax(19rem, 1.1fr) repeat(2, minmax(15rem, 0.9fr));
-  gap: 0.45rem;
-  margin-top: 0.45rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.55rem;
 }
 .grid > .card {
-  min-height: 11.25rem;
-  padding: 0.7rem;
-}
-.grid > .card:first-child {
-  grid-row: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.7rem;
+  min-height: 12.8rem;
+  padding: 0.8rem 0.9rem;
 }
 .card header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.7rem;
-  margin-bottom: 0.55rem;
 }
 .card header h2 {
-  margin: 0.1rem 0 0;
-  font-size: 0.9rem;
+  margin: 0.12rem 0 0;
+  color: #f8fafc;
+  font-size: 0.85rem;
+  line-height: 1.2;
 }
 .card header small {
   color: #6f7a8f;
@@ -31,187 +33,272 @@
 }
 .card header > strong {
   border-radius: 999px;
-  background: rgba(124, 58, 237, 0.13);
+  background: rgba(124, 58, 237, 0.14);
   color: #c4b5fd;
-  padding: 0.34rem 0.55rem;
-  font-size: 0.59rem;
-}
-.card header > svg {
-  width: 0.9rem;
-  color: #a78bfa;
+  padding: 0.26rem 0.55rem;
+  font-size: 0.56rem;
+  white-space: nowrap;
 }
 .card header > a,
 .atalhos a {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.22rem;
   color: #a995dc;
   font-size: 0.59rem;
   font-weight: 780;
   text-decoration: none;
+  white-space: nowrap;
 }
 .card header > a svg,
 .atalhos a svg {
   width: 0.72rem;
 }
-.faixaRaridades {
-  display: flex;
-  height: 0.48rem;
-  overflow: hidden;
-  border-radius: 999px;
-  background: #182033;
-  margin-bottom: 0.65rem;
+
+/* Gráfico Donut (Rosca) */
+.donutWrap {
+  display: grid;
+  grid-template-columns: 6.2rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.85rem;
+  margin: auto 0;
 }
-.faixaRaridades i {
-  min-width: 0.18rem;
+.donutFigura {
+  position: relative;
+  width: 6.2rem;
+  height: 6.2rem;
+}
+.donutFigura svg {
+  width: 100%;
   height: 100%;
+  display: block;
 }
-.faixaRaridades i[data-raridade="UR"] {
-  background: #8b5cf6;
-}
-.faixaRaridades i[data-raridade="SSR"] {
-  background: #f59e0b;
-}
-.faixaRaridades i[data-raridade="SR"] {
-  background: #06b6d4;
-}
-.faixaRaridades i[data-raridade="R"] {
-  background: #6366f1;
-}
-.faixaRaridades i[data-raridade="N"] {
-  background: #64748b;
-}
-.raridades {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.32rem;
-}
-.raridades > div {
-  display: grid;
-  grid-template-columns: 2.25rem 1fr;
+.donutCentro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.55rem;
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 0.62rem;
-  background: rgba(7, 12, 24, 0.48);
-  padding: 0.48rem;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
 }
-.raridades span {
-  display: grid;
-  height: 1.65rem;
-  place-items: center;
-  border-radius: 0.48rem;
-  color: #fff;
-  font-size: 0.57rem;
-  font-weight: 950;
-}
-.raridades span[data-raridade="UR"] {
-  background: #7c3aed;
-}
-.raridades span[data-raridade="SSR"] {
-  background: #b86a06;
-}
-.raridades span[data-raridade="SR"] {
-  background: #087f98;
-}
-.raridades span[data-raridade="R"] {
-  background: #4f46e5;
-}
-.raridades span[data-raridade="N"] {
-  background: #475569;
-}
-.raridades div > div {
-  display: grid;
-}
-.raridades div > div strong {
-  font-size: 0.74rem;
+.donutCentro strong {
+  color: #f8fafc;
+  font-size: 0.92rem;
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
-.raridades div > div small {
-  color: #68748a;
-  font-size: 0.51rem;
+.donutCentro small {
+  margin-top: 0.12rem;
+  color: #7c879c;
+  font-size: 0.48rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
-.atividade,
-.ranking {
+.donutLegenda {
   display: grid;
-}
-.atividade p,
-.ranking p {
-  display: grid;
-  min-height: 2.12rem;
-  align-items: center;
-  gap: 0.5rem;
+  gap: 0.34rem;
   margin: 0;
-  border-top: 1px solid rgba(148, 163, 184, 0.08);
-  color: #cbd5e1;
+  padding: 0;
+  list-style: none;
 }
-.atividade p {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-}
-.atividade p > i {
-  width: 0.36rem;
-  height: 0.36rem;
-  border-radius: 50%;
-  background: #a3e635;
-  box-shadow: 0 0 0 0.2rem rgba(163, 230, 53, 0.07);
-}
-.atividade p > span,
-.ranking p > span {
+.donutLegenda li {
   display: grid;
-  min-width: 0;
+  grid-template-columns: 0.48rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.58rem;
 }
-.atividade p strong,
-.ranking p strong {
+.donutLegenda li i {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+}
+.donutLegenda li span {
   overflow: hidden;
-  font-size: 0.62rem;
+  color: #cbd5e1;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.atividade p small,
-.ranking p small {
+.donutLegenda li strong {
+  color: #f8fafc;
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+}
+.donutLegenda li small {
+  min-width: 1.9rem;
   color: #68748a;
-  font-size: 0.53rem;
+  font-size: 0.52rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
-.atividade time {
-  color: #737e91;
-  font-size: 0.55rem;
+
+/* Gráfico de Colunas Verticais */
+.graficoColunas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+  gap: 0.6rem;
+  height: 7.8rem;
+  padding-top: 0.35rem;
 }
-.ranking p {
-  grid-template-columns: 1.35rem minmax(0, 1fr) auto;
+.colunaItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.32rem;
+  height: 100%;
 }
-.ranking p > b {
-  color: #8b5cf6;
+.colunaValor {
+  color: #e2e8f0;
+  font-size: 0.64rem;
+  font-variant-numeric: tabular-nums;
+}
+.colunaTrilha {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 2.3rem;
+  flex: 1;
+  overflow: hidden;
+  border-radius: 0.48rem;
+  background: rgba(15, 23, 42, 0.78);
+  padding: 0.14rem;
+}
+.colunaTrilha i {
+  display: block;
+  width: 100%;
+  border-radius: 0.36rem;
+  transition: height 260ms ease;
+}
+.colunaItem small {
+  color: #7c879c;
+  font-size: 0.52rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Gráfico de Barras Horizontais */
+.graficoBarras {
+  display: grid;
+  gap: 0.52rem;
+  margin: auto 0;
+}
+.barraLinha {
+  display: grid;
+  gap: 0.22rem;
+}
+.barraCabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.58rem;
+}
+.barraCabecalho span {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.35rem;
+  overflow: hidden;
+  color: #cbd5e1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pontoCor {
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+.barraCabecalho strong {
+  color: #f8fafc;
   font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.ranking em {
-  color: #8993a5;
-  font-size: 0.55rem;
-  font-style: normal;
+.barraCabecalho strong[data-cor="verde"] {
+  color: #bef264;
 }
-.atividade .estadoVazio,
-.ranking .estadoVazio {
+.barraCabecalho strong[data-cor="roxo"] {
+  color: #c4b5fd;
+}
+.barraFundo {
+  height: 0.44rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #161f33;
+}
+.barraFundo i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 240ms ease;
+}
+
+/* Mini Auditoria rodapé do 6º card */
+.miniAuditoria {
+  display: grid;
+  gap: 0.25rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  padding-top: 0.45rem;
+}
+.miniAuditoria p {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+.miniAuditoria i {
+  width: 0.34rem;
+  height: 0.34rem;
+  border-radius: 50%;
+  background: #a3e635;
+}
+.miniAuditoria i[data-tipo="usuario"] {
+  background: #a78bfa;
+}
+.miniAuditoria strong {
+  overflow: hidden;
+  color: #cbd5e1;
+  font-size: 0.56rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.miniAuditoria time {
+  color: #68748a;
+  font-size: 0.5rem;
+  white-space: nowrap;
+}
+
+.estadoVazio {
   display: grid;
   min-height: 4rem;
   place-items: center;
   color: #64748b;
-  font-size: 0.6rem;
+  font-size: 0.58rem;
 }
+
 .atalhos {
-  grid-column: 1/-1;
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.4rem;
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 0.72rem;
   background: rgba(8, 13, 27, 0.62);
-  padding: 0.3rem;
+  padding: 0.35rem 0.45rem;
 }
 .atalhos > span {
   display: flex;
   align-items: center;
   gap: 0.35rem;
   margin-right: auto;
-  padding: 0 0.42rem;
+  padding: 0 0.35rem;
   color: #79849a;
   font-size: 0.56rem;
   font-weight: 850;
@@ -234,35 +321,89 @@
   background: rgba(124, 58, 237, 0.12);
   color: #ddd6fe;
 }
-@media (max-width: 1180px) {
+
+@media (max-width: 1200px) {
   .grid {
-    grid-template-columns: minmax(20rem, 1.1fr) minmax(17rem, 0.9fr);
-  }
-  .grid > .card:first-child {
-    grid-row: span 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-@media (max-width: 900px) {
+@media (max-width: 760px) {
   .grid {
     grid-template-columns: 1fr;
+    gap: 0.45rem;
+    margin-top: 0.45rem;
   }
-  .grid > .card:first-child {
-    grid-row: auto;
+  .grid > .card {
+    min-height: 0;
+    gap: 0.6rem;
+    padding: 0.7rem 0.75rem;
+  }
+  .card header h2 {
+    font-size: 0.8rem;
+  }
+  .donutWrap {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 0.7rem;
+  }
+  .donutFigura {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+  .donutCentro strong {
+    font-size: 0.84rem;
+  }
+  .donutLegenda {
+    gap: 0.28rem;
+  }
+  .donutLegenda li {
+    font-size: 0.56rem;
+  }
+  .graficoColunas {
+    height: 6.4rem;
+    gap: 0.45rem;
+  }
+  .colunaTrilha {
+    max-width: 2rem;
   }
   .atalhos {
-    grid-column: auto;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+    padding: 0.45rem;
   }
   .atalhos > span {
-    width: 100%;
-  }
-}
-@media (max-width: 520px) {
-  .raridades {
-    grid-template-columns: 1fr;
+    grid-column: 1 / -1;
+    margin-right: 0;
+    padding: 0 0.15rem 0.1rem;
   }
   .atalhos a {
-    flex: 1;
-    justify-content: center;
+    min-height: 2.25rem;
+    justify-content: space-between;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    background: rgba(15, 23, 42, 0.45);
+    padding: 0 0.6rem;
+  }
+}
+@media (max-width: 390px) {
+  .donutWrap {
+    grid-template-columns: 4.9rem minmax(0, 1fr);
+    gap: 0.55rem;
+  }
+  .donutFigura {
+    width: 4.9rem;
+    height: 4.9rem;
+  }
+  .donutLegenda li {
+    grid-template-columns: 0.42rem minmax(0, 1fr) auto;
+  }
+  .donutLegenda li small {
+    display: none;
+  }
+  .graficoColunas {
+    height: 5.8rem;
+    gap: 0.35rem;
+  }
+  .colunaItem small {
+    font-size: 0.48rem;
   }
 }

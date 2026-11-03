@@ -11,8 +11,11 @@ import { PartidasService } from './partidas.service';
 import {
   gerarSeedExpedicao,
   gerarTrilhaExpedicao,
+  percentualMantidoNaEtapa,
   type OpcaoRota,
   type TrilhaExpedicao,
+  type SecaoCampanha,
+  secoesPadraoCampanha,
 } from './expedicao.trilha';
 import {
   configuracaoRecompensasPadrao,
@@ -51,6 +54,8 @@ type ExpedicaoPersistida = Prisma.ExpedicaoGetPayload<{
 
 @Injectable()
 export class ExpedicoesService {
+  private readonly processandoBoss = new Set<string>();
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly partidasService: PartidasService,
@@ -66,10 +71,29 @@ export class ExpedicoesService {
 
     const deck = await this.prisma.deck.findFirst({
       where: { id: idDeck, id_usuario: idUsuario, excluido_em: null },
-      include: { cartas: true },
+      include: {
+        cartas: {
+          where: { carta: { ativo: true, excluido_em: null } },
+        },
+      },
     });
     if (!deck || deck.cartas.length < 1 || deck.cartas.length > 6) {
       throw new BadRequestException('Selecione um deck com 1 a 6 cartas.');
+    }
+
+    const idsCartas = deck.cartas.map((item) => item.id_carta);
+    const cartasPossuidas = await this.prisma.inventario.count({
+      where: {
+        id_usuario: idUsuario,
+        id_carta: { in: idsCartas },
+        quantidade: { gt: 0 },
+        carta: { ativo: true, excluido_em: null },
+      },
+    });
+    if (cartasPossuidas !== idsCartas.length) {
+      throw new BadRequestException(
+        'O deck possui cartas indisponíveis ou fora do inventário.',
+      );
     }
 
     const seed = gerarSeedExpedicao(`${idUsuario}:${idDeck}`);
@@ -97,6 +121,15 @@ export class ExpedicoesService {
             perguntas: configuracao.boss_perguntas,
             cartas: configuracao.boss_cartas,
           },
+          Array.isArray(configuracao.secoes) && configuracao.secoes.length
+            ? configuracao.secoes as SecaoCampanha[]
+            : secoesPadraoCampanha({
+                percentualMantidoDerrota: configuracao.percentual_mantido_derrota,
+                recompensas: {
+                  FACIL: configuracao.recompensa_facil, MEDIA: configuracao.recompensa_media,
+                  DIFICIL: configuracao.recompensa_dificil, CHEFE: configuracao.recompensa_chefe,
+                },
+              }),
         ),
       },
     });
@@ -133,6 +166,13 @@ export class ExpedicoesService {
 
   async buscarAtual(idUsuario: string) {
     await this.sincronizar(idUsuario);
+    const ativa = await this.prisma.expedicao.findFirst({
+      where: { id_usuario: idUsuario, status: 'EM_ANDAMENTO' },
+      include: expedicaoInclude,
+      orderBy: { criado_em: 'desc' },
+    });
+    if (ativa) return this.formatar(ativa);
+
     const expedicao = await this.prisma.expedicao.findFirst({
       where: { id_usuario: idUsuario },
       include: expedicaoInclude,
@@ -164,14 +204,14 @@ export class ExpedicoesService {
       throw new ConflictException('Esta etapa já possui uma rota selecionada.');
     }
 
-    const trilha = this.normalizarTrilha(expedicao.trilha);
-    if (expedicao.etapa_atual === 3 && trilha.boss && !expedicao.dialogo_boss) {
+    const trilha = this.normalizarTrilha(expedicao.trilha, expedicao.seed);
+    if (expedicao.etapa_atual === trilha.etapas.length && trilha.boss && !expedicao.dialogo_boss) {
       throw new ConflictException(
         'Responda à provocação do boss antes do confronto.',
       );
     }
     const opcoes =
-      expedicao.etapa_atual === 3
+      expedicao.etapa_atual === trilha.etapas.length
         ? [trilha.chefe]
         : (trilha.etapas[expedicao.etapa_atual]?.opcoes ?? []);
     const escolha = opcoes.find((opcao) => opcao.id === idEscolha);
@@ -200,8 +240,12 @@ export class ExpedicoesService {
         idExpedicao: expedicao.id,
         etapa: expedicao.etapa_atual,
         dificuldade: escolha.dificuldade,
+        cartasAdversario: escolha.cartas,
+        quantidadeCartas: escolha.quantidadeCartas,
+        modoCartas: escolha.modoCartas,
+        mixed: escolha.mixed,
         boss:
-          expedicao.etapa_atual === 3 && trilha.boss
+          expedicao.etapa_atual === trilha.etapas.length && trilha.boss
             ? {
                 cartas: trilha.boss.cartas,
               }
@@ -236,49 +280,66 @@ export class ExpedicoesService {
       throw new BadRequestException(
         'A resposta deve ter no máximo 200 caracteres.',
       );
-    const expedicao = await this.prisma.expedicao.findFirst({
-      where: {
-        id: idExpedicao,
-        id_usuario: idUsuario,
-        status: 'EM_ANDAMENTO',
-        etapa_atual: 3,
-      },
-    });
-    if (!expedicao)
-      throw new NotFoundException('Confronto final indisponível.');
-    if (expedicao.dialogo_boss || expedicao.escolha_atual)
-      throw new ConflictException('A resposta do boss já foi registrada.');
-    const trilha = this.normalizarTrilha(expedicao.trilha);
-    if (!trilha.boss)
-      throw new BadRequestException(
-        'Esta expedição não possui diálogo configurado.',
+    if (this.processandoBoss.has(idExpedicao)) {
+      throw new ConflictException(
+        'A resposta ao boss já está sendo processada.',
       );
-    const pergunta = perguntaBoss(trilha.boss, expedicao.seed);
-    const avaliacao = await avaliarRespostaBoss(trilha.boss, pergunta, texto);
-    const dialogo: DialogoBoss = {
-      pergunta,
-      resposta: texto,
-      reacao: avaliacao.reacao,
-      nota: avaliacao.nota,
-      multiplicador: multiplicadorBoss(avaliacao.nota),
-      modo: avaliacao.modo,
-    };
-    const salvo = await this.prisma.expedicao.updateMany({
-      where: {
-        id: idExpedicao,
-        id_usuario: idUsuario,
-        status: 'EM_ANDAMENTO',
-        etapa_atual: 3,
-        escolha_atual: null,
-        dialogo_boss: { equals: Prisma.DbNull },
-      },
-      data: {
-        dialogo_boss: dialogo as unknown as Prisma.InputJsonValue,
-        atualizado_em: new Date(),
-      },
-    });
-    if (!salvo.count) throw new ConflictException('A resposta já foi enviada.');
-    return this.buscarAtual(idUsuario);
+    }
+
+    this.processandoBoss.add(idExpedicao);
+    try {
+      const expedicao = await this.prisma.expedicao.findFirst({
+        where: {
+          id: idExpedicao,
+          id_usuario: idUsuario,
+          status: 'EM_ANDAMENTO',
+        },
+      });
+      if (!expedicao)
+        throw new NotFoundException('Confronto final indisponível.');
+      if (expedicao.dialogo_boss || expedicao.escolha_atual)
+        throw new ConflictException('A resposta do boss já foi registrada.');
+      const trilha = this.normalizarTrilha(expedicao.trilha, expedicao.seed);
+      if (expedicao.etapa_atual !== trilha.etapas.length)
+        throw new NotFoundException('Confronto final indisponível.');
+      if (!trilha.boss)
+        throw new BadRequestException(
+          'Esta expedição não possui diálogo configurado.',
+        );
+      const pergunta = perguntaBoss(trilha.boss, expedicao.seed);
+      const avaliacao = await avaliarRespostaBoss(
+        trilha.boss,
+        pergunta,
+        texto,
+      );
+      const dialogo: DialogoBoss = {
+        pergunta,
+        resposta: texto,
+        reacao: avaliacao.reacao,
+        nota: avaliacao.nota,
+        multiplicador: multiplicadorBoss(avaliacao.nota),
+        modo: avaliacao.modo,
+      };
+      const salvo = await this.prisma.expedicao.updateMany({
+        where: {
+          id: idExpedicao,
+          id_usuario: idUsuario,
+          status: 'EM_ANDAMENTO',
+          etapa_atual: trilha.etapas.length,
+          escolha_atual: null,
+          dialogo_boss: { equals: Prisma.DbNull },
+        },
+        data: {
+          dialogo_boss: dialogo as unknown as Prisma.InputJsonValue,
+          atualizado_em: new Date(),
+        },
+      });
+      if (!salvo.count)
+        throw new ConflictException('A resposta já foi enviada.');
+      return this.buscarAtual(idUsuario);
+    } finally {
+      this.processandoBoss.delete(idExpedicao);
+    }
   }
 
   async abandonar(idUsuario: string, idExpedicao: string) {
@@ -317,25 +378,26 @@ export class ExpedicoesService {
     );
     if (!partida || partida.resultado === 'EM_ANDAMENTO') return;
 
-    const trilha = this.normalizarTrilha(expedicao.trilha);
+    const trilha = this.normalizarTrilha(expedicao.trilha, expedicao.seed);
     const configuracao = this.obterConfiguracaoTrilha(trilha);
     const escolha = this.buscarEscolhaAtual(trilha, expedicao);
     if (!escolha) return;
     const recompensaPendente = Math.round(
-      recompensaDaRota(escolha.dificuldade, configuracao) *
+      this.recompensaEscolha(escolha, configuracao) *
         (escolha.dificuldade === 'CHEFE'
           ? ((expedicao.dialogo_boss as DialogoBoss | null)?.multiplicador ?? 1)
           : 1),
     );
 
     if (partida.resultado !== 'VITORIA') {
+      const percentualMantido = percentualMantidoNaEtapa(trilha, expedicao.etapa_atual);
       const recompensaMantida = recompensaAposDerrota(
         recompensaPendente,
-        configuracao.percentualMantidoDerrota,
+        percentualMantido,
       );
       const rubysPerdidos = rubysPerdidosNaDerrota(
         recompensaPendente,
-        configuracao.percentualMantidoDerrota,
+        percentualMantido,
       );
       await this.prisma.$transaction(async (tx) => {
         const falhou = await tx.expedicao.updateMany({
@@ -365,12 +427,19 @@ export class ExpedicoesService {
               descricao: `Resgate da Expedição após perder ${rubysPerdidos} Rubys.`,
             },
           });
+          await tx.usuario.update({
+            where: { id: idUsuario },
+            data: {
+              saldo_rubys_cache: { increment: recompensaMantida },
+              atualizado_em: new Date(),
+            },
+          });
         }
       });
       return;
     }
 
-    if (expedicao.etapa_atual < 3) {
+    if (expedicao.etapa_atual < trilha.etapas.length) {
       await this.prisma.$transaction(async (tx) => {
         const avancou = await tx.expedicao.updateMany({
           where: {
@@ -398,6 +467,13 @@ export class ExpedicoesService {
             descricao: `Recompensa assegurada no checkpoint ${expedicao.etapa_atual + 1}.`,
           },
         });
+        await tx.usuario.update({
+          where: { id: idUsuario },
+          data: {
+            saldo_rubys_cache: { increment: recompensaPendente },
+            atualizado_em: new Date(),
+          },
+        });
       });
       return;
     }
@@ -411,7 +487,7 @@ export class ExpedicoesService {
         where: {
           id: expedicao.id,
           status: 'EM_ANDAMENTO',
-          etapa_atual: 3,
+          etapa_atual: trilha.etapas.length,
         },
         data: {
           status: 'CONCLUIDA',
@@ -433,11 +509,27 @@ export class ExpedicoesService {
           descricao: 'Recompensa pela conclusão da Expedição.',
         },
       });
+      await tx.usuario.update({
+        where: { id: idUsuario },
+        data: {
+          saldo_rubys_cache: { increment: recompensaChefe },
+          atualizado_em: new Date(),
+        },
+      });
     });
   }
 
-  private normalizarTrilha(valor: Prisma.JsonValue): TrilhaExpedicao {
-    return valor as unknown as TrilhaExpedicao;
+  private normalizarTrilha(valor: Prisma.JsonValue, seed = 1): TrilhaExpedicao {
+    if (
+      valor &&
+      typeof valor === 'object' &&
+      !Array.isArray(valor) &&
+      Array.isArray((valor as Partial<TrilhaExpedicao>).etapas) &&
+      (valor as Partial<TrilhaExpedicao>).chefe
+    ) {
+      return valor as unknown as TrilhaExpedicao;
+    }
+    return gerarTrilhaExpedicao(seed || 1);
   }
 
   private buscarEscolhaAtual(
@@ -445,7 +537,7 @@ export class ExpedicoesService {
     expedicao: ExpedicaoPersistida,
   ): OpcaoRota | null {
     const opcoes =
-      expedicao.etapa_atual === 3
+      expedicao.etapa_atual === trilha.etapas.length
         ? [trilha.chefe]
         : (trilha.etapas[expedicao.etapa_atual]?.opcoes ?? []);
     return opcoes.find((opcao) => opcao.id === expedicao.escolha_atual) ?? null;
@@ -457,6 +549,10 @@ export class ExpedicoesService {
     return trilha.configuracao ?? configuracaoRecompensasPadrao;
   }
 
+  private recompensaEscolha(opcao: OpcaoRota, configuracao: ConfiguracaoRecompensasExpedicao) {
+    return opcao.recompensa ?? recompensaDaRota(opcao.dificuldade, configuracao);
+  }
+
   private formatarOpcao(
     opcao: OpcaoRota,
     configuracao: ConfiguracaoRecompensasExpedicao,
@@ -465,14 +561,14 @@ export class ExpedicoesService {
     return {
       ...opcao,
       recompensa: Math.round(
-        recompensaDaRota(opcao.dificuldade, configuracao) *
+        this.recompensaEscolha(opcao, configuracao) *
           (opcao.dificuldade === 'CHEFE' ? multiplicador : 1),
       ),
     };
   }
 
   private formatar(expedicao: ExpedicaoPersistida) {
-    const trilha = this.normalizarTrilha(expedicao.trilha);
+    const trilha = this.normalizarTrilha(expedicao.trilha, expedicao.seed);
     const configuracao = this.obterConfiguracaoTrilha(trilha);
     const multiplicador =
       (expedicao.dialogo_boss as DialogoBoss | null)?.multiplicador ?? 1;
@@ -489,7 +585,7 @@ export class ExpedicoesService {
       status: expedicao.status,
       seed: expedicao.seed,
       etapaAtual: expedicao.etapa_atual,
-      totalEtapas: 4,
+      totalEtapas: trilha.etapas.length + 1,
       deck: expedicao.deck,
       produto: expedicao.produto,
       escolhas: expedicao.escolhas,
@@ -509,7 +605,7 @@ export class ExpedicoesService {
       chefe: {
         ...this.formatarOpcao(trilha.chefe, configuracao, multiplicador),
         status:
-          expedicao.etapa_atual === 3 && expedicao.status === 'EM_ANDAMENTO'
+          expedicao.etapa_atual === trilha.etapas.length && expedicao.status === 'EM_ANDAMENTO'
             ? 'ATUAL'
             : expedicao.status === 'CONCLUIDA'
               ? 'CONCLUIDA'
@@ -526,7 +622,7 @@ export class ExpedicoesService {
       opcoesAtuais:
         expedicao.status !== 'EM_ANDAMENTO' || partidaAtual
           ? []
-          : expedicao.etapa_atual === 3
+          : expedicao.etapa_atual === trilha.etapas.length
             ? [this.formatarOpcao(trilha.chefe, configuracao, multiplicador)]
             : (trilha.etapas[expedicao.etapa_atual]?.opcoes.map((opcao) =>
                 this.formatarOpcao(opcao, configuracao),
@@ -549,7 +645,7 @@ export class ExpedicoesService {
       ),
       recompensaPendente: escolhaAtual
         ? Math.round(
-            recompensaDaRota(escolhaAtual.dificuldade, configuracao) *
+            this.recompensaEscolha(escolhaAtual, configuracao) *
               (escolhaAtual.dificuldade === 'CHEFE' ? multiplicador : 1),
           )
         : 0,
@@ -557,10 +653,10 @@ export class ExpedicoesService {
         expedicao.status === 'FALHOU' && escolhaAtual
           ? rubysPerdidosNaDerrota(
               Math.round(
-                recompensaDaRota(escolhaAtual.dificuldade, configuracao) *
+                this.recompensaEscolha(escolhaAtual, configuracao) *
                   (escolhaAtual.dificuldade === 'CHEFE' ? multiplicador : 1),
               ),
-              configuracao.percentualMantidoDerrota,
+              percentualMantidoNaEtapa(trilha, expedicao.etapa_atual),
             )
           : 0,
       rubysAssegurados,

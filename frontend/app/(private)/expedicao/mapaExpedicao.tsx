@@ -73,8 +73,8 @@ export function MapaExpedicao({
   });
   const batalhaEmAndamento = expedicao.partidaAtual?.status === "EM_ANDAMENTO";
   const layout = useMemo(
-    () => gerarLayoutTrilha(expedicao.etapas.length),
-    [expedicao.etapas.length],
+    () => gerarLayoutTrilha(expedicao.etapas.map((etapa) => etapa.opcoes.length)),
+    [expedicao.etapas],
   );
 
   function alterarZoom(proximoZoom: number) {
@@ -175,7 +175,7 @@ export function MapaExpedicao({
               ? "O guardião espera no fim da trilha"
               : "Escolha seu próximo confronto"}
           </h2>
-          <p>Avance pela trilha. Cada etapa revela três rotas possíveis.</p>
+          <p>Avance pela trilha. Cada etapa revela os caminhos definidos para esta campanha.</p>
         </div>
         <div className={styles.infoMapa}>
           <small>Progresso da expedição</small>
@@ -265,6 +265,7 @@ export function MapaExpedicao({
               "--zoom-trilha": zoom,
               "--pan-x": `${deslocamento.x}px`,
               "--pan-y": `${deslocamento.y}px`,
+              "--etapas-trilha": expedicao.etapas.length,
             } as CSSProperties
           }
         >
@@ -525,7 +526,7 @@ function ConexoesTrilha({
 
   layout.posicoesX.forEach((posicoesEtapa, etapa) => {
     const posicaoY = layout.posicoesY[etapa];
-    const inicioY = etapa === 0 ? 94 : layout.checkpointsY[etapa - 1] - 2;
+    const inicioY = etapa === 0 ? 94 : layout.checkpointsY[etapa - 1];
     const estadoTrecho = estadoTrechoEtapa(expedicao, etapa);
 
     conexoes.push({
@@ -562,7 +563,7 @@ function ConexoesTrilha({
   conexoes.push({
     id: "checkpoint-chefe",
     inicioX: layout.checkpointsX[ultimoCheckpoint],
-    inicioY: layout.checkpointsY[ultimoCheckpoint] - 2,
+    inicioY: layout.checkpointsY[ultimoCheckpoint],
     fimX: 50,
     fimY: 8,
     estado:
@@ -582,7 +583,7 @@ function ConexoesTrilha({
     >
       {conexoes.map((conexao) => (
         <path
-          d={`M ${conexao.inicioX} ${conexao.inicioY} L ${conexao.fimX} ${conexao.fimY}`}
+          d={desenharConexao(conexao)}
           data-estado={conexao.estado}
           vectorEffect="non-scaling-stroke"
           key={conexao.id}
@@ -630,15 +631,41 @@ function buscarIndiceEscolhido(
   );
 }
 
-function gerarLayoutTrilha(totalEtapas: number): LayoutTrilha {
+function gerarLayoutTrilha(caminhosPorEtapa: number[]): LayoutTrilha {
+  const totalEtapas = caminhosPorEtapa.length;
+  const ultimaEtapaY = Math.max(16, 36 - Math.max(0, totalEtapas - 3) * 4);
   const posicoesY = Array.from(
     { length: totalEtapas },
-    (_, indice) => 76 - indice * 24,
+    (_, indice) => 78 - indice * ((78 - ultimaEtapaY) / Math.max(1, totalEtapas - 1)),
   );
-  const posicoesX = Array.from({ length: totalEtapas }, () => [17, 50, 83]);
-  const checkpointsY = posicoesY.map((posicao) => posicao - 10);
+  const posicoesX = caminhosPorEtapa.map((quantidade) =>
+    Array.from({ length: quantidade }, (_, indice) =>
+      quantidade === 1 ? 50 : 15 + indice * (70 / (quantidade - 1)),
+    ),
+  );
+  const checkpointsY = posicoesY.map((posicao, indice) =>
+    indice < totalEtapas - 1
+      ? (posicao + posicoesY[indice + 1]) / 2
+      : (posicao + 8) / 2,
+  );
   const checkpointsX = checkpointsY.map(() => 50);
   return { posicoesX, posicoesY, checkpointsX, checkpointsY };
+}
+
+function desenharConexao(conexao: {
+  inicioX: number;
+  inicioY: number;
+  fimX: number;
+  fimY: number;
+}) {
+  const { inicioX, inicioY, fimX, fimY } = conexao;
+  const deltaX = fimX - inicioX;
+  const deltaY = fimY - inicioY;
+  if (Math.abs(deltaX) > 1) {
+    const arco = Math.min(2, Math.abs(deltaX) * 0.08);
+    return `M ${inicioX} ${inicioY} C ${inicioX + deltaX * 0.3} ${inicioY - arco}, ${inicioX + deltaX * 0.7} ${fimY - arco}, ${fimX} ${fimY}`;
+  }
+  return `M ${inicioX} ${inicioY} C ${inicioX + 1.3} ${inicioY + deltaY * 0.3}, ${fimX - 1.3} ${inicioY + deltaY * 0.7}, ${fimX} ${fimY}`;
 }
 
 function limitar(valor: number, minimo: number, maximo: number) {

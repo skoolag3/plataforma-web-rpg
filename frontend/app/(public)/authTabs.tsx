@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import styles from "../styles/authTabs.module.css";
 
 type AbaAuth = "login" | "cadastro";
@@ -11,14 +10,9 @@ type PropsAuthTabs = {
 };
 
 export function AuthTabs({ ativa, aoTrocar }: PropsAuthTabs) {
-  const router = useRouter();
-
   function selecionar(aba: AbaAuth) {
     if (aba === ativa) return;
 
-    router.replace(aba === "login" ? "/login" : "/cadastro", {
-      scroll: false,
-    });
     aoTrocar(aba);
   }
 

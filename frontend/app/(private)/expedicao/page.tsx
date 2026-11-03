@@ -37,22 +37,34 @@ export default function ExpedicaoPage() {
   const [confirmandoAbandono, setConfirmandoAbandono] = useState(false);
 
   useEffect(() => {
-    Promise.all([buscarExpedicaoAtual(), listarDecks()])
-      .then(([atual, lista]) => {
-        setExpedicao(atual);
-        setDecks(lista);
-        const deck =
-          lista.find((item) => item.ativo && item.completo) ??
-          lista.find((item) => item.completo);
-        setIdDeck(deck?.id ?? "");
+    Promise.allSettled([buscarExpedicaoAtual(), listarDecks()])
+      .then(([resExpedicao, resDecks]) => {
+        const mensagensErro: string[] = [];
+        if (resExpedicao.status === "fulfilled") {
+          setExpedicao(resExpedicao.value);
+        } else {
+          mensagensErro.push(
+            resExpedicao.reason instanceof Error
+              ? resExpedicao.reason.message
+              : "Não foi possível carregar a Expedição.",
+          );
+        }
+        if (resDecks.status === "fulfilled") {
+          const lista = resDecks.value;
+          setDecks(lista);
+          const deck =
+            lista.find((item) => item.ativo && item.completo) ??
+            lista.find((item) => item.completo);
+          setIdDeck(deck?.id ?? "");
+        } else {
+          mensagensErro.push(
+            resDecks.reason instanceof Error
+              ? resDecks.reason.message
+              : "Não foi possível carregar os decks.",
+          );
+        }
+        if (mensagensErro.length) setErro(mensagensErro[0]);
       })
-      .catch((error) =>
-        setErro(
-          error instanceof Error
-            ? error.message
-            : "Não foi possível carregar a Expedição.",
-        ),
-      )
       .finally(() => setCarregando(false));
   }, []);
 
@@ -118,7 +130,7 @@ export default function ExpedicaoPage() {
               <Map /> Jornada procedural
             </span>
             <h1>Expedição</h1>
-            <p>Escolha uma rota, vença três confrontos e alcance o chefe.</p>
+            <p>Escolha seus caminhos, vença os confrontos e alcance o chefe.</p>
           </div>
           {expedicao?.status === "EM_ANDAMENTO" &&
           !expedicao.dialogoBoss?.resultado ? (
@@ -151,12 +163,6 @@ export default function ExpedicaoPage() {
           </div>
         ) : (
           <>
-            <MapaExpedicao
-              expedicao={expedicao}
-              processando={processando}
-              onEscolher={(opcao) => void escolherRota(opcao)}
-              onAbrirDialogoBoss={() => router.push("/partida?boss=1")}
-            />
             {expedicao.partidaAtual?.status === "EM_ANDAMENTO" ? (
               <section className={styles.batalhaPendente}>
                 <Swords />
@@ -169,6 +175,12 @@ export default function ExpedicaoPage() {
                 </button>
               </section>
             ) : null}
+            <MapaExpedicao
+              expedicao={expedicao}
+              processando={processando}
+              onEscolher={(opcao) => void escolherRota(opcao)}
+              onAbrirDialogoBoss={() => router.push("/partida?boss=1")}
+            />
           </>
         )}
       </section>

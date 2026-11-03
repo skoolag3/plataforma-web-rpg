@@ -1,29 +1,29 @@
-import { CLASSES, ELEMENTOS, RARIDADES, VALORES_VENDA } from "../cardData";
+import { CLASSES, ELEMENTOS } from "../cardData";
 import { styles } from "../styles";
 import { FiltroSelect } from "./filtroSelect";
+import { useRaridadesJogo } from "../../../components/raridadesJogo";
 
 type FiltrosColecaoProps = {
   raridade: string;
   elemento: string;
   classe: string;
-  custo: string;
   ordenacao: string;
   somenteFavoritas: boolean;
   aoAlterarRaridade: (valor: string) => void;
   aoAlterarElemento: (valor: string) => void;
   aoAlterarClasse: (valor: string) => void;
-  aoAlterarCusto: (valor: string) => void;
   aoAlterarOrdenacao: (valor: string) => void;
   aoAlterarSomenteFavoritas: (valor: boolean) => void;
 };
 
 export function FiltrosColecao(props: FiltrosColecaoProps) {
+  const raridades = useRaridadesJogo();
   return (
     <div className={styles.filtros}>
       <FiltroSelect
         rotulo="Raridade"
         valor={props.raridade}
-        opcoes={RARIDADES}
+        opcoes={["Todas", ...raridades.map((item) => item.codigo)]}
         aoAlterar={props.aoAlterarRaridade}
       />
       <FiltroSelect
@@ -37,12 +37,6 @@ export function FiltrosColecao(props: FiltrosColecaoProps) {
         valor={props.classe}
         opcoes={CLASSES}
         aoAlterar={props.aoAlterarClasse}
-      />
-      <FiltroSelect
-        rotulo="Valor de venda"
-        valor={props.custo}
-        opcoes={VALORES_VENDA}
-        aoAlterar={props.aoAlterarCusto}
       />
       <FiltroSelect
         rotulo="Ordenar por"

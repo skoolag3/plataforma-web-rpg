@@ -1,5 +1,5 @@
-import { LandingContent } from "../landingContent";
+import { redirect } from "next/navigation";
 
 export default function LoginPage() {
-  return <LandingContent modalInicial="login" />;
+  redirect("/?auth=login");
 }

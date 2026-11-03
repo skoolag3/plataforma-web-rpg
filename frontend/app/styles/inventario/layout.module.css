@@ -88,11 +88,10 @@
 
 @media (max-width: 440px) {
   .conteudo {
-    padding: 0.75rem;
+    padding: 0.55rem;
   }
 
-  .lista,
-  .detalhe {
-    padding: 0.8rem;
+  .lista {
+    padding: 0.55rem;
   }
 }

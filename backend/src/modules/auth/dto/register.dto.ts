@@ -10,6 +10,7 @@ import {
 export class RegisterDto {
   @IsString()
   @IsNotEmpty()
+  @Length(3, 100)
   nome!: string;
 
   @Matches(emailRegex, {

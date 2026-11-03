@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Query,
   UseGuards,
@@ -31,28 +32,43 @@ export class AdminUsuariosController {
   }
 
   @Get(':id')
-  buscar(@Param('id') id: string) {
+  buscar(@Param('id', ParseUUIDPipe) id: string) {
     return this.usuariosService.buscar(id);
   }
 
   @Get(':id/colecao')
-  buscarColecao(@Param('id') id: string) {
+  buscarColecao(@Param('id', ParseUUIDPipe) id: string) {
     return this.usuariosService.buscarColecao(id);
   }
 
   @Get(':id/atividade')
-  buscarAtividade(@Param('id') id: string, @Query('limite') limite?: string) {
+  buscarAtividade(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('limite') limite?: string,
+  ) {
     return this.usuariosService.buscarAtividade(id, limite);
   }
 
   @Get(':id/expedicoes')
-  buscarExpedicoes(@Param('id') id: string) {
-    return this.usuariosService.buscarExpedicoes(id);
+  buscarExpedicoes(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('pagina') pagina?: string,
+  ) {
+    return this.usuariosService.buscarExpedicoes(id, pagina);
+  }
+
+  @Get(':id/expedicoes/:idExpedicao/lutas/:idLuta')
+  buscarLogLutaExpedicao(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('idExpedicao', ParseUUIDPipe) idExpedicao: string,
+    @Param('idLuta', ParseUUIDPipe) idLuta: string,
+  ) {
+    return this.usuariosService.buscarLogLutaExpedicao(id, idExpedicao, idLuta);
   }
 
   @Patch(':id/colecao')
   ajustarColecao(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AjustarColecaoUsuarioDto,
     @CurrentUser() admin: AuthenticatedUser,
   ) {
@@ -61,7 +77,7 @@ export class AdminUsuariosController {
 
   @Patch(':id/saldos')
   ajustarSaldos(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AjustarSaldoUsuarioDto,
     @CurrentUser() admin: AuthenticatedUser,
   ) {
@@ -70,7 +86,7 @@ export class AdminUsuariosController {
 
   @Patch(':id')
   atualizar(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAdminUsuarioDto,
     @CurrentUser() admin: AuthenticatedUser,
   ) {
@@ -79,7 +95,7 @@ export class AdminUsuariosController {
 
   @Delete(':id')
   remover(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RemoverAdminUsuarioDto,
     @CurrentUser() admin: AuthenticatedUser,
   ) {

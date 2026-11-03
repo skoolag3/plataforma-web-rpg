@@ -43,22 +43,23 @@ describe('Rotas críticas - fluxo HTTP da partida', () => {
   });
 
   it('processa um turno pelo endpoint da partida', async () => {
+    const idPartida = '61f8b757-a74d-48c7-a4ab-f15d319dc612';
     partidasService.executarTurno.mockResolvedValue({
-      id: 'partida-1',
+      id: idPartida,
       turno: 2,
       status: 'EM_ANDAMENTO',
     });
 
     await request(app.getHttpServer())
-      .post('/partidas/partida-1/turnos')
+      .post(`/partidas/${idPartida}/turnos`)
       .set(comToken)
       .send({ acao: 'DEFENDER' })
       .expect(201)
-      .expect({ id: 'partida-1', turno: 2, status: 'EM_ANDAMENTO' });
+      .expect({ id: idPartida, turno: 2, status: 'EM_ANDAMENTO' });
 
     expect(partidasService.executarTurno).toHaveBeenCalledWith(
       usuarioTeste.id,
-      'partida-1',
+      idPartida,
       'DEFENDER',
     );
   });

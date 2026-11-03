@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
 import { NoticiasService } from './noticias.service';
 
 @Controller('noticias')
@@ -11,7 +11,7 @@ export class NoticiasController {
   }
 
   @Get(':id')
-  buscar(@Param('id') id: string) {
+  buscar(@Param('id', ParseUUIDPipe) id: string) {
     return this.noticiasService.buscar(id);
   }
 }

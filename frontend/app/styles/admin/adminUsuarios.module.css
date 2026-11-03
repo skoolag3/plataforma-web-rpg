@@ -77,6 +77,79 @@
   font-size: 0.63rem;
 }
 
+.usuarioIdentidade {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.usuarioAvatarWrap {
+  position: relative;
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  aspect-ratio: 1 / 1;
+  flex: 0 0 auto;
+  place-items: center;
+}
+
+.usuarioAvatarFoto {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  border-radius: 0.62rem;
+  background-color: #202438;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.usuarioMolduraImg {
+  position: absolute;
+  inset: -0.16rem;
+  z-index: 2;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+  transform: translate(var(--perfilMolduraX), var(--perfilMolduraY))
+    rotate(var(--perfilMolduraRotacao))
+    scale(var(--perfilMolduraEscalaX), var(--perfilMolduraEscalaY));
+}
+
+.usuarioMolduraImg::before {
+  position: absolute;
+  inset: 0;
+  background-image: inherit;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  content: "";
+  opacity: 0.9;
+  transform: scale(0.91);
+}
+
+.molduraPadrao .usuarioAvatarFoto {
+  border-color: #a797c9;
+  box-shadow: 0 0 0 1px #55466e;
+}
+
+.molduraVioleta .usuarioAvatarFoto {
+  border-color: #8b5cf6;
+}
+
+.molduraRubi .usuarioAvatarFoto {
+  border-color: #ef4444;
+}
+
+.molduraCarta .usuarioAvatarFoto {
+  border-color: rgba(167, 139, 250, 0.5);
+}
+
 .usuarioCell {
   display: grid;
   min-width: 0;
@@ -86,6 +159,20 @@
 .usuarioCell strong {
   color: #f1f5f9;
   font-size: 0.8rem;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.usuarioCell .usuarioNomeAlerta {
+  color: #facc15;
+  cursor: help;
+  text-decoration: underline dotted rgba(250, 204, 21, 0.55);
+  text-underline-offset: 0.18rem;
+}
+
+.usuarioCell .usuarioNomeAlerta[data-tom="vermelho"] {
+  color: #f87171;
+  text-decoration-color: rgba(248, 113, 113, 0.55);
 }
 
 .usuarioCell strong,
@@ -101,13 +188,67 @@
 }
 
 @media (max-width: 720px) {
-  .usuariosListaPanel .tableWrap colgroup {
+  .usuariosListaPanel .tableWrap {
+    overflow: visible;
+  }
+
+  .usuariosListaPanel .tableWrap table,
+  .usuariosListaPanel .tableWrap tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .usuariosListaPanel .tableWrap colgroup,
+  .usuariosListaPanel .tableWrap thead {
     display: none;
   }
 
+  .usuariosListaPanel .tableWrap tbody tr:not(.emptyTableRow) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem 0.65rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+    padding: 0.75rem 0.8rem;
+  }
+
   .usuariosListaPanel .tableWrap tbody td {
+    display: flex;
+    align-items: center;
     height: auto;
+    min-width: 0;
+    border: 0;
+    padding: 0;
     text-align: left;
+  }
+
+  .usuariosListaPanel .tableWrap tbody td[data-label="Usuário"] {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .usuariosListaPanel .tableWrap tbody td[data-label="Ações"] {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+  }
+
+  .usuariosListaPanel .tableWrap tbody td[data-label="Partidas"] {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .usuariosListaPanel .tableWrap tbody td[data-label="Saldo"] {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .usuariosListaPanel .tableWrap tbody td[data-label="Status"] {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    justify-content: flex-end;
+    align-self: end;
   }
 
   .usuariosListaPanel .tableWrap tbody td:last-child .menuAcoesCarta {
@@ -117,7 +258,7 @@
 
   .usuariosListaPanel .tableWrap tbody tr:has(details[open]) {
     position: relative;
-    z-index: 2;
+    z-index: 5;
     overflow: visible;
   }
 

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import type { ProdutoExpedicao } from '@prisma/client';
+import { Prisma, type ProdutoExpedicao } from '@prisma/client';
+import { secoesPadraoCampanha, type SecaoCampanha } from '../../jogo/expedicao.trilha';
 import { PrismaService } from '../../../database/prisma.service';
 import {
   AtualizarAdminCampanhaDto,
@@ -13,12 +14,17 @@ export class AdminCampanhaService {
   constructor(private readonly prisma: PrismaService) {}
 
   async obterPainel() {
-    const [configuracao, produtos, temas] = await Promise.all([
+    const [configuracao, produtos, temas, cartas] = await Promise.all([
       this.obterConfiguracao(),
       this.prisma.produtoExpedicao.findMany({
         orderBy: [{ ativo: 'desc' }, { criado_em: 'desc' }],
       }),
       this.prisma.temaExpedicao.findMany({ orderBy: { nome: 'asc' } }),
+      this.prisma.carta.findMany({
+        where: { ativo: true, excluido_em: null },
+        select: { id: true, nome: true },
+        orderBy: { nome: 'asc' },
+      }),
     ]);
 
     return {
@@ -26,6 +32,7 @@ export class AdminCampanhaService {
       boss: this.formatarBoss(configuracao),
       produtos: produtos.map((produto) => this.formatarProduto(produto)),
       temas: temas.map((tema) => ({ nome: tema.nome })),
+      cartas,
     };
   }
 
@@ -133,6 +140,19 @@ export class AdminCampanhaService {
   }
 
   private async validarProduto(dto: SalvarProdutoExpedicaoDto) {
+    if (dto.secoes.at(-1)?.tipo !== 'BOSS' || dto.secoes.slice(0, -1).some(
+      (secao) => secao.tipo !== 'BATALHA' || !secao.caminhos?.length,
+    )) throw new BadRequestException('Configure caminhos de batalha e deixe o boss na última seção.');
+    for (const secao of dto.secoes.slice(0, -1)) {
+      for (const caminho of secao.caminhos ?? []) {
+        if (caminho.modoCartas !== 'MANUAL') continue;
+        const quantidade = caminho.quantidadeCartas ?? 3;
+        if (new Set(caminho.cartas).size !== caminho.cartas.length ||
+          (caminho.mixed ? caminho.cartas.length < quantidade : caminho.cartas.length !== quantidade)) {
+          throw new BadRequestException('A seleção manual deve ter a quantidade configurada; no mixed, pelo menos essa quantidade.');
+        }
+      }
+    }
     if (!dto.nome.trim() || !dto.descricao.trim() || !dto.tema.trim())
       throw new BadRequestException('Preencha nome, descrição e tema.');
     const tema = await this.prisma.temaExpedicao.findUnique({
@@ -147,7 +167,10 @@ export class AdminCampanhaService {
       throw new BadRequestException(
         'O fim do evento deve ocorrer depois do início.',
       );
-    const ids = [...new Set(dto.bossCartas)];
+    const ids = [...new Set([
+      ...dto.bossCartas,
+      ...dto.secoes.flatMap((secao) => secao.caminhos?.flatMap((caminho) => caminho.cartas) ?? []),
+    ])];
     const total = await this.prisma.carta.count({
       where: { id: { in: ids }, ativo: true, excluido_em: null },
     });
@@ -175,6 +198,7 @@ export class AdminCampanhaService {
       boss_provocacao: dto.bossProvocacao.trim(),
       boss_perguntas: dto.bossPerguntas.map((item) => item.trim()),
       boss_cartas: [...new Set(dto.bossCartas)],
+      secoes: dto.secoes as unknown as Prisma.InputJsonValue,
     };
   }
 
@@ -199,6 +223,15 @@ export class AdminCampanhaService {
       bossProvocacao: produto.boss_provocacao,
       bossPerguntas: produto.boss_perguntas,
       bossCartas: produto.boss_cartas,
+      secoes: Array.isArray(produto.secoes) && produto.secoes.length
+        ? produto.secoes as SecaoCampanha[]
+        : secoesPadraoCampanha({
+            percentualMantidoDerrota: produto.percentual_mantido_derrota,
+            recompensas: {
+              FACIL: produto.recompensa_facil, MEDIA: produto.recompensa_media,
+              DIFICIL: produto.recompensa_dificil, CHEFE: produto.recompensa_chefe,
+            },
+          }),
       criadoEm: produto.criado_em,
       atualizadoEm: produto.atualizado_em,
     };

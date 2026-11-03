@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -33,7 +34,7 @@ export class AdminHabilidadesController {
   }
 
   @Get(':id')
-  buscar(@Param('id') id: string) {
+  buscar(@Param('id', ParseUUIDPipe) id: string) {
     return this.habilidadesService.buscar(id);
   }
 
@@ -43,22 +44,31 @@ export class AdminHabilidadesController {
   }
 
   @Put(':id')
-  atualizar(@Param('id') id: string, @Body() dto: CreateAdminHabilidadeDto) {
+  atualizar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreateAdminHabilidadeDto,
+  ) {
     return this.habilidadesService.atualizar(id, dto);
   }
 
   @Post(':id/testar')
-  testar(@Param('id') id: string, @Body() dto: TestarAdminHabilidadeDto) {
+  testar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: TestarAdminHabilidadeDto,
+  ) {
     return this.habilidadesService.testar(id, dto);
   }
 
   @Post(':id/publicar')
-  publicar(@Param('id') id: string) {
+  publicar(@Param('id', ParseUUIDPipe) id: string) {
     return this.habilidadesService.publicar(id);
   }
 
   @Delete(':id')
-  inativar(@Param('id') id: string, @Body() dto: InativarAdminHabilidadeDto) {
+  inativar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: InativarAdminHabilidadeDto,
+  ) {
     return this.habilidadesService.inativar(id, dto.confirmarNome);
   }
 }

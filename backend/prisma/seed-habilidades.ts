@@ -91,6 +91,7 @@ function obterRequisitoValor(requisito: RequisitoHabilidade) {
   if (requisito.tipo === 'CONTADOR_ATAQUES') return requisito.quantidade;
   if (requisito.tipo === 'HP_ABAIXO') return requisito.percentual;
   if (requisito.tipo === 'TURNO_MINIMO') return requisito.turno;
+  if (requisito.tipo === 'INTERVALO_TURNOS') return requisito.intervalo;
   return null;
 }
 

@@ -8,11 +8,14 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../../database/prisma.service';
+import { obterOAuthStateSecret } from '../auth/jwt.config';
 import { AuthService } from '../auth/services/auth.service';
 
 type GoogleState = {
   sub?: string;
   finalidade: 'VINCULAR_GOOGLE' | 'LOGIN_GOOGLE';
+  nonce?: string;
+  purpose?: string;
 };
 
 type GoogleTokenResponse = {
@@ -48,7 +51,11 @@ export class GoogleOAuthService {
 
   private gerarUrl(payload: GoogleState) {
     const config = this.getConfig();
-    const state = this.jwtService.sign(payload, { expiresIn: '10m' });
+    const nonce = randomBytes(16).toString('hex');
+    const state = this.jwtService.sign(
+      { ...payload, nonce, purpose: 'oauth_state' },
+      { secret: obterOAuthStateSecret(), expiresIn: '10m' },
+    );
     const parametros = new URLSearchParams({
       client_id: config.clientId,
       redirect_uri: config.callbackUrl,
@@ -61,24 +68,36 @@ export class GoogleOAuthService {
 
     return {
       url: `https://accounts.google.com/o/oauth2/v2/auth?${parametros}`,
+      nonce,
     };
   }
 
-  async processarCallback(code: string, state: string) {
+  async processarCallback(
+    code: string,
+    state: string,
+    nonceCookie?: string | null,
+  ) {
     const config = this.getConfig();
     let payload: GoogleState;
 
     try {
-      payload = this.jwtService.verify<GoogleState>(state);
+      payload = this.jwtService.verify<GoogleState>(state, {
+        secret: obterOAuthStateSecret(),
+      });
     } catch {
       throw new BadRequestException('Estado OAuth inválido ou expirado.');
     }
 
     if (
-      payload.finalidade !== 'VINCULAR_GOOGLE' &&
-      payload.finalidade !== 'LOGIN_GOOGLE'
+      payload.purpose !== 'oauth_state' ||
+      (payload.finalidade !== 'VINCULAR_GOOGLE' &&
+        payload.finalidade !== 'LOGIN_GOOGLE')
     ) {
       throw new BadRequestException('Finalidade OAuth inválida.');
+    }
+
+    if (!payload.nonce || !nonceCookie || payload.nonce !== nonceCookie) {
+      throw new BadRequestException('Sessão OAuth inválida (falha de validação CSRF).');
     }
 
     if (payload.finalidade === 'VINCULAR_GOOGLE' && !payload.sub) {
@@ -157,6 +176,7 @@ export class GoogleOAuthService {
     const usuarioExistente = await this.prisma.usuario.findUnique({
       where: { email },
     });
+    const nomeGoogle = info.name?.trim().slice(0, 100) || email.split('@')[0];
     const usuario = usuarioExistente
       ? await this.prisma.usuario.update({
           where: { id: usuarioExistente.id },
@@ -164,11 +184,22 @@ export class GoogleOAuthService {
             email_verificado: true,
             token_verificacao_email: null,
             token_verificacao_expira_em: null,
+            ...(!usuarioExistente.email_verificado
+              ? {
+                  nome: nomeGoogle,
+                  senha_hash: await bcrypt.hash(
+                    randomBytes(32).toString('hex'),
+                    10,
+                  ),
+                  bloqueado: false,
+                  tentativas_login: 0,
+                }
+              : {}),
           },
         })
       : await this.prisma.usuario.create({
           data: {
-            nome: info.name?.trim().slice(0, 100) || email.split('@')[0],
+            nome: nomeGoogle,
             email,
             senha_hash: await bcrypt.hash(randomBytes(32).toString('hex'), 10),
             email_verificado: true,
@@ -177,10 +208,21 @@ export class GoogleOAuthService {
           },
         });
 
-    await this.prisma.provedorUsuario.create({
-      data: {
+    await this.prisma.provedorUsuario.upsert({
+      where: {
+        id_usuario_provedor: {
+          id_usuario: usuario.id,
+          provedor: 'GOOGLE',
+        },
+      },
+      create: {
         id_usuario: usuario.id,
         provedor: 'GOOGLE',
+        id_provedor: info.sub,
+        email_provedor: email,
+        ultimo_login_em: new Date(),
+      },
+      update: {
         id_provedor: info.sub,
         email_provedor: email,
         ultimo_login_em: new Date(),

@@ -2,8 +2,10 @@ import type {
   ConfiguracaoHabilidade,
   RequisitoHabilidade,
 } from './habilidade.types';
+import { calcularValorEscalado } from './habilidade.escala';
 
 export type CenarioTesteHabilidade = {
+  criticoAtivou?: boolean;
   turno: number;
   ataquesRealizados: number;
   hpAtual: number;
@@ -28,7 +30,10 @@ export function simularHabilidade(
     cenario,
     percentualHp,
   );
-  const valorCalculado = calcularValor(habilidade, cenario);
+  const valorCalculado =
+    habilidade.requisito.tipo === 'CHANCE' && !requisitoAtendido
+      ? 0
+      : calcularValorEscalado(habilidade, cenario.turno, cenario.ataquesRealizados);
 
   return {
     acionada: requisitoAtendido,
@@ -39,7 +44,9 @@ export function simularHabilidade(
       ? habilidade.tipoEfeito === 'CRITICO' && habilidade.requisito.tipo === 'CHANCE'
         ? `${habilidade.requisito.percentual}% de chance de causar +${valorCalculado}% de dano no ataque.`
         : `${habilidade.nome} seria ativada com valor ${valorCalculado}.`
-      : `${habilidade.nome} não seria ativada porque o requisito não foi alcançado.`,
+      : habilidade.requisito.tipo === 'CHANCE'
+        ? `O golpe não foi crítico. A chance configurada é ${habilidade.requisito.percentual}%; nenhum bônus de dano foi aplicado.`
+        : `${habilidade.nome} não seria ativada porque o requisito não foi alcançado.`,
   };
 }
 
@@ -48,6 +55,9 @@ function verificarRequisito(
   cenario: CenarioTesteHabilidade,
   percentualHp: number,
 ) {
+  if (requisito.tipo === 'CHANCE') {
+    return cenario.criticoAtivou ?? true;
+  }
   if (requisito.tipo === 'CONTADOR_ATAQUES') {
     return cenario.ataquesRealizados >= requisito.quantidade;
   }
@@ -57,19 +67,8 @@ function verificarRequisito(
   if (requisito.tipo === 'TURNO_MINIMO') {
     return cenario.turno >= requisito.turno;
   }
+  if (requisito.tipo === 'INTERVALO_TURNOS') {
+    return cenario.turno >= 1 && cenario.turno % requisito.intervalo === 0;
+  }
   return true;
-}
-
-function calcularValor(
-  habilidade: ConfiguracaoHabilidade,
-  cenario: CenarioTesteHabilidade,
-) {
-  if (habilidade.escala.tipo === 'NENHUMA') return habilidade.valorBase;
-
-  const multiplicador =
-    habilidade.escala.tipo === 'POR_TURNO'
-      ? Math.max(0, cenario.turno - 1)
-      : cenario.ataquesRealizados;
-  const valor = habilidade.valorBase + habilidade.escala.valor * multiplicador;
-  return Math.min(valor, habilidade.escala.limite);
 }

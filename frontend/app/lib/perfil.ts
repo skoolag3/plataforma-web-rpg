@@ -45,6 +45,51 @@ export type MolduraConta = {
   obtida: boolean;
 };
 
+export type FotoCartaPerfil = { id: string; nome: string; fotoUrl: string };
+
+export type PerfilPublico = {
+  id: string;
+  nome: string;
+  biografia: string;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
+  moldura: string;
+  molduraClasse: string;
+  molduraUrl: string | null;
+  molduraConfig: ConfigVisualCarta | null;
+  pontos: number;
+  partidas: number;
+  vitorias: number;
+  derrotas: number;
+  cartasObtidas: number;
+  totalCartas: number;
+  decksCriados: number;
+  historicoOculto: boolean;
+  historico: Array<{
+    id: string;
+    resultado: "VITORIA" | "DERROTA" | "EMPATE";
+    turnos_jogados: number;
+    variacao_pontos: number | null;
+    timestamp_inicio: string | null;
+    deck: { nome: string } | null;
+  }>;
+};
+
+export function buscarPerfilPublicoApi(token: string, idUsuario: string) {
+  return requisicaoPerfil<PerfilPublico>(token, `/perfil/publico/${encodeURIComponent(idUsuario)}`);
+}
+
+export function listarFotosCartasApi(token: string) {
+  return requisicaoPerfil<FotoCartaPerfil[]>(token, "/perfil/fotos-cartas");
+}
+
+export function selecionarFotoCartaApi(token: string, idCarta: string) {
+  return requisicaoPerfil<RespostaMensagem & { avatarUrl: string | null }>(token, "/perfil/foto-carta", {
+    method: "PATCH",
+    body: JSON.stringify({ idCarta }),
+  });
+}
+
 type RespostaMensagem = {
   message: string;
 };

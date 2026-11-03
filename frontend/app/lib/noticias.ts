@@ -1,5 +1,16 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
+export function nomeCategoriaNoticia(categoria: string) {
+  const nomes: Record<string, string> = {
+    NOVIDADE: "Novidade",
+    BALANCE: "Balanceamento",
+    EVENTO: "Evento",
+    PROMOCAO: "Promoção",
+    AVISO: "Aviso",
+  };
+  return nomes[categoria] ?? categoria;
+}
+
 export type NoticiaPublica = {
   id: string;
   titulo: string;

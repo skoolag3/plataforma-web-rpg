@@ -3,6 +3,7 @@ import {
   Get,
   Headers,
   Param,
+  ParseUUIDPipe,
   Post,
   Req,
   UseGuards,
@@ -23,7 +24,7 @@ export class LojaController {
   @Post('checkout/:idPacote')
   checkout(
     @CurrentUser() usuario: AuthenticatedUser,
-    @Param('idPacote') idPacote: string,
+    @Param('idPacote', ParseUUIDPipe) idPacote: string,
   ) {
     return this.service.criarCheckout(usuario.id, idPacote);
   }

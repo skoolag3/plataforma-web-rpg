@@ -1,8 +1,10 @@
+import { nomeElementoCarta } from "../../../components/elementosCarta";
 import { PackagePlus, X } from "lucide-react";
 
 import { cardStyle } from "../cardData";
 import { styles } from "../styles";
 import type { Card } from "../types";
+import { obterRaridadeJogo, useRaridadesJogo } from "../../../components/raridadesJogo";
 
 type ModalDeckProps = {
   aberto: boolean;
@@ -23,6 +25,7 @@ export function ModalDeck({
   aoEquipar,
   aoRemover,
 }: ModalDeckProps) {
+  const raridades = useRaridadesJogo();
   if (!aberto || !carta) {
     return null;
   }
@@ -58,15 +61,15 @@ export function ModalDeck({
           <article className={styles.deckCartaPreview} style={cardStyle(carta)}>
             <span className={styles.arte} aria-hidden="true" />
             <span className={styles.silhueta} aria-hidden="true" />
-            <span className={styles.raridade}>{carta.raridade}</span>
+            <span className={styles.raridade}>{obterRaridadeJogo(raridades, carta.raridade)?.nome ?? carta.raridade}</span>
             <span className={styles.elemento}>
-              <Elemento aria-label={carta.elemento} />
+              <Elemento aria-label={nomeElementoCarta(carta.elemento)} />
             </span>
           </article>
           <div>
             <strong>{carta.nome}</strong>
             <span>
-              {carta.elemento} / {carta.classe}
+              {nomeElementoCarta(carta.elemento)} / {carta.classe}
             </span>
             <p>
               Escolha um dos 6 slots do deck. O conteúdo do slot será
@@ -96,7 +99,7 @@ export function ModalDeck({
                 {cartaNoSlot && IconeSlot ? (
                   <>
                     <span className={styles.deckSlotRaridade}>
-                      {cartaNoSlot.raridade}
+                      {obterRaridadeJogo(raridades, cartaNoSlot.raridade)?.nome ?? cartaNoSlot.raridade}
                     </span>
                     <IconeSlot
                       className={styles.deckSlotElemento}

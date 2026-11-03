@@ -18,6 +18,7 @@ export type DimensoesImagem = {
 };
 
 export type ConfigVisualCarta = {
+  fotoPerfil: { zoom: number; x: number; y: number };
   arte: {
     escala: number;
     x: number;
@@ -46,6 +47,7 @@ export type ConfigVisualCarta = {
 
 export function criarConfigVisualPadrao(): ConfigVisualCarta {
   return {
+    fotoPerfil: { zoom: 1, x: 0, y: 0 },
     arte: { escala: 1, x: 0, y: 0, rotacao: 0 },
     moldura: {
       escalaX: 1,
@@ -73,6 +75,7 @@ export function normalizarConfigVisual(
 ): ConfigVisualCarta {
   const padrao = criarConfigVisualPadrao();
   return {
+    fotoPerfil: { ...padrao.fotoPerfil, ...config?.fotoPerfil },
     arte: { ...padrao.arte, ...config?.arte },
     moldura: { ...padrao.moldura, ...config?.moldura },
     molduraPerfil: {

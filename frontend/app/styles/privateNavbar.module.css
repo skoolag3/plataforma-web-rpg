@@ -33,17 +33,6 @@
   color: white;
   text-decoration: none;
 }
-.brand > span {
-  display: grid;
-  width: 2.35rem;
-  height: 2.35rem;
-  place-items: center;
-  border: 1px solid rgba(190, 242, 100, 0.22);
-  border-radius: 0.8rem;
-  color: #d9f99d;
-  background: #5b36a8;
-}
-.brand svg,
 .usuario svg {
   width: 1.05rem;
 }
@@ -87,7 +76,7 @@
   padding-right: 0.55rem;
   border-right: 1px solid rgba(148, 163, 184, 0.16);
 }
-.saldos span {
+.saldos a {
   display: inline-flex;
   min-height: 2.2rem;
   align-items: center;
@@ -97,15 +86,13 @@
   padding: 0.35rem 0.48rem;
   font-size: 0.7rem;
   font-weight: 850;
+  text-decoration: none;
 }
-.saldos span:hover {
+.saldos a:hover {
   background: rgba(255, 255, 255, 0.04);
 }
-.saldos span:first-child svg {
+.saldos a svg {
   color: #facc15;
-}
-.saldos span:last-child svg {
-  color: #a78bfa;
 }
 .usuario > a {
   display: flex;
@@ -168,7 +155,8 @@
   transform: scale(0.91);
 }
 .molduraPadrao .fotoAvatar {
-  border-color: #64748b;
+  border-color: #a797c9;
+  box-shadow: 0 0 0 1px #55466e;
 }
 .molduraVioleta .fotoAvatar {
   border-color: #8b5cf6;
@@ -243,6 +231,8 @@
   }
   .menu {
     display: grid;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
   }
   .menu svg {
     width: 1.2rem;
@@ -322,16 +312,16 @@
     border-right: 0;
     padding-right: 0;
   }
-  .saldos span {
-    min-height: 2.15rem;
+  .saldos a {
+    min-height: 2.75rem;
     padding-inline: 0.38rem;
   }
   .usuario > a {
     position: relative;
     z-index: 3;
     display: flex;
-    min-width: 2.35rem;
-    min-height: 2.35rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
     align-items: center;
     justify-content: center;
     padding: 0.15rem;
@@ -342,6 +332,8 @@
   }
   .usuario > button {
     display: grid;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
     padding: 0.58rem;
   }
 }
@@ -357,12 +349,12 @@
   .brand {
     gap: 0.45rem;
   }
-  .brand > span,
   .avatarVisual {
     width: 2.15rem;
     height: 2.15rem;
   }
   .brand strong {
-    display: none;
+    font-size: 0.72rem;
+    white-space: nowrap;
   }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { nomeElementoCarta } from "../../components/elementosCarta";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -10,7 +11,8 @@ import {
   Layers,
   Plus,
   Save,
-  Search,
+  PanelRightClose,
+  PanelRightOpen,
   Shield,
   ShieldCheck,
   Swords,
@@ -26,8 +28,11 @@ import {
   notificarErro,
   notificarSucesso,
 } from "../../components/notificacoesGlobais";
-import { FiltroSelect } from "../cartas/components/filtroSelect";
 import { DetalheCarta } from "../cartas/components/detalheCarta";
+import { ModalFiltrosDeck } from "./modalFiltrosDeck";
+import { ResumoDeck } from "./resumoDeck";
+import { InventarioDeck } from "./inventarioDeck";
+import { useCartasFavoritas } from "../cartas/useCartasFavoritas";
 import { mapearCarta } from "../cartas/cardData";
 import { styles as estilosInventario } from "../cartas/styles";
 import {
@@ -41,6 +46,7 @@ import {
   type Deck,
 } from "../../lib/jogo";
 import styles from "../../styles/decks.module.css";
+import { obterRaridadeJogo, useRaridadesJogo } from "../../components/raridadesJogo";
 
 const SLOT_COUNT = 6;
 
@@ -60,6 +66,7 @@ function montarSlots(deck: Deck | undefined, cartas: CartaColecao[]) {
 }
 
 export default function DecksPage() {
+  const raridades = useRaridadesJogo();
   const [decks, setDecks] = useState<Deck[]>([]);
   const [colecao, setColecao] = useState<CartaColecao[]>([]);
   const [editandoId, setEditandoId] = useState<string | null>(null);
@@ -71,6 +78,13 @@ export default function DecksPage() {
   const [busca, setBusca] = useState("");
   const [raridade, setRaridade] = useState("Todas");
   const [elemento, setElemento] = useState("Todos");
+  const [classe, setClasse] = useState("Todas");
+  const [ordenacao, setOrdenacao] = useState("Raridade");
+  const [somenteFavoritas, setSomenteFavoritas] = useState(false);
+  const [favoritas] = useCartasFavoritas();
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
+  const [inventarioNaLateral, setInventarioNaLateral] = useState(true);
+  const [inventarioModalAberto, setInventarioModalAberto] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [deckParaExcluir, setDeckParaExcluir] = useState<Deck | null>(null);
@@ -81,6 +95,8 @@ export default function DecksPage() {
   const [cartaDetalhada, setCartaDetalhada] = useState<CartaColecao | null>(null);
   const [portalPronto, setPortalPronto] = useState(false);
   const btnMeusDecks = useRef<HTMLButtonElement>(null);
+  const btnFiltros = useRef<HTMLButtonElement>(null);
+  const btnAbrirInventario = useRef<HTMLButtonElement>(null);
   const focoAntesDetalhe = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -103,6 +119,21 @@ export default function DecksPage() {
       btnMeusDecksAtual?.focus();
     };
   }, [decksAbertos]);
+
+  useEffect(() => {
+    if (!inventarioModalAberto) return;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function fecharComEscape(evento: KeyboardEvent) {
+      if (evento.key === "Escape" && !document.getElementById("titulo-filtros-deck")) setInventarioModalAberto(false);
+    }
+    document.addEventListener("keydown", fecharComEscape);
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      document.removeEventListener("keydown", fecharComEscape);
+      btnAbrirInventario.current?.focus();
+    };
+  }, [inventarioModalAberto]);
 
   useEffect(() => {
     if (!cartaDetalhada) return;
@@ -192,20 +223,37 @@ export default function DecksPage() {
 
   const cartasFiltradas = useMemo(() => {
     const termo = busca.trim().toLocaleLowerCase("pt-BR");
-    return colecao.filter(
+    const res = colecao.filter(
       (carta) =>
         (!termo ||
           carta.nome.toLocaleLowerCase("pt-BR").includes(termo) ||
+          carta.elemento.toLocaleLowerCase("pt-BR").includes(termo) ||
           carta.classe.toLocaleLowerCase("pt-BR").includes(termo)) &&
         (raridade === "Todas" || carta.raridade === raridade) &&
-        (elemento === "Todos" || carta.elemento === elemento),
+        (elemento === "Todos" || carta.elemento === elemento) &&
+        (classe === "Todas" || carta.classe === classe) &&
+        (!somenteFavoritas || favoritas.has(carta.nome)),
     );
-  }, [busca, colecao, elemento, raridade]);
+    return [...res].sort((a, b) => {
+      if (ordenacao === "Raridade") return (obterRaridadeJogo(raridades, b.raridade)?.ordem ?? 0) - (obterRaridadeJogo(raridades, a.raridade)?.ordem ?? 0);
+      if (ordenacao === "HP") return b.hpBase - a.hpBase;
+      if (ordenacao === "Ataque") return b.danoBase - a.danoBase;
+      if (ordenacao === "Defesa") return b.defesaBase - a.defesaBase;
+      if (ordenacao === "Valor de venda") return b.custo - a.custo;
+      const dataA = a.obtidaEm ? new Date(a.obtidaEm).getTime() : 0;
+      const dataB = b.obtidaEm ? new Date(b.obtidaEm).getTime() : 0;
+      return ordenacao === "Mais recentes" ? dataB - dataA : dataA - dataB;
+    });
+  }, [busca, classe, colecao, elemento, favoritas, ordenacao, raridade, raridades, somenteFavoritas]);
 
   const cartasSelecionadas = slots.filter((carta): carta is CartaColecao =>
     Boolean(carta),
   );
   const deckCompleto = cartasSelecionadas.length >= 1;
+  const deckSalvo = decks.find((deck) => deck.id === editandoId) ?? decks.find((deck) => deck.ativo);
+  const slotsSalvos = montarSlots(deckSalvo, colecao);
+  const alteracoesPendentes = nome !== (deckSalvo?.nome ?? "Meu Deck") ||
+    slots.some((carta, index) => carta?.id !== slotsSalvos[index]?.id);
 
   function novoDeck() {
     setDecksAbertos(false);
@@ -245,6 +293,15 @@ export default function DecksPage() {
     proximos[index] = null;
     setSlots(proximos);
     setSlotSelecionado(index);
+  }
+
+  function cancelarEdicao() {
+    setEditandoId(deckSalvo?.id ?? null);
+    setNome(deckSalvo?.nome ?? "Meu Deck");
+    setSlots(slotsSalvos);
+    setSlotSelecionado(0);
+    setErro("");
+    setMensagem("");
   }
 
   async function salvar(ativar: boolean) {
@@ -325,14 +382,14 @@ export default function DecksPage() {
       <header className={styles.topo}>
         <div>
           <Link href="/cartas" className={styles.voltar}>
-            <ArrowLeft aria-hidden="true" /> Voltar
+            <ArrowLeft aria-hidden="true" /> Voltar à coleção
           </Link>
           <h1>Construtor de decks</h1>
           <p>Monte e equipe o deck que será usado nas partidas.</p>
         </div>
       </header>
 
-      <div className={styles.layout}>
+      <div className={`${styles.layout} ${inventarioNaLateral ? "" : styles.layoutSemLateral}`}>
         <section className={styles.editor}>
           <div className={styles.acoesEditor}>
             <button
@@ -345,7 +402,33 @@ export default function DecksPage() {
               <Layers aria-hidden="true" />
               Meus decks <span>{decks.length}</span>
             </button>
+            <div className={styles.modosInventario} aria-label="Modo de exibição do inventário">
+              {!inventarioNaLateral && (
+                <button
+                  ref={btnAbrirInventario}
+                  type="button"
+                  onClick={() => setInventarioModalAberto(true)}
+                  aria-haspopup="dialog"
+                >
+                  <Layers aria-hidden="true" /> Inventário
+                </button>
+              )}
+              <button
+                type="button"
+                className={styles.btnAlternarInventario}
+                onClick={() => {
+                  setInventarioNaLateral((atual) => !atual);
+                  setInventarioModalAberto(false);
+                }}
+                aria-label={inventarioNaLateral ? "Ocultar barra lateral do inventário" : "Mostrar barra lateral do inventário"}
+                title={inventarioNaLateral ? "Ocultar barra lateral" : "Mostrar barra lateral"}
+                aria-pressed={inventarioNaLateral}
+              >
+                {inventarioNaLateral ? <PanelRightClose aria-hidden="true" /> : <PanelRightOpen aria-hidden="true" />}
+              </button>
+            </div>
           </div>
+          <ResumoDeck cartas={cartasSelecionadas} />
           <div className={styles.editorTopo}>
             <label>
               Nome do deck
@@ -381,6 +464,8 @@ export default function DecksPage() {
                   if (carta) {
                     focoAntesDetalhe.current = document.activeElement as HTMLElement;
                     setCartaDetalhada(carta);
+                  } else if (!inventarioNaLateral) {
+                    setInventarioModalAberto(true);
                   }
                 }}
                 aria-label={carta ? `Ver detalhes de ${carta.nome}` : `Selecionar slot ${index + 1}`}
@@ -403,7 +488,7 @@ export default function DecksPage() {
                       <span className={styles.slotCartaNome}>
                         <strong>{carta.nome}</strong>
                         <small>
-                          {carta.raridade} · {carta.elemento}
+                          {obterRaridadeJogo(raridades, carta.raridade)?.nome ?? carta.raridade} · {nomeElementoCarta(carta.elemento)}
                         </small>
                       </span>
                       <span className={styles.slotCartaStats}>
@@ -456,11 +541,11 @@ export default function DecksPage() {
           <div className={styles.salvarAcoes}>
             <button
               type="button"
-              className={styles.rascunho}
+              className={`${styles.rascunho} ${alteracoesPendentes ? styles.cancelarAlterado : ""}`}
               disabled={salvando}
-              onClick={() => void salvar(false)}
+              onClick={cancelarEdicao}
             >
-              <Save aria-hidden="true" /> Salvar rascunho
+              <X aria-hidden="true" /> Cancelar
             </button>
             <button
               type="button"
@@ -468,77 +553,70 @@ export default function DecksPage() {
               disabled={salvando || !deckCompleto}
               onClick={() => void salvar(true)}
             >
-              <ShieldCheck aria-hidden="true" /> Salvar e equipar
+              <Save aria-hidden="true" /> Salvar
             </button>
           </div>
         </section>
-
-        <aside className={styles.colecao}>
-          <h2>Sua coleção</h2>
-          <label className={styles.busca}>
-            <Search aria-hidden="true" />
-            <input
-              value={busca}
-              onChange={(event) => setBusca(event.target.value)}
-              placeholder="Buscar carta..."
-            />
-          </label>
-          <div className={styles.filtros}>
-            <FiltroSelect
-              rotulo="Raridade"
-              valor={raridade}
-              opcoes={["Todas", "UR", "SSR", "SR", "R", "N"]}
-              aoAlterar={setRaridade}
-            />
-            <FiltroSelect
-              rotulo="Elemento"
-              valor={elemento}
-              opcoes={["Todos", "natureza", "agua", "fogo", "sombra", "luz"]}
-              aoAlterar={setElemento}
-            />
-          </div>
-          <div className={styles.cartas}>
-            {cartasFiltradas.map((carta) => {
-              const usada = slots.some((item) => item?.id === carta.id);
-              return (
-                <button
-                  type="button"
-                  key={carta.id}
-                  disabled={usada}
-                  onClick={() => selecionarCarta(carta)}
-                  aria-label={`${usada ? "Carta já no deck" : "Adicionar ao deck"}: ${carta.nome}`}
-                >
-                  <span className={styles.cartaColecaoVisual}>
-                    <CartaMontada
-                      arte={carta.foto ?? undefined}
-                      moldura={carta.moldura ?? undefined}
-                      nome={carta.nome}
-                      raridade={carta.raridade}
-                      elemento={carta.elemento}
-                      config={carta.configVisual ?? undefined}
-                      placeholder={<Layers aria-hidden="true" />}
-                    />
-                    <span className={styles.cartaColecaoMarca}>
-                      {usada ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}
-                    </span>
-                  </span>
-                  <span className={styles.cartaColecaoNome}>
-                    <strong>{carta.nome}</strong>
-                    <small>
-                      {carta.raridade} · {carta.classe}
-                    </small>
-                  </span>
-                </button>
-              );
-            })}
-            {!cartasFiltradas.length && (
-              <p className={styles.vazio}>
-                Nenhuma carta obtida corresponde aos filtros.
-              </p>
-            )}
-          </div>
-        </aside>
+        {inventarioNaLateral && (
+          <InventarioDeck
+            cartas={cartasFiltradas}
+            cartasNoDeck={new Set(cartasSelecionadas.map((carta) => carta.id))}
+            busca={busca}
+            setBusca={setBusca}
+            filtrosAtivos={raridade !== "Todas" || elemento !== "Todos" || classe !== "Todas" || ordenacao !== "Raridade" || somenteFavoritas}
+            btnFiltros={btnFiltros}
+            aoAbrirFiltros={() => setFiltrosAbertos(true)}
+            aoSelecionar={selecionarCarta}
+          />
+        )}
       </div>
+
+      {inventarioModalAberto && portalPronto ? createPortal(
+        <div className={styles.fundoInventario} role="dialog" aria-modal="true" aria-labelledby="titulo-inventario-deck" onMouseDown={(evento) => { if (evento.target === evento.currentTarget) setInventarioModalAberto(false); }}>
+          <div className={styles.painelInventarioModal}>
+            <header className={styles.topoInventarioModal}>
+              <div><span>Montagem de deck</span><h2 id="titulo-inventario-deck">Escolher cartas</h2></div>
+              <div className={styles.acoesInventarioModal}>
+                <button type="button" onClick={() => { setInventarioNaLateral(true); setInventarioModalAberto(false); }} aria-label="Fixar inventário à direita" title="Fixar à direita"><PanelRightOpen aria-hidden="true" /></button>
+                <button type="button" onClick={() => setInventarioModalAberto(false)} aria-label="Fechar inventário"><X aria-hidden="true" /></button>
+              </div>
+            </header>
+            <InventarioDeck
+              cartas={cartasFiltradas}
+              cartasNoDeck={new Set(cartasSelecionadas.map((carta) => carta.id))}
+              busca={busca}
+              setBusca={setBusca}
+              filtrosAtivos={raridade !== "Todas" || elemento !== "Todos" || classe !== "Todas" || ordenacao !== "Raridade" || somenteFavoritas}
+              btnFiltros={btnFiltros}
+              aoAbrirFiltros={() => setFiltrosAbertos(true)}
+              aoSelecionar={selecionarCarta}
+              emModal
+            />
+          </div>
+        </div>,
+        document.body,
+      ) : null}
+
+      {filtrosAbertos && portalPronto ? createPortal(
+        <ModalFiltrosDeck
+          raridade={raridade}
+          elemento={elemento}
+          classe={classe}
+          ordenacao={ordenacao}
+          somenteFavoritas={somenteFavoritas}
+          quantidadeCartas={cartasFiltradas.length}
+          setRaridade={setRaridade}
+          setElemento={setElemento}
+          setClasse={setClasse}
+          setOrdenacao={setOrdenacao}
+          setSomenteFavoritas={setSomenteFavoritas}
+          aoFechar={() => {
+            setFiltrosAbertos(false);
+            requestAnimationFrame(() => btnFiltros.current?.focus());
+          }}
+        />,
+        document.body,
+      ) : null}
 
       {decksAbertos && portalPronto
         ? createPortal(

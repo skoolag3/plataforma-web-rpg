@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -12,6 +12,7 @@ import { SolicitarRedefinicaoSenhaDto } from '../dto/solicitar-redefinicao-senha
 import { VerifyEmailDto } from '../dto/verify-email.dto';
 import { AuthService } from '../services/auth.service';
 import { definirCookieSessao, removerCookieSessao } from '../auth-cookie';
+import { extrairJwt } from '../strategies/jwt.strategy';
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +25,7 @@ export class AuthController {
   }
 
   @Post('verify-email')
+  @Throttle({ default: { limit: 8, ttl: 60_000 } })
   async verifyEmail(@Body() dto: VerifyEmailDto) {
     return this.authService.verificarEmail(dto);
   }
@@ -48,14 +50,21 @@ export class AuthController {
 
   @Post('login')
   @Throttle({ default: { limit: 8, ttl: 60_000 } })
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const sessao = await this.authService.login(dto);
     definirCookieSessao(res, sessao.access_token);
-    return sessao;
+    return { usuario: sessao.usuario };
   }
 
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
+  logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    this.authService.revogarTokenSessao(extrairJwt(req));
     removerCookieSessao(res);
     return { message: 'Sessão encerrada.' };
   }

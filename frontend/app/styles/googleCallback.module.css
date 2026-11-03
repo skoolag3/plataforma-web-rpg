@@ -35,12 +35,11 @@
   font-weight: 700;
 }
 
-.iconeCarregando,
 .iconeErro {
   font-size: 2rem;
 }
 
-.iconeCarregando {
+.cartao [role="status"] {
   color: #c79cff;
 }
 

@@ -10,6 +10,7 @@ import {
 import { Test } from '@nestjs/testing';
 import type { App } from 'supertest/types';
 import { CurrentUser } from '../../src/common/decorators/current-user.decorator';
+import { PrismaService } from '../../src/database/prisma.service';
 import { HttpExceptionFilter } from '../../src/common/filters/http-exception.filter';
 import { AdminGuard } from '../../src/common/guards/admin.guard';
 import { JwtAuthGuard } from '../../src/common/guards/jwt-auth.guard';
@@ -124,6 +125,7 @@ export async function criarAppRotasCriticas() {
     webhook: jest.fn(),
   };
   const adminDashboardService = { resumo: jest.fn() };
+  const prismaService = { raridadeCarta: { findMany: jest.fn() } };
 
   const modulo = await Test.createTestingModule({
     controllers: [
@@ -144,6 +146,7 @@ export async function criarAppRotasCriticas() {
       { provide: ExpedicoesService, useValue: expedicoesService },
       { provide: LojaService, useValue: lojaService },
       { provide: AdminDashboardService, useValue: adminDashboardService },
+      { provide: PrismaService, useValue: prismaService },
     ],
   })
     .overrideGuard(JwtAuthGuard)

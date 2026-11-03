@@ -95,20 +95,16 @@
   gap: 0.65rem;
 }
 
-.listaPreferencias label {
+.preferenciaLinha {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  min-height: 2.8rem;
+  border: 1px solid rgba(148, 163, 184, .16);
+  border-radius: .55rem;
+  background: rgba(15, 23, 42, .45);
+  padding: .25rem .65rem;
   color: #d0d4de;
-  cursor: pointer;
   font-size: 0.75rem;
-}
-
-.listaPreferencias input {
-  width: 1.05rem;
-  height: 1.05rem;
-  margin: 0;
-  accent-color: #7c3aed;
 }
 
 .listaPreferencias > small {

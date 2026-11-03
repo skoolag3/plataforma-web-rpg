@@ -2,20 +2,15 @@
 
 import {
   Copy,
-  Frame,
-  Image as ImagemIcone,
   Pencil,
-  ShieldCheck,
   Swords,
   Trophy,
-  UserRound,
   X,
 } from "lucide-react";
 import { useState } from "react";
 import { criarEstiloMolduraPerfil } from "../../../components/cartaMontada";
-import AnimatedFileUpload from "@/components/ui/animated-file-upload";
 import VLabel8 from "@/components/ui/v-label-8";
-import type { MolduraConta, PerfilConta } from "../../../lib/perfil";
+import type { FotoCartaPerfil, MolduraConta, PerfilConta } from "../../../lib/perfil";
 import styles from "../../../styles/perfil/cardUsuario.module.css";
 import modalStyles from "../../../styles/perfil/modalPerfil.module.css";
 import { ModalEdicao } from "./modalEdicao";
@@ -23,42 +18,51 @@ import { ModalEdicao } from "./modalEdicao";
 type PropsCardUsuario = {
   perfil: PerfilConta;
   molduras: MolduraConta[];
+  fotosCartas: FotoCartaPerfil[];
+  aoSelecionarFotoCarta: (idCarta: string) => Promise<string>;
   aoAtualizarNome: (nome: string) => Promise<string>;
   aoAtualizarBiografia: (biografia: string) => Promise<string>;
   aoSelecionarMoldura: (idMoldura: string) => Promise<string>;
-  aoEnviarImagem: (
-    tipo: "avatar" | "banner",
-    arquivo: File,
-  ) => Promise<string>;
 };
 
 export function CardUsuario({
   perfil,
   molduras,
+  fotosCartas,
+  aoSelecionarFotoCarta,
   aoAtualizarNome,
   aoAtualizarBiografia,
   aoSelecionarMoldura,
-  aoEnviarImagem,
 }: PropsCardUsuario) {
   const [copiado, setCopiado] = useState(false);
   const [editandoNome, setEditandoNome] = useState(false);
-  const [modalPerfil, setModalPerfil] = useState<"bio" | "moldura" | "avatar" | "banner" | null>(null);
+  const [modalPerfil, setModalPerfil] = useState<"bio" | "aparencia" | null>(null);
+  const [abaAparencia, setAbaAparencia] = useState<"icone" | "moldura">("icone");
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
 
-  async function enviarImagemSelecionada(tipo: "avatar" | "banner", arquivos: File[]) {
-    const arquivo = arquivos[0];
-    if (!arquivo) return;
+  function abrirAparencia() {
+    setErro("");
+    setAbaAparencia("icone");
+    setModalPerfil("aparencia");
+  }
+
+  function escolherFoto(idCarta: string) {
     setSalvando(true);
     setErro("");
-    try {
-      await aoEnviarImagem(tipo, arquivo);
-      setModalPerfil(null);
-    } catch (erroCapturado) {
-      setErro(erroCapturado instanceof Error ? erroCapturado.message : "Não foi possível enviar a imagem.");
-    } finally {
-      setSalvando(false);
-    }
+    void aoSelecionarFotoCarta(idCarta)
+      .then(() => setModalPerfil(null))
+      .catch((erroCapturado) => setErro(erroCapturado instanceof Error ? erroCapturado.message : "Não foi possível selecionar a foto."))
+      .finally(() => setSalvando(false));
+  }
+
+  function escolherMoldura(idMoldura: string) {
+    setSalvando(true);
+    setErro("");
+    void aoSelecionarMoldura(idMoldura)
+      .then(() => setModalPerfil(null))
+      .catch((erroCapturado) => setErro(erroCapturado instanceof Error ? erroCapturado.message : "Não foi possível selecionar a moldura."))
+      .finally(() => setSalvando(false));
   }
 
   async function copiarId() {
@@ -69,46 +73,23 @@ export function CardUsuario({
 
   return (
     <section className={styles.cardUsuario}>
-      <div
-        className={styles.bannerPerfil}
-        style={
-          perfil.bannerUrl
-            ? { backgroundImage: `url("${perfil.bannerUrl}")` }
-            : undefined
-        }
-      >
-        <ImagemIcone aria-hidden="true" />
-        <button
-          type="button"
-          aria-label="Editar banner"
-          title={
-            perfil.storageConfigurado
-              ? "Editar banner"
-              : "Storage ainda não configurado"
-          }
-          disabled={!perfil.storageConfigurado}
-          onClick={() => { setErro(""); setModalPerfil("banner"); }}
-        >
-          <Pencil aria-hidden="true" />
-        </button>
-      </div>
-
       <div className={styles.identidadeUsuario}>
         <div className={styles.avatarArea}>
-          <div
+          <button
+            type="button"
+            aria-label="Personalizar ícone e moldura"
+            title="Personalizar ícone e moldura"
+            onClick={abrirAparencia}
             className={[
               styles.avatarUsuario,
               styles[perfil.molduraClasse] ?? "",
             ].join(" ")}
             style={
-              perfil.avatarUrl
-                ? { backgroundImage: `url("${perfil.avatarUrl}")` }
-                : undefined
+              { backgroundImage: `url("${perfil.avatarUrl ?? "/avatar-padrao.svg"}")` }
             }
           >
             <span className={styles.brilhoAvatar} />
-            <UserRound aria-hidden="true" />
-          </div>
+          </button>
           {perfil.molduraUrl ? (
             <span
               className={styles.molduraCartaAvatar}
@@ -121,15 +102,10 @@ export function CardUsuario({
           ) : null}
           <button
             type="button"
-            className={styles.btnEditarAvatar}
-            aria-label="Editar avatar"
-            title={
-              perfil.storageConfigurado
-                ? "Editar avatar"
-                : "Storage ainda não configurado"
-            }
-            disabled={!perfil.storageConfigurado}
-            onClick={() => { setErro(""); setModalPerfil("avatar"); }}
+            className={styles.btnEditarFoto}
+            aria-label="Personalizar ícone e moldura"
+            title="Personalizar ícone e moldura"
+            onClick={abrirAparencia}
           >
             <Pencil aria-hidden="true" />
           </button>
@@ -146,10 +122,6 @@ export function CardUsuario({
               <Pencil aria-hidden="true" />
             </button>
           </div>
-          <span className={styles.nivelUsuario}>
-            <ShieldCheck aria-hidden="true" />
-            Nível {perfil.nivel}
-          </span>
 
           <button type="button" className={styles.btnCopiarId} onClick={copiarId}>
             ID: {perfil.idUser}
@@ -157,26 +129,16 @@ export function CardUsuario({
             {copiado ? <small>Copiado</small> : null}
           </button>
 
-          <div className={styles.biografiaUsuario}>
-            <p>{perfil.biografia}</p>
-            <button
-              type="button"
-              aria-label="Editar biografia"
-              title="Editar biografia"
-              onClick={() => setModalPerfil("bio")}
-            >
-              <Pencil aria-hidden="true" />
-            </button>
-          </div>
-
+        </div>
+        <div className={styles.biografiaUsuario}>
+          <span>Bio</span>
+          <p>{perfil.biografia || "Adicione uma bio ao seu perfil."}</p>
           <button
             type="button"
-            className={styles.btnMoldura}
-            title="Selecionar moldura"
-            onClick={() => setModalPerfil("moldura")}
+            aria-label="Editar biografia"
+            title="Editar biografia"
+            onClick={() => setModalPerfil("bio")}
           >
-            <Frame aria-hidden="true" />
-            Moldura: {perfil.moldura}
             <Pencil aria-hidden="true" />
           </button>
         </div>
@@ -206,20 +168,58 @@ export function CardUsuario({
         </div>
       </dl>
 
-      {modalPerfil === "avatar" || modalPerfil === "banner" ? (
+      {modalPerfil === "aparencia" ? (
         <ModalEdicao
-          titulo={modalPerfil === "avatar" ? "Editar avatar" : "Editar banner"}
-          descricao="Escolha uma imagem PNG, JPG ou WEBP."
+          titulo="Personalizar perfil"
+          descricao="Escolha o ícone e a moldura do seu perfil."
           aoFechar={() => { if (!salvando) setModalPerfil(null); }}
         >
-          <AnimatedFileUpload
-            accept="image/png,image/jpeg,image/webp"
-            maxSize={modalPerfil === "avatar" ? 2 * 1024 * 1024 : 5 * 1024 * 1024}
-            rotulo={modalPerfil === "avatar" ? "Escolher avatar" : "Escolher banner"}
-            disabled={salvando}
-            onFilesSelected={(arquivos) => void enviarImagemSelecionada(modalPerfil, arquivos)}
-          />
-          {salvando ? <p className={modalStyles.erroForm}>Enviando imagem...</p> : null}
+          <div className={styles.abasAparencia} role="tablist" aria-label="Personalização do perfil">
+            <button type="button" role="tab" id="aba-icone" aria-controls="painel-icone" aria-selected={abaAparencia === "icone"} className={abaAparencia === "icone" ? styles.abaAtiva : ""} onClick={() => { setErro(""); setAbaAparencia("icone"); }}>Ícone</button>
+            <button type="button" role="tab" id="aba-moldura" aria-controls="painel-moldura" aria-selected={abaAparencia === "moldura"} className={abaAparencia === "moldura" ? styles.abaAtiva : ""} onClick={() => { setErro(""); setAbaAparencia("moldura"); }}>Moldura</button>
+          </div>
+          {abaAparencia === "icone" ? <div id="painel-icone" role="tabpanel" aria-labelledby="aba-icone">
+          <div className={styles.listaFotosCartas}>
+              <button
+                type="button"
+                className={!perfil.avatarUrl ? styles.fotoSelecionada : ""}
+                aria-pressed={!perfil.avatarUrl}
+                disabled={salvando}
+                onClick={() => escolherFoto("padrao")}
+              >
+                <img src="/avatar-padrao.svg" alt="" />
+                <span>Foto padrão</span>
+                <small>{!perfil.avatarUrl ? "Em uso" : "Disponível"}</small>
+              </button>
+              {fotosCartas.map((carta) => (
+                <button
+                  key={carta.id}
+                  type="button"
+                  className={perfil.avatarUrl === carta.fotoUrl ? styles.fotoSelecionada : ""}
+                  aria-pressed={perfil.avatarUrl === carta.fotoUrl}
+                  disabled={salvando}
+                  onClick={() => escolherFoto(carta.id)}
+                >
+                  <img src={carta.fotoUrl} alt="" />
+                  <span>{carta.nome}</span>
+                  <small>{perfil.avatarUrl === carta.fotoUrl ? "Em uso" : "Carta obtida"}</small>
+                </button>
+              ))}
+          </div>
+          {fotosCartas.length === 0 ? <p className={styles.avisoFotos}>As fotos das cartas que você obtiver vão aparecer aqui.</p> : null}
+          </div> : <div id="painel-moldura" role="tabpanel" aria-labelledby="aba-moldura">
+            <div className={styles.listaMolduras}>
+              {molduras.map((moldura) => (
+                <button type="button" key={moldura.id} disabled={!moldura.obtida || salvando} aria-pressed={perfil.moldura === moldura.nome} onClick={() => escolherMoldura(moldura.id)}>
+                  <span className={[styles.amostraMoldura, styles[moldura.classeCss] ?? ""].join(" ")}>
+                    {moldura.imagemUrl ? <i className={styles.imagemAmostraMoldura} style={{ ...criarEstiloMolduraPerfil(moldura.configVisual), backgroundImage: `url("${moldura.imagemUrl}")` }} aria-hidden="true" /> : null}
+                  </span>
+                  <strong>{moldura.nome}</strong>
+                  <small>{moldura.obtida ? perfil.moldura === moldura.nome ? "Em uso" : "Disponível" : moldura.requisito ?? "Bloqueada"}</small>
+                </button>
+              ))}
+            </div>
+          </div>}
           {erro ? <p className={modalStyles.erroForm} role="alert">{erro}</p> : null}
         </ModalEdicao>
       ) : null}
@@ -320,52 +320,6 @@ export function CardUsuario({
         </ModalEdicao>
       ) : null}
 
-      {modalPerfil === "moldura" ? (
-        <ModalEdicao
-          titulo="Selecionar moldura"
-          descricao="Somente molduras obtidas podem ser usadas."
-          aoFechar={() => setModalPerfil(null)}
-        >
-          <div className={styles.listaMolduras}>
-            {molduras.map((moldura) => (
-              <button
-                type="button"
-                key={moldura.id}
-                disabled={!moldura.obtida}
-                onClick={() =>
-                  void aoSelecionarMoldura(moldura.id).then(() =>
-                    setModalPerfil(null),
-                  )
-                }
-              >
-                <span
-                  className={[
-                    styles.amostraMoldura,
-                    styles[moldura.classeCss] ?? "",
-                  ].join(" ")}
-                >
-                  {moldura.imagemUrl ? (
-                    <i
-                      className={styles.imagemAmostraMoldura}
-                      style={{
-                        ...criarEstiloMolduraPerfil(moldura.configVisual),
-                        backgroundImage: `url("${moldura.imagemUrl}")`,
-                      }}
-                      aria-hidden="true"
-                    />
-                  ) : null}
-                </span>
-                <strong>{moldura.nome}</strong>
-                <small>
-                  {moldura.obtida
-                    ? "Disponível"
-                    : moldura.requisito ?? "Bloqueada"}
-                </small>
-              </button>
-            ))}
-          </div>
-        </ModalEdicao>
-      ) : null}
     </section>
   );
 }

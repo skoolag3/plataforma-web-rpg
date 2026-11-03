@@ -1,9 +1,15 @@
-import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
-import type { Response } from 'express';
+import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { definirCookieSessao } from '../auth/auth-cookie';
+import {
+  definirCookieOAuthNonce,
+  definirCookieSessao,
+  extrairCookie,
+  NOME_COOKIE_OAUTH_NONCE,
+  removerCookieOAuthNonce,
+} from '../auth/auth-cookie';
 import { GoogleOAuthService } from './google-oauth.service';
 
 @Controller('perfil/google')
@@ -11,14 +17,21 @@ export class GoogleOAuthController {
   constructor(private readonly googleOAuthService: GoogleOAuthService) {}
 
   @Get('url-login')
-  gerarUrlLogin() {
-    return this.googleOAuthService.gerarUrlLogin();
+  gerarUrlLogin(@Res({ passthrough: true }) response: Response) {
+    const { url, nonce } = this.googleOAuthService.gerarUrlLogin();
+    definirCookieOAuthNonce(response, nonce);
+    return { url };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('url')
-  gerarUrl(@CurrentUser() usuario: AuthenticatedUser) {
-    return this.googleOAuthService.gerarUrlVinculo(usuario.id);
+  gerarUrl(
+    @CurrentUser() usuario: AuthenticatedUser,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { url, nonce } = this.googleOAuthService.gerarUrlVinculo(usuario.id);
+    definirCookieOAuthNonce(response, nonce);
+    return { url };
   }
 
   @Get('callback')
@@ -26,10 +39,13 @@ export class GoogleOAuthController {
     @Query('code') code: string | undefined,
     @Query('state') state: string | undefined,
     @Query('error') erroOAuth: string | undefined,
+    @Req() request: Request,
     @Res() response: Response,
   ) {
     const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
     const callbackFrontend = `${frontendUrl}/login/google-callback`;
+    const nonceCookie = extrairCookie(request, NOME_COOKIE_OAUTH_NONCE);
+    removerCookieOAuthNonce(response);
 
     if (erroOAuth) {
       const motivo = erroOAuth === 'access_denied' ? 'cancelado' : 'oauth';
@@ -44,7 +60,11 @@ export class GoogleOAuthController {
 
     let resultado: Awaited<ReturnType<GoogleOAuthService['processarCallback']>>;
     try {
-      resultado = await this.googleOAuthService.processarCallback(code, state);
+      resultado = await this.googleOAuthService.processarCallback(
+        code,
+        state,
+        nonceCookie,
+      );
     } catch {
       response.redirect(`${callbackFrontend}#error=oauth`);
       return;

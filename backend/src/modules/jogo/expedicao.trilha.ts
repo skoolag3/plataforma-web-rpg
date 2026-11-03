@@ -7,14 +7,54 @@ export type OpcaoRota = {
   descricao: string;
   dificuldade: DificuldadeRota;
   risco: string;
+  recompensa?: number;
+  cartas?: string[];
+  quantidadeCartas?: number;
+  modoCartas?: 'ALEATORIO' | 'MANUAL';
+  mixed?: boolean;
+  percentualMantidoDerrota?: number;
 };
 
+export type CaminhoCampanha = {
+  dificuldade: Exclude<DificuldadeRota, 'CHEFE'>;
+  recompensa: number;
+  cartas: string[];
+  quantidadeCartas?: number;
+  modoCartas?: 'ALEATORIO' | 'MANUAL';
+  mixed?: boolean;
+  titulo?: string;
+  descricao?: string;
+};
+
+export type SecaoCampanha =
+  | { tipo: 'BATALHA'; caminhos: CaminhoCampanha[]; grupo?: number; percentualMantidoDerrota?: number }
+  | { tipo: 'BOSS'; percentualMantidoDerrota?: number };
+
+export function secoesPadraoCampanha(recompensas: ConfiguracaoRecompensasExpedicao): SecaoCampanha[] {
+  return [...[0, 1, 2].map((indice) => ({
+    tipo: 'BATALHA' as const,
+    grupo: indice < 2 ? 1 : 2,
+    caminhos: (['FACIL', 'MEDIA', 'DIFICIL'] as const).map((dificuldade) => ({
+      dificuldade, recompensa: recompensas.recompensas[dificuldade], cartas: [],
+      quantidadeCartas: 3, modoCartas: 'ALEATORIO' as const, mixed: false,
+    })),
+  })), { tipo: 'BOSS' }];
+}
+
 export type TrilhaExpedicao = {
-  etapas: Array<{ indice: number; opcoes: OpcaoRota[] }>;
+  etapas: Array<{ indice: number; opcoes: OpcaoRota[]; percentualMantidoDerrota?: number }>;
   chefe: OpcaoRota;
   configuracao?: ConfiguracaoRecompensasExpedicao;
   boss?: ConfiguracaoBoss;
 };
+
+export function percentualMantidoNaEtapa(trilha: TrilhaExpedicao, indice: number) {
+  return (indice === trilha.etapas.length
+    ? trilha.chefe.percentualMantidoDerrota
+    : trilha.etapas[indice]?.percentualMantidoDerrota)
+    ?? trilha.configuracao?.percentualMantidoDerrota
+    ?? configuracaoRecompensasPadrao.percentualMantidoDerrota;
+}
 
 const rotasPorDificuldade: Record<
   Exclude<DificuldadeRota, 'CHEFE'>,
@@ -85,22 +125,31 @@ export function gerarTrilhaExpedicao(
   seed: number,
   configuracao = configuracaoRecompensasPadrao,
   boss?: ConfiguracaoBoss,
+  secoes: SecaoCampanha[] = secoesPadraoCampanha(configuracao),
 ): TrilhaExpedicao {
   const random = criarRandom(seed);
-  const dificuldades = ['FACIL', 'MEDIA', 'DIFICIL'] as const;
-  const etapas = Array.from({ length: 3 }, (_, indice) => {
-    const opcoes = dificuldades.map((dificuldade) => {
+  const etapas = secoes.slice(0, -1).map((secao, indice) => {
+    if (secao.tipo !== 'BATALHA') throw new Error('Seção de batalha inválida.');
+    const opcoes = secao.caminhos.slice(0, 3).map((caminho, indiceCaminho) => {
+      const { dificuldade } = caminho;
       const modelos = rotasPorDificuldade[dificuldade];
       const modelo = modelos[Math.floor(random() * modelos.length)];
       return {
         ...modelo,
-        id: `etapa-${indice + 1}-${dificuldade.toLowerCase()}`,
+        titulo: caminho.titulo?.trim() || modelo.titulo,
+        descricao: caminho.descricao?.trim() || modelo.descricao,
+        id: `etapa-${indice + 1}-caminho-${indiceCaminho + 1}`,
         dificuldade,
         risco: riscoPorDificuldade[dificuldade],
+        recompensa: caminho.recompensa,
+        cartas: caminho.cartas,
+        quantidadeCartas: caminho.quantidadeCartas,
+        modoCartas: caminho.modoCartas,
+        mixed: caminho.mixed,
       };
     });
 
-    return { indice, opcoes: embaralhar(opcoes, random) };
+    return { indice, opcoes: embaralhar(opcoes, random), percentualMantidoDerrota: secao.percentualMantidoDerrota };
   });
   return {
     etapas,
@@ -112,6 +161,7 @@ export function gerarTrilhaExpedicao(
       descricao: 'O último adversário protege a recompensa da jornada.',
       dificuldade: 'CHEFE',
       risco: 'Chefe',
+      percentualMantidoDerrota: secoes.at(-1)?.percentualMantidoDerrota,
     },
   };
 }

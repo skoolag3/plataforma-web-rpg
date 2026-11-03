@@ -1,4 +1,5 @@
 import { limitesHabilidade } from './habilidade.limites';
+import { limiteIncrementoEscala, limiteTotalEscala } from './habilidade.escala';
 import type {
   ConfiguracaoHabilidade,
   ErroValidacaoHabilidade,
@@ -54,16 +55,20 @@ export function validarHabilidade(
 }
 
 function obterLimiteValor(habilidade: ConfiguracaoHabilidade): Intervalo {
-  if (habilidade.tipoEfeito === 'CRITICO') return limitesHabilidade.valorPercentual;
+  if (habilidade.tipoEfeito === 'CRITICO') return limitesHabilidade.percentualCritico;
   if (habilidade.tipoEfeito === 'EVASAO') {
     return limitesHabilidade.percentualEvasao;
   }
   if (habilidade.tipoEfeito === 'ROUBO_VIDA') {
     return limitesHabilidade.percentualRouboVida;
   }
-  return habilidade.unidade === 'PERCENTUAL'
-    ? limitesHabilidade.valorPercentual
-    : limitesHabilidade.valorFixo;
+  if (habilidade.unidade === 'FIXO') return limitesHabilidade.valorFixo;
+  if (habilidade.tipoEfeito === 'DANO') {
+    return habilidade.formaAplicacao === 'SUBSTITUI_ATAQUE'
+      ? limitesHabilidade.percentualAtaqueSubstituto
+      : limitesHabilidade.percentualDanoDireto;
+  }
+  return limitesHabilidade.percentualEfeito;
 }
 
 function validarCompatibilidadeEfeito(
@@ -72,6 +77,13 @@ function validarCompatibilidadeEfeito(
 ) {
   const alteraAtributo =
     habilidade.tipoEfeito === 'BUFF' || habilidade.tipoEfeito === 'DEBUFF';
+  const alvoEsperado = ['DANO', 'DEBUFF', 'CRITICO'].includes(habilidade.tipoEfeito)
+    ? 'INIMIGO_ATIVO'
+    : 'PROPRIA_CARTA';
+  if (habilidade.alvo !== alvoEsperado) {
+    adicionarErro(erros, 'alvo', 'ALVO_INCOMPATIVEL',
+      `O efeito ${habilidade.tipoEfeito} deve afetar ${alvoEsperado === 'INIMIGO_ATIVO' ? 'o inimigo ativo' : 'a própria carta'}.`);
+  }
 
   if (habilidade.tipoEfeito === 'CRITICO') {
     if (habilidade.gatilho !== 'AO_ATACAR' ||
@@ -133,6 +145,14 @@ function validarFormaAplicacao(
       'Somente habilidades acionadas ao atacar podem substituir o ataque.',
     );
   }
+  if (habilidade.formaAplicacao === 'SUBSTITUI_ATAQUE' &&
+      habilidade.tipoEfeito === 'DANO' &&
+      habilidade.unidade !== 'PERCENTUAL') {
+    adicionarErro(
+      erros, 'unidade', 'UNIDADE_SUBSTITUICAO_INCOMPATIVEL',
+      'Dano que substitui um ataque deve usar porcentagem do ataque.',
+    );
+  }
 }
 
 function validarRequisito(
@@ -183,6 +203,16 @@ function validarRequisito(
       'TURNO_FORA_LIMITE',
     );
   }
+  if (requisito.tipo === 'INTERVALO_TURNOS') {
+    validarInteiroNoIntervalo(
+      erros, 'requisito.intervalo', requisito.intervalo,
+      limitesHabilidade.intervaloTurnos, 'INTERVALO_TURNOS_FORA_LIMITE',
+    );
+    if (habilidade.gatilho !== 'INICIO_TURNO') {
+      adicionarErro(erros, 'gatilho', 'INTERVALO_TURNOS_INCOMPATIVEL',
+        'A cada X turnos exige o gatilho no início do turno.');
+    }
+  }
 }
 
 function validarEscala(
@@ -213,6 +243,18 @@ function validarEscala(
       'escala.limite',
       'LIMITE_ESCALA_MENOR_QUE_BASE',
       'O limite da escala não pode ser menor que o valor base.',
+    );
+  }
+  if (habilidade.escala.valor > limiteIncrementoEscala(habilidade.valorBase)) {
+    adicionarErro(
+      erros, 'escala.valor', 'ESCALA_SALTO_EXCESSIVO',
+      `O aumento por vez pode ser de no máximo ${limiteIncrementoEscala(habilidade.valorBase)} para este valor base.`,
+    );
+  }
+  if (habilidade.escala.limite > limiteTotalEscala(habilidade.valorBase)) {
+    adicionarErro(
+      erros, 'escala.limite', 'LIMITE_ESCALA_DESPROPORCIONAL',
+      `O teto da escala pode ser de no máximo ${limiteTotalEscala(habilidade.valorBase)} para este valor base.`,
     );
   }
 }

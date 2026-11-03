@@ -86,6 +86,16 @@
   background: rgba(127, 29, 29, 0.32);
   color: #fecaca;
 }
+.confirmarDescarteCarta {
+  position: relative;
+  z-index: 101;
+}
+.confirmarDescarteCarta > div {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.confirmarDescarteCarta button {
+  padding: 0.45rem;
+}
 
 .editPanel header {
   display: flex;
@@ -106,7 +116,7 @@
   font-size: 0.86rem;
 }
 
-.editPanel header button {
+.editPanel > header button {
   display: grid;
   width: 2rem;
   height: 2rem;
@@ -118,7 +128,7 @@
   cursor: pointer;
 }
 
-.editPanel header button:hover {
+.editPanel > header button:hover {
   border-color: rgba(248, 113, 113, 0.68);
   background: rgba(153, 27, 27, 0.78);
 }
@@ -282,6 +292,10 @@
   align-items: start;
   gap: 0.7rem;
   padding: 0.8rem;
+}
+
+.campoElemento {
+  grid-template-rows: 1.5rem auto;
 }
 
 .sectionResetRow {

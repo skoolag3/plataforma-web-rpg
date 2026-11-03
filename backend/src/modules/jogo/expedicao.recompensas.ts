@@ -8,9 +8,9 @@ export type ConfiguracaoRecompensasExpedicao = {
 export const configuracaoRecompensasPadrao: ConfiguracaoRecompensasExpedicao = {
   percentualMantidoDerrota: 70,
   recompensas: {
-    FACIL: 25,
-    MEDIA: 25,
-    DIFICIL: 25,
+    FACIL: 20,
+    MEDIA: 35,
+    DIFICIL: 50,
     CHEFE: 100,
   },
 };

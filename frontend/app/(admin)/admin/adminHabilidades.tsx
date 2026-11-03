@@ -31,10 +31,12 @@ import {
 
 import {
   AdminHabilidadeFormulario,
+  alvoDoEfeito,
   type FormHabilidade,
 } from "./adminHabilidadeFormulario";
 import { AdminHabilidadeTeste } from "./adminHabilidadeTeste";
-import { AdminLayout } from "./adminShared";
+import { AjudaTiposHabilidade, TipoHabilidade } from "./adminHabilidadeTipos";
+import { AdminLayout, NomeComAlerta } from "./adminShared";
 import { combinarEstilos } from "./combinarEstilos";
 import { FiltroHabilidadesModal } from "./filtroHabilidadesModal";
 
@@ -46,14 +48,14 @@ const formularioVazio: FormHabilidade = {
   tipoEfeito: "DANO",
   gatilho: "AO_ATACAR",
   alvo: "INIMIGO_ATIVO",
-  unidade: "PERCENTUAL",
-  valorBase: 100,
+  unidade: "FIXO",
+  valorBase: 10,
   formaAplicacao: "APOS_ACAO",
   requisitoTipo: "NENHUM",
-  requisitoValor: 3,
+  requisitoValor: 1,
   escalaTipo: "NENHUMA",
   escalaValor: 5,
-  escalaLimite: 100,
+  escalaLimite: 30,
 };
 
 function Status({ status }: { status: AdminHabilidade["status"] }) {
@@ -79,7 +81,7 @@ function toForm(habilidade: AdminHabilidade): FormHabilidade {
     descricao: habilidade.descricao ?? "",
     tipoEfeito: habilidade.tipoEfeito,
     gatilho: habilidade.gatilho,
-    alvo: habilidade.alvo,
+    alvo: alvoDoEfeito(habilidade.tipoEfeito),
     atributo: habilidade.atributo ?? undefined,
     unidade: habilidade.unidade,
     valorBase: habilidade.valorBase,
@@ -127,6 +129,10 @@ export function Habilidades() {
   const [form, setForm] = useState<FormHabilidade | null>(null);
   const [habilidadeTeste, setHabilidadeTeste] =
     useState<AdminHabilidade | null>(null);
+  const [confirmacao, setConfirmacao] = useState<{
+    tipo: "publicar" | "inativar";
+    habilidade: AdminHabilidade;
+  } | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [processandoId, setProcessandoId] = useState("");
@@ -169,13 +175,16 @@ export function Habilidades() {
   }, []);
 
   useEffect(() => {
-    if (!form && !habilidadeTeste) return;
+    if (!form && !habilidadeTeste && !confirmacao) return;
     const overflowAnterior = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     function fecharComEscape(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setForm(null);
-        setHabilidadeTeste(null);
+        if (confirmacao) setConfirmacao(null);
+        else {
+          setForm(null);
+          setHabilidadeTeste(null);
+        }
       }
     }
     document.addEventListener("keydown", fecharComEscape);
@@ -183,7 +192,7 @@ export function Habilidades() {
       document.body.style.overflow = overflowAnterior;
       document.removeEventListener("keydown", fecharComEscape);
     };
-  }, [form, habilidadeTeste]);
+  }, [form, habilidadeTeste, confirmacao]);
 
   const tipos = useMemo(
     () =>
@@ -234,7 +243,21 @@ export function Habilidades() {
         };
       }
       if (campo === "tipoEfeito" && atual.tipoEfeito === "CRITICO") {
-        return { ...atual, tipoEfeito: valor as AdminHabilidade["tipoEfeito"], requisitoTipo: "NENHUM", requisitoValor: undefined };
+        const tipoEfeito = valor as AdminHabilidade["tipoEfeito"];
+        return { ...atual, tipoEfeito, alvo: alvoDoEfeito(tipoEfeito), requisitoTipo: "NENHUM", requisitoValor: undefined };
+      }
+      if (campo === "tipoEfeito") {
+        const tipoEfeito = valor as AdminHabilidade["tipoEfeito"];
+        return { ...atual, tipoEfeito, alvo: alvoDoEfeito(tipoEfeito) };
+      }
+      if (campo === "valorBase") {
+        const valorBase = valor as number;
+        return {
+          ...atual,
+          valorBase,
+          escalaValor: Math.min(atual.escalaValor ?? 1, Math.max(1, Math.ceil(valorBase / 2))),
+          escalaLimite: Math.max(valorBase, Math.min(atual.escalaLimite ?? valorBase, valorBase * 3)),
+        };
       }
       return { ...atual, [campo]: valor };
     });
@@ -271,7 +294,7 @@ export function Habilidades() {
   }
 
   async function inativar(habilidade: AdminHabilidade) {
-    if (!window.confirm(`Inativar a habilidade ${habilidade.nome}?`)) return;
+    setProcessandoId(habilidade.id);
     setErro("");
     setFeedback("");
     try {
@@ -282,11 +305,14 @@ export function Habilidades() {
       setHabilidades((atuais) =>
         atuais.map((item) => (item.id === atualizada.id ? atualizada : item)),
       );
+      setConfirmacao(null);
       setFeedback("Habilidade inativada.");
     } catch (error) {
       setErro(
         error instanceof Error ? error.message : "Não foi possível inativar.",
       );
+    } finally {
+      setProcessandoId("");
     }
   }
 
@@ -304,7 +330,6 @@ export function Habilidades() {
       setErro("Execute ao menos um teste antes de publicar esta versão.");
       return;
     }
-    if (!window.confirm(`Publicar a habilidade ${habilidade.nome}?`)) return;
 
     setProcessandoId(habilidade.id);
     setErro("");
@@ -312,6 +337,7 @@ export function Habilidades() {
     try {
       const atualizada = await publicarAdminHabilidade(habilidade.id);
       atualizarHabilidade(atualizada);
+      setConfirmacao(null);
       setFeedback("Habilidade publicada e disponível para vinculação.");
     } catch (error) {
       setErro(
@@ -389,7 +415,7 @@ export function Habilidades() {
               <thead>
                 <tr>
                   <th>Habilidade</th>
-                  <th>Tipo</th>
+                  <th><span className={featureStyles.tituloTipo}>Tipo <AjudaTiposHabilidade /></span></th>
                   <th>Gatilho</th>
                   <th>Alvo</th>
                   <th>Status</th>
@@ -402,13 +428,26 @@ export function Habilidades() {
                     <td colSpan={6}>Nenhuma habilidade encontrada.</td>
                   </tr>
                 ) : null}
-                {habilidadesFiltradas.map((habilidade) => (
+                {habilidadesFiltradas.map((habilidade) => {
+                  const motivoAlerta =
+                    habilidade.status === "RASCUNHO"
+                      ? !habilidade.testadaEm
+                        ? "Habilidade em rascunho e ainda não testada."
+                        : "Habilidade em rascunho aguardando publicação."
+                      : habilidade.status !== "INATIVA" && !habilidade.testadaEm
+                        ? "Versão ainda não testada."
+                        : null;
+                  return (
                   <tr key={habilidade.id}>
-                    <td>
+                    <td data-label="Habilidade">
                       <span className={styles.habilidadeNome}>
                         <Sparkles aria-hidden="true" />
                         <span>
-                          <strong>{habilidade.nome}</strong>
+                          <NomeComAlerta
+                            nome={habilidade.nome}
+                            tom="amarelo"
+                            motivo={motivoAlerta}
+                          />
                           <small>
                             v{habilidade.versao}
                             {habilidade.testadaEm
@@ -418,13 +457,13 @@ export function Habilidades() {
                         </span>
                       </span>
                     </td>
-                    <td>{habilidade.tipoEfeito}</td>
-                    <td>{habilidade.gatilho}</td>
-                    <td>{habilidade.alvo}</td>
-                    <td>
+                    <td data-label="Tipo"><TipoHabilidade tipo={habilidade.tipoEfeito} texto={habilidade.tipoEfeito} /></td>
+                    <td data-label="Gatilho">{habilidade.gatilho}</td>
+                    <td data-label="Alvo">{habilidade.alvo}</td>
+                    <td data-label="Status">
                       <Status status={habilidade.status} />
                     </td>
-                    <td>
+                    <td data-label="Ações">
                       <details className={styles.menuAcoesCarta} name="acoes-habilidades">
                         <summary aria-label={`Ações de ${habilidade.nome}`}>
                           <MoreHorizontal aria-hidden="true" />
@@ -448,14 +487,14 @@ export function Habilidades() {
                             title={habilidade.testadaEm ? "Publicar versão testada" : "Teste esta versão antes de publicar"}
                             onClick={(evento) => {
                               evento.currentTarget.closest("details")?.removeAttribute("open");
-                              void publicar(habilidade);
+                              setConfirmacao({ tipo: "publicar", habilidade });
                             }}
                           >
                             <Rocket aria-hidden="true" /> Publicar
                           </button>
                           <button type="button" disabled={habilidade.status === "INATIVA"} onClick={(evento) => {
                             evento.currentTarget.closest("details")?.removeAttribute("open");
-                            void inativar(habilidade);
+                            setConfirmacao({ tipo: "inativar", habilidade });
                           }}>
                             <Trash2 aria-hidden="true" /> Inativar
                           </button>
@@ -463,7 +502,8 @@ export function Habilidades() {
                       </details>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -495,6 +535,67 @@ export function Habilidades() {
           aoTestar={atualizarHabilidade}
           aoFechar={() => setHabilidadeTeste(null)}
         />
+      ) : null}
+      {confirmacao ? (
+        <div
+          className={styles.modalBackdrop}
+          role="presentation"
+          onMouseDown={(evento) => {
+            if (evento.target === evento.currentTarget && !processandoId) {
+              setConfirmacao(null);
+            }
+          }}
+        >
+          <section
+            className={featureStyles.confirmarAcaoHabilidade}
+            data-tipo={confirmacao.tipo}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="titulo-confirmar-habilidade"
+          >
+            {confirmacao.tipo === "publicar" ? (
+              <Rocket aria-hidden="true" />
+            ) : (
+              <Trash2 aria-hidden="true" />
+            )}
+            <h2 id="titulo-confirmar-habilidade">
+              {confirmacao.tipo === "publicar"
+                ? `Publicar ${confirmacao.habilidade.nome}?`
+                : `Inativar ${confirmacao.habilidade.nome}?`}
+            </h2>
+            <p>
+              {confirmacao.tipo === "publicar"
+                ? `A versão v${confirmacao.habilidade.versao} foi testada e ficará disponível para vinculação nas cartas do jogo.`
+                : "A habilidade deixará de ficar disponível para novas vinculações até ser reativada."}
+            </p>
+            <div>
+              <button
+                type="button"
+                disabled={Boolean(processandoId)}
+                onClick={() => setConfirmacao(null)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(processandoId)}
+                onClick={() =>
+                  void (confirmacao.tipo === "publicar"
+                    ? publicar(confirmacao.habilidade)
+                    : inativar(confirmacao.habilidade))
+                }
+              >
+                {processandoId
+                  ? confirmacao.tipo === "publicar"
+                    ? "Publicando..."
+                    : "Inativando..."
+                  : confirmacao.tipo === "publicar"
+                    ? "Publicar habilidade"
+                    : "Inativar habilidade"}
+              </button>
+            </div>
+          </section>
+        </div>
       ) : null}
     </AdminLayout>
   );

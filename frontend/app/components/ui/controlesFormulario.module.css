@@ -11,7 +11,7 @@
   padding: 0.28rem 0.58rem;
   box-shadow:
     inset 0 1px rgba(255, 255, 255, 0.045),
-    0 0 0 0 rgba(190, 242, 100, 0);
+    0 0 0 0 rgba(167, 139, 250, 0);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -26,10 +26,10 @@
 .selectRaiz:focus-within,
 .selectRaiz[data-aberto] {
   z-index: 60;
-  border-color: rgba(190, 242, 100, 0.72);
+  border-color: rgba(167, 139, 250, 0.72);
   box-shadow:
     inset 0 1px rgba(255, 255, 255, 0.045),
-    0 0 0 3px rgba(190, 242, 100, 0.08);
+    0 0 0 3px rgba(167, 139, 250, 0.1);
 }
 
 .rotulo {
@@ -109,7 +109,7 @@
   right: 0;
   left: 0;
   display: grid;
-  max-height: min(19rem, 50vh);
+  max-height: min(19rem, var(--espaco-menu, 50vh));
   gap: 0.16rem;
   overflow-y: auto;
   border: 1px solid rgba(167, 139, 250, 0.28);
@@ -118,6 +118,11 @@
   padding: 0.3rem;
   box-shadow: 0 1.1rem 2.8rem rgba(1, 4, 12, 0.6);
   animation: abrirMenu 160ms ease-out;
+}
+
+.selectRaiz[data-menu-acima] .selectMenu {
+  top: auto;
+  bottom: calc(100% + 0.38rem);
 }
 
 .selectRaiz .selectMenu > button {
@@ -158,7 +163,7 @@
   width: 0.85rem;
   height: 0.85rem;
   flex: 0 0 auto;
-  color: #bef264;
+  color: currentColor;
 }
 
 .opcaoConteudo > span {

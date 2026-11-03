@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -29,12 +30,15 @@ export class AdminNoticiasController {
   }
 
   @Patch(':id')
-  atualizar(@Param('id') id: string, @Body() dto: SalvarAdminNoticiaDto) {
+  atualizar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SalvarAdminNoticiaDto,
+  ) {
     return this.noticiasService.atualizar(id, dto);
   }
 
   @Delete(':id')
-  remover(@Param('id') id: string) {
+  remover(@Param('id', ParseUUIDPipe) id: string) {
     return this.noticiasService.remover(id);
   }
 }

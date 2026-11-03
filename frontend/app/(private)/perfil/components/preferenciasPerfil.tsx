@@ -9,6 +9,7 @@ import {
   notificarSucesso,
 } from "../../../components/notificacoesGlobais";
 import { SecaoRecolhivel } from "./secaoRecolhivel";
+import { SwitchToggle } from "../../../../components/ui/switch";
 
 type PropsPreferenciasPerfil = {
   preferencias: PreferenciasConta;
@@ -47,37 +48,12 @@ export function PreferenciasPerfil({
   return (
     <SecaoRecolhivel
       titulo="Preferências"
-      descricao="Privacidade e notificações"
+      descricao="Privacidade e ranking"
       icone={Settings}
     >
       <div className={styles.listaPreferencias}>
-        <label>
-          <input
-            type="checkbox"
-            checked={valores.receberNotificacoes}
-            onChange={() => alternar("receberNotificacoes")}
-            disabled={salvando}
-          />
-          <span>Receber notificações</span>
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={valores.mostrarNoRanking}
-            onChange={() => alternar("mostrarNoRanking")}
-            disabled={salvando}
-          />
-          <span>Mostrar perfil no ranking</span>
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={valores.ocultarHistorico}
-            onChange={() => alternar("ocultarHistorico")}
-            disabled={salvando}
-          />
-          <span>Ocultar histórico de partidas</span>
-        </label>
+        <div className={styles.preferenciaLinha}><SwitchToggle checked={valores.mostrarNoRanking} onChange={() => void alternar("mostrarNoRanking")} label="Mostrar perfil no ranking" disabled={salvando} /></div>
+        <div className={styles.preferenciaLinha}><SwitchToggle checked={valores.ocultarHistorico} onChange={() => void alternar("ocultarHistorico")} label="Ocultar histórico de partidas" disabled={salvando} /></div>
 
         {salvando ? <small>Salvando...</small> : null}
       </div>

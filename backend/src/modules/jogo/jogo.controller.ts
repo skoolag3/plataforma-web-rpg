@@ -4,11 +4,13 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -27,6 +29,7 @@ import { EscolherRotaDto, IniciarExpedicaoDto } from './dto/expedicao.dto';
 import { ExecutarTurnoDto } from './dto/executar-turno.dto';
 import { ExpedicoesService } from './expedicoes.service';
 import { ResponderBossDto } from './dto/responder-boss.dto';
+import { PrismaService } from '../../database/prisma.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller()
@@ -39,7 +42,16 @@ export class JogoController {
     private readonly recompensasService: RecompensasService,
     private readonly correioService: CorreioService,
     private readonly expedicoesService: ExpedicoesService,
+    private readonly prisma: PrismaService,
   ) {}
+
+  @Get('raridades')
+  listarRaridades() {
+    return this.prisma.raridadeCarta.findMany({
+      select: { codigo: true, nome: true, valor_venda: true, cor: true, ordem: true },
+      orderBy: [{ ordem: 'asc' }, { nome: 'asc' }],
+    });
+  }
 
   @Get('expedicoes/atual')
   buscarExpedicaoAtual(@CurrentUser() usuario: AuthenticatedUser) {
@@ -57,16 +69,17 @@ export class JogoController {
   @Post('expedicoes/:id/escolhas')
   escolherRota(
     @CurrentUser() usuario: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: EscolherRotaDto,
   ) {
     return this.expedicoesService.escolher(usuario.id, id, dto.idEscolha);
   }
 
   @Post('expedicoes/:id/boss/resposta')
+  @Throttle({ default: { limit: 6, ttl: 60_000 } })
   responderBoss(
     @CurrentUser() usuario: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ResponderBossDto,
   ) {
     return this.expedicoesService.responderBoss(usuario.id, id, dto.resposta);
@@ -75,7 +88,7 @@ export class JogoController {
   @Post('expedicoes/:id/abandonar')
   abandonarExpedicao(
     @CurrentUser() usuario: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.expedicoesService.abandonar(usuario.id, id);
   }
@@ -140,7 +153,7 @@ export class JogoController {
   @Get('partidas/:id')
   buscarPartida(
     @CurrentUser() usuario: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.partidasService.buscar(usuario.id, id);
   }
@@ -148,7 +161,7 @@ export class JogoController {
   @Post('partidas/:id/turnos')
   executarTurno(
     @CurrentUser() usuario: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ExecutarTurnoDto,
   ) {
     return this.partidasService.executarTurno(usuario.id, id, dto.acao);
@@ -180,7 +193,7 @@ export class JogoController {
   @Get('decks/:id')
   buscarDeck(
     @CurrentUser() usuario: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.decksService.buscar(usuario.id, id);
   }
@@ -196,7 +209,7 @@ export class JogoController {
   @Patch('decks/:id')
   atualizarDeck(
     @CurrentUser() usuario: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AtualizarDeckDto,
   ) {
     return this.decksService.atualizar(usuario.id, id, dto);
@@ -205,7 +218,7 @@ export class JogoController {
   @Post('decks/:id/ativar')
   ativarDeck(
     @CurrentUser() usuario: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.decksService.ativar(usuario.id, id);
   }
@@ -213,7 +226,7 @@ export class JogoController {
   @Delete('decks/:id')
   excluirDeck(
     @CurrentUser() usuario: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.decksService.excluir(usuario.id, id);
   }

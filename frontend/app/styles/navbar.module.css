@@ -1,3 +1,11 @@
+.cabecalhoJogador {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+}
+
 .cabecalho {
   position: absolute;
   top: 0.85rem;
@@ -28,6 +36,7 @@
   pointer-events: auto;
   backdrop-filter: blur(1rem);
 }
+.navNoticia { grid-template-columns: minmax(0, 1fr) auto; }
 
 .marca {
   display: inline-flex;
@@ -40,20 +49,6 @@
   min-width: 0;
   text-decoration: none;
   text-transform: uppercase;
-}
-
-.seloMarca {
-  display: grid;
-  width: 2.35rem;
-  height: 2.35rem;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 0.28rem;
-  background: rgba(255, 255, 255, 0.055);
-  color: #d7e9b2;
-  font-size: 0.72rem;
-  font-style: normal;
-  font-weight: 950;
 }
 
 .nomeMarca {
@@ -211,11 +206,5 @@
 
   .acoes {
     display: flex;
-  }
-}
-
-@media (max-width: 380px) {
-  .nomeMarca {
-    display: none;
   }
 }

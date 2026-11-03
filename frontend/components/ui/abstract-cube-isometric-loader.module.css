@@ -1,0 +1,43 @@
+.loader {
+  display: inline-grid;
+  grid-template-columns: repeat(5, var(--dot-size));
+  grid-template-rows: repeat(5, var(--dot-size));
+  gap: var(--gap);
+  flex: none;
+  width: max-content;
+  height: max-content;
+  color: var(--dot-color);
+  vertical-align: middle;
+}
+
+.loader > span {
+  display: block;
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: 2px;
+  background: currentColor;
+  animation: pulso var(--speed) ease-in-out var(--atraso) infinite;
+}
+
+.inativo {
+  opacity: 0.08;
+}
+
+.ativo {
+  opacity: 0.25;
+}
+
+.bloom .ativo {
+  box-shadow: 0 0 calc(var(--dot-size) * 1.8) currentColor;
+}
+
+@keyframes pulso {
+  0%, 100% { opacity: 0.15; transform: scale(0.8); }
+  20% { opacity: 1; transform: scale(1.2); }
+  60% { opacity: 0.35; transform: scale(0.95); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader > span { animation: none; }
+  .ativo { opacity: 1; }
+}

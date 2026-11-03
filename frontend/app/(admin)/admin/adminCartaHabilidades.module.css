@@ -2,6 +2,12 @@
   display: grid;
   grid-column: 1 / -1;
   gap: 0.7rem;
+  min-width: 0;
+  border: 1px solid rgba(139, 92, 246, 0.38);
+  border-radius: 0.65rem;
+  background: linear-gradient(145deg, rgba(76, 29, 149, 0.12), rgba(8, 13, 28, 0.28) 55%);
+  padding: 0.65rem;
+  box-shadow: inset 3px 0 rgba(167, 139, 250, 0.72);
 }
 
 .topo {
@@ -11,9 +17,19 @@
   gap: 0.75rem;
 }
 
-.topo div {
+.topo > div {
   display: grid;
   gap: 0.14rem;
+}
+.titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.titulo > svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: #c4b5fd;
 }
 .topo strong {
   color: #f1f5f9;
@@ -45,18 +61,208 @@
   background: rgba(2, 6, 18, 0.58);
   padding: 0 0.65rem;
 }
+.busca:focus-within {
+  border-color: rgba(167, 139, 250, 0.75);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.12);
+}
 
-.busca svg {
+.busca > svg {
   width: 0.85rem;
+  flex: none;
   color: #71809a;
 }
-.busca input {
-  width: 100%;
+.painel .busca input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
   min-height: 0;
   border: 0;
   outline: 0;
   background: transparent;
   padding: 0;
+  box-shadow: none;
+}
+.painel .busca .limparBusca {
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  flex: none;
+  place-items: center;
+  border: 0;
+  border-radius: 0.3rem;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+.painel .busca .limparBusca:hover {
+  background: rgba(139, 92, 246, 0.16);
+  color: #ddd6fe;
+}
+.limparBusca svg {
+  width: 0.8rem;
+}
+.painel .busca .btnFiltros {
+  display: flex;
+  min-height: 1.8rem;
+  flex: none;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 0.4rem;
+  background: rgba(91, 33, 182, 0.14);
+  color: #c4b5fd;
+  cursor: pointer;
+  padding: 0 0.45rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+}
+.btnFiltros svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+.painel .busca .btnFiltros:hover {
+  background: rgba(109, 40, 217, 0.35);
+  color: #ede9fe;
+}
+.fundoFiltros {
+  position: fixed;
+  z-index: 200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(2, 4, 12, 0.78);
+  padding: 1rem;
+  backdrop-filter: blur(5px);
+}
+.modalFiltros {
+  display: grid;
+  width: min(24rem, 100%);
+  max-height: 90dvh;
+  gap: 0.9rem;
+  overflow: visible;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  border-radius: 0.8rem;
+  background: #0a1020;
+  padding: 1rem;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.55);
+}
+.modalFiltros header,
+.modalFiltros footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.modalFiltros header > div {
+  display: grid;
+  gap: 0.2rem;
+}
+.modalFiltros header strong {
+  color: #f1f5f9;
+  font-size: 0.85rem;
+}
+.modalFiltros header small {
+  color: #94a3b8;
+  font-size: 0.62rem;
+}
+.fecharFiltros {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  flex: none;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 0.4rem;
+  background: #111827;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+.fecharFiltros svg {
+  width: 0.85rem;
+}
+.filtros {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 0.5rem;
+  background: rgba(2, 6, 18, 0.42);
+  padding: 0.75rem;
+}
+.filtros label,
+.campoFiltro {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
+  color: #cbd5e1;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+.marcaTipo {
+  width: 0.55rem;
+  height: 0.55rem;
+  flex: none;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 18%, transparent);
+}
+.modalFiltros .campoFiltro > div:focus-within,
+.modalFiltros .campoFiltro > div[data-aberto] {
+  border-color: rgba(167, 139, 250, 0.72);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.13);
+}
+.campoFiltro [role="listbox"] {
+  max-height: min(13rem, 38dvh);
+  scrollbar-color: #6d28d9 #111827;
+  scrollbar-width: thin;
+}
+.filtros select {
+  width: 100%;
+  min-height: 2.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 0.45rem;
+  background: #0d1528;
+  color: #f1f5f9;
+  padding: 0.4rem 0.55rem;
+  font: inherit;
+}
+.modalFiltros footer button {
+  min-height: 2.25rem;
+  border-radius: 0.45rem;
+  cursor: pointer;
+  padding: 0 0.85rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+.modalFiltros .limparFiltros {
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  background: rgba(91, 33, 182, 0.13);
+  color: #c4b5fd;
+}
+.modalFiltros .aplicarFiltros {
+  border: 1px solid rgba(167, 139, 250, 0.55);
+  background: #6d28d9;
+  color: white;
+}
+.modalRemocao {
+  border-color: rgba(251, 113, 133, 0.5);
+}
+.modalRemocao p {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+.modalRemocao p strong {
+  color: #fda4af;
+}
+.modalRemocao .cancelarRemocao {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #111827;
+  color: #e2e8f0;
+}
+.modalRemocao .confirmarRemocao {
+  border: 1px solid rgba(251, 113, 133, 0.55);
+  background: #991b1b;
+  color: #fff;
 }
 .selecionadas,
 .catalogo {
@@ -106,6 +312,10 @@
   white-space: nowrap;
 }
 .dados small {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.18rem;
   color: #71809a;
   font-size: 0.58rem;
 }
@@ -118,7 +328,7 @@
 }
 
 .acoes button,
-.catalogo button {
+.catalogo article > button {
   display: grid;
   width: 1.75rem;
   height: 1.75rem;
@@ -131,17 +341,17 @@
 }
 
 .acoes button:hover,
-.catalogo button:hover {
+.catalogo article > button:hover {
   border-color: rgba(167, 139, 250, 0.5);
   color: #ddd6fe;
 }
 .acoes button:disabled,
-.catalogo button:disabled {
+.catalogo article > button:disabled {
   cursor: not-allowed;
   opacity: 0.35;
 }
 .acoes svg,
-.catalogo button svg {
+.catalogo article > button svg {
   width: 0.75rem;
 }
 .catalogo {

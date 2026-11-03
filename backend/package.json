@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "nest build",
+    "postinstall": "prisma generate",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",

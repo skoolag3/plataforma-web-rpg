@@ -1,3 +1,10 @@
+import { calcularValorEscalado } from './habilidades/habilidade.escala';
+import { limitesHabilidade } from './habilidades/habilidade.limites';
+import type {
+  ConfiguracaoHabilidade,
+  GatilhoHabilidade,
+} from './habilidades/habilidade.types';
+
 export type Dificuldade = 'FACIL' | 'MEDIA' | 'DIFICIL' | 'CHEFE';
 export type Lado = 'JOGADOR' | 'BOT';
 export type AcaoTurno = 'ATACAR' | 'DEFENDER';
@@ -152,10 +159,15 @@ export function executarTurno(
   const ordem: Lado[] = jogadorPrimeiro
     ? ['JOGADOR', 'BOT']
     : ['BOT', 'JOGADOR'];
+  const cartasDoTurno = {
+    JOGADOR: cartaAtiva(estado, 'JOGADOR'),
+    BOT: cartaAtiva(estado, 'BOT'),
+  };
   for (const lado of ordem) {
     if (estado.vencedor) break;
     const alvo = lado === 'JOGADOR' ? 'BOT' : 'JOGADOR';
-    if (!cartaAtiva(estado, lado).derrotada) atacar(estado, lado, alvo);
+    if (cartaAtiva(estado, lado) === cartasDoTurno[lado] && !cartasDoTurno[lado].derrotada)
+      atacar(estado, lado, alvo);
   }
   finalizarTurno(estado);
   return estado;
@@ -346,13 +358,17 @@ function acionarHabilidades(
         ? habilidade.requisito.percentual / 100
         : 0;
       if (Math.random() < chance) {
-        res.multiplicadorAtaque = (res.multiplicadorAtaque ?? 1) * (1 + valor / 100);
+        const bonusCritico = Math.min(valor, 100);
+        res.multiplicadorAtaque = Math.min(
+          limitesHabilidade.multiplicadorAtaque.maximo,
+          (res.multiplicadorAtaque ?? 1) * (1 + bonusCritico / 100),
+        );
         estado.eventos.push({
           turno: estado.turno,
           tipo: 'HABILIDADE',
           origem,
-          valor,
-          texto: `${dono.nome} acertou um crítico com ${habilidade.nome} (+${valor}% de dano).`,
+          valor: bonusCritico,
+          texto: `${dono.nome} acertou um crítico com ${habilidade.nome} (+${bonusCritico}% de dano).`,
         });
       }
       continue;
@@ -362,10 +378,13 @@ function acionarHabilidades(
       habilidade.tipoEfeito === 'DANO' &&
       habilidade.formaAplicacao === 'SUBSTITUI_ATAQUE'
     ) {
-      res.multiplicadorAtaque =
+      const percentualAtaque = Math.min(valor, 100 * limitesHabilidade.multiplicadorAtaque.maximo);
+      res.multiplicadorAtaque = Math.min(
+        limitesHabilidade.multiplicadorAtaque.maximo,
         (res.multiplicadorAtaque ?? 1) *
-        (habilidade.unidade === 'PERCENTUAL' ? valor / 100 : 1);
-      registrarAtivacao(estado, origem, habilidade, valor);
+          (habilidade.unidade === 'PERCENTUAL' ? percentualAtaque / 100 : 1),
+      );
+      registrarAtivacao(estado, origem, habilidade, percentualAtaque);
       continue;
     }
     if (habilidade.tipoEfeito === 'EVASAO') {
@@ -416,7 +435,7 @@ function aplicarEfeitoHabilidade(
     return;
   }
   if (habilidade.tipoEfeito === 'ROUBO_VIDA') {
-    const cura = Math.round((danoCausado * valor) / 100);
+    const cura = Math.round((danoCausado * Math.min(valor, limitesHabilidade.percentualRouboVida.maximo)) / 100);
     const recuperado = Math.min(cura, alvo.hp - alvo.hpAtual);
     alvo.hpAtual += recuperado;
     estado.eventos.push({
@@ -431,21 +450,30 @@ function aplicarEfeitoHabilidade(
   if (habilidade.tipoEfeito === 'ESCUDO') {
     const estadoAlvo = obterEstadoHabilidades(alvo);
     const escudo = calcularValorAplicado(valor, habilidade.unidade, alvo.hp);
-    estadoAlvo.escudo += escudo;
-    estadoAlvo.escudoExpiraNoTurno = habilidade.duracaoTurnos
-      ? estado.turno + habilidade.duracaoTurnos
-      : null;
+    const escudoConcedido = Math.min(
+      escudo,
+      Math.max(0, alvo.hp * limitesHabilidade.escudoEmBatalha.multiplicadorHpMaximo - estadoAlvo.escudo),
+    );
+    estadoAlvo.escudo += escudoConcedido;
+    if (escudoConcedido > 0) {
+      estadoAlvo.escudoExpiraNoTurno = habilidade.duracaoTurnos
+        ? estado.turno + habilidade.duracaoTurnos
+        : null;
+    }
     estado.eventos.push({
       turno: estado.turno,
       tipo: 'ESCUDO',
       origem,
-      valor: escudo,
-      texto: `${alvo.nome} ativou ${habilidade.nome} e recebeu ${escudo} de escudo.`,
+      valor: escudoConcedido,
+      texto: `${alvo.nome} ativou ${habilidade.nome} e recebeu ${escudoConcedido} de escudo.`,
     });
     return;
   }
   if (habilidade.tipoEfeito === 'DANO') {
-    const dano = calcularValorAplicado(valor, habilidade.unidade, alvo.hp);
+    const valorDano = habilidade.unidade === 'PERCENTUAL'
+      ? Math.min(valor, limitesHabilidade.percentualDanoDireto.maximo)
+      : valor;
+    const dano = calcularValorAplicado(valorDano, habilidade.unidade, alvo.hp);
     alvo.hpAtual = Math.max(0, alvo.hpAtual - dano);
     estado.eventos.push({
       turno: estado.turno,
@@ -494,11 +522,18 @@ function aplicarAlteracaoAtributo(
     alvo[chaveBase],
   );
   const fator = habilidade.tipoEfeito === 'DEBUFF' ? -1 : 1;
-  alvo[chaveAtual] = Math.max(1, alvo[chaveAtual] + alteracao * fator);
-  if (habilidade.duracaoTurnos) {
+  const valorAnterior = alvo[chaveAtual];
+  alvo[chaveAtual] = fator > 0
+    ? Math.min(
+        Math.max(valorAnterior, alvo[chaveBase] * limitesHabilidade.atributoEmBatalha.multiplicadorMaximo),
+        valorAnterior + alteracao,
+      )
+    : Math.max(1, valorAnterior - alteracao);
+  const alteracaoAplicada = Math.abs(alvo[chaveAtual] - valorAnterior);
+  if (habilidade.duracaoTurnos && alteracaoAplicada > 0) {
     obterEstadoHabilidades(alvo).modificadores.push({
       atributo,
-      valor: alteracao * fator,
+      valor: alteracaoAplicada * fator,
       expiraNoTurno: estado.turno + habilidade.duracaoTurnos,
     });
   }
@@ -506,8 +541,8 @@ function aplicarAlteracaoAtributo(
     turno: estado.turno,
     tipo: habilidade.tipoEfeito === 'BUFF' ? 'BUFF' : 'DEBUFF',
     origem,
-    valor: alteracao,
-    texto: `${alvo.nome} ativou ${habilidade.nome}: ${atributo.toLowerCase()} ${fator > 0 ? '+' : '-'}${alteracao}.`,
+    valor: alteracaoAplicada,
+    texto: `${alvo.nome} ativou ${habilidade.nome}: ${atributo.toLowerCase()} ${fator > 0 ? '+' : '-'}${alteracaoAplicada}.`,
   });
 }
 
@@ -592,6 +627,9 @@ function requisitoAtendido(
     return (carta.hpAtual / carta.hp) * 100 < requisito.percentual;
   }
   if (requisito.tipo === 'TURNO_MINIMO') return turno >= requisito.turno;
+  if (requisito.tipo === 'INTERVALO_TURNOS') {
+    return turno >= 1 && turno % requisito.intervalo === 0;
+  }
   return true;
 }
 
@@ -600,14 +638,10 @@ function calcularValorHabilidade(
   carta: CartaBatalha,
   turno: number,
 ) {
-  if (habilidade.escala.tipo === 'NENHUMA') return habilidade.valorBase;
-  const multiplicador =
-    habilidade.escala.tipo === 'POR_TURNO'
-      ? Math.max(0, turno - 1)
-      : obterEstadoHabilidades(carta).ataquesRealizados;
-  return Math.min(
-    habilidade.escala.limite,
-    habilidade.valorBase + habilidade.escala.valor * multiplicador,
+  return calcularValorEscalado(
+    habilidade,
+    turno,
+    obterEstadoHabilidades(carta).ataquesRealizados,
   );
 }
 
@@ -658,7 +692,3 @@ function cartaAtiva(estado: EstadoBatalha, lado: Lado) {
   const equipe = lado === 'JOGADOR' ? estado.jogador : estado.bot;
   return equipe.cartas[equipe.ativa];
 }
-import type {
-  ConfiguracaoHabilidade,
-  GatilhoHabilidade,
-} from './habilidades/habilidade.types';

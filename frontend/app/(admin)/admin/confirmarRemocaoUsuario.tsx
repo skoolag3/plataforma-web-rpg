@@ -66,7 +66,8 @@ export function ConfirmarRemocaoUsuario({ usuario, removendo, erro, aoFechar, ao
       </header>
       <div className={styles.conteudo}>
         <div className={styles.conta}><strong>{usuario.nome}</strong><span>{usuario.email}</span></div>
-        <label className={styles.campo}>Digite <strong>{usuario.nome}</strong> para confirmar
+        <label className={styles.campo}>
+          <span>Digite <strong>{usuario.nome}</strong> para confirmar</span>
           <input ref={campoRef} value={nome} onChange={(evento) => setNome(evento.target.value)} disabled={removendo} autoComplete="off" required />
         </label>
         <label className={styles.ciente}>

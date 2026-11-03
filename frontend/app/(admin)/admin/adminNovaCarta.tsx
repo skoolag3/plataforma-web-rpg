@@ -33,10 +33,11 @@ import {
   ElementoSelect,
   PreviewCarta,
   obterElementoVisual,
-  raridades,
 } from "./adminCartaVisual";
+import { useAdminRaridades } from "./useAdminRaridades";
 import { AdminCartaHabilidades } from "./adminCartaHabilidades";
 import { AdminClasseSelect } from "./adminClasseSelect";
+import { FotoPerfilCarta, ajusteFotoPerfilPadrao, gerarFotoPerfilCarta, type AjusteFotoPerfil } from "./fotoPerfilCarta";
 import { AdminLayout } from "./adminShared";
 import { combinarEstilos } from "./combinarEstilos";
 
@@ -80,8 +81,10 @@ function criarFormularioNovaCarta(): CartaFormState {
 }
 
 export function NovaCarta() {
+  const raridades = useAdminRaridades();
   const [form, setForm] = useState<CartaFormState>(criarFormularioNovaCarta);
   const [foto, setFoto] = useState<File | null>(null);
+  const [ajusteFotoPerfil, setAjusteFotoPerfil] = useState<AjusteFotoPerfil>(ajusteFotoPerfilPadrao);
   const [moldura, setMoldura] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [molduraPreviewUrl, setMolduraPreviewUrl] = useState<string | null>(
@@ -92,6 +95,13 @@ export function NovaCarta() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  useEffect(() => {
+    setForm((atual) => ({
+      ...atual,
+      custo: String(raridades.find((item) => item.codigo === atual.raridade)?.valorVenda ?? obterValorVendaCarta(atual.raridade)),
+    }));
+  }, [raridades]);
 
   useEffect(() => {
     if (!feedback) return;
@@ -110,7 +120,7 @@ export function NovaCarta() {
     setForm((atual) => ({
       ...atual,
       raridade,
-      custo: String(obterValorVendaCarta(raridade)),
+      custo: String(raridades.find((item) => item.codigo === raridade)?.valorVenda ?? obterValorVendaCarta(raridade)),
     }));
   }
 
@@ -178,13 +188,16 @@ export function NovaCarta() {
         configVisual: form.configVisual,
       };
 
-      if (foto || moldura) {
+      const fotoPerfil = previewUrl ? await gerarFotoPerfilCarta(previewUrl, ajusteFotoPerfil) : null;
+      if (foto || fotoPerfil || moldura) {
         const formData = new FormData();
         if (foto) formData.append("foto", foto);
+        if (fotoPerfil) formData.append("fotoPerfil", fotoPerfil);
         if (moldura) formData.append("moldura", moldura);
 
         const upload = await uploadCartaAssets(formData);
         payload.foto = upload.foto?.url;
+        payload.fotoPerfil = upload.fotoPerfil?.url;
         payload.moldura = upload.moldura?.url;
       }
 
@@ -279,19 +292,13 @@ export function NovaCarta() {
                   }
                   placeholder="Raridade"
                   opcoes={raridades.map((raridade) => ({
-                    valor: raridade,
-                    label: raridade,
-                    cor: {
-                      UR: "#e879f9",
-                      SSR: "#facc15",
-                      SR: "#67e8f9",
-                      R: "#a78bfa",
-                      N: "#94a3b8",
-                    }[raridade],
+                    valor: raridade.codigo,
+                    label: raridade.nome,
+                    cor: raridade.cor,
                   }))}
                 />
               </div>
-              <label>
+              <label className={styles.campoElemento}>
                 Elemento
                 <ElementoSelect
                   value={form.elemento}
@@ -400,6 +407,10 @@ export function NovaCarta() {
                   updateField("configVisual", configVisual)
                 }
               />
+              <FotoPerfilCarta arte={previewUrl ?? undefined} ajuste={ajusteFotoPerfil} aoAlterar={(ajuste) => {
+                setAjusteFotoPerfil(ajuste);
+                updateField("configVisual", { ...form.configVisual, fotoPerfil: ajuste });
+              }} />
             </div>
           </details>
         </section>

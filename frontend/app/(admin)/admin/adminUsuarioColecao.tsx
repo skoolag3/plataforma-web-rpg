@@ -75,7 +75,7 @@ export function AdminUsuarioColecao({
     [busca, colecao],
   );
   const catalogo = useMemo(
-    () => colecao.filter((carta) => correspondeBusca(carta, buscaCatalogo)),
+    () => colecao.filter((carta) => carta.quantidade === 0 && correspondeBusca(carta, buscaCatalogo)),
     [buscaCatalogo, colecao],
   );
   const totalCartas = colecao.reduce(
@@ -91,7 +91,7 @@ export function AdminUsuarioColecao({
       >
         <header>
           <div>
-            <small>Catálogo completo</small>
+            <small>Cartas ainda não obtidas</small>
             <h3>Adicionar carta</h3>
           </div>
           <button
@@ -111,6 +111,11 @@ export function AdminUsuarioColecao({
           />
         </label>
         <div className={styles.usuarioCatalogoGrid}>
+          {!carregando && catalogo.length === 0 ? (
+            <p className={styles.feedbackInfo}>
+              {buscaCatalogo ? "Nenhuma carta disponível para esta busca." : "O usuário já possui todas as cartas disponíveis."}
+            </p>
+          ) : null}
           {catalogo.map((carta) => (
             <article key={carta.id}>
               <div className={styles.usuarioCatalogoVisual}>
@@ -118,11 +123,7 @@ export function AdminUsuarioColecao({
               </div>
               <div>
                 <strong>{carta.nome}</strong>
-                <small>
-                  {carta.quantidade
-                    ? `${carta.quantidade} no inventário`
-                    : "Ainda não possui"}
-                </small>
+                <small>Ainda não possui</small>
               </div>
               <button
                 type="button"

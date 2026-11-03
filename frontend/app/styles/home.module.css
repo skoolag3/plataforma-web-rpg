@@ -1,8 +1,8 @@
 .page {
   position: relative;
-  min-height: calc(100vh - 4.7rem);
+  min-height: calc(100dvh - 4.7rem);
   overflow: hidden;
-  padding: clamp(1.5rem, 3.5vw, 3.25rem) 1.25rem 4rem;
+  padding: clamp(1rem, 2.4vw, 2rem) 1.25rem 2.5rem;
   color: var(--member-text);
   background:
     radial-gradient(
@@ -34,7 +34,7 @@
 }
 .container {
   position: relative;
-  width: min(76rem, 100%);
+  width: min(72rem, 100%);
   margin: auto;
 }
 .saudacao {
@@ -42,7 +42,7 @@
   align-items: end;
   justify-content: space-between;
   gap: 2rem;
-  margin-bottom: 1.35rem;
+  margin-bottom: 1rem;
 }
 .saudacao > div:first-child > span,
 .capitulo {
@@ -62,7 +62,7 @@
   display: flex;
   gap: 0.55rem;
 }
-.recursos > span {
+.recursos > a {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -73,7 +73,10 @@
   padding: 0.55rem 0.8rem;
   font-size: 0.68rem;
   text-transform: uppercase;
+  text-decoration: none;
 }
+.recursos > a:hover { border-color: rgba(167, 139, 250, 0.45); color: #fff; }
+.recursos > a:focus-visible { outline: 2px solid var(--member-lime); outline-offset: 2px; }
 .recursos svg {
   width: 1rem;
   height: 1rem;
@@ -86,8 +89,8 @@
 .palco {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(18rem, 0.78fr) minmax(31rem, 1.22fr);
-  min-height: 28rem;
+  grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr);
+  min-height: 25rem;
   overflow: hidden;
   border: 1px solid rgba(167, 139, 250, 0.22);
   border-radius: 1.5rem;
@@ -101,43 +104,18 @@
     0 2rem 5rem rgba(0, 0, 0, 0.38),
     inset 0 1px rgba(255, 255, 255, 0.06);
 }
-.palco::before {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, transparent 45%, rgba(139, 92, 246, 0.05)),
-    radial-gradient(
-      circle at 76% 118%,
-      rgba(190, 242, 100, 0.13),
-      transparent 37%
-    );
-  content: "";
-}
-.palco::after {
-  position: absolute;
-  right: 5%;
-  bottom: -17rem;
-  width: 32rem;
-  height: 32rem;
-  border: 1px solid rgba(190, 242, 100, 0.1);
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 4rem rgba(139, 92, 246, 0.025),
-    0 0 0 9rem rgba(139, 92, 246, 0.02);
-  content: "";
-}
 .chamadaArena {
   z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  padding: clamp(2rem, 4vw, 3.7rem);
+  padding: clamp(1.6rem, 3vw, 2.7rem);
 }
 .chamadaArena h2 {
   max-width: 11ch;
   margin: 0.8rem 0 1rem;
-  font-size: clamp(2.2rem, 4vw, 4.1rem);
+  font-size: clamp(2.2rem, 3.6vw, 3.65rem);
   line-height: 0.93;
   letter-spacing: -0.065em;
 }
@@ -226,7 +204,7 @@
 }
 .lequeCartas {
   position: relative;
-  height: 18rem;
+  height: 16.5rem;
   margin: 0.35rem 0;
   perspective: 65rem;
 }
@@ -411,7 +389,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.8rem;
-  margin-top: 0.85rem;
+  margin-top: 0.7rem;
 }
 .caminhos > a {
   display: grid;
@@ -533,61 +511,117 @@
 }
 @media (max-width: 640px) {
   .page {
-    padding: 1rem 0.75rem 3rem;
+    padding: 0.7rem 0.65rem 1.5rem;
+  }
+  .aurora {
+    display: none;
   }
   .saudacao {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.8rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.65rem;
+  }
+  .saudacao h1 {
+    margin-top: 0.2rem;
+    font-size: clamp(1.25rem, 4.8vw, 1.6rem);
+    line-height: 1.12;
   }
   .recursos {
-    width: 100%;
+    width: auto;
   }
-  .recursos > span {
-    flex: 1;
+  .recursos > a {
     justify-content: center;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 0;
+  }
+  .recursos > a > span { display: none; }
+  .recursos strong {
+    font-size: 0.75rem;
+  }
+  .palco {
+    min-height: 0;
+    border-radius: 1rem;
   }
   .chamadaArena {
-    padding: 1.6rem 1.25rem;
+    padding: 1rem 1rem 0.45rem;
   }
   .chamadaArena h2 {
-    font-size: 2.35rem;
+    max-width: 18ch;
+    margin: 0.4rem 0 0.55rem;
+    font-size: clamp(1.55rem, 6vw, 2rem);
+    line-height: 1;
+  }
+  .chamadaArena p {
+    margin-bottom: 0.8rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+  .btnJogar {
+    min-height: 2.75rem;
+    padding: 0.55rem 0.8rem;
+  }
+  .chamadaArena > small {
+    margin-top: 0.4rem;
   }
   .deckDestaque {
-    min-height: 19rem;
-    padding: 1.2rem;
+    min-height: 0;
+    padding: 0.65rem 1rem 0.8rem;
+  }
+  .deckTitulo {
+    gap: 0.15rem 0.5rem;
+  }
+  .deckTitulo strong {
+    font-size: 1rem;
   }
   .lequeCartas {
-    height: 13.5rem;
+    height: 9.4rem;
+    margin: 0;
   }
   .cartaDeck {
-    width: 6.3rem;
+    width: 4.65rem;
+    filter: none;
   }
   .cartaDeck:nth-child(1) {
-    --xCarta: -6.625rem;
+    --xCarta: -5.5rem;
   }
   .cartaDeck:nth-child(2) {
-    --xCarta: -3.975rem;
+    --xCarta: -3.3rem;
   }
   .cartaDeck:nth-child(3) {
-    --xCarta: -1.325rem;
+    --xCarta: -1.1rem;
   }
   .cartaDeck:nth-child(4) {
-    --xCarta: 1.325rem;
+    --xCarta: 1.1rem;
   }
   .cartaDeck:nth-child(5) {
-    --xCarta: 3.975rem;
+    --xCarta: 3.3rem;
   }
   .cartaDeck:nth-child(6) {
-    --xCarta: 6.625rem;
+    --xCarta: 5.5rem;
+  }
+  .cartaPlaceholder strong {
+    font-size: 0.52rem;
+  }
+  .cartaPlaceholder svg {
+    width: 1.45rem;
+    height: 1.45rem;
+  }
+  .editarDeck {
+    min-height: 2.5rem;
+    align-items: center;
   }
   .caminhos {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.45rem;
+    margin-top: 0.55rem;
   }
   .caminhos > a {
     grid-template-columns: auto minmax(0, 1fr);
     gap: 0.45rem;
+    min-height: 3.5rem;
     padding: 0.65rem 0.5rem;
   }
   .caminhos > a > svg {
@@ -598,6 +632,25 @@
   }
   .caminhos em {
     display: none;
+  }
+}
+@media (hover: none) {
+  .cartaDeck:hover {
+    transform: translate(calc(-50% + var(--xCarta)), -48%) rotate(var(--giroCarta));
+    filter: none;
+  }
+  .btnJogar:hover,
+  .caminhos > a:hover {
+    transform: none;
+  }
+}
+@media (max-width: 350px) {
+  .caminhos small {
+    display: none;
+  }
+  .caminhos strong {
+    font-size: 0.74rem;
+    line-height: 1.2;
   }
 }
 @media (prefers-reduced-motion: reduce) {

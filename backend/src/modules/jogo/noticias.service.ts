@@ -9,7 +9,6 @@ export class NoticiasService {
     return this.prisma.noticia.findMany({
       where: { publicada: true },
       orderBy: { criado_em: 'desc' },
-      take: 6,
       select: {
         id: true,
         titulo: true,

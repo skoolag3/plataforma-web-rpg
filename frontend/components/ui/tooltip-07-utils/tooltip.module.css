@@ -1,0 +1,17 @@
+.posicionador { z-index: 300 !important; }
+.conteudo {
+  --corTooltip: #161126;
+  max-width: min(18rem, calc(100vw - 2rem));
+  padding: .6rem .75rem;
+  border: 1px solid #a78bfa88;
+  border-radius: .55rem;
+  background: var(--corTooltip);
+  box-shadow: 0 .6rem 1.8rem #0008;
+  color: #f5f3ff;
+  font-size: .76rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+.conteudo:global(.dark) { --corTooltip: #f8fafc; border-color: #cbd5e1; color: #0f172a; }
+.seta { --arrow-size: .55rem; --arrow-background: var(--corTooltip); }
+.pontaSeta { border: 1px solid #a78bfa88; }

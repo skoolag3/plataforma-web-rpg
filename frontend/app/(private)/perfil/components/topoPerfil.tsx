@@ -28,7 +28,6 @@ export function TopoPerfil({ perfil }: PropsTopoPerfil) {
         </span>
         <span>
           <strong>{perfil.user}</strong>
-          <small>Nível {perfil.nivel}</small>
         </span>
         <ChevronDown aria-hidden="true" />
       </div>

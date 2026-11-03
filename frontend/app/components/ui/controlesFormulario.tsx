@@ -41,6 +41,8 @@ export function SelectPadrao({
   ariaLabel,
 }: SelectPadraoProps) {
   const [aberto, setAberto] = useState(false);
+  const [menuAcima, setMenuAcima] = useState(false);
+  const [espacoMenu, setEspacoMenu] = useState(304);
   const raiz = useRef<HTMLDivElement>(null);
   const idMenu = useId();
   const selecionada = opcoes.find((opcao) => opcao.valor === valor);
@@ -67,16 +69,31 @@ export function SelectPadrao({
     label: placeholder,
   };
 
+  function abrirMenu() {
+    const posicao = raiz.current?.getBoundingClientRect();
+    if (posicao) {
+      const abaixo = window.innerHeight - posicao.bottom - 16;
+      const acima = posicao.top - 16;
+      const alturaPrevista = Math.min(304, opcoes.length * 42 + 12);
+      const abrirAcima = abaixo < alturaPrevista && acima > abaixo;
+      setMenuAcima(abrirAcima);
+      setEspacoMenu(Math.max(80, abrirAcima ? acima : abaixo));
+    }
+    setAberto(true);
+  }
+
   return (
     <div
       ref={raiz}
       className={`${styles.selectRaiz} ${className}`}
       data-aberto={aberto || undefined}
+      data-menu-acima={aberto && menuAcima || undefined}
       data-vazio={!selecionada || undefined}
       style={
-        conteudoAtual.cor
-          ? ({ "--controle-cor": conteudoAtual.cor } as CSSProperties)
-          : undefined
+        ({
+          "--controle-cor": conteudoAtual.cor ?? undefined,
+          "--espaco-menu": `${espacoMenu}px`,
+        } as CSSProperties)
       }
     >
       {rotulo ? <span className={styles.rotulo}>{rotulo}</span> : null}
@@ -87,11 +104,11 @@ export function SelectPadrao({
         aria-haspopup="listbox"
         aria-expanded={aberto}
         aria-controls={idMenu}
-        onClick={() => setAberto((atual) => !atual)}
+        onClick={() => aberto ? setAberto(false) : abrirMenu()}
         onKeyDown={(evento) => {
           if (evento.key === "ArrowDown" || evento.key === "Enter") {
             evento.preventDefault();
-            setAberto(true);
+            abrirMenu();
           }
         }}
       >
@@ -116,11 +133,7 @@ export function SelectPadrao({
               aria-selected={opcao.valor === valor}
               data-selecionada={opcao.valor === valor || undefined}
               key={opcao.valor || "opcao-vazia"}
-              style={
-                opcao.cor
-                  ? ({ "--controle-cor": opcao.cor } as CSSProperties)
-                  : undefined
-              }
+              style={{ "--controle-cor": opcao.cor ?? "#dbe4f4" } as CSSProperties}
               onClick={() => {
                 aoAlterar(opcao.valor);
                 setAberto(false);

@@ -24,7 +24,6 @@ import {
   type ConfigVisualCarta,
   type DimensoesImagem,
 } from "../../components/cartaMontada";
-import { CartaVerso } from "../../components/cartaVerso";
 import AnimatedFileUpload from "@/components/ui/animated-file-upload";
 import { elementosCarta } from "../../components/elementosCarta";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
@@ -40,7 +39,7 @@ const styles = combinarEstilos(
   visualStyles,
 );
 
-export const raridades = ["UR", "SSR", "SR", "R", "N"] as const;
+export const raridades = ["N", "R", "SR", "SSR", "UR", "SECRETA"] as const;
 export const classesCarta = [
   "Mago",
   "Espadachim",
@@ -148,6 +147,7 @@ export function ElementoSelect({
               type="button"
               role="option"
               aria-selected={!value}
+              style={{ "--elemento-cor": "#cbd5e1" } as CSSProperties}
               onClick={() => selecionar("")}
             >
               <span className={styles.elementoOpcaoNeutra}>{placeholder}</span>
@@ -259,6 +259,7 @@ export function StatusSelect({
             type="button"
             role="option"
             aria-selected={!value}
+            style={{ "--elemento-cor": "#cbd5e1" } as CSSProperties}
             onClick={() => selecionar("")}
           >
             <span className={styles.elementoOpcaoNeutra}>Status</span>
@@ -301,10 +302,10 @@ export function classeRaridade(raridade: string) {
   return classes[raridade] ?? "";
 }
 
-export function Raridade({ value }: { value: string }) {
+export function Raridade({ value, nome, cor }: { value: string; nome?: string; cor?: string }) {
   return (
-    <span className={`${styles.raridadeBadge} ${classeRaridade(value)}`}>
-      {value}
+    <span className={`${styles.raridadeBadge} ${classeRaridade(value)}`} style={cor ? { color: cor, borderColor: cor, backgroundColor: `${cor}1a` } : undefined}>
+      {nome ?? value}
     </span>
   );
 }
@@ -340,11 +341,8 @@ export function PreviewCarta({
   nome,
   raridade,
   elemento,
-  classe,
-  hpBase,
-  danoBase,
-  defesaBase,
   configVisual,
+  onAbrirDetalhes,
 }: {
   arte?: string;
   moldura?: string;
@@ -352,10 +350,11 @@ export function PreviewCarta({
   raridade: string;
   elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
   classe?: string;
-  hpBase: number;
-  danoBase: number;
-  defesaBase: number;
+  hpBase?: number;
+  danoBase?: number;
+  defesaBase?: number;
   configVisual: ConfigVisualCarta;
+  onAbrirDetalhes?: () => void;
 }) {
   const [dimensoesArte, setDimensoesArte] = useState<DimensoesImagem | null>(
     null,
@@ -410,28 +409,26 @@ export function PreviewCarta({
             />
           ))}
         </span>
-        <CartaMontada
-          arte={arte}
-          moldura={moldura}
-          nome={mostrarTextos ? nome : undefined}
-          raridade={mostrarTextos ? raridade : undefined}
-          elemento={mostrarTextos ? elemento : undefined}
-          config={configVisual}
-          placeholder={<ImagePlus aria-label="Sem arte" />}
-          onDimensoesArte={setDimensoesArte}
-          onDimensoesMoldura={setDimensoesMoldura}
-          verso={
-            <CartaVerso
-              nome={nome}
-              raridade={raridade}
-              elemento={elemento}
-              classe={classe}
-              hp={hpBase}
-              ataque={danoBase}
-              defesa={defesaBase}
-            />
-          }
-        />
+        <button
+          type="button"
+          className={styles.previewCartaBotao}
+          onClick={onAbrirDetalhes}
+          disabled={!onAbrirDetalhes}
+          aria-label={`Abrir detalhes de ${nome}`}
+          title="Abrir detalhes da carta"
+        >
+          <CartaMontada
+            arte={arte}
+            moldura={moldura}
+            nome={mostrarTextos ? nome : undefined}
+            raridade={mostrarTextos ? raridade : undefined}
+            elemento={mostrarTextos ? elemento : undefined}
+            config={configVisual}
+            placeholder={<ImagePlus aria-label="Sem arte" />}
+            onDimensoesArte={setDimensoesArte}
+            onDimensoesMoldura={setDimensoesMoldura}
+          />
+        </button>
       </div>
       {proporcoesDiferentes ? (
         <small className={styles.avisoProporcao}>
@@ -494,7 +491,7 @@ export function ControleVisualCarta({
         </div>
         <button
           type="button"
-          onClick={() => onChange(criarConfigVisualPadrao())}
+          onClick={() => onChange({ ...criarConfigVisualPadrao(), fotoPerfil: value.fotoPerfil })}
         >
           Resetar
         </button>
@@ -699,7 +696,7 @@ export function ControleVisualCarta({
   );
 }
 
-function ControleFaixa({
+export function ControleFaixa({
   rotulo,
   value,
   min,

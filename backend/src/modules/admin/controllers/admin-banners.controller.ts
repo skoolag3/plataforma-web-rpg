@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -38,12 +39,15 @@ export class AdminBannersController {
   }
 
   @Patch(':id')
-  atualizar(@Param('id') id: string, @Body() dto: AtualizarAdminBannerDto) {
+  atualizar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AtualizarAdminBannerDto,
+  ) {
     return this.bannersService.atualizar(id, dto);
   }
 
   @Delete(':id')
-  remover(@Param('id') id: string) {
+  remover(@Param('id', ParseUUIDPipe) id: string) {
     return this.bannersService.remover(id);
   }
 }

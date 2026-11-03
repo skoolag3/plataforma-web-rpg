@@ -9,6 +9,7 @@ import { PrismaService } from '../../../database/prisma.service';
 
 type CartaAssetFiles = {
   foto?: Express.Multer.File[];
+  fotoPerfil?: Express.Multer.File[];
   moldura?: Express.Multer.File[];
 };
 
@@ -28,21 +29,28 @@ export class AdminCloudinaryService {
   constructor(private readonly prisma: PrismaService) {}
 
   async uploadCartaAssets(files: CartaAssetFiles) {
-    const { foto, moldura } = this.extractFiles(files);
+    const { foto, fotoPerfil, moldura } = this.extractFiles(files);
 
-    if (!foto && !moldura) {
-      throw new BadRequestException('Envie foto, moldura ou ambos.');
+    if (!foto && !fotoPerfil && !moldura) {
+      throw new BadRequestException('Envie uma imagem da carta, foto de perfil ou moldura.');
     }
 
-    const [fotoUpload, molduraUpload] = await Promise.all([
+    const [fotoUpload, fotoPerfilUpload, molduraUpload] = await Promise.all([
       foto ? this.uploadImage(foto, 'cartas/fotos') : Promise.resolve(null),
+      fotoPerfil ? this.uploadImage(fotoPerfil, 'cartas/perfil') : Promise.resolve(null),
       moldura
         ? this.uploadImage(moldura, 'cartas/molduras')
         : Promise.resolve(null),
     ]);
 
+    if (fotoPerfilUpload && fotoPerfilUpload.width !== fotoPerfilUpload.height) {
+      await cloudinary.uploader.destroy(fotoPerfilUpload.publicId).catch(() => undefined);
+      throw new BadRequestException('A foto de perfil da carta precisa ser quadrada (1:1).');
+    }
+
     return {
       foto: fotoUpload,
+      fotoPerfil: fotoPerfilUpload,
       moldura: molduraUpload,
     };
   }
@@ -59,11 +67,12 @@ export class AdminCloudinaryService {
     const assets = await this.uploadCartaAssets(files);
 
     const cartaAtualizada =
-      assets.foto || assets.moldura
+      assets.foto || assets.fotoPerfil || assets.moldura
         ? await this.prisma.carta.update({
             where: { id },
             data: {
               ...(assets.foto ? { foto: assets.foto.url } : {}),
+              ...(assets.fotoPerfil ? { foto_perfil: assets.fotoPerfil.url } : {}),
               ...(assets.moldura ? { moldura: assets.moldura.url } : {}),
               atualizado_em: new Date(),
             },
@@ -83,6 +92,7 @@ export class AdminCloudinaryService {
   private extractFiles(files: CartaAssetFiles) {
     return {
       foto: files.foto?.[0],
+      fotoPerfil: files.fotoPerfil?.[0],
       moldura: files.moldura?.[0],
     };
   }

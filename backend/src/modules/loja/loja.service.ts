@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  OnModuleInit,
   UnauthorizedException,
 } from '@nestjs/common';
 import Stripe from 'stripe';
@@ -40,13 +41,20 @@ const pacotesIniciais = [
 ];
 
 @Injectable()
-export class LojaService {
+export class LojaService implements OnModuleInit {
   private readonly stripe = process.env.STRIPE_SECRET_KEY
     ? new Stripe(process.env.STRIPE_SECRET_KEY)
     : null;
+  private pacotesSincronizados = false;
+
   constructor(private readonly prisma: PrismaService) {}
 
-  async pacotes() {
+  async onModuleInit() {
+    await this.garantirPacotesIniciais().catch(() => undefined);
+  }
+
+  private async garantirPacotesIniciais() {
+    if (this.pacotesSincronizados) return;
     await Promise.all(
       pacotesIniciais.map((pacote) =>
         this.prisma.pacoteRuby.upsert({
@@ -57,11 +65,17 @@ export class LojaService {
             quantidade_rubys: pacote.quantidade_rubys,
             preco_brl: pacote.preco_brl,
             ativo: true,
-            atualizado_em: new Date(),
           },
         }),
       ),
     );
+    this.pacotesSincronizados = true;
+  }
+
+  async pacotes() {
+    if (!this.pacotesSincronizados) {
+      await this.garantirPacotesIniciais();
+    }
 
     return this.prisma.pacoteRuby.findMany({
       where: { ativo: true },
@@ -123,11 +137,18 @@ export class LojaService {
   async webhook(payload: Buffer, assinatura: string | undefined) {
     if (!this.stripe || !process.env.STRIPE_WEBHOOK_SECRET)
       throw new UnauthorizedException('Webhook Stripe não configurado.');
-    const evento = this.stripe.webhooks.constructEvent(
-      payload,
-      assinatura ?? '',
-      process.env.STRIPE_WEBHOOK_SECRET,
-    );
+
+    let evento: Stripe.Event;
+    try {
+      evento = this.stripe.webhooks.constructEvent(
+        payload,
+        assinatura ?? '',
+        process.env.STRIPE_WEBHOOK_SECRET,
+      );
+    } catch {
+      throw new BadRequestException('Assinatura do webhook Stripe inválida.');
+    }
+
     if (evento.type !== 'checkout.session.completed') return { recebido: true };
     const sessao = evento.data.object;
     const idTransacao = sessao.metadata?.transacaoId;
@@ -145,16 +166,16 @@ export class LojaService {
           !transacao.pacote
         )
           return;
-        await tx.logTransacao.update({
-          where: { id: transacao.id },
+
+        const atualizada = await tx.logTransacao.updateMany({
+          where: {
+            id: transacao.id,
+            status_pagamento: { not: 'CONCLUIDO' },
+          },
           data: { status_pagamento: 'CONCLUIDO' },
         });
-        await tx.usuario.update({
-          where: { id: transacao.id_usuario },
-          data: {
-            saldo_rubys_cache: { increment: transacao.pacote.quantidade_rubys },
-          },
-        });
+        if (atualizada.count !== 1) return;
+
         await tx.ledgerRuby.create({
           data: {
             id_usuario: transacao.id_usuario,

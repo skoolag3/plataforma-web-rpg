@@ -36,6 +36,7 @@ import {
 } from "../lib/senha";
 import styles from "../styles/authPanel.module.css";
 import { AuthTabs } from "./authTabs";
+import { AbstractCubeIsometricLoader } from "../../components/ui/abstract-cube-isometric-loader";
 
 type TipoModal = "login" | "cadastro" | "forgot" | null;
 
@@ -92,11 +93,8 @@ function EstruturaModal({
   aoFechar: () => void;
   variante?: "cadastro";
 }) {
-  const router = useRouter();
-
   function fechar() {
     aoFechar();
-    router.push("/");
   }
 
   return (
@@ -139,11 +137,13 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [acaoCarregando, setAcaoCarregando] = useState<"email" | "google" | null>(null);
 
   async function aoEnviar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErro("");
     setCarregando(true);
+    setAcaoCarregando("email");
 
     try {
       await login(email, senha);
@@ -157,12 +157,14 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
       );
     } finally {
       setCarregando(false);
+      setAcaoCarregando(null);
     }
   }
 
   async function entrarComGoogle() {
     setErro("");
     setCarregando(true);
+    setAcaoCarregando("google");
 
     try {
       const { url } = await obterUrlLoginGoogle();
@@ -174,6 +176,7 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
           : "Não foi possível iniciar o login com Google.",
       );
       setCarregando(false);
+      setAcaoCarregando(null);
     }
   }
 
@@ -250,7 +253,11 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
           className={styles.btnEnviar}
           disabled={carregando}
         >
-          <FontAwesomeIcon icon={faRightToBracket} aria-hidden="true" />
+          {acaoCarregando === "email" ? (
+            <AbstractCubeIsometricLoader dotSize={4} gap={3} label="Entrando" />
+          ) : (
+            <FontAwesomeIcon icon={faRightToBracket} aria-hidden="true" />
+          )}
           {carregando ? "Entrando..." : "Entrar"}
         </button>
       </form>
@@ -262,8 +269,12 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
         onClick={entrarComGoogle}
         disabled={carregando}
       >
-        <span className={styles.googleMark} aria-hidden="true">G</span>
-        {carregando ? "Abrindo Google..." : "Continuar com Google"}
+        {acaoCarregando === "google" ? (
+          <AbstractCubeIsometricLoader dotSize={4} gap={3} label="Abrindo Google" />
+        ) : (
+          <span className={styles.googleMark} aria-hidden="true">G</span>
+        )}
+        {acaoCarregando === "google" ? "Abrindo Google..." : "Continuar com Google"}
       </button>
 
     </EstruturaModal>

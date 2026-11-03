@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ConfigVisualCarta } from "../../components/cartaMontada";
 
-export type RaridadeCarta = "UR" | "SSR" | "SR" | "R" | "N";
+export type RaridadeCarta = string;
 
 export type CartaGachaVisual = {
   id?: string;
@@ -17,4 +17,4 @@ export type CartaGachaVisual = {
   valorVenda?: number;
 };
 
-export type EstadoGacha = "selecao" | "carregando" | "revelacao" | "resultado";
+export type EstadoGacha = "selecao" | "revelacao" | "resultado";

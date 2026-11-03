@@ -12,6 +12,10 @@ import {
 
 export class UpdateAdminUsuarioDto {
   @IsOptional()
+  @IsBoolean()
+  admin?: boolean;
+
+  @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(100)

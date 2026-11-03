@@ -23,13 +23,14 @@ describe('Rotas críticas - login e autenticação', () => {
   afterAll(async () => app.close());
 
   it('realiza login com credenciais válidas', async () => {
-    authService.login.mockResolvedValue({ access_token: 'jwt-valido' });
+    authService.login.mockResolvedValue({ access_token: 'jwt-valido', usuario: usuarioTeste });
 
     await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: usuarioTeste.email, senha: 'Senha@123' })
       .expect(201)
-      .expect({ access_token: 'jwt-valido' });
+      .expect({ usuario: usuarioTeste })
+      .expect('set-cookie', /animecards_session=jwt-valido/);
 
     expect(authService.login).toHaveBeenCalledWith({
       email: usuarioTeste.email,

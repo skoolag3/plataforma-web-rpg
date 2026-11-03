@@ -6,7 +6,7 @@ import {
   CheckCheck,
   ChevronRight,
   Gift,
-  Mail,
+  Bell,
   Megaphone,
   Percent,
   Sparkles,
@@ -173,7 +173,7 @@ export function Correio() {
           if (!aberto) carregar();
         }}
       >
-        <Mail aria-hidden="true" />
+        <Bell aria-hidden="true" />
         {naoLidas ? <b>{Math.min(naoLidas, 9)}</b> : null}
       </button>
 

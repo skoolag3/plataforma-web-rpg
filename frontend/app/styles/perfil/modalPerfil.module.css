@@ -4,6 +4,7 @@
   z-index: 100;
   display: grid;
   overflow-y: auto;
+  overscroll-behavior: contain;
   place-items: center;
   background: #01030ac7;
   padding: 1rem;

@@ -1,5 +1,6 @@
 "use client";
 
+import { nomeCategoriaNoticia } from "../lib/noticias";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
   faBolt,
@@ -27,6 +28,12 @@ import { ShaderBackground } from "../components/ui/shaderBackground";
 import { listarNoticias, type NoticiaPublica } from "../lib/noticias";
 import { listarCartasVitrine, type CartaVitrine } from "../lib/vitrine";
 import { ModalEsqueciSenha, ModalLogin, ModalCadastro } from "./authModal";
+import {
+  alterarModalAuth,
+  eventoModalAuth,
+  obterModalAuth,
+  type ModalAuth,
+} from "./authNavegacao";
 import estilosBase from "../styles/landingBase.module.css";
 import estilosHero from "../styles/landingHero.module.css";
 import estilosInfo from "../styles/landingInfo.module.css";
@@ -55,12 +62,6 @@ const styles = combinarEstilos(
   estilosResponsivo,
 );
 
-type TipoModal = "login" | "cadastro" | "forgot" | null;
-
-type PropriedadesLandingContent = {
-  modalInicial?: Exclude<TipoModal, "forgot">;
-};
-
 type TopicoLanding = {
   icone: IconDefinition;
   titulo: string;
@@ -71,15 +72,6 @@ type MetricaLanding = {
   icone: IconDefinition;
   valor: string;
   texto: string;
-};
-
-type NoticiaLanding = {
-  icone: IconDefinition;
-  tag: string;
-  tagClasse: string;
-  titulo: string;
-  resumo: string;
-  data: string;
 };
 
 const recursos = [
@@ -141,35 +133,6 @@ const cartas = [
   },
 ];
 
-const noticiasExemplo = [
-  {
-    icone: faTrophy,
-    tag: "Novidade",
-    tagClasse: styles.tagTemporada,
-    titulo: "Novas cartas chegam à arena",
-    resumo: "Amplie sua coleção, teste novas combinações e evolua seus decks.",
-    data: "12 MAI 2026",
-  },
-  {
-    icone: faBolt,
-    tag: "Balance",
-    tagClasse: styles.tagBalanceamento,
-    titulo: "Ajustes no custo de energia",
-    resumo:
-      "Mudanças pontuais deixam os duelos mais dinâmicos e abrem novas estratégias.",
-    data: "10 MAI 2026",
-  },
-  {
-    icone: faWandMagicSparkles,
-    tag: "Evento",
-    tagClasse: styles.tagEvento,
-    titulo: "Registro antecipado libera carta rara",
-    resumo:
-      "Crie sua conta antes da estreia e comece a jornada com uma carta especial.",
-    data: "08 MAI 2026",
-  },
-] satisfies NoticiaLanding[];
-
 function obterEstiloParticula(indice: number) {
   return {
     "--posEsquerda": `${((indice * 7) % 104) - 4}%`,
@@ -202,18 +165,32 @@ function aoSairPonteiroCarta(evento: PointerEvent<HTMLElement>) {
   carta.style.setProperty("--rotacaoY", "0deg");
 }
 
-export function LandingContent({
-  modalInicial = null,
-}: PropriedadesLandingContent) {
-  const [modal, setModal] = useState<TipoModal>(modalInicial);
+export function LandingContent() {
+  const [modal, setModal] = useState<ModalAuth>(null);
   const [noticiasPublicadas, setNoticiasPublicadas] = useState<
     NoticiaPublica[]
   >([]);
   const [cartasVitrine, setCartasVitrine] = useState<CartaVitrine[]>([]);
 
   useEffect(() => {
-    setModal(modalInicial);
-  }, [modalInicial]);
+    const sincronizarModal = () => setModal(obterModalAuth());
+    sincronizarModal();
+    window.addEventListener("popstate", sincronizarModal);
+    window.addEventListener(eventoModalAuth, sincronizarModal);
+    return () => {
+      window.removeEventListener("popstate", sincronizarModal);
+      window.removeEventListener(eventoModalAuth, sincronizarModal);
+    };
+  }, []);
+
+  function trocarModal(novoModal: ModalAuth) {
+    alterarModalAuth(novoModal, true);
+    setModal(novoModal);
+  }
+
+  function fecharModal() {
+    trocarModal(null);
+  }
 
   useEffect(() => {
     listarNoticias()
@@ -248,7 +225,21 @@ export function LandingContent({
             </p>
 
             <div className={styles.acoesHero}>
-              <Link href="/cadastro" className={styles.btnJogar}>
+              <Link
+                href="/?auth=cadastro"
+                className={styles.btnJogar}
+                onClick={(evento) => {
+                  if (
+                    evento.button !== 0 ||
+                    evento.ctrlKey ||
+                    evento.metaKey ||
+                    evento.shiftKey ||
+                    evento.altKey
+                  ) return;
+                  evento.preventDefault();
+                  alterarModalAuth("cadastro");
+                }}
+              >
                 <FontAwesomeIcon
                   className={styles.iconeBtnJogar}
                   icon={faPlay}
@@ -346,15 +337,10 @@ export function LandingContent({
           </div>
           <p>Novidades do jogo, mudanças de balanceamento e eventos para acompanhar sem sair da arena.</p>
         </div>
+        {noticiasPublicadas.length === 0 ? <p role="status">Nenhuma notícia disponível no momento.</p> : null}
         <div className={styles.gradeNoticias}>
-          {(noticiasPublicadas.length
-            ? noticiasPublicadas
-            : noticiasExemplo
-          ).map((noticia) => {
-            const categoria =
-              "categoria" in noticia
-                ? noticia.categoria
-                : noticia.tag.toUpperCase();
+          {noticiasPublicadas.slice(0, 6).map((noticia) => {
+            const categoria = noticia.categoria;
             const visual =
               categoria === "BALANCE"
                 ? { icone: faBolt, classe: styles.tagBalanceamento, card: styles.cardBalanceamento }
@@ -362,13 +348,11 @@ export function LandingContent({
                   ? { icone: faWandMagicSparkles, classe: styles.tagEvento, card: styles.cardEvento }
                   : { icone: faTrophy, classe: styles.tagTemporada, card: styles.cardAviso };
             const data =
-              "criado_em" in noticia
-                ? new Date(noticia.criado_em).toLocaleDateString("pt-BR", {
+              new Date(noticia.criado_em).toLocaleDateString("pt-BR", {
                     day: "2-digit",
                     month: "short",
                     year: "numeric",
-                  })
-                : noticia.data;
+                  });
             const conteudo = (
               <>
                 {"imagem" in noticia && noticia.imagem ? (
@@ -380,33 +364,35 @@ export function LandingContent({
                     height={220}
                   />
                 ) : null}
-                <div className={styles.topoNoticia}>
-                  <span
-                    className={`${styles.tagNoticia} ${"tagClasse" in noticia ? noticia.tagClasse : visual.classe}`}
-                  >
-                    {"tag" in noticia ? noticia.tag : noticia.categoria}
+                <div className={styles.corpoNoticia}>
+                  <div className={styles.topoNoticia}>
+                    <span
+                      className={`${styles.tagNoticia} ${visual.classe}`}
+                    >
+                      {nomeCategoriaNoticia(noticia.categoria)}
+                    </span>
+                    <FontAwesomeIcon
+                      className={styles.iconeNoticia}
+                      icon={visual.icone}
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <h3>{noticia.titulo}</h3>
+                  <p>{noticia.resumo}</p>
+                  <span className={styles.rodapeNoticia}>
+                    <time>
+                      <FontAwesomeIcon icon={faCalendarDays} aria-hidden="true" />
+                      {data}
+                    </time>
+                    <span className={styles.lerMais}>
+                      Ler novidade{" "}
+                      <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
+                    </span>
                   </span>
-                  <FontAwesomeIcon
-                    className={styles.iconeNoticia}
-                    icon={"icone" in noticia ? noticia.icone : visual.icone}
-                    aria-hidden="true"
-                  />
                 </div>
-                <h3>{noticia.titulo}</h3>
-                <p>{noticia.resumo}</p>
-                <span className={styles.rodapeNoticia}>
-                  <time>
-                    <FontAwesomeIcon icon={faCalendarDays} aria-hidden="true" />
-                    {data}
-                  </time>
-                  <span className={styles.lerMais}>
-                    Ler novidade{" "}
-                    <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
-                  </span>
-                </span>
               </>
             );
-            return "id" in noticia ? (
+            return (
               <Link
                 className={`${styles.cardNoticia} ${visual.card}`}
                 href={`/noticias/${noticia.id}`}
@@ -414,25 +400,21 @@ export function LandingContent({
               >
                 {conteudo}
               </Link>
-            ) : (
-              <article className={`${styles.cardNoticia} ${visual.card}`} key={noticia.titulo}>
-                {conteudo}
-              </article>
             );
           })}
         </div>
       </section>
 
       {modal === "login" ? (
-        <ModalLogin aoFechar={() => setModal(null)} aoTrocar={setModal} />
+        <ModalLogin aoFechar={fecharModal} aoTrocar={trocarModal} />
       ) : null}
       {modal === "cadastro" ? (
-        <ModalCadastro aoFechar={() => setModal(null)} aoTrocar={setModal} />
+        <ModalCadastro aoFechar={fecharModal} aoTrocar={trocarModal} />
       ) : null}
       {modal === "forgot" ? (
         <ModalEsqueciSenha
-          aoFechar={() => setModal(null)}
-          aoTrocar={setModal}
+          aoFechar={fecharModal}
+          aoTrocar={trocarModal}
         />
       ) : null}
     </main>

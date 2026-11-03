@@ -403,7 +403,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
   async listarMolduras(idUsuario: string) {
     const [molduras, cartasComMoldura] = await Promise.all([
       this.prisma.moldura.findMany({
-        where: { ativo: true },
+        where: { ativo: true, slug: { notIn: ['padrao', 'violeta', 'rubi'] } },
         include: {
           usuarios: {
             where: { id_usuario: idUsuario },
@@ -432,6 +432,14 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     ]);
 
     return [
+      {
+        id: 'padrao',
+        nome: 'Padrão',
+        descricao: 'Moldura inicial do perfil.',
+        classeCss: 'molduraPadrao',
+        imagemUrl: null,
+        obtida: true,
+      },
       ...molduras.map((moldura) => ({
         id: moldura.id,
         nome: moldura.nome,
@@ -459,7 +467,161 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     ];
   }
 
+  async buscarPerfilPublico(idUsuario: string) {
+    const usuario = await this.prisma.usuario.findFirst({
+      where: {
+        id: idUsuario,
+        ativo: true,
+        is_admin: false,
+        email_verificado: true,
+        excluido_em: null,
+      },
+      select: {
+        id: true,
+        nome: true,
+        pontos_experiencia: true,
+        perfil: {
+          select: {
+            mostrar_no_ranking: true,
+            ocultar_historico: true,
+            biografia: true,
+            avatar_url: true,
+            banner_url: true,
+            molduraSelecionada: { select: { nome: true, classe_css: true } },
+            cartaMolduraSelecionada: { select: { nome: true, moldura: true, config_visual: true } },
+          },
+        },
+      },
+    });
+
+    if (!usuario || usuario.perfil?.mostrar_no_ranking === false) {
+      throw new NotFoundException('Perfil não encontrado.');
+    }
+
+    const [cartasObtidas, totalCartas, decksCriados, partidas, pontuacao] = await Promise.all([
+      this.prisma.inventario.count({
+        where: { id_usuario: idUsuario, quantidade: { gt: 0 } },
+      }),
+      this.prisma.carta.count({ where: { ativo: true, excluido_em: null } }),
+      this.prisma.deck.count({ where: { id_usuario: idUsuario, excluido_em: null } }),
+      this.prisma.logPartida.groupBy({
+        by: ['resultado'],
+        where: { id_usuario: idUsuario, resultado: { not: 'EM_ANDAMENTO' } },
+        _count: { _all: true },
+      }),
+      this.prisma.logPartida.aggregate({
+        where: { id_usuario: idUsuario, resultado: { not: 'EM_ANDAMENTO' } },
+        _sum: { variacao_pontos: true },
+      }),
+    ]);
+
+    const perfil = usuario.perfil;
+    const historico = perfil?.ocultar_historico
+      ? []
+      : await this.prisma.logPartida.findMany({
+          where: { id_usuario: idUsuario, resultado: { not: 'EM_ANDAMENTO' } },
+          select: {
+            id: true,
+            resultado: true,
+            turnos_jogados: true,
+            variacao_pontos: true,
+            timestamp_inicio: true,
+            deck: { select: { nome: true } },
+          },
+          orderBy: { timestamp_inicio: 'desc' },
+          take: 30,
+        });
+    const quantidadePartidas = (resultado: string) =>
+      partidas.find((partida) => partida.resultado === resultado)?._count._all ?? 0;
+
+    return {
+      id: usuario.id,
+      nome: usuario.nome,
+      biografia: perfil?.biografia ?? '',
+      avatarUrl: perfil?.avatar_url ?? null,
+      bannerUrl: perfil?.banner_url ?? null,
+      moldura: perfil?.cartaMolduraSelecionada?.nome
+        ? `Moldura de ${perfil.cartaMolduraSelecionada.nome}`
+        : (perfil?.molduraSelecionada?.nome ?? 'Padrão'),
+      molduraClasse: perfil?.cartaMolduraSelecionada
+        ? 'molduraCarta'
+        : (perfil?.molduraSelecionada?.classe_css ?? 'molduraPadrao'),
+      molduraUrl: perfil?.cartaMolduraSelecionada?.moldura ?? null,
+      molduraConfig: perfil?.cartaMolduraSelecionada?.config_visual ?? null,
+      pontos: pontuacao._sum.variacao_pontos ?? usuario.pontos_experiencia ?? 0,
+      partidas: partidas.reduce((total, partida) => total + partida._count._all, 0),
+      vitorias: quantidadePartidas('VITORIA'),
+      derrotas: quantidadePartidas('DERROTA'),
+      cartasObtidas,
+      totalCartas,
+      decksCriados,
+      historicoOculto: perfil?.ocultar_historico ?? false,
+      historico,
+    };
+  }
+
+  async listarFotosCartas(idUsuario: string) {
+    const itens = await this.prisma.inventario.findMany({
+      where: {
+        id_usuario: idUsuario,
+        quantidade: { gt: 0 },
+        carta: { ativo: true, excluido_em: null, OR: [{ foto_perfil: { not: null } }, { foto: { not: null } }] },
+      },
+      select: { carta: { select: { id: true, nome: true, foto: true, foto_perfil: true } } },
+      orderBy: { carta: { nome: 'asc' } },
+    });
+    return itens.flatMap(({ carta }) => carta?.foto_perfil || carta?.foto
+      ? [{ id: carta.id, nome: carta.nome, fotoUrl: carta.foto_perfil ?? carta.foto! }]
+      : []);
+  }
+
+  async selecionarFotoCarta(idUsuario: string, idCarta: string) {
+    if (idCarta === 'padrao') {
+      await this.prisma.perfilUsuario.upsert({
+        where: { id_usuario: idUsuario },
+        create: { id_usuario: idUsuario, avatar_url: null },
+        update: { avatar_url: null },
+      });
+      return { message: 'Foto padrão selecionada.', avatarUrl: null };
+    }
+
+    const item = await this.prisma.inventario.findFirst({
+      where: {
+        id_usuario: idUsuario,
+        id_carta: idCarta,
+        quantidade: { gt: 0 },
+        carta: { ativo: true, excluido_em: null, OR: [{ foto_perfil: { not: null } }, { foto: { not: null } }] },
+      },
+      select: { carta: { select: { foto: true, foto_perfil: true } } },
+    });
+    const url = item?.carta?.foto_perfil ?? item?.carta?.foto;
+    if (!url) {
+      throw new ForbiddenException('Esta foto não está disponível na sua coleção.');
+    }
+    await this.prisma.perfilUsuario.upsert({
+      where: { id_usuario: idUsuario },
+      create: { id_usuario: idUsuario, avatar_url: url },
+      update: { avatar_url: url },
+    });
+    return { message: 'Foto do perfil atualizada.', avatarUrl: url };
+  }
+
   async selecionarMoldura(idUsuario: string, dto: SelecionarMolduraDto) {
+    if (dto.idMoldura === 'padrao') {
+      await this.prisma.perfilUsuario.upsert({
+        where: { id_usuario: idUsuario },
+        create: { id_usuario: idUsuario, id_moldura: null, id_carta_moldura: null },
+        update: { id_moldura: null, id_carta_moldura: null },
+      });
+      return {
+        message: 'Moldura padrão selecionada.',
+        moldura: 'Padrão',
+        molduraClasse: 'molduraPadrao',
+        molduraUrl: null,
+        molduraConfig: null,
+      };
+    }
+
     if (dto.idMoldura.startsWith('carta:')) {
       return this.selecionarMolduraDeCarta(
         idUsuario,

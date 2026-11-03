@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsIn,
   IsInt,
   IsOptional,
@@ -40,6 +41,7 @@ const requisitos = [
   'CONTADOR_ATAQUES',
   'HP_ABAIXO',
   'TURNO_MINIMO',
+  'INTERVALO_TURNOS',
 ] as const;
 const escalas = ['NENHUMA', 'POR_TURNO', 'POR_ATAQUE'] as const;
 
@@ -117,6 +119,10 @@ export class InativarAdminHabilidadeDto {
 }
 
 export class TestarAdminHabilidadeDto {
+  @IsOptional()
+  @IsBoolean()
+  criticoAtivou?: boolean;
+
   @IsInt()
   @Min(1)
   @Max(100)

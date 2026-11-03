@@ -1,5 +1,6 @@
 "use client";
 
+import { nomeElementoCarta } from "../../components/elementosCarta";
 import { Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -161,7 +162,7 @@ export function FormBoss({
                       checked={form.cartas.includes(carta.id)}
                       onChange={() => alternarCarta(carta.id)}
                     />{" "}
-                    {carta.nome} · {carta.elemento}
+                    {carta.nome} · {nomeElementoCarta(carta.elemento)}
                   </label>
                 ))}
             </div>

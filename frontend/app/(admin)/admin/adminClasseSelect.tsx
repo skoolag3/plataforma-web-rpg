@@ -11,6 +11,7 @@ import {
 } from "../../lib/admin";
 import styles from "../../styles/admin/adminClasseSelect.module.css";
 import { SelectPadrao } from "../../components/ui/controlesFormulario";
+import { SwitchToggle } from "../../../components/ui/switch";
 
 const classeVazia: SalvarAdminClassePayload = {
   nome: "",
@@ -87,7 +88,24 @@ export function AdminClasseSelect({
 
   return (
     <div className={styles.campoClasse}>
-      <label htmlFor="classe-carta">Classe</label>
+      <div className={styles.cabecalhoClasse}>
+        <span>Classe</span>
+        <div className={styles.acoesClasse}>
+          {selecionada ? <small>Prioridade {selecionada.prioridadeAtaque}</small> : null}
+          <button type="button" onClick={() => abrir()} title="Criar classe" aria-label="Criar classe">
+            <Plus aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => selecionada && abrir(selecionada)}
+            disabled={!selecionada}
+            title="Editar classe selecionada"
+            aria-label="Editar classe selecionada"
+          >
+            <Pencil aria-hidden="true" />
+          </button>
+        </div>
+      </div>
       <div className={styles.linhaSelect}>
         <div className={styles.selectClasse}>
           <SelectPadrao
@@ -117,20 +135,7 @@ export function AdminClasseSelect({
             ]}
           />
         </div>
-        <button type="button" onClick={() => abrir()} title="Criar classe">
-          <Plus />
-        </button>
-        <button
-          type="button"
-          onClick={() => selecionada && abrir(selecionada)}
-          disabled={!selecionada}
-          title="Editar classe selecionada"
-        >
-          <Pencil />
-        </button>
       </div>
-      {selecionada ? <small>Prioridade {selecionada.prioridadeAtaque}</small> : null}
-
       {editando !== undefined ? (
         <div className={styles.fundoModal} role="presentation">
           <section className={styles.modalClasse}>
@@ -175,16 +180,9 @@ export function AdminClasseSelect({
               />
             </div>
             {editando ? (
-              <label className={styles.checkAtiva}>
-                <input
-                  type="checkbox"
-                  checked={form.ativo}
-                  onChange={(event) =>
-                    setForm({ ...form, ativo: event.target.checked })
-                  }
-                />
-                Classe ativa
-              </label>
+              <div className={styles.checkAtiva}>
+                <SwitchToggle checked={Boolean(form.ativo)} onChange={(ativo) => setForm({ ...form, ativo })} label="Classe ativa" />
+              </div>
             ) : null}
             <footer>
               <button type="button" onClick={() => setEditando(undefined)}>

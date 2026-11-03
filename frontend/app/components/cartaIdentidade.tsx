@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { obterElementoCarta } from "./elementosCarta";
 import styles from "../styles/cartaIdentidade.module.css";
+import { obterRaridadeJogo, useRaridadesJogo } from "./raridadesJogo";
 
 export function CartaIdentidade({
   nome,
@@ -13,6 +16,7 @@ export function CartaIdentidade({
   elemento: string;
 }) {
   const elementoVisual = obterElementoCarta(elemento);
+  const raridadeVisual = obterRaridadeJogo(useRaridadesJogo(), raridade);
 
   return (
     <span className={styles.identidade} data-elemento={elemento}>
@@ -32,7 +36,7 @@ export function CartaIdentidade({
       ) : null}
       <span className={styles.titulo}>
         <strong>{nome}</strong>
-        <small data-raridade={raridade}>{raridade}</small>
+        <small data-raridade={raridade} style={raridadeVisual ? { color: raridadeVisual.cor, borderColor: raridadeVisual.cor } : undefined}>{raridadeVisual?.nome ?? raridade}</small>
       </span>
     </span>
   );

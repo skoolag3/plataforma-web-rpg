@@ -1,7 +1,6 @@
 "use client";
 
-import { Layers, Map, ReceiptText, UserRound, X } from "lucide-react";
-import Image from "next/image";
+import { Layers, Map, ReceiptText, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   ajustarColecaoAdminUsuario,
@@ -21,6 +20,7 @@ import financeiroStyles from "../../styles/admin/adminUsuarioFinanceiro.module.c
 import { AdminUsuarioColecao } from "./adminUsuarioColecao";
 import { AdminUsuarioFinanceiro } from "./adminUsuarioFinanceiro";
 import { AdminUsuarioExpedicoes } from "./adminUsuarioExpedicoes";
+import { UsuarioAvatarMoldura } from "./adminUsuarios";
 import { combinarEstilos } from "./combinarEstilos";
 import {
   notificarErro,
@@ -187,19 +187,7 @@ export function AdminUsuarioPainel({
         aria-labelledby="usuario-painel-titulo"
       >
         <header className={styles.usuarioPainelTopo}>
-          <span className={styles.usuarioAvatar}>
-            {usuario.avatarUrl ? (
-              <Image
-                src={usuario.avatarUrl}
-                alt=""
-                width={40}
-                height={40}
-                unoptimized
-              />
-            ) : (
-              <UserRound aria-hidden="true" />
-            )}
-          </span>
+          <UsuarioAvatarMoldura usuario={usuario} />
           <div>
             <h2 id="usuario-painel-titulo">{usuario.nome}</h2>
             <p>{usuario.email}</p>
@@ -208,7 +196,6 @@ export function AdminUsuarioPainel({
             className={styles.usuarioCabecalhoResumo}
             aria-label="Resumo rápido do usuário"
           >
-            <span>Nv. {usuario.nivel}</span>
             <span>{formatNumber(usuario.rubys)} Rubys</span>
             <span>{formatNumber(usuario.partidas)} partidas</span>
           </div>

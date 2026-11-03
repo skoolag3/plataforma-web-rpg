@@ -30,12 +30,27 @@ describe('JwtStrategy', () => {
         where: expect.objectContaining({
           id: 'usuario-id',
           ativo: true,
-          bloqueado: false,
           email_verificado: true,
           excluido_em: null,
         }),
+        select: expect.objectContaining({
+          bloqueado: true,
+          tentativas_login: true,
+        }),
       }),
     );
+  });
+
+  it('rejeita conta bloqueada pelo administrador', async () => {
+    findFirst.mockResolvedValue({
+      id: 'usuario-id',
+      bloqueado: true,
+      tentativas_login: 0,
+    });
+
+    await expect(
+      strategy.validate({ sub: 'usuario-id' }),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
   it('rejeita token de uma conta que não está mais disponível', async () => {

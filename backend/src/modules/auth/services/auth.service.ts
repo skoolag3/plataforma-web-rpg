@@ -19,12 +19,19 @@ import { RegisterDto } from '../dto/register.dto';
 import { ReenviarVerificacaoDto } from '../dto/reenviar-verificacao.dto';
 import { SolicitarRedefinicaoSenhaDto } from '../dto/solicitar-redefinicao-senha.dto';
 import { VerifyEmailDto } from '../dto/verify-email.dto';
+import {
+  revogarSessoesDoUsuario,
+  revogarTokenEspecifico,
+} from '../session-revocation';
 
 const maxTentativasLogin = 5;
+const janelaBloqueioLoginMs = 15 * 60 * 1000;
 const tokenVerificacaoHoras = 24;
 const tokenRedefinicaoSenhaHoras = 1;
 const mensagemVerificacaoPendente =
   'Cadastro pendente de verificação. Tentamos enviar o e-mail; se o endereço existir, ele chegará em instantes.';
+const mensagemReenvioPadrao =
+  'Se o e-mail existir e estiver pendente de confirmação, enviaremos uma nova verificação.';
 
 @Injectable()
 export class AuthService {
@@ -54,7 +61,6 @@ export class AuthService {
 
         return {
           message: mensagemVerificacaoPendente,
-          usuario: this.removerSenha(usuario),
         };
       }
 
@@ -126,15 +132,9 @@ export class AuthService {
       where: { email },
     });
 
-    if (!usuarioExistente) {
+    if (!usuarioExistente || usuarioExistente.email_verificado) {
       return {
-        message: 'Se o e-mail existir, enviaremos uma nova verificação.',
-      };
-    }
-
-    if (usuarioExistente.email_verificado) {
-      return {
-        message: 'Este e-mail já está verificado.',
+        message: mensagemReenvioPadrao,
       };
     }
 
@@ -146,7 +146,7 @@ export class AuthService {
     });
 
     return {
-      message: 'Enviamos um novo e-mail de verificação.',
+      message: mensagemReenvioPadrao,
     };
   }
 
@@ -209,6 +209,8 @@ export class AuthService {
       },
     });
 
+    revogarSessoesDoUsuario(usuario.id);
+
     return {
       message: 'Senha alterada com sucesso. Você já pode entrar.',
     };
@@ -231,9 +233,20 @@ export class AuthService {
     }
 
     if (usuario.bloqueado) {
-      throw new ForbiddenException(
-        'Conta bloqueada por excesso de tentativas.',
-      );
+      const bloqueioPorTentativas =
+        (usuario.tentativas_login ?? 0) >= maxTentativasLogin;
+      const ultimaAtualizacao = usuario.atualizado_em?.getTime() ?? 0;
+      const bloqueioExpirado =
+        bloqueioPorTentativas &&
+        Date.now() - ultimaAtualizacao >= janelaBloqueioLoginMs;
+
+      if (!bloqueioExpirado) {
+        throw new ForbiddenException(
+          bloqueioPorTentativas
+            ? 'Conta temporariamente bloqueada por excesso de tentativas. Aguarde 15 minutos ou redefina sua senha.'
+            : 'Conta bloqueada.',
+        );
+      }
     }
 
     if (!usuario.email_verificado) {
@@ -243,20 +256,25 @@ export class AuthService {
     const senhaValida = await bcrypt.compare(data.senha, usuario.senha_hash);
 
     if (!senhaValida) {
-      const tentativas = (usuario.tentativas_login ?? 0) + 1;
-      const bloqueado = tentativas >= maxTentativasLogin;
+      const tentativasBase =
+        usuario.bloqueado && (usuario.tentativas_login ?? 0) >= maxTentativasLogin
+          ? 0
+          : (usuario.tentativas_login ?? 0);
+      const tentativas = tentativasBase + 1;
+      const bloqueado = !usuario.is_admin && tentativas >= maxTentativasLogin;
 
       await this.prisma.usuario.update({
         where: { id: usuario.id },
         data: {
           tentativas_login: tentativas,
           bloqueado,
+          atualizado_em: new Date(),
         },
       });
 
       if (bloqueado) {
         throw new ForbiddenException(
-          'Conta bloqueada por excesso de tentativas.',
+          'Conta temporariamente bloqueada por excesso de tentativas. Aguarde 15 minutos ou redefina sua senha.',
         );
       }
 
@@ -316,11 +334,29 @@ export class AuthService {
     return usuario ? this.removerSenha(usuario) : null;
   }
 
+  revogarTokenSessao(token: string | null) {
+    if (!token) return;
+    try {
+      const payload = this.jwtService.verify<{ jti?: string; sub?: string }>(
+        token,
+      );
+      if (payload?.jti) {
+        revogarTokenEspecifico(payload.jti);
+      } else if (payload?.sub) {
+        revogarSessoesDoUsuario(payload.sub);
+      }
+    } catch {
+      // Token já expirado ou inválido
+    }
+  }
+
   private gerarToken(usuario: Usuario) {
     const payload = {
       sub: usuario.id,
       email: usuario.email,
       isAdmin: Boolean(usuario.is_admin),
+      purpose: 'session',
+      jti: randomBytes(16).toString('hex'),
     };
 
     return this.jwtService.sign(payload);

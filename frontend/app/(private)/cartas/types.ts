@@ -6,9 +6,10 @@ import type { ConfigVisualCarta } from "../../components/cartaMontada";
 export type Card = {
   id?: string;
   nome: string;
-  raridade: "UR" | "SSR" | "SR" | "R" | "N";
+  raridade: string;
   elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
   classe: string;
+  prioridadeAtaque?: number;
   custo: number;
   elementoIcone: LucideIcon;
   copias: string;
@@ -25,6 +26,7 @@ export type Card = {
   hpBase?: number;
   danoBase?: number;
   defesaBase?: number;
+  habilidades?: { id: string; nome: string; descricao: string | null }[];
   passiva?: Record<string, unknown>;
 };
 

@@ -1,5 +1,5 @@
-import { LandingContent } from "../landingContent";
+import { redirect } from "next/navigation";
 
 export default function CadastroPage() {
-  return <LandingContent modalInicial="cadastro" />;
+  redirect("/?auth=cadastro");
 }

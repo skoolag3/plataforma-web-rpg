@@ -24,21 +24,24 @@ import {
 } from "../../lib/admin";
 import styles from "../../styles/admin/adminCampanha.module.css";
 import BasicSteps from "@/components/ui/steps";
+import { SwitchToggle } from "../../../components/ui/switch";
 import { AdminCampanhaCatalogo } from "./adminCampanhaCatalogo";
+import { AdminCampanhaSecoes, secoesIniciais } from "./adminCampanhaSecoes";
 import { AdminLayout } from "./adminShared";
 
 const produtoInicial: SalvarProdutoExpedicaoPayload = {
   nome: "", descricao: "", tema: "", tipo: "RECORRENTE", ativo: true, peso: 100,
-  inicioEm: null, fimEm: null, recompensaFacil: 25, recompensaMedia: 25,
-  recompensaDificil: 25, recompensaChefe: 100, percentualMantidoDerrota: 70,
+  inicioEm: null, fimEm: null, recompensaFacil: 20, recompensaMedia: 35,
+  recompensaDificil: 50, recompensaChefe: 100, percentualMantidoDerrota: 70,
   bossNome: "Guardião da Expedição",
   bossPersonalidade: "Orgulhoso, estratégico e provocador, mas respeita a coragem.",
   bossProvocacao: "Você atravessou minha trilha. Agora prove que merece sair dela.",
   bossPerguntas: ["Por que você merece atravessar meu domínio?", "O que faria se sua carta mais forte caísse agora?", "Qual sacrifício aceitaria para vencer esta batalha?", "O que distingue coragem de imprudência?"],
   bossCartas: [],
+  secoes: secoesIniciais(),
 };
 
-const etapasProduto = ["Identidade", "Regras da jornada", "Boss e publicação"] as const;
+const etapasProduto = ["Campanha", "Seções", "Recompensas", "Disponibilidade", "Boss"] as const;
 
 export function AdminCampanha() {
   const [painel, setPainel] = useState<AdminCampanhaPainel | null>(null);
@@ -77,10 +80,14 @@ export function AdminCampanha() {
       percentualMantidoDerrota: item.percentualMantidoDerrota, bossNome: item.bossNome,
       bossPersonalidade: item.bossPersonalidade, bossProvocacao: item.bossProvocacao,
       bossPerguntas: item.bossPerguntas, bossCartas: item.bossCartas,
+      secoes: item.secoes.map((secao, indice) => secao.tipo === "BATALHA"
+        ? { ...secao, caminhos: secao.caminhos.slice(0, 3), grupo: secao.grupo ?? (indice < 2 ? 1 : indice) }
+        : secao),
     } : {
       ...produtoInicial,
       tema: tema ?? temaSelecionado ?? painel?.produtos[0]?.tema ?? produtoInicial.tema,
       bossPerguntas: [...produtoInicial.bossPerguntas],
+      secoes: secoesIniciais(),
     });
     setConfirmandoExclusao(false);
   }
@@ -91,7 +98,7 @@ export function AdminCampanha() {
       setErroEtapa("Preencha nome, descrição e tema para continuar.");
       return;
     }
-    if (etapaProduto === 1 && produto.inicioEm && produto.fimEm && new Date(produto.inicioEm) >= new Date(produto.fimEm)) {
+    if (etapaProduto === 3 && produto.inicioEm && produto.fimEm && new Date(produto.inicioEm) >= new Date(produto.fimEm)) {
       setErroEtapa("O fim do evento deve ocorrer depois do início.");
       return;
     }
@@ -143,7 +150,7 @@ export function AdminCampanha() {
   return (
     <AdminLayout
       title="Catálogo de campanhas"
-      subtitle="Organize temas, crie cenários e acompanhe as campanhas disponíveis para sorteio."
+      subtitle="Primeiro escolha um tema. Depois configure a campanha que poderá aparecer nas expedições."
     >
       <AdminCampanhaCatalogo
         temas={painel?.temas ?? []}
@@ -161,7 +168,7 @@ export function AdminCampanha() {
             <header>
               <div>
                 <h2 id="titulo-produto">{produtoId ? "Editar campanha" : "Criar campanha"}</h2>
-                <p>{produtoId ? "Ajuste o cenário e suas regras." : `Uma nova campanha para o tema ${produto.tema}.`}</p>
+                <p>{produtoId ? `Tema ${produto.tema} · alterações só entram em vigor ao salvar` : `Tema ${produto.tema} · avance pelas etapas para criar`}</p>
               </div>
               <button type="button" aria-label="Fechar" onClick={() => setProduto(null)}><X /></button>
             </header>
@@ -173,52 +180,68 @@ export function AdminCampanha() {
               {etapaProduto === 0 ? <>
                 <div className={styles.introEtapa}>
                   <span><Compass aria-hidden="true" /></span>
-                  <div><h3>Onde esta campanha acontece?</h3><p>Um tema pode reunir várias campanhas, cada uma com seu cenário e boss.</p></div>
+                  <div><h3>Identifique esta jornada</h3><p>O nome e a descrição ajudam a distinguir campanhas dentro do mesmo tema.</p></div>
                 </div>
                 <div className={styles.selecaoTema}>
-                  <strong>Tema: {produto.tema}</strong>
-                  <small>Esta campanha ficará dentro do tema selecionado no catálogo.</small>
+                  <strong>Tema selecionado: {produto.tema}</strong>
+                  <small>Para usar outro tema, feche esta janela e escolha-o no catálogo.</small>
                 </div>
                 <div className={styles.formProduto}>
-                  <label>Nome da campanha<input maxLength={100} value={produto.nome} placeholder="Ex.: Fortaleza das Cinzas" onChange={(e) => setProduto({...produto, nome: e.target.value})} /></label>
-                  <label className={styles.campoLargo}>Cenário e proposta<input maxLength={300} value={produto.descricao} placeholder="Descreva o que torna esta jornada diferente" onChange={(e) => setProduto({...produto, descricao: e.target.value})} /></label>
-                  <label>Tipo de campanha<select value={produto.tipo} onChange={(e) => setProduto({...produto, tipo: e.target.value as "RECORRENTE" | "EVENTO"})}><option value="RECORRENTE">Recorrente</option><option value="EVENTO">Evento</option></select></label>
+                  <label>Nome da campanha<input maxLength={100} value={produto.nome} placeholder="Ex.: Expedição Arcana" onChange={(e) => setProduto({...produto, nome: e.target.value})} /><small>Nome exibido para identificar esta jornada.</small></label>
+                  <label>Descrição da jornada<input maxLength={300} value={produto.descricao} placeholder="Ex.: Atravesse ruínas arcanas até o guardião final" onChange={(e) => setProduto({...produto, descricao: e.target.value})} /><small>Resuma o cenário e o objetivo da expedição.</small></label>
+                  <label>Tipo de campanha<select value={produto.tipo} onChange={(e) => setProduto({...produto, tipo: e.target.value as "RECORRENTE" | "EVENTO"})}><option value="RECORRENTE">Recorrente</option><option value="EVENTO">Evento</option></select><small>{produto.tipo === "EVENTO" ? "Você poderá definir um período na etapa Disponibilidade." : "Pode ficar disponível continuamente ou por um período."}</small></label>
                 </div>
               </> : null}
 
-              {etapaProduto === 1 ? <>
-                <div className={styles.introEtapa}>
-                  <span><Map aria-hidden="true" /></span>
-                  <div><h3>Como funciona a jornada?</h3><p>Defina as recompensas das rotas e quando esta campanha poderá aparecer.</p></div>
-                </div>
-                <div className={styles.formProduto}>
-                  <CampoProduto rotulo="Rota fácil · Rubys" valor={produto.recompensaFacil} alterar={(recompensaFacil) => setProduto({...produto, recompensaFacil})} />
-                  <CampoProduto rotulo="Rota média · Rubys" valor={produto.recompensaMedia} alterar={(recompensaMedia) => setProduto({...produto, recompensaMedia})} />
-                  <CampoProduto rotulo="Rota difícil · Rubys" valor={produto.recompensaDificil} alterar={(recompensaDificil) => setProduto({...produto, recompensaDificil})} />
-                  <CampoProduto rotulo="Chefe final · Rubys" valor={produto.recompensaChefe} alterar={(recompensaChefe) => setProduto({...produto, recompensaChefe})} />
-                  <CampoProduto rotulo="Mantido na derrota (%)" valor={produto.percentualMantidoDerrota} alterar={(percentualMantidoDerrota) => setProduto({...produto, percentualMantidoDerrota})} />
-                  <CampoProduto rotulo="Peso no sorteio" valor={produto.peso} alterar={(peso) => setProduto({...produto, peso})} />
-                </div>
-                <p className={styles.ajudaEtapa}>Quanto maior o peso, maior a chance de a campanha ser sorteada entre as disponíveis.</p>
-                <div className={styles.periodoEvento}>
-                  <strong>Período de disponibilidade</strong>
-                  <p>Deixe as datas vazias para manter a campanha disponível sem limite de tempo.</p>
-                  <div className={styles.formProduto}>
-                    <label>Início<input type="datetime-local" value={paraInputData(produto.inicioEm)} onChange={(e) => setProduto({...produto, inicioEm: e.target.value ? new Date(e.target.value).toISOString() : null})} /></label>
-                    <label>Fim<input type="datetime-local" value={paraInputData(produto.fimEm)} onChange={(e) => setProduto({...produto, fimEm: e.target.value ? new Date(e.target.value).toISOString() : null})} /></label>
-                  </div>
-                </div>
-              </> : null}
+              {etapaProduto === 1 ? <AdminCampanhaSecoes secoes={produto.secoes} percentualMantidoPadrao={produto.percentualMantidoDerrota} cartas={painel?.cartas ?? []} alterar={(secoes) => setProduto({ ...produto, secoes })} /> : null}
 
               {etapaProduto === 2 ? <>
                 <div className={styles.introEtapa}>
-                  <span><Swords aria-hidden="true" /></span>
-                  <div><h3>Quem espera no final?</h3><p>Dê identidade ao boss e prepare as perguntas do confronto.</p></div>
+                  <span><Map aria-hidden="true" /></span>
+                  <div><h3>Recompensa final</h3><p>Os ganhos e as perdas das batalhas são definidos em cada seção. Configure aqui o chefe final.</p></div>
                 </div>
                 <div className={styles.formProduto}>
-                  <label className={styles.campoLargo}>Nome do boss<input maxLength={100} value={produto.bossNome} onChange={(e) => setProduto({...produto, bossNome: e.target.value})} /></label>
-                  <label className={styles.campoLargo}>Personalidade<textarea maxLength={600} value={produto.bossPersonalidade} onChange={(e) => setProduto({...produto, bossPersonalidade: e.target.value})} /></label>
-                  <label className={styles.campoLargo}>Provocação<textarea maxLength={500} value={produto.bossProvocacao} onChange={(e) => setProduto({...produto, bossProvocacao: e.target.value})} /></label>
+                  <CampoProduto rotulo="Chefe final (Rubys)" valor={produto.recompensaChefe} alterar={(recompensaChefe) => setProduto({...produto, recompensaChefe})} />
+                  <label>Perda ao ser derrotado pelo chefe (%)<input type="number" min="0" max="100" value={100 - (produto.secoes.at(-1)?.percentualMantidoDerrota ?? produto.percentualMantidoDerrota)} onChange={(evento) => setProduto({...produto, secoes: produto.secoes.map((secao) => secao.tipo === "BOSS" ? { ...secao, percentualMantidoDerrota: 100 - Math.min(100, Math.max(0, Number(evento.target.value))) } : secao)})} /></label>
+                </div>
+                <p className={styles.ajudaEtapa}>A porcentagem afeta apenas a recompensa prevista para a batalha perdida. Vitórias anteriores já estão asseguradas.</p>
+              </> : null}
+
+              {etapaProduto === 3 ? <>
+                <div className={styles.introEtapa}>
+                  <span><Map aria-hidden="true" /></span>
+                  <div><h3>Quando esta campanha aparece?</h3><p>Escolha o período e a frequência no sorteio de novas expedições.</p></div>
+                </div>
+                <div className={styles.publicarCampanha}>
+                  <SwitchToggle checked={produto.ativo} onChange={(ativo) => setProduto({...produto, ativo})} aria-label="Disponibilizar no sorteio" />
+                  <span><strong>Incluir no sorteio de expedições</strong><small>{produto.ativo ? (produto.inicioEm || produto.fimEm ? "Disponível somente no período definido." : "Disponível assim que você salvar.") : "Desativada: jogadores não receberão esta campanha."}</small></span>
+                </div>
+                <div className={styles.periodoEvento}>
+                  <strong>Período de disponibilidade</strong>
+                  <p>Deixe as datas vazias para disponibilizar sem limite de tempo. Você também pode preencher só o início ou só o fim.</p>
+                  <div className={styles.formProduto}>
+                    <label>Começa em<input type="datetime-local" value={paraInputData(produto.inicioEm)} onChange={(e) => setProduto({...produto, inicioEm: e.target.value ? new Date(e.target.value).toISOString() : null})} /></label>
+                    <label>Termina em<input type="datetime-local" value={paraInputData(produto.fimEm)} onChange={(e) => setProduto({...produto, fimEm: e.target.value ? new Date(e.target.value).toISOString() : null})} /></label>
+                  </div>
+                </div>
+                <details className={styles.opcaoAvancada}>
+                  <summary>Ajustar frequência no sorteio (opcional)</summary>
+                  <div className={styles.pesoSorteio}>
+                    <CampoProduto rotulo="Peso no sorteio" valor={produto.peso} alterar={(peso) => setProduto({...produto, peso})} />
+                    <p>Com o mesmo peso das outras campanhas, todas têm chances iguais. Aumente este número se quiser que esta apareça mais vezes.</p>
+                  </div>
+                </details>
+              </> : null}
+
+              {etapaProduto === 4 ? <>
+                <div className={styles.introEtapa}>
+                  <span><Swords aria-hidden="true" /></span>
+                  <div><h3>Prepare o boss final</h3><p>Escreva a fala do boss e as quatro perguntas que o jogador responderá.</p></div>
+                </div>
+                <div className={styles.formProduto}>
+                  <label className={styles.campoLargo}>Nome do boss<input maxLength={100} value={produto.bossNome} onChange={(e) => setProduto({...produto, bossNome: e.target.value})} /><small>Aparece no confronto final.</small></label>
+                  <label className={styles.campoLargo}>Personalidade do boss<textarea maxLength={600} value={produto.bossPersonalidade} onChange={(e) => setProduto({...produto, bossPersonalidade: e.target.value})} /><small>Orientação para o diálogo antes da batalha.</small></label>
+                  <label className={styles.campoLargo}>Provocação inicial<textarea maxLength={500} value={produto.bossProvocacao} onChange={(e) => setProduto({...produto, bossProvocacao: e.target.value})} /><small>Primeira fala exibida ao jogador.</small></label>
                   {produto.bossPerguntas.map((pergunta, indice) => (
                     <label key={indice}>Pergunta {indice + 1}<input maxLength={250} value={pergunta} onChange={(e) => {
                       const bossPerguntas = [...produto.bossPerguntas];
@@ -227,10 +250,6 @@ export function AdminCampanha() {
                     }} /></label>
                   ))}
                 </div>
-                <label className={styles.publicarCampanha}>
-                  <input type="checkbox" checked={produto.ativo} onChange={(e) => setProduto({...produto, ativo: e.target.checked})} />
-                  <span><strong>Disponibilizar no sorteio</strong><small>{produto.inicioEm || produto.fimEm ? "A campanha só aparecerá durante o período definido." : "A campanha poderá aparecer assim que for salva."}</small></span>
-                </label>
               </> : null}
               {erroEtapa ? <p className={styles.erroEtapa} role="alert">{erroEtapa}</p> : null}
             </div>
@@ -239,7 +258,7 @@ export function AdminCampanha() {
               <div className={styles.acoesEtapa}>
                 {etapaProduto > 0 ? <button className={styles.voltarEtapa} type="button" disabled={salvando} onClick={() => { setEtapaProduto((etapa) => etapa - 1); setErroEtapa(""); }}>Voltar</button> : null}
                 {etapaProduto < etapasProduto.length - 1
-                  ? <button className={styles.salvarProduto} type="button" onClick={avancarEtapa}>Próximo</button>
+                  ? <button className={styles.salvarProduto} type="button" onClick={avancarEtapa}>Próximo: {etapasProduto[etapaProduto + 1]}</button>
                   : <button className={styles.salvarProduto} type="button" disabled={salvando} onClick={() => void salvarProduto()}>{salvando ? "Salvando..." : "Salvar campanha"}</button>}
               </div>
             </footer>

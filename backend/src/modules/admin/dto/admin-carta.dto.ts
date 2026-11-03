@@ -15,7 +15,6 @@ import {
 } from 'class-validator';
 
 const elementos = ['natureza', 'agua', 'fogo', 'sombra', 'luz'] as const;
-const raridades = ['UR', 'SSR', 'SR', 'R', 'N'] as const;
 
 export class CreateAdminCartaDto {
   @IsString()
@@ -25,8 +24,9 @@ export class CreateAdminCartaDto {
   @IsIn(elementos)
   elemento: (typeof elementos)[number];
 
-  @IsIn(raridades)
-  raridade: (typeof raridades)[number];
+  @IsString()
+  @MaxLength(50)
+  raridade: string;
 
   @IsOptional()
   @IsString()
@@ -70,6 +70,11 @@ export class CreateAdminCartaDto {
   @IsOptional()
   @IsString()
   @MaxLength(500)
+  fotoPerfil?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
   moldura?: string;
 
   @IsOptional()
@@ -99,8 +104,9 @@ export class UpdateAdminCartaDto {
   elemento?: (typeof elementos)[number];
 
   @IsOptional()
-  @IsIn(raridades)
-  raridade?: (typeof raridades)[number];
+  @IsString()
+  @MaxLength(50)
+  raridade?: string;
 
   @IsOptional()
   @IsString()
@@ -143,6 +149,11 @@ export class UpdateAdminCartaDto {
   @IsString()
   @MaxLength(500)
   foto?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  fotoPerfil?: string;
 
   @IsOptional()
   @IsString()

@@ -32,7 +32,7 @@
 
 .cartasListaTopo > .cartasListaEsquerda {
   display: flex;
-  flex: 1 1 35rem;
+  flex: 1 1 28rem;
   min-width: 0;
   align-items: center;
   gap: .55rem;
@@ -101,8 +101,8 @@
 
 .cartasListaTopo > .cartasListaAcoes {
   display: grid;
-  width: min(100%, 29rem);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(100%, 34rem);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
   gap: 0.45rem;
 }
@@ -127,8 +127,12 @@
 .btnHistoricoCartas:focus-visible { outline: 2px solid #ddd6fe; outline-offset: 2px; }
 
 @media (max-width: 600px) {
-  .cartasListaTopo > .cartasListaAcoes { grid-template-columns: 1fr 1fr; }
-  .btnHistoricoCartas { grid-column: 1 / -1; }
+  .cartasListaTopo > .cartasListaAcoes {
+    grid-template-columns: 1fr 1fr;
+  }
+  .btnHistoricoCartas {
+    grid-column: auto;
+  }
 }
 
 .ordenacaoCartas {
@@ -608,11 +612,105 @@
 @media (max-width: 720px) {
   .cartasListaTopo > .cartasListaEsquerda {
     width: 100%;
+    flex: 0 1 auto;
     flex-wrap: wrap;
   }
 
   .cartasListaTopo > .cartasListaAcoes {
     width: 100%;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap {
+    overflow: visible;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap table,
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap thead {
+    display: none;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody tr:not(.emptyTableRow) {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+    gap: 0.5rem 0.6rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+    padding: 0.75rem 0.8rem;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    font-size: 0.72rem;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td[data-label="Carta"] {
+    grid-column: 1 / 3;
+    grid-row: 1;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td[data-label="Ações"] {
+    grid-column: 3;
+    grid-row: 1;
+    justify-content: flex-end;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td[data-label="Raridade"] {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td[data-label="Elemento"] {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td[data-label="Status"] {
+    grid-column: 3;
+    grid-row: 2;
+    justify-content: flex-end;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td[data-label="Classe"],
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td[data-label="Venda"] {
+    color: #94a3b8;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td[data-label="Classe"]::before,
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td[data-label="Venda"]::before {
+    content: attr(data-label) ":";
+    color: #64748b;
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td[data-label="Classe"] {
+    grid-column: 1 / 3;
+    grid-row: 3;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody td[data-label="Venda"] {
+    grid-column: 3;
+    grid-row: 3;
+    justify-content: flex-end;
+  }
+
+  .cartasWorkspaceUnica > .cartasListaPanel:not(:global([class*="usuariosListaPanel"])):not(:global([class*="habilidadesListaPanel"])):not(:global([class*="listaBanners"])) .tableWrap tbody tr:has(details[open]) {
+    position: relative;
+    z-index: 5;
   }
 }
 
@@ -692,7 +790,7 @@
   cursor: not-allowed;
   opacity: 0.4;
 }
-.tableWrap tbody tr:last-child .menuAcoesCarta > div {
+.tableWrap tbody tr:nth-last-child(-n + 2) .menuAcoesCarta > div {
   top: auto;
   bottom: calc(100% + 0.3rem);
 }

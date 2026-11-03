@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronDown, Clock3, Trophy, XCircle } from "lucide-react";
 import { clearSession, getToken, updateStoredUser } from "../../lib/auth";
 import { buscarHistoricoPartidas, type HistoricoPartida } from "../../lib/jogo";
 import {
@@ -13,18 +12,20 @@ import {
   buscarPerfilApi,
   cancelarExclusaoApi,
   desativarContaApi,
-  enviarImagemPerfilApi,
   listarMoldurasApi,
+  listarFotosCartasApi,
   obterUrlGoogleApi,
   selecionarMolduraApi,
+  selecionarFotoCartaApi,
   solicitarExclusaoApi,
   type MolduraConta,
+  type FotoCartaPerfil,
   type PerfilConta,
   type PreferenciasConta,
 } from "../../lib/perfil";
 import styles from "../../styles/perfil/perfilLayout.module.css";
-import historicoStyles from "../../styles/perfil/historicoPerfil.module.css";
 import { CardUsuario } from "./components/cardUsuario";
+import { HistoricoPartidasPerfil } from "./components/historicoPartidasPerfil";
 import { ConfigsPerfil } from "./components/configsPerfil";
 import { PreferenciasPerfil } from "./components/preferenciasPerfil";
 import { ResumoConta } from "./components/resumoConta";
@@ -34,9 +35,8 @@ export default function PerfilPage() {
   const [perfil, setPerfil] = useState<PerfilConta | null>(null);
   const [erro, setErro] = useState("");
   const [molduras, setMolduras] = useState<MolduraConta[]>([]);
+  const [fotosCartas, setFotosCartas] = useState<FotoCartaPerfil[]>([]);
   const [historico, setHistorico] = useState<HistoricoPartida[]>([]);
-  const [historicoAberto, setHistoricoAberto] = useState(false);
-  const [paginaHistorico, setPaginaHistorico] = useState(1);
 
   useEffect(() => {
     const token = getToken();
@@ -56,6 +56,7 @@ export default function PerfilPage() {
       );
 
     listarMoldurasApi(token).then(setMolduras).catch(() => setMolduras([]));
+    listarFotosCartasApi(token).then(setFotosCartas).catch(() => setFotosCartas([]));
     buscarHistoricoPartidas().then(setHistorico).catch(() => setHistorico([]));
   }, []);
 
@@ -134,23 +135,12 @@ export default function PerfilPage() {
     return resposta.message;
   }
 
-  async function enviarImagem(tipo: "avatar" | "banner", arquivo: File) {
+  async function selecionarFotoCarta(idCarta: string) {
     const token = getToken();
     if (!token) throw new Error("Sessão expirada.");
-    const resposta = await enviarImagemPerfilApi(token, tipo, arquivo);
-    setPerfil((atual) =>
-      atual
-        ? {
-            ...atual,
-            ...(tipo === "avatar"
-              ? { avatarUrl: resposta.url }
-              : { bannerUrl: resposta.url }),
-          }
-        : atual,
-    );
-    if (tipo === "avatar") {
-      window.dispatchEvent(new Event("perfil-atualizado"));
-    }
+    const resposta = await selecionarFotoCartaApi(token, idCarta);
+    setPerfil((atual) => atual ? { ...atual, avatarUrl: resposta.avatarUrl } : atual);
+    window.dispatchEvent(new Event("perfil-atualizado"));
     return resposta.message;
   }
 
@@ -219,10 +209,11 @@ export default function PerfilPage() {
               <CardUsuario
                 perfil={perfil}
                 molduras={molduras}
+                fotosCartas={fotosCartas}
+                aoSelecionarFotoCarta={selecionarFotoCarta}
                 aoAtualizarNome={atualizarNome}
                 aoAtualizarBiografia={atualizarBiografia}
                 aoSelecionarMoldura={selecionarMoldura}
-                aoEnviarImagem={enviarImagem}
               />
               <ConfigsPerfil
                 perfil={perfil}
@@ -230,30 +221,7 @@ export default function PerfilPage() {
                 aoAtualizarSenha={atualizarSenha}
                 aoVincularGoogle={vincularGoogle}
               />
-              <section id="historico" className={historicoStyles.painel}>
-                <button type="button" className={historicoStyles.cabecalho} onClick={() => setHistoricoAberto((aberto) => !aberto)} aria-expanded={historicoAberto}>
-                  <span><Clock3 /> Histórico de partidas</span><small>Últimas batalhas registradas <ChevronDown /></small>
-                </button>
-                {historicoAberto && (historico.length === 0 ? <p className={historicoStyles.vazio}>Você ainda não concluiu nenhuma partida.</p> : (
-                  <div className={historicoStyles.lista}>
-                    {historico.slice((paginaHistorico - 1) * 5, paginaHistorico * 5).map((partida) => {
-                      const vitoria = partida.resultado === "VITORIA";
-                      const data = partida.timestamp_inicio ? new Date(partida.timestamp_inicio).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—";
-                      return <article key={partida.id} className={historicoStyles.item}>
-                        <strong data-resultado={partida.resultado}>{vitoria ? <><Trophy /> Vitória</> : partida.resultado === "DERROTA" ? <><XCircle /> Derrota</> : "Empate"}</strong>
-                        <span><b>{partida.deck?.nome ?? "Deck removido"}</b><small>{data} · {partida.turnos_jogados} turnos</small></span>
-                        <em>{partida.variacao_pontos && partida.variacao_pontos > 0 ? "+" : ""}{partida.variacao_pontos ?? 0} pts</em>
-                      </article>;
-                    })}
-                    {historico.length > 5 ? <nav className={historicoStyles.paginacao} aria-label="Paginação do histórico"><button type="button" disabled={paginaHistorico === 1} onClick={() => setPaginaHistorico((pagina) => pagina - 1)}>Anterior</button><span>{paginaHistorico} / {Math.ceil(historico.length / 5)}</span><button type="button" disabled={paginaHistorico >= Math.ceil(historico.length / 5)} onClick={() => setPaginaHistorico((pagina) => pagina + 1)}>Próxima</button></nav> : null}
-                  </div>
-                ))}
-              </section>
-
-              <p className={styles.ajudaPerfil}>
-                Precisa de ajuda? Acesse nossa{" "}
-                <a href="#central-ajuda">Central de Ajuda</a>
-              </p>
+              <HistoricoPartidasPerfil historico={historico} proprioPerfil />
             </div>
 
             <aside className={styles.colunaLateral}>

@@ -1,0 +1,160 @@
+.botaoIndice.botaoIndice {
+  display: inline-flex;
+  min-height: 2.15rem;
+  align-items: center;
+  gap: .45rem;
+  border: 1px solid rgba(190, 242, 100, .55);
+  border-radius: .55rem;
+  background: linear-gradient(120deg, rgba(77, 124, 15, .32), rgba(190, 242, 100, .14));
+  color: #e9ffc2;
+  padding: .35rem .7rem;
+  font-size: .62rem;
+  font-weight: 850;
+  box-shadow: 0 0 1.1rem rgba(190, 242, 100, .09);
+}
+
+.botaoIndice.botaoIndice:hover {
+  border-color: #bef264;
+  background: rgba(77, 124, 15, .45);
+  color: #fff;
+}
+
+.botaoIndice:focus-visible,
+.topoIndice button:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 3px;
+}
+
+.botaoIndice svg {
+  width: .85rem;
+  height: .85rem;
+}
+
+.modalIndice {
+  display: grid;
+  width: min(57rem, 96vw);
+  max-height: min(90dvh, 48rem);
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(167, 139, 250, .48);
+  border-radius: 1rem;
+  background: #0b0d19;
+  box-shadow: 0 2rem 7rem rgba(0, 0, 0, .7);
+}
+
+.topoIndice {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(167, 139, 250, .18);
+  background: linear-gradient(100deg, #17102a, #0b0d19);
+  padding: 1rem 1.2rem;
+}
+
+.topoIndice small {
+  color: #bef264;
+  font-size: .58rem;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.topoIndice h2 {
+  margin: .2rem 0;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.topoIndice p {
+  margin: 0;
+  color: #9da6ba;
+  font-size: .68rem;
+}
+
+.topoIndice button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  place-items: center;
+  border: 1px solid rgba(167, 139, 250, .3);
+  border-radius: .5rem;
+  background: rgba(25, 21, 43, .9);
+  color: #ddd6fe;
+  cursor: pointer;
+}
+
+.topoIndice button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.conteudoIndice {
+  display: grid;
+  align-content: start;
+  gap: .75rem;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #6d5c9c #111827;
+  padding: 1rem 1.2rem 1.25rem;
+}
+
+.conteudoIndice::-webkit-scrollbar { width: .45rem; }
+.conteudoIndice::-webkit-scrollbar-track { background: #111827; border-radius: 999px; }
+.conteudoIndice::-webkit-scrollbar-thumb { background: #6d5c9c; border-radius: 999px; }
+.conteudoIndice::-webkit-scrollbar-thumb:hover { background: #a78bfa; }
+
+.grupoRaridade {
+  border: 1px solid color-mix(in srgb, var(--cor-raridade) 48%, #303448);
+  border-left: 3px solid var(--cor-raridade);
+  border-radius: .7rem;
+  background: linear-gradient(110deg, color-mix(in srgb, var(--cor-raridade) 8%, #101321), #101321 55%);
+  padding: .7rem;
+}
+
+.grupoRaridade header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+  margin-bottom: .6rem;
+}
+
+.grupoRaridade h3 {
+  margin: 0;
+  color: var(--cor-raridade);
+  font-size: .82rem;
+}
+
+.grupoRaridade header strong {
+  border: 1px solid color-mix(in srgb, var(--cor-raridade) 62%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cor-raridade) 14%, transparent);
+  color: var(--cor-raridade);
+  padding: .22rem .5rem;
+  font-size: .68rem;
+}
+
+.gradeCartas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: .65rem;
+}
+
+.cartaIndice {
+  width: min(100%, 10rem);
+  justify-self: center;
+  filter: drop-shadow(0 .5rem .7rem rgba(0, 0, 0, .32));
+}
+.botaoCartaIndice { display:block; width:100%; border:0; background:transparent; color:inherit; padding:0; text-align:left; cursor:pointer; transition:transform 150ms ease,filter 150ms ease; }
+.botaoCartaIndice:hover { transform:translateY(-.2rem); filter:brightness(1.12); }
+.botaoCartaIndice:focus-visible { outline:2px solid #bef264; outline-offset:3px; border-radius:.5rem; }
+@media(prefers-reduced-motion:reduce) { .botaoCartaIndice { transition:none; } }
+
+@media (max-width: 560px) {
+  .modalIndice { max-height: 94dvh; }
+  .topoIndice { padding: .8rem; }
+  .conteudoIndice { padding: .7rem; }
+  .gradeCartas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4rem; }
+}

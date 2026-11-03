@@ -37,7 +37,7 @@ export type AdminHabilidade = {
   unidade: "FIXO" | "PERCENTUAL";
   valorBase: number;
   formaAplicacao: "ANTES_ACAO" | "APOS_ACAO" | "SUBSTITUI_ATAQUE";
-  requisitoTipo: "NENHUM" | "CHANCE" | "CONTADOR_ATAQUES" | "HP_ABAIXO" | "TURNO_MINIMO";
+  requisitoTipo: "NENHUM" | "CHANCE" | "CONTADOR_ATAQUES" | "HP_ABAIXO" | "TURNO_MINIMO" | "INTERVALO_TURNOS";
   requisitoValor: number | null;
   escalaTipo: "NENHUMA" | "POR_TURNO" | "POR_ATAQUE";
   escalaValor: number | null;
@@ -69,6 +69,7 @@ export type SalvarAdminHabilidadePayload = {
 };
 
 export type TestarAdminHabilidadePayload = {
+  criticoAtivou?: boolean;
   turno: number;
   ataquesRealizados: number;
   hpAtual: number;
@@ -90,7 +91,7 @@ export type AdminCarta = {
   id: string;
   nome: string;
   elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
-  raridade: "UR" | "SSR" | "SR" | "R" | "N";
+  raridade: string;
   classe: string | null;
   idClasse: string | null;
   classeDetalhes: AdminClasse | null;
@@ -100,6 +101,7 @@ export type AdminCarta = {
   defesaBase: number;
   passiva: Record<string, unknown>;
   foto: string | null;
+  fotoPerfil: string | null;
   moldura: string | null;
   configVisual: ConfigVisualCarta | null;
   ativo: boolean;
@@ -133,6 +135,7 @@ export type CreateAdminCartaPayload = {
   defesaBase: number;
   passiva?: Record<string, unknown>;
   foto?: string;
+  fotoPerfil?: string;
   moldura?: string;
   configVisual?: ConfigVisualCarta;
   ativo?: boolean;
@@ -193,6 +196,9 @@ export type AdminUsuario = {
   ultimoLoginEm: string | null;
   avatarUrl: string | null;
   molduraId: string | null;
+  molduraClasse?: string;
+  molduraUrl?: string | null;
+  molduraConfig?: ConfigVisualCarta | null;
 };
 
 export type UpdateAdminUsuarioPayload = {
@@ -201,6 +207,7 @@ export type UpdateAdminUsuarioPayload = {
   ativo?: boolean;
   bloqueado?: boolean;
   emailVerificado?: boolean;
+  admin?: boolean;
 };
 
 export type AdminUsuarioCarta = {
@@ -235,6 +242,38 @@ export type AdminUsuarioExpedicao = {
   rubys: number;
   criadoEm: string;
   finalizadoEm: string | null;
+  lutas: AdminUsuarioLuta[];
+};
+
+export type AdminUsuarioLuta = {
+  id: string;
+  etapa: number | null;
+  resultado: string;
+  turnos: number;
+  rubys: number;
+  iniciadoEm: string | null;
+  finalizadoEm: string | null;
+};
+
+export type AdminUsuarioLogLuta = AdminUsuarioLuta & {
+  eventos: {
+    id: string;
+    sequencia: number;
+    turno: number;
+    tipo: string;
+    origem: string | null;
+    texto: string;
+    valor: number | null;
+    criadoEm: string;
+  }[];
+};
+
+export type AdminUsuarioExpedicoesPagina = {
+  itens: AdminUsuarioExpedicao[];
+  total: number;
+  pagina: number;
+  porPagina: number;
+  totalPaginas: number;
 };
 
 export type AjusteSaldoUsuarioPayload = {
@@ -242,15 +281,78 @@ export type AjusteSaldoUsuarioPayload = {
   motivo: string;
 };
 
+export type PeriodoDashboardAdmin = "7d" | "30d" | "tudo";
+
 export type AdminDashboardResumo = {
+  periodo: PeriodoDashboardAdmin;
   metricas: {
     usuarios: number;
     usuariosAtivos: number;
+    usuariosBloqueados: number;
+    usuariosNaoVerificados: number;
+    usuariosNovosPeriodo: number;
+    usuariosLoginPeriodo: number;
     cartas: number;
     cartasAtivas: number;
     partidas: number;
+    partidasPeriodo: number;
     rubysEmCirculacao: number;
   };
+  combate: {
+    partidasPeriodo: number;
+    vitorias: number;
+    derrotas: number;
+    abandonosPartida: number;
+    taxaVitoria: number;
+    mediaTurnos: number;
+    rubysRecompensados: number;
+    expedicoes: {
+      total: number;
+      ativas: number;
+      concluidas: number;
+      falhas: number;
+      abandonadas: number;
+      taxaConclusao: number;
+    };
+  };
+  economia: {
+    rubysEmCirculacao: number;
+    rubysEmitidosPeriodo: number;
+    rubysConsumidosPeriodo: number;
+    saldoLiquidoPeriodo: number;
+    girosGachaPeriodo: number;
+    rubysGastosGachaPeriodo: number;
+    pityMedio: number;
+    comprasPagasPeriodo: number;
+    receitaBrlPeriodo: number;
+    bannersMaisGirados: {
+      id: string;
+      nome: string;
+      ativo: boolean;
+      giros: number;
+      rubysGastos: number;
+    }[];
+  };
+  saudeCatalogo: {
+    cartasSemHabilidade: number;
+    nomesSemHabilidade?: string[];
+    cartasForaDeBanner: number;
+    nomesForaDeBanner?: string[];
+    habilidadesRascunho: number;
+    nomesSkillsRascunho?: string[];
+    habilidadesNaoTestadas: number;
+    bannersAtivos: number;
+    noticiasPublicadas: number;
+    noticiasRascunho: number;
+  };
+  alertas: {
+    id: string;
+    severidade: "critico" | "atencao" | "ok";
+    pergunta: string;
+    resposta: string;
+    acaoLabel: string;
+    href: string;
+  }[];
   raridades: { raridade: AdminCarta["raridade"] | string; total: number }[];
   atividadeRecente: {
     tipo: string;
@@ -263,7 +365,15 @@ export type AdminDashboardResumo = {
     id: string | null;
     nome: string;
     raridade: string;
+    elemento?: string;
     quantidade: number;
+  }[];
+  topDecks: {
+    id: string | null;
+    nome: string;
+    raridade: string;
+    elemento?: string;
+    decks: number;
   }[];
 };
 
@@ -301,6 +411,7 @@ export type UploadedAsset = {
 
 export type UploadCartaAssetsResponse = {
   foto: UploadedAsset | null;
+  fotoPerfil: UploadedAsset | null;
   moldura: UploadedAsset | null;
 };
 
@@ -317,6 +428,10 @@ export type AdminBanner = {
   totalCartas: number;
   cartas: Pick<AdminCarta, "id" | "nome" | "raridade" | "elemento">[];
   raridades: { raridade: string; total: number }[];
+  chances: { raridade: string; percentual: number }[];
+  pities: { raridade: string; limite: number }[];
+  inicioEm: string | null;
+  fimEm: string | null;
 };
 
 export type SalvarAdminBannerPayload = {
@@ -324,13 +439,18 @@ export type SalvarAdminBannerPayload = {
   custoGiro: number;
   ativo: boolean;
   cartasIds: string[];
+  chances: { raridade: string; percentual: number }[];
+  pities: { raridade: string; limite: number }[];
+  inicioEm: string | null;
+  fimEm: string | null;
 };
 
 export type AdminBannersResponse = {
   probabilidades: ProbabilidadeGacha[];
+  raridadesDisponiveis: { codigo: string; nome: string; cor: string }[];
   rotacao: {
     bannerAtualId: string;
-    proximaRotacaoEm: string;
+    proximaRotacaoEm: string | null;
     forcadoPorAdmin: boolean;
   } | null;
   banners: AdminBanner[];
@@ -351,7 +471,23 @@ export type AdminCampanhaPainel = {
   boss: AdminBoss;
   produtos: AdminProdutoExpedicao[];
   temas: { nome: string }[];
+  cartas: { id: string; nome: string }[];
 };
+
+export type CaminhoCampanha = {
+  dificuldade: "FACIL" | "MEDIA" | "DIFICIL";
+  recompensa: number;
+    cartas: string[];
+    quantidadeCartas?: number;
+    modoCartas?: "ALEATORIO" | "MANUAL";
+    mixed?: boolean;
+  titulo?: string;
+  descricao?: string;
+};
+
+export type SecaoCampanha =
+  | { tipo: "BATALHA"; caminhos: CaminhoCampanha[]; grupo?: number; percentualMantidoDerrota?: number }
+  | { tipo: "BOSS"; percentualMantidoDerrota?: number };
 
 export type AdminExpedicoesPainel = {
   metricas: {
@@ -400,6 +536,7 @@ export type AdminProdutoExpedicao = {
   bossProvocacao: string;
   bossPerguntas: string[];
   bossCartas: string[];
+  secoes: SecaoCampanha[];
   criadoEm: string;
   atualizadoEm: string;
 };
@@ -424,8 +561,11 @@ export function atualizarAdminBoss(boss: AdminBoss) {
   );
 }
 
+export const ADMIN_DATA_CHANGED_EVENT = "animecards:admin-data-changed";
+
 async function adminRequest<T>(path: string, options: RequestInit = {}) {
   const token = getToken();
+  const metodo = (options.method ?? "GET").toUpperCase();
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     credentials: "include",
@@ -451,11 +591,17 @@ async function adminRequest<T>(path: string, options: RequestInit = {}) {
     throw new Error(formatApiError(data));
   }
 
+  if (typeof window !== "undefined" && metodo !== "GET") {
+    window.dispatchEvent(new Event(ADMIN_DATA_CHANGED_EVENT));
+  }
+
   return data as T;
 }
 
-export function obterAdminDashboard() {
-  return adminRequest<AdminDashboardResumo>("/admin/dashboard");
+export function obterAdminDashboard(periodo: PeriodoDashboardAdmin = "7d") {
+  return adminRequest<AdminDashboardResumo>(
+    `/admin/dashboard?periodo=${encodeURIComponent(periodo)}`,
+  );
 }
 
 export function listarAdminHabilidades() {
@@ -552,6 +698,29 @@ export function listarAdminCartas(
 
 export function listarAdminClasses() {
   return adminRequest<AdminClasse[]>("/admin/classes");
+}
+
+export type AdminRaridade = {
+  codigo: string;
+  nome: string;
+  valorVenda: number;
+  cor: string;
+  ordem: number;
+  totalCartas: number;
+};
+
+export type SalvarAdminRaridadePayload = { nome: string; valorVenda: number; cor: string };
+
+export function listarAdminRaridades() {
+  return adminRequest<AdminRaridade[]>("/admin/raridades");
+}
+
+export function criarAdminRaridade(payload: SalvarAdminRaridadePayload) {
+  return adminRequest<AdminRaridade[]>("/admin/raridades", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export function atualizarAdminRaridade(codigo: string, payload: SalvarAdminRaridadePayload) {
+  return adminRequest<AdminRaridade[]>(`/admin/raridades/${encodeURIComponent(codigo)}`, { method: "PATCH", body: JSON.stringify(payload) });
 }
 
 export function criarAdminClasse(payload: SalvarAdminClassePayload) {
@@ -776,8 +945,12 @@ export function obterAtividadeAdminUsuario(id: string, limite = 50) {
   );
 }
 
-export function obterExpedicoesAdminUsuario(id: string) {
-  return adminRequest<AdminUsuarioExpedicao[]>(`/admin/usuarios/${id}/expedicoes`);
+export function obterExpedicoesAdminUsuario(id: string, pagina = 1) {
+  return adminRequest<AdminUsuarioExpedicoesPagina>(`/admin/usuarios/${id}/expedicoes?pagina=${pagina}`);
+}
+
+export function obterLogLutaAdminUsuario(id: string, idExpedicao: string, idLuta: string) {
+  return adminRequest<AdminUsuarioLogLuta>(`/admin/usuarios/${id}/expedicoes/${idExpedicao}/lutas/${idLuta}`);
 }
 
 export function ajustarColecaoAdminUsuario(

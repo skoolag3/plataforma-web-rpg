@@ -11,14 +11,15 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CartaMontada } from "../../components/cartaMontada";
-import { getToken } from "../../lib/auth";
-import { listarDecks, type Deck } from "../../lib/jogo";
+import { getStoredUser, getToken } from "../../lib/auth";
+import { buscarRanking, listarDecks, type Deck } from "../../lib/jogo";
 import { buscarPerfilApi, type PerfilConta } from "../../lib/perfil";
 import styles from "../../styles/home.module.css";
 
 export default function HomePage() {
   const [perfil, setPerfil] = useState<PerfilConta | null>(null);
   const [decks, setDecks] = useState<Deck[]>([]);
+  const [posicaoRanking, setPosicaoRanking] = useState<number | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
@@ -26,10 +27,13 @@ export default function HomePage() {
     const token = getToken();
     if (!token) return;
 
-    Promise.all([buscarPerfilApi(token), listarDecks()])
-      .then(([dados, decksDados]) => {
+    Promise.all([buscarPerfilApi(token), listarDecks(), buscarRanking().catch(() => null)])
+      .then(([dados, decksDados, ranking]) => {
         setPerfil(dados);
         setDecks(decksDados);
+        setPosicaoRanking(
+          ranking?.jogadores.find((jogador) => jogador.id === getStoredUser()?.id)?.posicao ?? null,
+        );
       })
       .catch((e) => {
         setErro(
@@ -55,13 +59,11 @@ export default function HomePage() {
             <h1>Pronto para lutar, {perfil?.user ?? "aventureiro"}?</h1>
           </div>
           <div className={styles.recursos} aria-label="Progresso do jogador">
-            <span>
-              <Trophy />
-              <strong>
-                {perfil?.ranking?.toLocaleString("pt-BR") ?? "..."}
-              </strong>{" "}
-              ranking
-            </span>
+            <Link href="/ranking" aria-label={posicaoRanking ? `Ver ranking, posição ${posicaoRanking}` : "Ver ranking"}>
+              <Trophy aria-hidden="true" />
+              <strong>{carregando ? "..." : posicaoRanking ? `#${posicaoRanking}` : "Sem posição"}</strong>
+              <span>Ranking</span>
+            </Link>
           </div>
         </header>
 
@@ -184,7 +186,7 @@ export default function HomePage() {
             </span>
             <ChevronRight />
           </Link>
-          <Link href="/gacha">
+          <Link href="/banners">
             <span className={styles.iconeCaminho}>
               <Sparkles />
             </span>

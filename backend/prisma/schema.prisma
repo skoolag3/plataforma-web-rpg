@@ -238,6 +238,7 @@ model Carta {
   defesa_base   Int       @default(0)
   passiva       Json?
   foto          String?   @db.VarChar(500)
+  foto_perfil   String?   @db.VarChar(500)
   moldura       String?   @db.VarChar(500)
   config_visual Json?
   ativo         Boolean?  @default(true)
@@ -257,6 +258,18 @@ model Carta {
 
   @@index([id_classe])
   @@map("carta")
+}
+
+model RaridadeCarta {
+  codigo         String   @id @db.VarChar(50)
+  nome           String   @unique @db.VarChar(80)
+  valor_venda    Int      @default(0)
+  cor            String   @default("#a78bfa") @db.VarChar(7)
+  ordem          Int      @default(0)
+  criado_em      DateTime @default(now()) @db.Timestamptz(0)
+  atualizado_em  DateTime @default(now()) @db.Timestamptz(0)
+
+  @@map("raridade_carta")
 }
 
 model ClasseCarta {
@@ -329,6 +342,9 @@ model Banner {
   ativo         Boolean?  @default(true)
   criado_em     DateTime? @default(now()) @db.Timestamptz(0)
   atualizado_em DateTime? @default(now()) @db.Timestamptz(0)
+  inicio_em     DateTime? @db.Timestamptz(0)
+  fim_em        DateTime? @db.Timestamptz(0)
+  configuracao  Json?
 
   cartas         BannerCarta[]
   gachaLogs      LogGacha[]
@@ -516,6 +532,7 @@ model ProdutoExpedicao {
   boss_provocacao            String    @default("Você atravessou minha trilha. Agora prove que merece sair dela.") @db.VarChar(500)
   boss_perguntas             String[]  @default(["Por que você merece atravessar meu domínio?", "O que faria se sua carta mais forte caísse agora?", "Qual sacrifício aceitaria para vencer esta batalha?", "O que distingue coragem de imprudência?"])
   boss_cartas                String[]  @default([])
+  secoes                     Json      @default("[]")
   criado_em                  DateTime  @default(now()) @db.Timestamptz(0)
   atualizado_em              DateTime  @default(now()) @db.Timestamptz(0)
 

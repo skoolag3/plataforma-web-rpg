@@ -267,4 +267,22 @@ describe('AdminHabilidadesService', () => {
       data: { status: 'PUBLICADA', atualizado_em: expect.any(Date) },
     });
   });
+
+  it('não publica uma versão antiga com escala desproporcional', async () => {
+    prisma.habilidade.findUnique.mockResolvedValue({
+      ...habilidade,
+      unidade: 'FIXO',
+      valor_base: 10,
+      forma_aplicacao: 'APOS_ACAO',
+      requisito_tipo: 'NENHUM',
+      requisito_valor: null,
+      escala_tipo: 'POR_TURNO',
+      escala_valor: 5,
+      escala_limite: 100,
+      testada_em: new Date('2026-08-20T11:00:00Z'),
+    });
+
+    await expect(service.publicar(habilidade.id)).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.habilidade.update).not.toHaveBeenCalled();
+  });
 });

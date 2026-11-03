@@ -13,6 +13,8 @@ export function Paginacao({
   totalPaginas,
   aoAlterar,
 }: PaginacaoProps) {
+  if (totalPaginas <= 1) return null;
+
   return (
     <footer className={styles.paginacao}>
       <button

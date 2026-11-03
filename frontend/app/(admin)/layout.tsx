@@ -10,6 +10,7 @@ import {
   updateStoredUser,
 } from "../lib/auth";
 import styles from "../styles/privateLayout.module.css";
+import { AbstractCubeIsometricLoader } from "../../components/ui/abstract-cube-isometric-loader";
 
 export default function AdminRouteLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function AdminRouteLayout({ children }: { children: ReactNode }) 
     return (
       <main className={styles.loadingPage}>
         <section className={styles.loadingCard}>
-          <span aria-hidden="true" />
+          <AbstractCubeIsometricLoader dotSize={7} gap={5} bloom label="Validando acesso administrativo" />
           <strong>Validando acesso administrativo</strong>
           <p>Confirmando sua sessão e suas permissões...</p>
         </section>

@@ -31,7 +31,7 @@ import {
 import styles from "../../styles/admin/adminBanners.module.css";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
 import listaStyles from "../../styles/admin/adminCartasLista.module.css";
-import { AdminLayout } from "./adminShared";
+import { AdminLayout, NomeComAlerta } from "./adminShared";
 import { combinarEstilos } from "./combinarEstilos";
 import { FiltroBannersModal } from "./filtroBannersModal";
 import { FormBanner } from "./formBanner";
@@ -87,7 +87,7 @@ export function AdminBanners() {
       ),
     [dados],
   );
-  const tempoRestante = dados?.rotacao
+  const tempoRestante = dados?.rotacao?.proximaRotacaoEm
     ? new Date(dados.rotacao.proximaRotacaoEm).getTime() - agora
     : 0;
   const bannersFiltrados = (dados?.banners ?? []).filter((banner) => {
@@ -156,8 +156,8 @@ export function AdminBanners() {
 
   return (
     <AdminLayout
-      title="Rotação do gacha"
-      subtitle="Controle o banner atual e acompanhe as chances do sorteio."
+      title="Banners"
+      subtitle="Monte os banners, defina chances, garantias e períodos de exibição."
     >
       <section className={styles.resumoRotacao}>
         <span className={styles.iconeAtual}>
@@ -172,28 +172,13 @@ export function AdminBanners() {
               : "Escolhido automaticamente pelo servidor"}
           </span>
         </div>
-        <div className={styles.contador}>
+        {dados?.rotacao?.proximaRotacaoEm ? <div className={styles.contador}>
           <Clock3 aria-hidden="true" />
           <span>
-            <small>Próxima troca</small>
+            <small>Próxima mudança</small>
             <strong>{formatarTempo(tempoRestante)}</strong>
           </span>
-        </div>
-      </section>
-
-      <section className={styles.probabilidades}>
-        <header>
-          <h2>Chances por raridade</h2>
-          <p>Primeiro o servidor sorteia a raridade, depois a carta.</p>
-        </header>
-        <div>
-          {(dados?.probabilidades ?? []).map((item) => (
-            <span key={item.raridade} data-raridade={item.raridade}>
-              <b>{item.raridade}</b>
-              <strong>{item.percentual}%</strong>
-            </span>
-          ))}
-        </div>
+        </div> : null}
       </section>
 
       <section
@@ -246,19 +231,29 @@ export function AdminBanners() {
             <tbody>
               {bannersFiltrados.map((banner) => {
                 const atual = banner.id === dados?.rotacao?.bannerAtualId;
+                const semCartas = banner.ativo && banner.totalCartas === 0;
                 return (
                   <tr key={banner.id} data-atual={atual || undefined}>
                     <td data-label="Banner">
                       <div className={styles.bannerPrincipal}>
-                        <strong>{banner.nome}</strong>
+                        <NomeComAlerta
+                          nome={banner.nome}
+                          tom="vermelho"
+                          motivo={
+                            semCartas
+                              ? "Banner ativo sem nenhuma carta no pool."
+                              : null
+                          }
+                        />
                         <small>{banner.custoGiro} Rubys por giro</small>
+                        <small>{banner.inicioEm ? `Início: ${new Date(banner.inicioEm).toLocaleString("pt-BR")}` : "Disponível imediatamente"}{banner.fimEm ? ` · Fim: ${new Date(banner.fimEm).toLocaleString("pt-BR")}` : ""}</small>
                       </div>
                     </td>
                     <td data-label="Pool">
                       <div className={styles.raridadesBanner}>
                         {banner.raridades.map((item) => (
                           <span key={item.raridade}>
-                            {item.raridade} <b>{item.total}</b>
+                            {dados?.raridadesDisponiveis.find((raridade) => raridade.codigo === item.raridade)?.nome ?? item.raridade} <b>{item.total}</b>
                           </span>
                         ))}
                         <small>{banner.totalCartas} cartas</small>
@@ -339,6 +334,7 @@ export function AdminBanners() {
         <FormBanner
           banner={editando === "novo" ? null : editando}
           cartas={cartas}
+          raridades={dados?.raridadesDisponiveis ?? []}
           salvando={salvando}
           onFechar={() => setEditando(null)}
           onSalvar={(payload) => void salvarBanner(payload)}

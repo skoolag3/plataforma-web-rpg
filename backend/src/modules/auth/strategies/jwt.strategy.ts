@@ -4,26 +4,24 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { Request } from 'express';
 import { PrismaService } from '../../../database/prisma.service';
 import { obterJwtSecret } from '../jwt.config';
-import { NOME_COOKIE_SESSAO } from '../auth-cookie';
+import { extrairCookie, NOME_COOKIE_SESSAO } from '../auth-cookie';
+import { tokenFoiRevogado } from '../session-revocation';
 
 type JwtPayload = {
   sub: string;
+  purpose?: string;
+  finalidade?: string;
+  jti?: string;
+  iat?: number;
 };
 
-function extrairCookieSessao(request: Request) {
-  const cookies = request.headers.cookie?.split(';') ?? [];
-  const prefixo = `${NOME_COOKIE_SESSAO}=`;
-  const cookie = cookies.find((item) => item.trim().startsWith(prefixo));
-  return cookie ? decodeURIComponent(cookie.trim().slice(prefixo.length)) : null;
-}
-
-function extrairJwt(request: Request) {
+export function extrairJwt(request: Request) {
   const tokenCabecalho = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
   if (tokenCabecalho && tokenCabecalho !== '__cookie_session__') {
     return tokenCabecalho;
   }
 
-  return extrairCookieSessao(request);
+  return extrairCookie(request, NOME_COOKIE_SESSAO);
 }
 
 @Injectable()
@@ -37,11 +35,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
+    if (
+      payload.finalidade ||
+      (payload.purpose !== undefined && payload.purpose !== 'session')
+    ) {
+      throw new UnauthorizedException('Token inválido para autenticação de sessão.');
+    }
+
+    if (tokenFoiRevogado(payload.sub, payload.jti, payload.iat)) {
+      throw new UnauthorizedException('Sessão encerrada ou expirada.');
+    }
+
     const usuario = await this.prisma.usuario.findFirst({
       where: {
         id: payload.sub,
         ativo: true,
-        bloqueado: false,
         email_verificado: true,
         excluido_em: null,
       },
@@ -49,10 +57,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         id: true,
         email: true,
         is_admin: true,
+        bloqueado: true,
+        tentativas_login: true,
       },
     });
 
-    if (!usuario) {
+    const bloqueadoPorAdmin =
+      Boolean(usuario?.bloqueado) && (usuario?.tentativas_login ?? 0) < 5;
+
+    if (!usuario || bloqueadoPorAdmin) {
       throw new UnauthorizedException('Sessão inválida ou conta indisponível.');
     }
 

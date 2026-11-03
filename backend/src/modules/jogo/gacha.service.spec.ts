@@ -18,12 +18,12 @@ describe('GachaService', () => {
   prisma.$transaction.mockImplementation(
     (operacao: (tx: typeof prisma) => unknown) => operacao(prisma),
   );
-  const service = new GachaService(prisma as never, {} as never);
+  const service = new GachaService(prisma as never, { obterAtual: jest.fn().mockResolvedValue({ idBanner: 'banner' }) } as never);
 
   afterEach(() => jest.restoreAllMocks());
 
   it('faz sorteio ponderado respeitando a faixa acumulada', () => {
-    jest.spyOn(Math, 'random').mockReturnValue(0);
+    jest.spyOn(service as unknown as { numeroAleatorio: () => number }, 'numeroAleatorio').mockReturnValue(0);
     const primeira = { id: 'ur', taxa_drop: new Prisma.Decimal(1) };
     const segunda = { id: 'n', taxa_drop: new Prisma.Decimal(50) };
     expect(service['sortear']([primeira, segunda])).toBe(primeira);
@@ -36,7 +36,7 @@ describe('GachaService', () => {
     [0.2, 'R'],
     [0.5, 'N'],
   ])('sorteia a raridade pela faixa percentual %s', (aleatorio, raridade) => {
-    jest.spyOn(Math, 'random').mockReturnValue(aleatorio);
+    jest.spyOn(service as unknown as { numeroAleatorio: () => number }, 'numeroAleatorio').mockReturnValue(aleatorio);
     expect(service['sortearRaridade']()).toBe(raridade);
   });
 
@@ -77,9 +77,7 @@ describe('GachaService', () => {
     ]);
     prisma.$executeRaw.mockResolvedValue(1);
 
-    await expect(
-      service.resgatarDiario('usuario', 'banner'),
-    ).resolves.toEqual({
+    await expect(service.resgatarDiario('usuario', 'banner')).resolves.toEqual({
       message: 'Giro gratuito resgatado.',
       rubysRecebidos: 300,
     });
@@ -106,5 +104,26 @@ describe('GachaService', () => {
     expect(obterProximaRotacaoBanner(new Date(agora).getTime())).toEqual(
       new Date(proxima),
     );
+  });
+
+  it('aplica pity durante dez giros e reinicia após cada garantia', async () => {
+    const cartaN = { id: 'n', nome: 'Comum', raridade: 'N', elemento: 'FOGO', foto: null, moldura: null, config_visual: null };
+    const cartaUR = { ...cartaN, id: 'ur', nome: 'Ultra', raridade: 'UR' };
+    const tx = {
+      usuario: { findUnique: jest.fn().mockResolvedValue({ saldo_rubys_cache: 10000 }) },
+      banner: { findFirst: jest.fn().mockResolvedValue({ nome: 'Teste', custo_giro: 100, configuracao: { chances: [{ raridade: 'UR', percentual: 1 }, { raridade: 'N', percentual: 99 }], pities: [{ raridade: 'UR', limite: 3 }] }, cartas: [{ id_carta: 'n', taxa_drop: new Prisma.Decimal(1), carta: cartaN }, { id_carta: 'ur', taxa_drop: new Prisma.Decimal(1), carta: cartaUR }] }) },
+      logGacha: { findFirst: jest.fn().mockResolvedValue({ pity_contador: 1 }), findMany: jest.fn().mockResolvedValue([{ cartaObtida: { raridade: 'N' } }]), create: jest.fn() },
+      ledgerRuby: { create: jest.fn() },
+      inventario: { findUnique: jest.fn().mockResolvedValue(null), upsert: jest.fn().mockResolvedValue({ quantidade: 1 }) },
+      raridadeCarta: { findUnique: jest.fn() },
+    };
+    const banco = { $transaction: jest.fn((operacao: (cliente: typeof tx) => unknown) => operacao(tx)) };
+    const gacha = new GachaService(banco as never, { obterAtual: jest.fn().mockResolvedValue({ idBanner: 'banner' }) } as never);
+    jest.spyOn(gacha as unknown as { numeroAleatorio: () => number }, 'numeroAleatorio').mockReturnValue(0.99);
+    const res = await gacha.girar('usuario', 'banner', 10);
+    expect(res.cartas.map((carta) => carta.raridade)).toEqual(['N', 'UR', 'N', 'N', 'UR', 'N', 'N', 'UR', 'N', 'N']);
+    expect(res.pities).toEqual([{ raridade: 'UR', limite: 3, atual: 2 }]);
+    expect(res.custo).toBe(900);
+    expect(tx.logGacha.create).toHaveBeenCalledTimes(10);
   });
 });

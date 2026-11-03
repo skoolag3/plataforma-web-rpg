@@ -1,0 +1,13 @@
+.campo { display: inline-flex; min-width: 0; min-height: 2rem; align-items: center; gap: .55rem; cursor: pointer; }
+.campo input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.quadro { display: grid; width: 1.2rem; height: 1.2rem; flex: none; place-items: center; border: 1.5px solid color-mix(in srgb, var(--corCheck) 58%, #64748b); border-radius: .35rem; background: #101625; box-shadow: inset 0 1px rgba(255,255,255,.05); transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.quadro svg { width: .85rem; height: .85rem; stroke: #f8fafc; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 30; stroke-dashoffset: 30; transition: stroke-dashoffset .24s cubic-bezier(.16,1,.3,1); }
+.campo:hover .quadro { border-color: var(--corCheck); box-shadow: 0 0 0 3px color-mix(in srgb, var(--corCheck) 12%, transparent); }
+.campo input:checked + .quadro { border-color: var(--corCheck); background: color-mix(in srgb, var(--corCheck) 56%, #111827); box-shadow: 0 0 .7rem color-mix(in srgb, var(--corCheck) 25%, transparent); }
+.campo input:checked + .quadro svg { stroke-dashoffset: 0; }
+.campo input:active + .quadro { transform: scale(.92); }
+.campo input:focus-visible + .quadro { outline: 2px solid #f8fafc; outline-offset: 3px; }
+.campo:has(input:disabled) { cursor: not-allowed; }
+.campo input:disabled + .quadro, .campo input:disabled ~ .rotulo { opacity: .45; }
+.rotulo { min-width: 0; color: inherit; font-size: inherit; line-height: 1.35; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { .quadro, .quadro svg { transition: none; } }

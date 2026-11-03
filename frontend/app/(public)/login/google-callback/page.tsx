@@ -2,7 +2,6 @@
 
 import {
   faCircleExclamation,
-  faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -10,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { concluirLoginGoogle } from "../../../lib/auth";
 import styles from "../../../styles/googleCallback.module.css";
+import { AbstractCubeIsometricLoader } from "../../../../components/ui/abstract-cube-isometric-loader";
 
 const mensagensOAuth: Record<string, string> = {
   cancelado: "Você cancelou a entrada com o Google. Nenhuma alteração foi feita.",
@@ -83,11 +83,7 @@ export default function GoogleCallbackPage() {
           </>
         ) : (
           <>
-            <FontAwesomeIcon
-              icon={faSpinner}
-              className={styles.iconeCarregando}
-              spin
-            />
+            <AbstractCubeIsometricLoader dotSize={7} gap={5} bloom label="Concluindo login com Google" />
             <h1>Concluindo seu login</h1>
             <p>Estamos preparando sua conta com o Google.</p>
           </>

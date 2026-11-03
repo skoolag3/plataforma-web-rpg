@@ -9,7 +9,6 @@ import {
   Min,
 } from 'class-validator';
 
-const raridades = ['UR', 'SSR', 'SR', 'R', 'N'] as const;
 const elementos = ['natureza', 'agua', 'fogo', 'sombra', 'luz'] as const;
 
 export class ListarColecaoDto {
@@ -19,8 +18,8 @@ export class ListarColecaoDto {
   busca?: string;
 
   @IsOptional()
-  @IsIn(raridades)
-  raridade?: (typeof raridades)[number];
+  @IsString()
+  raridade?: string;
 
   @IsOptional()
   @IsIn(elementos)

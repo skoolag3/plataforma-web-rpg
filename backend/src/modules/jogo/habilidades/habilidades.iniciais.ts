@@ -29,7 +29,7 @@ export const habilidadesIniciais: ConfiguracaoHabilidade[] = [
     valorBase: 6,
     formaAplicacao: 'APOS_ACAO',
     requisito: { tipo: 'NENHUM' },
-    escala: { tipo: 'POR_ATAQUE', valor: 4, limite: 30 },
+    escala: { tipo: 'POR_ATAQUE', valor: 3, limite: 18 },
     duracaoTurnos: 2,
     status: 'PUBLICADA',
   },

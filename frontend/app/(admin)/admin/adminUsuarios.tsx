@@ -30,6 +30,13 @@ import { AdminUsuarioPainel } from "./adminUsuarioPainel";
 import { combinarEstilos } from "./combinarEstilos";
 import { FiltroUsuariosModal } from "./filtroUsuariosModal";
 import { ConfirmarRemocaoUsuario } from "./confirmarRemocaoUsuario";
+import { SwitchToggle } from "../../../components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "../../../components/ui/tooltip-07-utils/tooltip";
+import { criarEstiloMolduraPerfil } from "../../components/cartaMontada";
 
 const styles = combinarEstilos(
   sharedStyles,
@@ -38,6 +45,32 @@ const styles = combinarEstilos(
   colecaoStyles,
   financeiroStyles,
 );
+
+export function UsuarioAvatarMoldura({ usuario }: { usuario: AdminUsuario }) {
+  const classeMoldura = usuario.molduraClasse ?? "molduraPadrao";
+  return (
+    <span
+      className={`${styles.usuarioAvatarWrap} ${styles[classeMoldura] ?? ""}`}
+    >
+      <span
+        className={styles.usuarioAvatarFoto}
+        style={{
+          backgroundImage: `url("${usuario.avatarUrl ?? "/avatar-padrao.svg"}")`,
+        }}
+      />
+      {usuario.molduraUrl ? (
+        <i
+          className={styles.usuarioMolduraImg}
+          style={{
+            ...criarEstiloMolduraPerfil(usuario.molduraConfig),
+            backgroundImage: `url("${usuario.molduraUrl}")`,
+          }}
+          aria-hidden="true"
+        />
+      ) : null}
+    </span>
+  );
+}
 
 function Status({ value }: { value: string }) {
   const ativo = value === "Ativo" || value === "Ativa";
@@ -65,8 +98,8 @@ export function Usuarios() {
   const [removendo, setRemovendo] = useState(false);
   const [erroRemocao, setErroRemocao] = useState<string | null>(null);
   const [nomeEdicao, setNomeEdicao] = useState("");
-  const [nivelEdicao, setNivelEdicao] = useState("1");
   const [ativoEdicao, setAtivoEdicao] = useState(true);
+  const [adminEdicao, setAdminEdicao] = useState(false);
   const [emailVerificadoEdicao, setEmailVerificadoEdicao] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
@@ -110,8 +143,8 @@ export function Usuarios() {
     setSelecionado(null);
     setEditando(usuario);
     setNomeEdicao(usuario.nome);
-    setNivelEdicao(String(usuario.nivel));
     setAtivoEdicao(usuario.ativo);
+    setAdminEdicao(usuario.admin);
     setEmailVerificadoEdicao(usuario.emailVerificado);
     setFeedback(null);
   }
@@ -120,8 +153,8 @@ export function Usuarios() {
     if (!editando) return;
     const alterado =
       nomeEdicao !== editando.nome ||
-      nivelEdicao !== String(editando.nivel) ||
       ativoEdicao !== editando.ativo ||
+      adminEdicao !== editando.admin ||
       emailVerificadoEdicao !== editando.emailVerificado;
     if (
       alterado &&
@@ -141,13 +174,13 @@ export function Usuarios() {
     try {
       const atualizado = await atualizarAdminUsuario(editando.id, {
         nome: nomeEdicao.trim(),
-        nivel: Number(nivelEdicao),
         ativo: ativoEdicao,
+        ...(!editando.admin && adminEdicao ? { admin: true } : {}),
         emailVerificado: emailVerificadoEdicao,
       });
       sincronizarUsuario(atualizado);
       setEditando(null);
-      setFeedback("Usuário atualizado.");
+      setFeedback(!editando.admin && adminEdicao ? "Acesso de administrador concedido." : "Usuário atualizado.");
     } catch (error) {
       setErro(
         error instanceof Error
@@ -230,7 +263,6 @@ export function Usuarios() {
     selecionado,
     editando,
     nomeEdicao,
-    nivelEdicao,
     ativoEdicao,
     emailVerificadoEdicao,
   ]);
@@ -299,7 +331,7 @@ export function Usuarios() {
               <thead>
                 <tr>
                   <th>Usuário</th>
-                  <th>Progresso</th>
+                  <th>Partidas</th>
                   <th>Saldos</th>
                   <th>Status</th>
                   <th>Ações</th>
@@ -311,18 +343,51 @@ export function Usuarios() {
                     <td colSpan={5}>Nenhum usuário encontrado.</td>
                   </tr>
                 ) : null}
-                {usuariosApi.map((usuario) => (
+                {usuariosApi.map((usuario) => {
+                  const motivoAlerta = usuario.bloqueado
+                    ? "Conta bloqueada pelo administrador."
+                    : !usuario.emailVerificado
+                      ? "E-mail ainda não verificado."
+                      : null;
+                  const tomAlerta = usuario.bloqueado
+                    ? "vermelho"
+                    : !usuario.emailVerificado
+                      ? "amarelo"
+                      : undefined;
+
+                  return (
                   <tr key={usuario.id}>
                     <td data-label="Usuário">
-                      <span className={styles.usuarioCell}>
-                        <strong>{usuario.nome}</strong>
-                        <small>{usuario.email}</small>
-                      </span>
+                      <div className={styles.usuarioIdentidade}>
+                        <UsuarioAvatarMoldura usuario={usuario} />
+                        <span className={styles.usuarioCell}>
+                          {motivoAlerta ? (
+                            <Tooltip>
+                              <TooltipTrigger
+                                render={
+                                  <strong
+                                    className={styles.usuarioNomeAlerta}
+                                    data-tom={tomAlerta}
+                                    tabIndex={0}
+                                  >
+                                    {usuario.nome}
+                                  </strong>
+                                }
+                              />
+                              <TooltipContent>
+                                <strong>Alerta</strong> — {motivoAlerta}
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            <strong>{usuario.nome}</strong>
+                          )}
+                          <small>{usuario.email}</small>
+                        </span>
+                      </div>
                     </td>
-                    <td data-label="Progresso">
+                    <td data-label="Partidas">
                       <span className={styles.usuarioDadoDuplo}>
-                        <strong>Nv. {usuario.nivel}</strong>
-                        <small>{formatNumber(usuario.partidas)} partidas</small>
+                        <strong>{formatNumber(usuario.partidas)} partidas</strong>
                       </span>
                     </td>
                     <td data-label="Saldo">
@@ -389,7 +454,8 @@ export function Usuarios() {
                       </details>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -431,10 +497,13 @@ export function Usuarios() {
             aria-modal="true"
             aria-labelledby="usuario-editor-titulo"
           >
-            <header>
-              <div>
-                <h2 id="usuario-editor-titulo">Editar usuário</h2>
-                <p>{editando.email}</p>
+            <header className={styles.usuarioEditorTopo}>
+              <div className={styles.usuarioIdentidade}>
+                <UsuarioAvatarMoldura usuario={editando} />
+                <div className={styles.usuarioCell}>
+                  <h2 id="usuario-editor-titulo">Editar {editando.nome}</h2>
+                  <p>{editando.email}</p>
+                </div>
               </div>
               <button
                 type="button"
@@ -455,48 +524,45 @@ export function Usuarios() {
                 autoFocus
               />
             </label>
-            <label>
-              Nível
-              <input
-                type="number"
-                min={1}
-                max={9999}
-                value={nivelEdicao}
-                onChange={(event) => setNivelEdicao(event.target.value)}
-                required
-              />
-            </label>
-            <label className={styles.usuarioToggle}>
-              <input
-                type="checkbox"
-                checked={ativoEdicao}
-                disabled={editando.admin}
-                onChange={(event) => setAtivoEdicao(event.target.checked)}
-              />
+            <div className={styles.usuarioToggle}>
+              <SwitchToggle checked={ativoEdicao} disabled={adminEdicao} onChange={setAtivoEdicao} aria-label="Conta ativa" />
               <span>
                 <strong>Conta ativa</strong>
                 <small>
-                  {editando.admin
+                  {adminEdicao
                     ? "Contas administrativas permanecem ativas."
                     : "Permite que o usuário acesse a plataforma."}
                 </small>
               </span>
-            </label>
-            <label className={styles.usuarioToggle}>
-              <input
-                type="checkbox"
-                checked={emailVerificadoEdicao}
-                onChange={(event) =>
-                  setEmailVerificadoEdicao(event.target.checked)
-                }
+            </div>
+            <div className={styles.usuarioToggle}>
+              <SwitchToggle
+                checked={adminEdicao}
+                disabled={editando.admin}
+                onChange={(admin) => {
+                  setAdminEdicao(admin);
+                  if (admin) setAtivoEdicao(true);
+                }}
+                aria-label="Conceder acesso de administrador"
               />
+              <span>
+                <strong>Administrador</strong>
+                <small>
+                  {editando.admin
+                    ? "Esta conta já possui acesso administrativo."
+                    : "Concede acesso ao painel administrativo e desbloqueia a conta."}
+                </small>
+              </span>
+            </div>
+            <div className={styles.usuarioToggle}>
+              <SwitchToggle checked={emailVerificadoEdicao} onChange={setEmailVerificadoEdicao} aria-label="E-mail verificado" />
               <span>
                 <strong>E-mail verificado</strong>
                 <small>
                   Confirma manualmente que o endereço pertence ao usuário.
                 </small>
               </span>
-            </label>
+            </div>
             <div className={styles.editorActions}>
               <button type="button" onClick={fecharEdicao}>
                 Cancelar

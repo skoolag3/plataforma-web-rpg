@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [{ source: "/gacha", destination: "/banners", permanent: false }];
+  },
   images: {
     minimumCacheTTL: 2678400,
     remotePatterns: [

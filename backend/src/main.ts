@@ -65,7 +65,9 @@ async function bootstrap() {
       },
     }),
   );
-  app.getHttpAdapter().getInstance().disable('x-powered-by');
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.disable('x-powered-by');
+  expressApp.set('trust proxy', 1);
   app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors({
     origin(

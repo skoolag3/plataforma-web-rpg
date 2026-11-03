@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UploadedFile,
@@ -10,6 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -21,6 +24,7 @@ import { AtualizarSenhaDto } from './dto/atualizar-senha.dto';
 import { AtualizarBiografiaDto } from './dto/atualizar-biografia.dto';
 import { ConfirmarSenhaDto } from './dto/confirmar-senha.dto';
 import { SelecionarMolduraDto } from './dto/selecionar-moldura.dto';
+import { SelecionarFotoCartaDto } from './dto/selecionar-foto-carta.dto';
 import { PerfilStorageService } from './perfil-storage.service';
 import { PerfilService } from './perfil.service';
 
@@ -38,11 +42,6 @@ function filtrarImagemPerfil(
 
   callback(new BadRequestException('Use uma imagem JPG, PNG ou WebP.'), false);
 }
-
-const opcoesUploadAvatar = {
-  limits: { fileSize: 2 * 1024 * 1024, files: 1 },
-  fileFilter: filtrarImagemPerfil,
-};
 
 const opcoesUploadBanner = {
   limits: { fileSize: 5 * 1024 * 1024, files: 1 },
@@ -62,6 +61,11 @@ export class PerfilController {
     return this.perfilService.buscarPerfil(usuario.id);
   }
 
+  @Get('publico/:id')
+  buscarPerfilPublico(@Param('id', ParseUUIDPipe) id: string) {
+    return this.perfilService.buscarPerfilPublico(id);
+  }
+
   @Patch('nome')
   atualizarNome(
     @CurrentUser() usuario: AuthenticatedUser,
@@ -71,6 +75,7 @@ export class PerfilController {
   }
 
   @Patch('email')
+  @Throttle({ default: { limit: 6, ttl: 60_000 } })
   atualizarEmail(
     @CurrentUser() usuario: AuthenticatedUser,
     @Body() dto: AtualizarEmailDto,
@@ -79,6 +84,7 @@ export class PerfilController {
   }
 
   @Patch('senha')
+  @Throttle({ default: { limit: 6, ttl: 60_000 } })
   atualizarSenha(
     @CurrentUser() usuario: AuthenticatedUser,
     @Body() dto: AtualizarSenhaDto,
@@ -107,23 +113,25 @@ export class PerfilController {
     return this.perfilService.listarMolduras(usuario.id);
   }
 
+  @Get('fotos-cartas')
+  listarFotosCartas(@CurrentUser() usuario: AuthenticatedUser) {
+    return this.perfilService.listarFotosCartas(usuario.id);
+  }
+
+  @Patch('foto-carta')
+  selecionarFotoCarta(
+    @CurrentUser() usuario: AuthenticatedUser,
+    @Body() dto: SelecionarFotoCartaDto,
+  ) {
+    return this.perfilService.selecionarFotoCarta(usuario.id, dto.idCarta);
+  }
+
   @Patch('moldura')
   selecionarMoldura(
     @CurrentUser() usuario: AuthenticatedUser,
     @Body() dto: SelecionarMolduraDto,
   ) {
     return this.perfilService.selecionarMoldura(usuario.id, dto);
-  }
-
-  @Post('avatar')
-  @UseInterceptors(FileInterceptor('arquivo', opcoesUploadAvatar))
-  async enviarAvatar(
-    @CurrentUser() usuario: AuthenticatedUser,
-    @UploadedFile() arquivo: Express.Multer.File,
-  ) {
-    validarConteudoImagem(arquivo, ['image/jpeg', 'image/png', 'image/webp']);
-    const url = await this.storageService.enviar(usuario.id, 'avatar', arquivo);
-    return this.perfilService.atualizarImagem(usuario.id, 'avatar', url);
   }
 
   @Post('banner')
@@ -138,6 +146,7 @@ export class PerfilController {
   }
 
   @Patch('desativar')
+  @Throttle({ default: { limit: 6, ttl: 60_000 } })
   desativar(
     @CurrentUser() usuario: AuthenticatedUser,
     @Body() dto: ConfirmarSenhaDto,
@@ -146,6 +155,7 @@ export class PerfilController {
   }
 
   @Post('exclusao')
+  @Throttle({ default: { limit: 6, ttl: 60_000 } })
   solicitarExclusao(
     @CurrentUser() usuario: AuthenticatedUser,
     @Body() dto: ConfirmarSenhaDto,

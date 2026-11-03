@@ -5,6 +5,7 @@ import {
   ListFilter,
   ImagePlus,
   History,
+  Gem,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -39,10 +40,11 @@ import {
   Raridade,
   obterElementoVisual,
 } from "./adminCartaVisual";
-import { AdminLayout } from "./adminShared";
+import { AdminLayout, NomeComAlerta } from "./adminShared";
 import { CartaEditor } from "./adminCartaEditor";
 import { combinarEstilos } from "./combinarEstilos";
 import { FiltroCartasModal } from "./filtroCartasModal";
+import { useAdminRaridades } from "./useAdminRaridades";
 
 const styles = combinarEstilos(
   sharedStyles,
@@ -70,6 +72,7 @@ function Status({ value }: { value: string }) {
 }
 
 export function Cartas() {
+  const raridades = useAdminRaridades();
   const router = useRouter();
   const [busca, setBusca] = useState("");
   const [buscaAplicada, setBuscaAplicada] = useState("");
@@ -89,7 +92,11 @@ export function Cartas() {
   const [erro, setErro] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [editorAlterado, setEditorAlterado] = useState(false);
+  const [descartePendente, setDescartePendente] = useState<
+    { tipo: "carta"; carta: AdminCarta | null } | { tipo: "navegacao"; destino: string } | null
+  >(null);
   const [excluindo, setExcluindo] = useState<AdminCarta | null>(null);
+  const [menuAcoesAbertoId, setMenuAcoesAbertoId] = useState<string | null>(null);
 
   function fecharModalFiltros() {
     setModalFiltrosAberto(false);
@@ -125,17 +132,25 @@ export function Cartas() {
   }, []);
 
   function selecionarCarta(carta: AdminCarta | null) {
-    if (
-      editorAlterado &&
-      !window.confirm(
-        "Existem alterações não salvas. Deseja mesmo descartá-las?",
-      )
-    ) {
+    if (editorAlterado) {
+      setDescartePendente({ tipo: "carta", carta });
       return;
     }
 
     setEditorAlterado(false);
     setSelecionada(carta);
+  }
+
+  function confirmarDescarte() {
+    if (!descartePendente) return;
+    const pendente = descartePendente;
+    setDescartePendente(null);
+    setEditorAlterado(false);
+    if (pendente.tipo === "carta") {
+      setSelecionada(pendente.carta);
+    } else {
+      router.push(pendente.destino);
+    }
   }
 
   useEffect(() => {
@@ -152,21 +167,16 @@ export function Cartas() {
       if (destino.origin !== window.location.origin) return;
 
       event.preventDefault();
-      if (
-        !window.confirm(
-          "Existem alterações não salvas. Deseja mesmo descartá-las?",
-        )
-      )
-        return;
-
-      setEditorAlterado(false);
-      router.push(`${destino.pathname}${destino.search}${destino.hash}`);
+      setDescartePendente({
+        tipo: "navegacao",
+        destino: `${destino.pathname}${destino.search}${destino.hash}`,
+      });
     }
 
     document.addEventListener("click", confirmarNavegacao, true);
     return () =>
       document.removeEventListener("click", confirmarNavegacao, true);
-  }, [editorAlterado, router]);
+  }, [editorAlterado]);
 
   async function carregarCartas() {
     setCarregando(true);
@@ -238,13 +248,16 @@ export function Cartas() {
         current.map((item) => (item.id === atualizada.id ? atualizada : item)),
       );
       setSelecionada(atualizada);
+      setEditorAlterado(false);
       setFeedback("Carta atualizada.");
+      return atualizada;
     } catch (error) {
-      setErro(
+      const falha =
         error instanceof Error
-          ? error.message
-          : "Não foi possível salvar a edição.",
-      );
+          ? error
+          : new Error("Não foi possível salvar a edição.");
+      setErro(falha.message);
+      throw falha;
     } finally {
       setSalvando(false);
     }
@@ -314,6 +327,9 @@ export function Cartas() {
               <Link href="/admin/cartas/historico" className={styles.btnHistoricoCartas}>
                 <History aria-hidden="true" /> Histórico
               </Link>
+              <Link href="/admin/cartas/raridades" className={styles.btnHistoricoCartas}>
+                <Gem aria-hidden="true" /> Raridades
+              </Link>
               <SelectPadrao
                 className={styles.ordenacaoCartas}
                 ariaLabel="Ordenar cartas"
@@ -363,9 +379,14 @@ export function Cartas() {
                     <td colSpan={7}>Nenhuma carta encontrada.</td>
                   </tr>
                 ) : null}
-                {cartasApi.map((carta) => (
+                {cartasApi.map((carta) => {
+                  const semHabilidade =
+                    carta.ativo &&
+                    !carta.excluidoEm &&
+                    (!carta.habilidades || carta.habilidades.length === 0);
+                  return (
                   <tr key={carta.id}>
-                    <td>
+                    <td data-label="Carta">
                       <span className={styles.cardCell}>
                         <span
                           className={styles.cardThumb}
@@ -379,7 +400,14 @@ export function Cartas() {
                             <ImagePlus aria-label="Sem imagem" />
                           ) : null}
                         </span>
-                        <strong
+                        <NomeComAlerta
+                          nome={carta.nome}
+                          tom="vermelho"
+                          motivo={
+                            semHabilidade
+                              ? "Carta ativa sem habilidade vinculada."
+                              : null
+                          }
                           className={styles.nomeCartaElemento}
                           style={
                             {
@@ -388,20 +416,18 @@ export function Cartas() {
                               ).cor,
                             } as CSSProperties
                           }
-                        >
-                          {carta.nome}
-                        </strong>
+                        />
                       </span>
                     </td>
-                    <td>
-                      <Raridade value={carta.raridade} />
+                    <td data-label="Raridade">
+                      <Raridade value={carta.raridade} nome={raridades.find((item) => item.codigo === carta.raridade)?.nome} cor={raridades.find((item) => item.codigo === carta.raridade)?.cor} />
                     </td>
-                    <td>
+                    <td data-label="Elemento">
                       <ElementoVisual value={carta.elemento} />
                     </td>
-                    <td>{carta.classe ?? "-"}</td>
-                    <td>{carta.custo ?? "-"}</td>
-                    <td>
+                    <td data-label="Classe">{carta.classe ?? "-"}</td>
+                    <td data-label="Venda">{carta.custo ?? "-"}</td>
+                    <td data-label="Status">
                       <Status
                         value={
                           carta.excluidoEm
@@ -412,23 +438,40 @@ export function Cartas() {
                         }
                       />
                     </td>
-                    <td>
-                      <details className={styles.menuAcoesCarta}>
-                        <summary aria-label={`Ações de ${carta.nome}`}>
+                    <td data-label="Ações">
+                      <details
+                        className={styles.menuAcoesCarta}
+                        open={menuAcoesAbertoId === carta.id}
+                      >
+                        <summary
+                          aria-label={`Ações de ${carta.nome}`}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            setMenuAcoesAbertoId((atual) =>
+                              atual === carta.id ? null : carta.id,
+                            );
+                          }}
+                        >
                           <MoreHorizontal aria-hidden="true" />
                         </summary>
                         <div>
                           <button
                             type="button"
                             disabled={Boolean(carta.excluidoEm)}
-                            onClick={() => selecionarCarta(carta)}
+                            onClick={() => {
+                              setMenuAcoesAbertoId(null);
+                              selecionarCarta(carta);
+                            }}
                           >
                             <Pencil aria-hidden="true" /> Editar
                           </button>
                           <button
                             type="button"
                             disabled={Boolean(carta.excluidoEm)}
-                            onClick={() => setExcluindo(carta)}
+                            onClick={() => {
+                              setMenuAcoesAbertoId(null);
+                              setExcluindo(carta);
+                            }}
                           >
                             <Trash2 aria-hidden="true" /> Excluir
                           </button>
@@ -436,7 +479,8 @@ export function Cartas() {
                       </details>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -445,6 +489,7 @@ export function Cartas() {
       </div>
 
       {modalFiltrosAberto ? <FiltroCartasModal
+        raridades={raridades}
         raridade={filtroRaridade}
         setRaridade={setFiltroRaridade}
         elemento={filtroElemento}
@@ -471,6 +516,31 @@ export function Cartas() {
             onDelete={() => removerCarta(selecionada)}
             salvando={salvando}
           />
+        </div>
+      ) : null}
+
+      {descartePendente ? (
+        <div className={styles.modalCartaBackdrop} role="presentation">
+          <section
+            className={`${styles.confirmarExclusaoCarta} ${styles.confirmarDescarteCarta}`}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="titulo-descartar-carta"
+            aria-describedby="descricao-descartar-carta"
+          >
+            <h2 id="titulo-descartar-carta">Descartar alterações?</h2>
+            <p id="descricao-descartar-carta">
+              Existem alterações não salvas nesta carta. Se continuar, elas serão perdidas.
+            </p>
+            <div>
+              <button type="button" autoFocus onClick={() => setDescartePendente(null)}>
+                Continuar editando
+              </button>
+              <button type="button" onClick={confirmarDescarte}>
+                Descartar alterações
+              </button>
+            </div>
+          </section>
         </div>
       ) : null}
 

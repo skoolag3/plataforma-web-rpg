@@ -62,21 +62,38 @@ export class HttpExceptionFilter implements ExceptionFilter {
       };
     }
 
-    if (
-      exception instanceof Prisma.PrismaClientKnownRequestError &&
-      exception.code === 'P2002'
-    ) {
-      return {
-        statusCode: HttpStatus.CONFLICT,
-        error: 'Conflict',
-        message: 'Registro duplicado.',
-        details: [
-          {
-            field: this.getPrismaTarget(exception),
-            messages: ['Ja existe um registro com este valor.'],
-          },
-        ],
-      };
+    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+      if (exception.code === 'P2002') {
+        return {
+          statusCode: HttpStatus.CONFLICT,
+          error: 'Conflict',
+          message: 'Registro duplicado.',
+          details: [
+            {
+              field: this.getPrismaTarget(exception),
+              messages: ['Ja existe um registro com este valor.'],
+            },
+          ],
+        };
+      }
+
+      if (exception.code === 'P2023' || exception.code === 'P2000') {
+        return {
+          statusCode: HttpStatus.BAD_REQUEST,
+          error: 'Bad Request',
+          message: 'Parâmetro ou formato de dado inválido.',
+          details: [],
+        };
+      }
+
+      if (exception.code === 'P2025') {
+        return {
+          statusCode: HttpStatus.NOT_FOUND,
+          error: 'Not Found',
+          message: 'Registro não encontrado.',
+          details: [],
+        };
+      }
     }
 
     return {

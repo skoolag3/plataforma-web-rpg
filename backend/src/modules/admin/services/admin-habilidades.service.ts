@@ -169,6 +169,14 @@ export class AdminHabilidadesService {
       );
     }
 
+    const validacao = validarHabilidade(this.toConfigFromRecord(atual));
+    if (!validacao.valida) {
+      throw new BadRequestException({
+        message: 'A configuração salva não passou na validação.',
+        details: validacao.erros,
+      });
+    }
+
     const habilidade = await this.prisma.habilidade.update({
       where: { id },
       data: { status: 'PUBLICADA', atualizado_em: new Date() },
@@ -272,6 +280,9 @@ export class AdminHabilidadesService {
         turno: dto.requisitoValor ?? Number.NaN,
       };
     }
+    if (dto.requisitoTipo === 'INTERVALO_TURNOS') {
+      return { tipo: 'INTERVALO_TURNOS', intervalo: dto.requisitoValor ?? Number.NaN };
+    }
     return { tipo: 'NENHUM' };
   }
 
@@ -331,6 +342,9 @@ export class AdminHabilidadesService {
         turno: habilidade.requisito_valor ?? Number.NaN,
       };
     }
+    if (habilidade.requisito_tipo === 'INTERVALO_TURNOS') {
+      return { tipo: 'INTERVALO_TURNOS', intervalo: habilidade.requisito_valor ?? Number.NaN };
+    }
     return { tipo: 'NENHUM' };
   }
 
@@ -357,6 +371,8 @@ export class AdminHabilidadesService {
           ? configuracao.requisito.percentual
           : configuracao.requisito.tipo === 'TURNO_MINIMO'
             ? configuracao.requisito.turno
+            : configuracao.requisito.tipo === 'INTERVALO_TURNOS'
+              ? configuracao.requisito.intervalo
             : null;
     const escalaValor =
       configuracao.escala.tipo === 'NENHUMA' ? null : configuracao.escala.valor;

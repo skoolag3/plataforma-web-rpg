@@ -7,6 +7,7 @@ import {
   type CSSProperties,
   type FormEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   obterImpactoAdminCarta,
   uploadCartaAssets,
@@ -30,11 +31,17 @@ import {
   ElementoSelect,
   PreviewCarta,
   obterElementoVisual,
-  raridades,
 } from "./adminCartaVisual";
+import { useAdminRaridades } from "./useAdminRaridades";
 import { AdminCartaHabilidades } from "./adminCartaHabilidades";
 import { combinarEstilos } from "./combinarEstilos";
 import { AdminClasseSelect } from "./adminClasseSelect";
+import { FotoPerfilCarta, gerarFotoPerfilCarta, type AjusteFotoPerfil } from "./fotoPerfilCarta";
+import { formularioCartaAlterado } from "./adminCartaEditor.estado";
+import { DetalheCarta } from "../../(private)/cartas/components/detalheCarta";
+import { mapearCarta } from "../../(private)/cartas/cardData";
+import type { CartaColecao } from "../../lib/jogo";
+import { styles as inventarioStyles } from "../../(private)/cartas/styles";
 
 const styles = combinarEstilos(
   sharedStyles,
@@ -68,14 +75,20 @@ export function CartaEditor({
 }: {
   carta: AdminCarta;
   onClose: () => void;
-  onSave: (payload: UpdateAdminCartaPayload) => Promise<void>;
+  onSave: (payload: UpdateAdminCartaPayload) => Promise<AdminCarta>;
   onDelete: () => Promise<void>;
   onDirtyChange: (alterado: boolean) => void;
   salvando: boolean;
 }) {
+  const raridades = useAdminRaridades();
   const [form, setForm] = useState<CartaFormState>(() => cartaToForm(carta));
+  const [formSalvo, setFormSalvo] = useState<CartaFormState>(() =>
+    cartaToForm(carta),
+  );
 
   const [foto, setFoto] = useState<File | null>(null);
+  const [ajusteFotoPerfil, setAjusteFotoPerfil] = useState<AjusteFotoPerfil>(() => normalizarConfigVisual(carta.configVisual).fotoPerfil);
+  const [fotoPerfilAlterada, setFotoPerfilAlterada] = useState(false);
   const [moldura, setMoldura] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [molduraPreviewUrl, setMolduraPreviewUrl] = useState<string | null>(
@@ -87,15 +100,29 @@ export function CartaEditor({
   const [impactoExclusao, setImpactoExclusao] = useState<number | null>(null);
   const [impactoStatus, setImpactoStatus] = useState<number | null>(null);
   const [carregandoImpacto, setCarregandoImpacto] = useState(false);
-  const formAlterado =
-    foto !== null ||
-    moldura !== null ||
-    JSON.stringify(form) !== JSON.stringify(cartaToForm(carta));
+  const [detalhesAbertos, setDetalhesAbertos] = useState(false);
+  const [portalPronto, setPortalPronto] = useState(false);
+  const formAlterado = formularioCartaAlterado(
+    form,
+    formSalvo,
+    foto !== null || fotoPerfilAlterada || moldura !== null,
+  );
 
   useEffect(() => {
     onDirtyChange(formAlterado);
     return () => onDirtyChange(false);
   }, [formAlterado, onDirtyChange]);
+
+  useEffect(() => setPortalPronto(true), []);
+
+  useEffect(() => {
+    if (!detalhesAbertos) return;
+    function fecharComEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setDetalhesAbertos(false);
+    }
+    document.addEventListener("keydown", fecharComEscape);
+    return () => document.removeEventListener("keydown", fecharComEscape);
+  }, [detalhesAbertos]);
 
   useEffect(() => {
     function confirmarSaida(event: BeforeUnloadEvent) {
@@ -118,7 +145,7 @@ export function CartaEditor({
     setForm((atual) => ({
       ...atual,
       raridade,
-      custo: String(obterValorVendaCarta(raridade)),
+      custo: String(raridades.find((item) => item.codigo === raridade)?.valorVenda ?? obterValorVendaCarta(raridade)),
     }));
   }
 
@@ -186,20 +213,44 @@ export function CartaEditor({
         configVisual: form.configVisual,
       };
 
-      if (foto || moldura) {
+      const fotoPerfil = cardImage && (foto || fotoPerfilAlterada)
+        ? await gerarFotoPerfilCarta(cardImage, ajusteFotoPerfil)
+        : null;
+      if (foto || fotoPerfil || moldura) {
         const formData = new FormData();
         if (foto) formData.append("foto", foto);
+        if (fotoPerfil) formData.append("fotoPerfil", fotoPerfil);
         if (moldura) formData.append("moldura", moldura);
 
         const upload = await uploadCartaAssets(formData);
         payload.foto = upload.foto?.url ?? carta.foto ?? undefined;
+        payload.fotoPerfil = upload.fotoPerfil?.url ?? carta.fotoPerfil ?? undefined;
         payload.moldura = upload.moldura?.url ?? carta.moldura ?? undefined;
       } else {
         payload.foto = carta.foto ?? undefined;
+        payload.fotoPerfil = carta.fotoPerfil ?? undefined;
         payload.moldura = carta.moldura ?? undefined;
       }
 
-      await onSave(payload);
+      const atualizada = await onSave(payload);
+      const novoFormSalvo = cartaToForm(atualizada);
+      setForm(novoFormSalvo);
+      setFormSalvo(novoFormSalvo);
+      setAjusteFotoPerfil(
+        normalizarConfigVisual(atualizada.configVisual).fotoPerfil,
+      );
+      setFoto(null);
+      setMoldura(null);
+      setFotoPerfilAlterada(false);
+      setPreviewUrl((current) => {
+        if (current) URL.revokeObjectURL(current);
+        return null;
+      });
+      setMolduraPreviewUrl((current) => {
+        if (current) URL.revokeObjectURL(current);
+        return null;
+      });
+      onDirtyChange(false);
     } catch (error) {
       setErroLocal(
         error instanceof Error
@@ -273,8 +324,31 @@ export function CartaEditor({
 
   const cardImage = previewUrl ?? carta.foto ?? undefined;
   const cardFrame = molduraPreviewUrl ?? carta.moldura ?? undefined;
+  const cartaDetalhe = mapearCarta({
+    id: carta.id,
+    nome: form.nome || "Carta",
+    raridade: form.raridade,
+    elemento: form.elemento,
+    classe: form.classe || "Sem classe",
+    prioridadeAtaque: carta.classeDetalhes?.prioridadeAtaque ?? 50,
+    custo: Number(form.custo) || 0,
+    hpBase: Number(form.hpBase) || 0,
+    danoBase: Number(form.danoBase) || 0,
+    defesaBase: Number(form.defesaBase) || 0,
+    habilidades: carta.habilidades.filter((habilidade) =>
+      form.habilidadesIds.includes(habilidade.id),
+    ),
+    passiva: carta.passiva,
+    foto: cardImage ?? null,
+    moldura: cardFrame ?? null,
+    configVisual: form.configVisual,
+    quantidade: 1,
+    obtida: true,
+    obtidaEm: null,
+  } satisfies CartaColecao);
 
   return (
+    <>
     <form className={styles.editPanel} onSubmit={handleSubmit}>
       <header>
         <div>
@@ -333,19 +407,13 @@ export function CartaEditor({
                   }
                   placeholder="Raridade"
                   opcoes={raridades.map((raridade) => ({
-                    valor: raridade,
-                    label: raridade,
-                    cor: {
-                      UR: "#e879f9",
-                      SSR: "#facc15",
-                      SR: "#67e8f9",
-                      R: "#a78bfa",
-                      N: "#94a3b8",
-                    }[raridade],
+                    valor: raridade.codigo,
+                    label: raridade.nome,
+                    cor: raridade.cor,
                   }))}
                 />
               </div>
-              <label>
+              <label className={styles.campoElemento}>
                 Elemento
                 <ElementoSelect
                   value={form.elemento}
@@ -456,6 +524,11 @@ export function CartaEditor({
                   updateField("configVisual", configVisual)
                 }
               />
+              <FotoPerfilCarta arte={cardImage} ajuste={ajusteFotoPerfil} aoAlterar={(ajuste) => {
+                setAjusteFotoPerfil(ajuste);
+                setFotoPerfilAlterada(true);
+                updateField("configVisual", { ...form.configVisual, fotoPerfil: ajuste });
+              }} />
             </div>
           </details>
           <details
@@ -609,11 +682,8 @@ export function CartaEditor({
             nome={form.nome || "Carta"}
             raridade={form.raridade}
             elemento={form.elemento}
-            classe={form.classe}
-            hpBase={Number(form.hpBase) || 0}
-            danoBase={Number(form.danoBase) || 0}
-            defesaBase={Number(form.defesaBase) || 0}
             configVisual={form.configVisual}
+            onAbrirDetalhes={() => setDetalhesAbertos(true)}
           />
           <div className={styles.editorActions}>
             <button type="button" onClick={onClose}>
@@ -630,6 +700,32 @@ export function CartaEditor({
         </aside>
       </section>
     </form>
+    {detalhesAbertos && portalPronto
+      ? createPortal(
+          <div
+            className={inventarioStyles.modalDetalhe}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Detalhes da carta ${cartaDetalhe.nome}`}
+            onClick={(event) => {
+              if (event.target === event.currentTarget) {
+                setDetalhesAbertos(false);
+              }
+            }}
+          >
+            <DetalheCarta
+              carta={cartaDetalhe}
+              favorita={false}
+              aoAlternarFavorita={() => undefined}
+              aoAdicionarAoDeck={() => undefined}
+              aoFechar={() => setDetalhesAbertos(false)}
+              modoAdmin
+            />
+          </div>,
+          document.body,
+        )
+      : null}
+    </>
   );
 }
 

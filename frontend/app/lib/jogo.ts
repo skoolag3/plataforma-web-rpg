@@ -8,13 +8,15 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 export type CartaColecao = {
   id: string;
   nome: string;
-  raridade: "UR" | "SSR" | "SR" | "R" | "N";
+  raridade: string;
   elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
   classe: string;
+  prioridadeAtaque: number;
   custo: number;
   hpBase: number;
   danoBase: number;
   defesaBase: number;
+  habilidades?: { id: string; nome: string; descricao: string | null }[];
   passiva: Record<string, unknown>;
   foto: string | null;
   moldura: string | null;
@@ -95,6 +97,12 @@ async function jogoRequest<T>(path: string, options: RequestInit = {}) {
   }
 
   return data as T;
+}
+
+export type RaridadeJogo = { codigo: string; nome: string; valor_venda: number; cor: string; ordem: number };
+
+export function listarRaridadesJogo() {
+  return jogoRequest<RaridadeJogo[]>("/raridades");
 }
 
 export function buscarColecao(posse?: "todas" | "obtidas" | "nao-obtidas") {
@@ -208,6 +216,9 @@ export type JogadorRanking = {
   partidas: number;
   cartasColecionadas: number;
   avatarUrl: string | null;
+  molduraClasse: string;
+  molduraUrl: string | null;
+  molduraConfig: ConfigVisualCarta | null;
 };
 
 export function buscarRanking() {
@@ -321,7 +332,7 @@ export function abandonarExpedicao(idExpedicao: string) {
 export type CartaGachaApi = {
   id: string;
   nome: string;
-  raridade: "UR" | "SSR" | "SR" | "R" | "N";
+  raridade: string;
   elemento: "natureza" | "agua" | "fogo" | "sombra" | "luz";
   foto: string | null;
   moldura: string | null;
@@ -339,6 +350,7 @@ export type BannerGacha = {
   custoDez: number;
   pity: number;
   limitePity: number;
+  pities: { raridade: string; limite: number; atual: number }[];
   diarioDisponivel: boolean;
   cartas: CartaGachaApi[];
 };
@@ -352,20 +364,21 @@ export type GachaResponse = {
   }[];
   rotacao: {
     bannerAtualId: string;
-    proximaRotacaoEm: string;
+    proximaRotacaoEm: string | null;
     forcadoPorAdmin: boolean;
   } | null;
   banners: BannerGacha[];
 };
 
 export function buscarGacha() {
-  return jogoRequest<GachaResponse>("/gacha/banners");
+  return jogoRequest<GachaResponse>("/gacha/banners", { cache: "no-store" });
 }
 
 export function girarGacha(idBanner: string, quantidade: 1 | 10) {
   return jogoRequest<{
     cartas: CartaGachaApi[];
     pity: number;
+    pities: { raridade: string; limite: number; atual: number }[];
     rubys: number;
     custo: number;
     rubysGanhosDuplicatas: number;

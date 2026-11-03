@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { SlidersHorizontal, X } from "lucide-react";
+import Link from "next/link";
+import { Layers3, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { CampoBusca } from "../../components/ui/controlesFormulario";
 
@@ -13,9 +14,12 @@ import { DetalheCarta } from "./components/detalheCarta";
 import { FiltrosColecao } from "./components/filtrosColecao";
 import { GradeCartas } from "./components/gradeCartas";
 import { ModalDeck } from "./components/modalDeck";
+import { ModalConquistas } from "./components/modalConquistas";
 import { Paginacao } from "./components/paginacao";
+import { useCartasFavoritas } from "./useCartasFavoritas";
 import { styles } from "./styles";
 import type { Card, ResumoColecao } from "./types";
+import { obterRaridadeJogo, useRaridadesJogo } from "../../components/raridadesJogo";
 
 const resumoInicial: ResumoColecao = {
   totalCartas: 0,
@@ -23,15 +27,8 @@ const resumoInicial: ResumoColecao = {
   percentual: 0,
 };
 
-const pesoRaridade: Record<Card["raridade"], number> = {
-  UR: 5,
-  SSR: 4,
-  SR: 3,
-  R: 2,
-  N: 1,
-};
-
 export default function CartasPage() {
+  const raridades = useRaridadesJogo();
   const router = useRouter();
   const [cards, setCards] = useState<Card[]>(FALLBACK_CARDS);
   const [resumo, setResumo] = useState(resumoInicial);
@@ -41,15 +38,12 @@ export default function CartasPage() {
   const [raridade, setRaridade] = useState("Todas");
   const [elemento, setElemento] = useState("Todos");
   const [classe, setClasse] = useState("Todas");
-  const [custo, setCusto] = useState("Todos");
   const [ordenacao, setOrdenacao] = useState("Raridade");
   const [busca, setBusca] = useState("");
   const [somenteFavoritas, setSomenteFavoritas] = useState(false);
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
 
-  const [favoritas, setFavoritas] = useState<Set<string>>(
-    new Set(["Kael Arcano"]),
-  );
+  const [favoritas, setFavoritas] = useCartasFavoritas();
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [pagina, setPagina] = useState(1);
   const [deckSlots, setDeckSlots] = useState<Array<string | null>>(
@@ -57,6 +51,10 @@ export default function CartasPage() {
   );
   const [modalDeckAberto, setModalDeckAberto] = useState(false);
   const [portalPronto, setPortalPronto] = useState(false);
+  const [conquistasAbertas, setConquistasAbertas] = useState(false);
+  const [cartasConquistas, setCartasConquistas] = useState<Card[]>([]);
+  const [carregandoConquistas, setCarregandoConquistas] = useState(false);
+  const [erroConquistas, setErroConquistas] = useState("");
   const botaoCartaAtivo = useRef<HTMLElement | null>(null);
   const botaoFiltros = useRef<HTMLButtonElement>(null);
 
@@ -81,6 +79,16 @@ export default function CartasPage() {
       .finally(() => setCarregando(false));
   }, []);
 
+  function abrirConquistas() {
+    setConquistasAbertas(true);
+    setCarregandoConquistas(true);
+    setErroConquistas("");
+    void buscarColecao("todas")
+      .then((dados) => setCartasConquistas(dados.itens.map(mapearCarta)))
+      .catch((error) => setErroConquistas(error instanceof Error ? error.message : "Não foi possível carregar as cartas."))
+      .finally(() => setCarregandoConquistas(false));
+  }
+
   const filtradas = useMemo(() => {
     const texto = busca.trim().toLowerCase();
 
@@ -96,14 +104,13 @@ export default function CartasPage() {
         (raridade === "Todas" || card.raridade === raridade) &&
         (elemento === "Todos" || card.elemento === elemento) &&
         (classe === "Todas" || card.classe === classe) &&
-        (custo === "Todos" || card.custo === Number(custo)) &&
         (!somenteFavoritas || favoritas.has(card.nome))
       );
     });
 
     return [...res].sort((a, b) => {
       if (ordenacao === "Raridade") {
-        return pesoRaridade[b.raridade] - pesoRaridade[a.raridade];
+        return (obterRaridadeJogo(raridades, b.raridade)?.ordem ?? 0) - (obterRaridadeJogo(raridades, a.raridade)?.ordem ?? 0);
       }
       if (ordenacao === "HP") return (b.hpBase ?? 0) - (a.hpBase ?? 0);
       if (ordenacao === "Ataque") {
@@ -122,11 +129,11 @@ export default function CartasPage() {
     busca,
     cards,
     classe,
-    custo,
     elemento,
     favoritas,
     ordenacao,
     raridade,
+    raridades,
     somenteFavoritas,
   ]);
 
@@ -257,10 +264,28 @@ export default function CartasPage() {
     <main className={styles.pagina}>
       <div className={styles.shellSemSidebar}>
         <section className={styles.conteudo}>
-          <CabecalhoColecao resumo={resumo} />
+          <CabecalhoColecao resumo={resumo} aoAbrirConquistas={abrirConquistas} />
 
           <div className={`${styles.workspace} ${styles.workspaceSemDetalhe}`}>
             <section className={styles.lista} aria-label="Lista de cartas">
+              {!erro ? (
+                <nav className={styles.atalhosColecao} aria-label="Atalhos da coleção">
+                  <Link href="/banners" className={styles.atalhoInvocar}>
+                    <Sparkles aria-hidden="true" />
+                    <span>
+                      <small>{cards.length ? "Amplie sua coleção" : "Sua coleção está vazia"}</small>
+                      <strong>Invocar cartas</strong>
+                    </span>
+                  </Link>
+                  <Link href="/decks" className={styles.atalhoDeck}>
+                    <Layers3 aria-hidden="true" />
+                    <span>
+                      <small>Prepare sua equipe</small>
+                      <strong>Montar deck</strong>
+                    </span>
+                  </Link>
+                </nav>
+              ) : null}
               {erro ? (
                 <p className={styles.semResultados} role="alert">
                   {erro}
@@ -291,11 +316,18 @@ export default function CartasPage() {
                 </button>
               </div>
 
-              <GradeCartas
-                cartas={cartasVisiveis}
-                cartaSelecionada={selecionada}
-                aoSelecionar={selecionarCarta}
-              />
+              {!erro && cards.length === 0 ? (
+                <div className={styles.estadoSemCartas}>
+                  <strong>Sua coleção ainda está sem cartas</strong>
+                  <p>Use os atalhos acima para invocar cartas e preparar seu primeiro deck.</p>
+                </div>
+              ) : (
+                <GradeCartas
+                  cartas={cartasVisiveis}
+                  cartaSelecionada={selecionada}
+                  aoSelecionar={selecionarCarta}
+                />
+              )}
 
               <Paginacao
                 paginaAtual={paginaAtual}
@@ -339,7 +371,6 @@ export default function CartasPage() {
                   raridade={raridade}
                   elemento={elemento}
                   classe={classe}
-                  custo={custo}
                   ordenacao={ordenacao}
                   somenteFavoritas={somenteFavoritas}
                   aoAlterarRaridade={(valor) =>
@@ -349,7 +380,6 @@ export default function CartasPage() {
                     atualizarFiltro(setElemento, valor)
                   }
                   aoAlterarClasse={(valor) => atualizarFiltro(setClasse, valor)}
-                  aoAlterarCusto={(valor) => atualizarFiltro(setCusto, valor)}
                   aoAlterarOrdenacao={(valor) =>
                     atualizarFiltro(setOrdenacao, valor)
                   }
@@ -367,6 +397,19 @@ export default function CartasPage() {
                 </button>
               </section>
             </div>,
+            document.body,
+          )
+        : null}
+
+      {conquistasAbertas && portalPronto
+        ? createPortal(
+            <ModalConquistas
+              resumo={resumo}
+              cartas={cartasConquistas}
+              carregando={carregandoConquistas}
+              erro={erroConquistas}
+              aoFechar={() => setConquistasAbertas(false)}
+            />,
             document.body,
           )
         : null}

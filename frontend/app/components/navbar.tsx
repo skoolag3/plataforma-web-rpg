@@ -12,9 +12,11 @@ import { usePathname } from "next/navigation";
 import type { MouseEvent } from "react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { isAuthenticated, subscribeAuthChange } from "../lib/auth";
+import { alterarModalAuth } from "../(public)/authNavegacao";
 import styles from "../styles/navbar.module.css";
 import { IconeInicio } from "./iconesNavbar";
 import { ExpandableTabs } from "./ui/expandableTabs";
+import { PrivateNavbar } from "./privateNavbar";
 
 const linksNav = [
   { href: "/#home", label: "Home", secao: "home", icon: IconeInicio },
@@ -28,6 +30,7 @@ const linksNav = [
 
 export function Navbar() {
   const caminho = usePathname();
+  const emNoticia = caminho.startsWith("/noticias/");
   const [secaoAtiva, setSecaoAtiva] = useState("home");
   const estaAutenticado = useSyncExternalStore(
     subscribeAuthChange,
@@ -77,6 +80,22 @@ export function Navbar() {
     setSecaoAtiva(secao);
   }
 
+  function abrirAcesso(
+    evento: MouseEvent<HTMLAnchorElement>,
+    modal: "login" | "cadastro",
+  ) {
+    if (
+      caminho !== "/" ||
+      evento.button !== 0 ||
+      evento.ctrlKey ||
+      evento.metaKey ||
+      evento.shiftKey ||
+      evento.altKey
+    ) return;
+    evento.preventDefault();
+    alterarModalAuth(modal);
+  }
+
   if (
     [
       "/home",
@@ -84,6 +103,7 @@ export function Navbar() {
       "/cartas",
       "/decks",
       "/gacha",
+      "/banners",
       "/expedicao",
       "/partida",
     ].some((rota) => caminho === rota || caminho.startsWith(`${rota}/`)) ||
@@ -92,17 +112,24 @@ export function Navbar() {
     return null;
   }
 
+  if (emNoticia && estaAutenticado) {
+    return (
+      <div className={styles.cabecalhoJogador}>
+        <PrivateNavbar />
+      </div>
+    );
+  }
+
   return (
     <header className={styles.cabecalho}>
-      <nav className={styles.nav}>
+      <nav className={`${styles.nav} ${emNoticia ? styles.navNoticia : ""}`}>
         <Link href="/" className={styles.marca}>
-          <span className={styles.seloMarca}>RPG</span>
           <span className={styles.nomeMarca}>
             Anime<span className={styles.destaqueMarca}>Cards</span>
           </span>
         </Link>
 
-        <ExpandableTabs
+        {!emNoticia ? <ExpandableTabs
           className={styles.linksNav}
           ariaLabel="Navegação principal"
           itens={linksNav.map((link) => ({
@@ -112,7 +139,7 @@ export function Navbar() {
             ativa: caminho === "/" && secaoAtiva === link.secao,
             aoClicar: (evento) => navegarParaSecao(evento, link.secao),
           }))}
-        />
+        /> : null}
 
         <div className={styles.acoes}>
           {estaAutenticado ? (
@@ -122,11 +149,19 @@ export function Navbar() {
             </Link>
           ) : (
             <>
-              <Link href="/login" className={styles.btn}>
+              <Link
+                href="/?auth=login"
+                className={styles.btn}
+                onClick={(evento) => abrirAcesso(evento, "login")}
+              >
                 <FontAwesomeIcon icon={faRightToBracket} aria-hidden="true" />
                 <span className={styles.textoAcao}>Entrar</span>
               </Link>
-              <Link href="/cadastro" className={styles.btnPrimario}>
+              <Link
+                href="/?auth=cadastro"
+                className={styles.btnPrimario}
+                onClick={(evento) => abrirAcesso(evento, "cadastro")}
+              >
                 <FontAwesomeIcon icon={faUserPlus} aria-hidden="true" />
                 <span className={styles.textoAcao}>Registrar</span>
               </Link>

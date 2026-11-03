@@ -22,7 +22,9 @@ type TipoImagem = keyof typeof assinaturasImagem;
 
 export function validarConteudoImagem(
   arquivo: Express.Multer.File | undefined,
-  tiposPermitidos: TipoImagem[] = Object.keys(assinaturasImagem) as TipoImagem[],
+  tiposPermitidos: TipoImagem[] = Object.keys(
+    assinaturasImagem,
+  ) as TipoImagem[],
 ) {
   if (!arquivo?.buffer?.length) {
     throw new BadRequestException('Envie um arquivo de imagem válido.');

@@ -325,11 +325,7 @@
       rgba(190, 242, 100, 0.035),
       transparent 24%
     ),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0 5rem,
-      rgba(255, 255, 255, 0.018) 5rem calc(5rem + 1px)
-    );
+    radial-gradient(ellipse at 82% 78%, rgba(139, 92, 246, 0.045), transparent 32%);
   content: "";
 }
 .viewportTrilha::after {
@@ -357,7 +353,7 @@
   z-index: 1;
   left: 50%;
   width: clamp(42rem, 68vw, 58rem);
-  height: 30rem;
+  height: max(30rem, calc(var(--etapas-trilha, 3) * 10rem));
   margin: 0;
   transform: translate(calc(-50% + var(--pan-x)), var(--pan-y))
     scale(var(--zoom-trilha));
@@ -399,8 +395,8 @@
   animation: fluxoRota 18s linear infinite;
 }
 .conexoesTrilha path[data-estado="futura"] {
-  stroke: rgba(139, 118, 192, 0.2);
-  stroke-dasharray: 2 6;
+  stroke: rgba(139, 118, 192, 0.28);
+  stroke-dasharray: 1 7;
 }
 .conexoesTrilha path[data-estado="percorrido"] {
   stroke: #c8f77a;
@@ -432,7 +428,7 @@
   align-items: center;
   gap: 0;
   border: 1px solid rgba(136, 146, 169, 0.22);
-  border-radius: 0.68rem;
+  border-radius: 0.9rem;
   color: var(--member-text);
   background: rgba(10, 13, 22, 0.94);
   padding: 0.5rem;
@@ -616,7 +612,7 @@
   align-items: center;
   gap: 0.65rem;
   border: 1px solid rgba(248, 113, 113, 0.2);
-  border-radius: 0.72rem;
+  border-radius: 1rem;
   color: var(--member-text);
   background: linear-gradient(
     135deg,
@@ -706,9 +702,9 @@
   stroke-width: 1.7;
 }
 .checkpointTrilha small {
-  border-radius: 0.3rem;
-  background: rgba(8, 10, 18, 0.88);
-  padding: 0.12rem 0.28rem;
+  border-radius: 999px;
+  background: rgba(8, 10, 18, 0.72);
+  padding: 0.15rem 0.4rem;
   font-size: 0.44rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -810,11 +806,13 @@
 }
 
 .batalhaPendente {
-  margin-top: 0.85rem;
-  padding: 1rem;
+  width: min(58rem, 100%);
+  margin: 0 auto 0.75rem;
+  padding: 0.85rem 1rem;
 }
 .batalhaPendente > svg {
   width: 1.5rem;
+  flex: 0 0 auto;
   color: #a78bfa;
 }
 .batalhaPendente > div {
@@ -1120,7 +1118,11 @@
     min-width: auto;
   }
   .viewportTrilha {
-    height: 30rem;
+    height: clamp(22rem, 52dvh, 28rem);
+  }
+  .conexoesTrilha path[data-estado="disponivel"],
+  .noConfronto[data-disponivel="true"] .iconeConfronto {
+    animation: none;
   }
   .areaTrilha {
     left: 0;
@@ -1177,17 +1179,25 @@
   }
   .barraMapa > span::after {
     content: "Amplie para mover o mapa";
-    font-size: 0.48rem;
+    font-size: 0.6rem;
     line-height: 1.2;
   }
   .barraMapa {
     justify-content: space-between;
   }
+  .controlesZoom button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .controlesZoom output {
+    width: 2.25rem;
+    font-size: 0.65rem;
+  }
   .resumoEtapas {
     padding-inline: 0.55rem;
   }
   .resumoEtapas li small {
-    font-size: 0.42rem;
+    font-size: 0.52rem;
   }
   .textoConfronto strong {
     max-width: 100%;
@@ -1216,10 +1226,16 @@
     white-space: nowrap;
   }
   .batalhaPendente {
-    align-items: stretch;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.6rem 0.65rem;
+    padding: 0.75rem;
   }
-  .batalhaPendente button,
+  .batalhaPendente button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
   .btnIniciar {
     width: 100%;
   }

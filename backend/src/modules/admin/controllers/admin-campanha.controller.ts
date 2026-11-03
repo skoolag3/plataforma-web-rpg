@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -60,14 +61,14 @@ export class AdminCampanhaController {
 
   @Patch('produtos/:id')
   atualizarProduto(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: SalvarProdutoExpedicaoDto,
   ) {
     return this.campanhaService.atualizarProduto(id, dto);
   }
 
   @Delete('produtos/:id')
-  excluirProduto(@Param('id') id: string) {
+  excluirProduto(@Param('id', ParseUUIDPipe) id: string) {
     return this.campanhaService.excluirProduto(id);
   }
 }

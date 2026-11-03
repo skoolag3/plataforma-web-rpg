@@ -9,6 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:secoes": "node --test \"tests/adminCampanhaSecoes.test.mjs\"",
+    "test:cartas": "node --test \"tests/adminCartaEditorEstado.test.mjs\"",
     "lint": "eslint"
   },
   "dependencies": {

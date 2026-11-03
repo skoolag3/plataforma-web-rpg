@@ -297,10 +297,14 @@
     min-height: 0;
   }
   .card {
-    padding: 0.85rem 0.95rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.25rem 0.5rem;
+    padding: 0.75rem 0.85rem;
   }
 
   .cardTopo {
+    grid-column: 1 / -1;
     min-height: 1.8rem;
     align-items: center;
   }
@@ -317,36 +321,46 @@
   }
 
   .card h2 {
-    margin: 0.55rem 0 0.2rem;
+    grid-column: 1;
+    align-self: center;
+    margin: 0;
     font-size: 0.95rem;
   }
 
   .descricao {
-    font-size: 0.66rem;
+    grid-column: 1 / -1;
+    font-size: 0.68rem;
   }
 
   .quantidade {
-    margin-top: 0.55rem;
-    font-size: 1.45rem;
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+    margin-top: 0;
+    font-size: 1.2rem;
   }
 
   .beneficios {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 0.75rem;
-    margin-top: 0.6rem;
-    padding-top: 0.6rem;
-    font-size: 0.6rem;
+    display: none;
   }
 
   .preco {
-    margin-top: 0.6rem;
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    margin-top: 0.15rem;
     padding-top: 0;
   }
 
+  .preco strong {
+    font-size: 1.05rem;
+  }
+
   .card button {
+    grid-column: 1 / -1;
     min-height: 2.75rem;
-    margin-top: 0.7rem;
+    margin-top: 0.25rem;
     font-size: 0.72rem;
   }
 

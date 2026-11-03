@@ -19,6 +19,7 @@ export class ColecaoService {
           : {}),
       },
       include: {
+        classe: { select: { nome: true, prioridade_ataque: true } },
         habilidades: {
           where: { habilidade: { status: 'PUBLICADA' } },
           include: { habilidade: true },
@@ -32,6 +33,9 @@ export class ColecaoService {
       },
       orderBy: [{ nome: 'asc' }],
     });
+
+    const raridades = await this.prisma.raridadeCarta.findMany({ select: { codigo: true, valor_venda: true } });
+    const valoresVenda = new Map(raridades.map((item) => [item.codigo, item.valor_venda]));
 
     const itens = cartas
       .map((carta) => {
@@ -63,12 +67,19 @@ export class ColecaoService {
           raridade: carta.raridade,
           elemento: carta.elemento,
           classe:
-            typeof passiva.classe === 'string' ? passiva.classe : 'Sem classe',
-          custo: obterValorVendaPorRaridade(carta.raridade),
+            carta.classe?.nome ??
+            (typeof passiva.classe === 'string' ? passiva.classe : 'Sem classe'),
+          prioridadeAtaque: carta.classe?.prioridade_ataque ?? 50,
+          custo: valoresVenda.get(carta.raridade) ?? obterValorVendaPorRaridade(carta.raridade),
           hpBase: carta.hp_base,
           danoBase: carta.dano_base,
           defesaBase: carta.defesa_base,
-          passiva: passivaExibicao,
+          habilidades: habilidades.map((habilidade) => ({
+            id: habilidade.id,
+            nome: habilidade.nome,
+            descricao: habilidade.descricao,
+          })),
+          passiva: { ...passivaExibicao, custo: valoresVenda.get(carta.raridade) ?? obterValorVendaPorRaridade(carta.raridade) },
           foto: carta.foto,
           moldura: carta.moldura,
           configVisual: carta.config_visual,

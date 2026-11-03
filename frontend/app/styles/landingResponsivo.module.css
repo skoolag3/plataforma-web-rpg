@@ -103,6 +103,10 @@
     border-radius: 1rem;
   }
 
+  .gradeHero .visualHero {
+    margin-left: 0;
+  }
+
   .personagemHero {
     inset: 0 -2.2rem -1rem;
   }

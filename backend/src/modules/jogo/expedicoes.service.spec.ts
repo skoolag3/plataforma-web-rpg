@@ -15,8 +15,8 @@ function criarExpedicao(
     status: 'EM_ANDAMENTO',
     etapa_atual: 0,
     trilha: gerarTrilhaExpedicao(123),
-    escolhas: ['etapa-1-facil'],
-    escolha_atual: 'etapa-1-facil',
+    escolhas: ['etapa-1-caminho-1'],
+    escolha_atual: 'etapa-1-caminho-1',
     criado_em: new Date('2026-09-10T10:00:00Z'),
     atualizado_em: new Date('2026-09-10T10:00:00Z'),
     finalizado_em: null,
@@ -39,6 +39,7 @@ function criarDependencias(expedicoes: Record<string, unknown>[]) {
     expedicao: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
     logPartida: { update: jest.fn().mockResolvedValue({}) },
     ledgerRuby: { create: jest.fn().mockResolvedValue({}) },
+    usuario: { update: jest.fn().mockResolvedValue({}) },
   };
   const prisma = {
     expedicao: {
@@ -82,7 +83,7 @@ describe('ExpedicoesService - progressão e recompensas', () => {
           id: 'partida-1',
           etapa_expedicao: 0,
           resultado: 'VITORIA',
-          recompensa_rubys: 25,
+          recompensa_rubys: 20,
           timestamp_inicio: new Date(),
         },
       ],
@@ -99,17 +100,17 @@ describe('ExpedicoesService - progressão e recompensas', () => {
     );
     expect(tx.ledgerRuby.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
-        quantidade: 25,
+        quantidade: 20,
         motivo: 'CHECKPOINT_EXPEDICAO',
       }),
     });
     expect(res).toEqual(
       expect.objectContaining({
         etapaAtual: 1,
-        rubysAssegurados: 25,
+        rubysAssegurados: 20,
         chefe: expect.objectContaining({ recompensa: 100 }),
         opcoesAtuais: expect.arrayContaining([
-          expect.objectContaining({ recompensa: 25 }),
+          expect.objectContaining({ recompensa: 20 }),
         ]),
       }),
     );
@@ -132,21 +133,21 @@ describe('ExpedicoesService - progressão e recompensas', () => {
         id: 'partida-1',
         etapa_expedicao: 0,
         resultado: 'VITORIA',
-        recompensa_rubys: 25,
+        recompensa_rubys: 20,
         timestamp_inicio: new Date(),
       },
     ];
     const atual = criarExpedicao({
       etapa_atual: 1,
       trilha,
-      escolhas: ['etapa-1-facil', escolhaDificil.id],
+      escolhas: ['etapa-1-caminho-1', escolhaDificil.id],
       escolha_atual: escolhaDificil.id,
       partidas,
     });
     const falhou = criarExpedicao({
       ...atual,
       status: 'FALHOU',
-      partidas: [{ ...partidas[0], recompensa_rubys: 18 }, partidas[1]],
+      partidas: [{ ...partidas[0], recompensa_rubys: 35 }, partidas[1]],
     });
     const { prisma, tx } = criarDependencias([atual, falhou]);
     const service = new ExpedicoesService(prisma, {} as PartidasService);
@@ -155,19 +156,19 @@ describe('ExpedicoesService - progressão e recompensas', () => {
 
     expect(tx.logPartida.update).toHaveBeenCalledWith({
       where: { id: 'partida-2' },
-      data: { recompensa_rubys: 18 },
+      data: { recompensa_rubys: 35 },
     });
     expect(tx.ledgerRuby.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
-        quantidade: 18,
+        quantidade: 35,
         motivo: 'EXPEDICAO_RESGATE_DERROTA',
       }),
     });
     expect(res).toEqual(
       expect.objectContaining({
         status: 'FALHOU',
-        rubysAssegurados: 43,
-        rubysPerdidos: 7,
+        rubysAssegurados: 55,
+        rubysPerdidos: 15,
       }),
     );
   });
@@ -178,9 +179,9 @@ describe('ExpedicoesService - progressão e recompensas', () => {
       etapa_atual: 3,
       trilha,
       escolhas: [
-        'etapa-1-facil',
-        'etapa-2-media',
-        'etapa-3-dificil',
+        'etapa-1-caminho-1',
+        'etapa-2-caminho-2',
+        'etapa-3-caminho-3',
         'chefe-final',
       ],
       escolha_atual: 'chefe-final',

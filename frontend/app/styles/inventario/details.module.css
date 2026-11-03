@@ -56,9 +56,10 @@
 
 .detalheTopo {
   display: grid;
-  grid-template-columns: minmax(6.5rem, 7.5rem) minmax(0, 1fr);
-  gap: 0.65rem;
-  align-items: start;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: center;
+  padding: 0.65rem 2.75rem 0.85rem 0.65rem;
 }
 
 .cardGrande {
@@ -115,16 +116,20 @@
 }
 
 .favoritoIcone {
-  display: grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  margin-left: auto;
-  place-items: center;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: #94a3b8;
+  display: inline-flex;
+  min-height: 2.4rem;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  border-radius: 0.55rem;
+  background: rgba(124, 58, 237, 0.08);
+  color: #c4b5fd;
   cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 750;
+  padding: 0.4rem 0.7rem;
 }
 
 .favoritoIcone svg {
@@ -146,9 +151,24 @@
   fill: currentColor;
 }
 
+.detalheRotulo {
+  color: var(--cor-raridade, #a78bfa);
+  font-size: 0.65rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.detalheRaridade {
+  margin: 0.15rem 0 0;
+  color: var(--cor-raridade, #d8b4fe);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
 .detalheTitulo h2 {
-  margin: 0.2rem 0 0.3rem;
-  font-size: clamp(1rem, 2vw, 1.18rem);
+  margin: 0.4rem 0 0;
+  font-size: clamp(1.4rem, 2.6vw, 1.85rem);
   line-height: 1.1;
 }
 
@@ -168,7 +188,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  margin-top: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.tagComDica {
+  position: relative;
+  display: inline-flex;
 }
 
 .tag {
@@ -184,6 +209,78 @@
   font-weight: 900;
   padding: 0 0.55rem;
   text-transform: capitalize;
+}
+
+button.tag {
+  cursor: help;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+button.tag:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 2px;
+}
+
+.tagElemento {
+  border-color: color-mix(in srgb, var(--cor-elemento) 42%, transparent);
+  background: color-mix(in srgb, var(--cor-elemento) 18%, #10131d);
+  color: color-mix(in srgb, var(--cor-elemento) 72%, white);
+}
+
+.dicaTag {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 10;
+  display: none;
+  width: min(17rem, calc(100vw - 2rem));
+  border: 1px solid rgba(167, 139, 250, 0.42);
+  border-radius: 0.7rem;
+  background: #181b29;
+  box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.45);
+  color: #dbe4f4;
+  padding: 0.75rem;
+  text-transform: none;
+}
+
+.tagDicaClasse .dicaTag {
+  right: 0;
+  left: auto;
+}
+
+.tagComDica:has(button:focus-visible) .dicaTag,
+.tagComDica[data-aberta="true"] .dicaTag {
+  display: grid;
+  gap: 0.35rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tagComDica:hover .dicaTag {
+    display: grid;
+    gap: 0.35rem;
+  }
+}
+
+.dicaTag strong {
+  color: #fff;
+  font-size: 0.78rem;
+}
+
+.dicaTag span {
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+.dicaTag small {
+  color: #aab6ca;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.dicaMobile {
+  display: none;
 }
 
 .tagVerde {
@@ -203,30 +300,43 @@
   height: 0.9rem;
 }
 
+.tag img {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
+}
+
 .atributos {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.3rem;
-  margin-top: 0.55rem;
+  gap: 0.55rem;
+  margin-top: 0.6rem;
 }
 
 .atributo {
   display: flex;
   align-items: center;
-  gap: 0.28rem;
+  gap: 0.5rem;
   min-width: 0;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 0.45rem;
-  background: rgba(15, 23, 42, 0.38);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.65rem;
+  background: rgba(15, 23, 42, 0.5);
   color: #cbd5e1;
-  font-size: 0.66rem;
+  font-size: 0.85rem;
   font-weight: 800;
-  padding: 0.38rem 0.42rem;
+  padding: 0.7rem 0.75rem;
 }
 
 .atributo svg {
-  width: 0.82rem;
-  height: 0.82rem;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.atributo small {
+  display: block;
+  color: #8996aa;
+  font-size: 0.62rem;
+  font-weight: 700;
 }
 
 .atributo strong {
@@ -247,8 +357,28 @@
 
 .secaoDetalhe {
   border-top: 1px solid rgba(148, 163, 184, 0.18);
-  margin-top: 0.55rem;
-  padding-top: 0.5rem;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+}
+
+.secaoAtributos {
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  padding-top: 0.85rem;
+}
+
+.secaoAtributos h3,
+.secaoDetalhe h3 {
+  margin: 0;
+  color: #f4f0ff;
+  font-size: 0.9rem;
+}
+
+.secaoAtributos h3 span,
+.secaoDetalhe h3 span {
+  margin-left: 0.45rem;
+  color: #8996aa;
+  font-size: 0.68rem;
+  font-weight: 500;
 }
 
 .secaoDetalhe h3 {
@@ -264,34 +394,31 @@
   line-height: 1.38;
 }
 
+.listaHabilidades {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
 .passiva {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.65rem;
-  align-items: center;
-}
-
-.passivaIcone {
-  display: grid;
-  width: 2.45rem;
-  height: 2.45rem;
-  place-items: center;
-  border: 1px solid rgba(132, 204, 22, 0.24);
-  border-radius: 999px;
-  background: rgba(22, 101, 52, 0.35);
-  color: #86efac;
-}
-
-.passivaIcone svg {
-  width: 1.1rem;
-  height: 1.1rem;
+  border: 1px solid rgba(132, 204, 22, 0.16);
+  border-radius: 0.7rem;
+  background: rgba(22, 101, 52, 0.1);
+  padding: 0.75rem;
 }
 
 .passiva strong {
   display: block;
   margin-bottom: 0.28rem;
   color: #fff;
-  font-size: 0.8rem;
+  font-size: 0.88rem;
+}
+
+.acoesDetalhe > p {
+  margin: 0 0 0.25rem;
+  color: #9daabe;
+  font-size: 0.73rem;
+  text-align: center;
 }
 
 .acoesDetalhe {
@@ -625,8 +752,8 @@
   right: 0.65rem;
   z-index: 2;
   display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: 2.4rem;
+  height: 2.4rem;
   place-items: center;
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 0.5rem;
@@ -665,4 +792,137 @@
   width: min(100%, 44rem);
   max-height: calc(100dvh - 1.5rem);
   overflow-y: auto;
+  border-color: color-mix(in srgb, var(--cor-raridade) 55%, transparent);
+  background:
+    radial-gradient(ellipse at 22% 0, color-mix(in srgb, var(--cor-raridade) 12%, transparent), transparent 48%),
+    var(--member-surface);
+  box-shadow: 0 1.4rem 4rem rgba(0, 0, 0, 0.46), 0 0 1.6rem color-mix(in srgb, var(--cor-raridade) 12%, transparent);
+}
+
+.modalDetalhe .secaoDetalhe h3 {
+  color: var(--cor-raridade);
+}
+
+@media (max-width: 600px) {
+  .modalDetalhe .tagComDica .dicaTag {
+    display: none;
+  }
+
+  .dicaMobile {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0 0 0.8rem;
+    border: 1px solid rgba(167, 139, 250, 0.42);
+    border-radius: 0.7rem;
+    background: #181b29;
+    color: #dbe4f4;
+    padding: 0.7rem;
+  }
+
+  .dicaMobile strong {
+    color: #fff;
+    font-size: 0.78rem;
+  }
+
+  .dicaMobile span {
+    font-size: 0.73rem;
+    line-height: 1.4;
+  }
+
+  .dicaMobile small {
+    color: #aab6ca;
+    font-size: 0.68rem;
+    line-height: 1.4;
+  }
+
+  .modalDetalhe {
+    align-items: end;
+    padding: 0;
+    background: rgba(2, 6, 23, 0.86);
+  }
+
+  .modalDetalhe .detalhe {
+    width: 100%;
+    max-height: calc(100dvh - 0.75rem);
+    border-radius: 1.25rem 1.25rem 0 0;
+    border-bottom: 0;
+    padding: 1.15rem 1rem max(1rem, env(safe-area-inset-bottom));
+    box-shadow: 0 -1rem 3rem rgba(0, 0, 0, 0.48);
+    overscroll-behavior: contain;
+  }
+
+  .modalDetalhe .detalhe::before {
+    display: block;
+    width: 2.5rem;
+    height: 0.25rem;
+    margin: -0.55rem auto 0.9rem;
+    border-radius: 999px;
+    background: rgba(196, 181, 253, 0.45);
+    content: "";
+  }
+
+  .modalDetalhe .detalheTopo {
+    grid-template-columns: minmax(5.6rem, 6.8rem) minmax(0, 1fr);
+    gap: 0.7rem;
+    padding: 0 2.3rem 0.75rem 0;
+  }
+
+  .modalDetalhe .cardGrande {
+    width: 100%;
+  }
+
+  .modalDetalhe .detalheTitulo {
+    text-align: left;
+  }
+
+  .modalDetalhe .detalheTitulo h2 {
+    margin-top: 0.3rem;
+    font-size: 1.25rem;
+  }
+
+  .modalDetalhe .favoritoIcone {
+    min-height: 2.3rem;
+    margin-top: 0.5rem;
+    font-size: 0.67rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .modalDetalhe .tags {
+    justify-content: flex-start;
+    gap: 0.25rem;
+    margin-top: 0.55rem;
+  }
+
+  .modalDetalhe .tag {
+    min-height: 1.5rem;
+    font-size: 0.63rem;
+    padding: 0 0.4rem;
+  }
+
+  .modalDetalhe .atributo {
+    gap: 0.25rem;
+    padding: 0.5rem 0.35rem;
+    font-size: 0.73rem;
+  }
+
+  .modalDetalhe .atributo svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .modalDetalhe .secaoAtributos h3 span,
+  .modalDetalhe .secaoDetalhe h3 span {
+    display: block;
+    margin: 0.1rem 0 0;
+  }
+
+  .modalDetalhe .acoesDetalhe {
+    bottom: calc(-1rem - env(safe-area-inset-bottom));
+    margin-top: 0.9rem;
+    padding: 0.8rem 0 env(safe-area-inset-bottom);
+  }
+
+  .modalDetalhe .botaoPrimario {
+    min-height: 2.85rem;
+  }
 }

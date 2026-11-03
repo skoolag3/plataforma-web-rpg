@@ -104,7 +104,9 @@ export class AdminCartasService {
       include: cartaInclude,
     });
 
-    return cartas.map((carta) => this.toResponse(carta));
+    const configuracoes = await this.prisma.raridadeCarta.findMany({ select: { codigo: true, valor_venda: true } });
+    const valoresVenda = new Map(configuracoes.map((item) => [item.codigo, item.valor_venda]));
+    return Promise.all(cartas.map((carta) => this.toResponse(carta, valoresVenda.get(carta.raridade))));
   }
 
   private obterInicioPeriodo(periodo?: string) {
@@ -174,11 +176,12 @@ export class AdminCartasService {
   }
 
   async criar(dto: CreateAdminCartaDto, idAdmin?: string) {
+    const raridade = await this.validarRaridade(dto.raridade);
     await this.validarHabilidades(dto.habilidadesIds);
     const classe = await this.resolverClasse(dto.idClasse, dto.classe);
     const carta = await this.prisma.$transaction(async (tx) => {
       const criada = await tx.carta.create({
-        data: this.toCreateData(dto, classe),
+        data: this.toCreateData(dto, classe, raridade.valor_venda),
         include: cartaInclude,
       });
       await tx.logAdminCarta.create({
@@ -192,6 +195,7 @@ export class AdminCartasService {
 
   async atualizar(id: string, dto: UpdateAdminCartaDto, idAdmin?: string) {
     const atual = await this.buscar(id);
+    const raridade = await this.validarRaridade(dto.raridade ?? atual.raridade);
     await this.validarHabilidades(dto.habilidadesIds);
     const classe =
       dto.idClasse !== undefined || dto.classe !== undefined
@@ -208,12 +212,12 @@ export class AdminCartasService {
       const editada = await tx.carta.update({
         where: { id },
         data: {
-          ...this.toUpdateData(dto, atual.raridade, atual.passiva, classe),
+          ...this.toUpdateData(dto, atual.raridade, atual.passiva, classe, raridade.valor_venda),
           atualizado_em: new Date(),
         },
         include: cartaInclude,
       });
-      const depois = this.toResponse(editada);
+      const depois = await this.toResponse(editada);
       const alteracoes = this.obterAlteracoes(atual, depois);
       if (Object.keys(alteracoes).length) {
         await tx.logAdminCarta.create({
@@ -255,11 +259,11 @@ export class AdminCartasService {
 
     return {
       message: 'Carta removida.',
-      carta: this.toResponse(carta),
+      carta: await this.toResponse(carta),
     };
   }
 
-  private obterAlteracoes(antes: ReturnType<AdminCartasService['toResponse']>, depois: ReturnType<AdminCartasService['toResponse']>) {
+  private obterAlteracoes(antes: Awaited<ReturnType<AdminCartasService['toResponse']>>, depois: Awaited<ReturnType<AdminCartasService['toResponse']>>) {
     const campos = ['nome', 'elemento', 'raridade', 'idClasse', 'hpBase', 'danoBase', 'defesaBase', 'passiva', 'foto', 'moldura', 'configVisual', 'ativo', 'habilidades'] as const;
     const alteracoes: Record<string, { antes: unknown; depois: unknown }> = {};
     for (const campo of campos) {
@@ -273,6 +277,7 @@ export class AdminCartasService {
   private toCreateData(
     dto: CreateAdminCartaDto,
     classe: { id: string; nome: string } | null,
+    valorVenda: number,
   ): Prisma.CartaCreateInput {
     return {
       nome: dto.nome.trim(),
@@ -281,9 +286,10 @@ export class AdminCartasService {
       hp_base: dto.hpBase,
       dano_base: dto.danoBase,
       defesa_base: dto.defesaBase,
-      passiva: this.buildPassiva(dto, dto.raridade, {}, classe?.nome),
+      passiva: this.buildPassiva(dto, dto.raridade, {}, classe?.nome, valorVenda),
       ...(classe ? { classe: { connect: { id: classe.id } } } : {}),
       foto: dto.foto,
+      foto_perfil: dto.fotoPerfil,
       moldura: dto.moldura,
       config_visual: dto.configVisual as Prisma.InputJsonValue | undefined,
       ativo: dto.ativo ?? true,
@@ -296,6 +302,7 @@ export class AdminCartasService {
     raridadeAtual: string,
     passivaAtual: Record<string, unknown>,
     classe?: { id: string; nome: string } | null,
+    valorVenda?: number,
   ): Prisma.CartaUpdateInput {
     return {
       ...(dto.nome !== undefined ? { nome: dto.nome.trim() } : {}),
@@ -315,6 +322,7 @@ export class AdminCartasService {
               dto.raridade ?? raridadeAtual,
               passivaAtual,
               classe?.nome,
+              valorVenda,
             ),
           }
         : {}),
@@ -324,6 +332,7 @@ export class AdminCartasService {
           : { classe: { disconnect: true } }
         : {}),
       ...(dto.foto !== undefined ? { foto: dto.foto } : {}),
+      ...(dto.fotoPerfil !== undefined ? { foto_perfil: dto.fotoPerfil } : {}),
       ...(dto.moldura !== undefined ? { moldura: dto.moldura } : {}),
       ...(dto.configVisual !== undefined
         ? { config_visual: dto.configVisual as Prisma.InputJsonValue }
@@ -358,6 +367,12 @@ export class AdminCartasService {
     }
   }
 
+  private async validarRaridade(codigo: string) {
+    const raridade = await this.prisma.raridadeCarta.findUnique({ where: { codigo } });
+    if (!raridade) throw new BadRequestException('Raridade não cadastrada.');
+    return raridade;
+  }
+
   private toHabilidadesCreate(habilidadesIds?: string[]) {
     if (habilidadesIds === undefined) return undefined;
     return { create: this.toHabilidadesCreateItems(habilidadesIds) };
@@ -379,6 +394,7 @@ export class AdminCartasService {
     raridade = 'N',
     passivaAtual: Record<string, unknown> = {},
     nomeClasse?: string,
+    valorVenda?: number,
   ) {
     return {
       ...passivaAtual,
@@ -386,11 +402,14 @@ export class AdminCartasService {
       ...(dto.classe !== undefined || dto.idClasse !== undefined
         ? { classe: nomeClasse ?? null }
         : {}),
-      custo: obterValorVendaPorRaridade(raridade),
+      custo: valorVenda ?? obterValorVendaPorRaridade(raridade),
     };
   }
 
-  private toResponse(carta: CartaComHabilidades) {
+  private async toResponse(carta: CartaComHabilidades, valorVenda?: number) {
+    const configuracaoRaridade = valorVenda === undefined
+      ? await this.prisma.raridadeCarta.findUnique({ where: { codigo: carta.raridade } })
+      : { valor_venda: valorVenda };
     const passiva =
       carta.passiva &&
       typeof carta.passiva === 'object' &&
@@ -417,12 +436,13 @@ export class AdminCartasService {
             modificadorDefesa: carta.classe.modificador_defesa,
           }
         : null,
-      custo: obterValorVendaPorRaridade(carta.raridade),
+      custo: configuracaoRaridade?.valor_venda ?? obterValorVendaPorRaridade(carta.raridade),
       hpBase: carta.hp_base,
       danoBase: carta.dano_base,
       defesaBase: carta.defesa_base,
-      passiva,
+      passiva: { ...passiva, custo: configuracaoRaridade?.valor_venda ?? obterValorVendaPorRaridade(carta.raridade) },
       foto: carta.foto,
+      fotoPerfil: carta.foto_perfil,
       moldura: carta.moldura,
       configVisual: carta.config_visual,
       ativo: Boolean(carta.ativo),

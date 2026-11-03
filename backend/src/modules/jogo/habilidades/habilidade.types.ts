@@ -32,7 +32,8 @@ export type RequisitoHabilidade =
   | { tipo: 'CHANCE'; percentual: number }
   | { tipo: 'CONTADOR_ATAQUES'; quantidade: number }
   | { tipo: 'HP_ABAIXO'; percentual: number }
-  | { tipo: 'TURNO_MINIMO'; turno: number };
+  | { tipo: 'TURNO_MINIMO'; turno: number }
+  | { tipo: 'INTERVALO_TURNOS'; intervalo: number };
 
 export type EscalaHabilidade =
   | { tipo: 'NENHUMA' }

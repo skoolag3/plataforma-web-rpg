@@ -52,6 +52,8 @@
   z-index: 120;
   display: grid;
   place-items: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: rgba(2, 6, 23, 0.78);
   backdrop-filter: blur(0.35rem);
   padding: 0.75rem;
@@ -59,8 +61,8 @@
 
 .painelFiltros {
   width: min(100%, 37rem);
-  max-height: calc(100dvh - 1.5rem);
-  overflow-y: auto;
+  margin: auto;
+  overflow: visible;
   border: 1px solid rgba(168, 85, 247, 0.5);
   border-radius: 1rem;
   background: #10131d;
@@ -477,5 +479,23 @@
   .barraBuscaFiltros .busca {
     flex: 1;
     width: auto;
+  }
+
+  .barraBuscaFiltros {
+    gap: 0.4rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .busca,
+  .btnFiltros {
+    min-height: 2.75rem;
+  }
+
+  .busca input {
+    font-size: 1rem;
+  }
+
+  .painelFiltros {
+    padding: 0.75rem;
   }
 }

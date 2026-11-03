@@ -2,7 +2,6 @@
 
 import {
   Clock3,
-  Gem,
   House,
   Layers3,
   LogOut,
@@ -21,7 +20,7 @@ const linksMenu = [
   { href: "/cartas", rotulo: "Coleção", icone: Layers3 },
   { href: "/decks", rotulo: "Decks", icone: Layers3 },
   { href: "#loja", rotulo: "Loja", icone: ShoppingCart },
-  { href: "#gacha", rotulo: "Gacha", icone: Sparkles },
+  { href: "#gacha", rotulo: "Banners", icone: Sparkles },
   { href: "#historico", rotulo: "Histórico", icone: Clock3 },
   { href: "#ranking", rotulo: "Ranking", icone: Trophy },
   { href: "/perfil", rotulo: "Perfil", icone: UserRound },
@@ -40,12 +39,8 @@ export function SidebarPerfil() {
   return (
     <aside className={styles.sidebarPerfil}>
       <Link href="/home" className={styles.marcaPerfil}>
-        <span className={styles.simboloMarca}>
-          <Gem aria-hidden="true" />
-        </span>
         <span>
-          <strong>Anime Cards</strong>
-          <small>RPG Online</small>
+          <strong>AnimeCards</strong>
         </span>
       </Link>
 

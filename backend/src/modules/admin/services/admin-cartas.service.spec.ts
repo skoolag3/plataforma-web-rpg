@@ -34,6 +34,7 @@ describe('AdminCartasService', () => {
       count: jest.fn(),
     },
     logAdminCarta: { create: jest.fn() },
+    raridadeCarta: { findUnique: jest.fn(), findMany: jest.fn() },
   };
   let service: AdminCartasService;
 
@@ -45,6 +46,10 @@ describe('AdminCartasService', () => {
     prisma.habilidade.findMany.mockResolvedValue([]);
     prisma.$transaction.mockImplementation((operacao) => operacao(prisma));
     prisma.logAdminCarta.create.mockResolvedValue({ id: 'log-id' });
+    prisma.raridadeCarta.findUnique.mockImplementation(({ where }: { where: { codigo: string } }) =>
+      Promise.resolve({ codigo: where.codigo, valor_venda: { N: 50, R: 100, SR: 200, SSR: 400, UR: 800 }[where.codigo] ?? 0 }),
+    );
+    prisma.raridadeCarta.findMany.mockResolvedValue([]);
     service = new AdminCartasService(prisma as never);
   });
 

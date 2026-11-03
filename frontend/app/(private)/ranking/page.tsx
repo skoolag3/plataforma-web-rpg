@@ -6,10 +6,9 @@ import {
   Medal,
   RefreshCw,
   Trophy,
-  User,
-  Users,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -18,8 +17,10 @@ import {
   useSyncExternalStore,
 } from "react";
 import { getStoredUser, subscribeAuthChange } from "../../lib/auth";
+import { criarEstiloMolduraPerfil } from "../../components/cartaMontada";
 import { buscarRanking, type JogadorRanking } from "../../lib/jogo";
 import styles from "../../styles/ranking.module.css";
+import perfilStyles from "../../styles/perfil/cardUsuario.module.css";
 
 const jogadoresPorPagina = 10;
 
@@ -81,14 +82,6 @@ export default function RankingPage() {
   const minhaPosicao = jogadoresOrdenados.find(
     (jogador) => jogador.id === usuario?.id,
   );
-  const totalPartidas = jogadores.reduce(
-    (total, jogador) => total + jogador.partidas,
-    0,
-  );
-  const totalCartas = jogadores.reduce(
-    (total, jogador) => total + jogador.cartasColecionadas,
-    0,
-  );
 
   return (
     <main className={styles.pagina}>
@@ -101,24 +94,23 @@ export default function RankingPage() {
             <h1>Ranking</h1>
             <p>Os invocadores com maior pontuação nas batalhas.</p>
           </div>
-          <div className={styles.resumo} aria-label="Resumo do ranking">
-            <span>
-              <Users />
-              <small>Jogadores</small>
-              <strong>{jogadores.length}</strong>
-            </span>
-            <span>
-              <Medal />
-              <small>Partidas</small>
-              <strong>{totalPartidas.toLocaleString("pt-BR")}</strong>
-            </span>
-            <span>
-              <Layers3 />
-              <small>Cartas</small>
-              <strong>{totalCartas.toLocaleString("pt-BR")}</strong>
-            </span>
-          </div>
         </header>
+
+        <div className={styles.guiaRanking}>
+          {criterio === "pontos" ? (
+            <>
+              <Trophy aria-hidden="true" />
+              <span><strong>Quer ganhar pontos?</strong><small>Vença batalhas na Expedição.</small></span>
+              <Link href="/expedicao">Jogar</Link>
+            </>
+          ) : (
+            <>
+              <Layers3 aria-hidden="true" />
+              <span><strong>Quer colecionar mais cartas?</strong><small>Invoque nos Banners.</small></span>
+              <Link href="/banners">Invocar</Link>
+            </>
+          )}
+        </div>
 
         {carregando ? (
           <CarregandoRanking />
@@ -173,8 +165,10 @@ export default function RankingPage() {
             ) : null}
             <section className={styles.podio} aria-label="Pódio do ranking">
               {podio.map((jogador) => (
-                <article
+                <Link
                   className={styles.cardPodio}
+                  href={`/perfil/${jogador.id}`}
+                  aria-label={`Ver perfil de ${jogador.nome}`}
                   data-posicao={jogador.posicao}
                   data-atual={jogador.id === usuario?.id || undefined}
                   key={jogador.id}
@@ -185,9 +179,7 @@ export default function RankingPage() {
                   </span>
                   <AvatarRanking jogador={jogador} destaque />
                   <strong className={styles.nomePodio}>{jogador.nome}</strong>
-                  <small>
-                    Nível {jogador.nivel} · {jogador.partidas} partidas
-                  </small>
+                  <small>{jogador.partidas} partidas</small>
                   <b>
                     {criterio === "pontos"
                       ? `${jogador.pontos.toLocaleString("pt-BR")} pts`
@@ -199,7 +191,7 @@ export default function RankingPage() {
                       : `${jogador.pontos.toLocaleString("pt-BR")} pts`}
                   </span>
                   {jogador.id === usuario?.id ? <em>Você</em> : null}
-                </article>
+                </Link>
               ))}
             </section>
 
@@ -217,8 +209,10 @@ export default function RankingPage() {
                   <span data-ativo={criterio === "pontos" || undefined}>Pontos</span>
                 </header>
                 {jogadoresPagina.map((jogador) => (
-                  <article
+                  <Link
                     className={styles.linha}
+                    href={`/perfil/${jogador.id}`}
+                    aria-label={`Ver perfil de ${jogador.nome}`}
                     data-atual={jogador.id === usuario?.id || undefined}
                     key={jogador.id}
                   >
@@ -229,7 +223,10 @@ export default function RankingPage() {
                       <AvatarRanking jogador={jogador} />
                       <span>
                         <b>{jogador.nome}</b>
-                        <small>Nível {jogador.nivel}</small>
+                        <small>
+                          <span className={styles.subtituloMobile}>{jogador.partidas} partidas · </span>
+                          Ver perfil
+                        </small>
                       </span>
                     </div>
                     <span className={styles.partidas}>
@@ -241,7 +238,7 @@ export default function RankingPage() {
                     <strong className={styles.pontos}>
                       {jogador.pontos.toLocaleString("pt-BR")} pts
                     </strong>
-                  </article>
+                  </Link>
                 ))}
                 {totalPaginas > 1 ? (
                   <nav className={styles.paginacao} aria-label="Páginas do ranking">
@@ -280,18 +277,24 @@ function AvatarRanking({
 }) {
   const tamanho = destaque ? 72 : 40;
   return (
-    <span className={styles.avatar} data-destaque={destaque || undefined}>
-      {jogador.avatarUrl ? (
+    <span className={`${styles.avatar} ${perfilStyles[jogador.molduraClasse] ?? ""}`} data-destaque={destaque || undefined}>
         <Image
-          src={jogador.avatarUrl}
+          src={jogador.avatarUrl ?? "/avatar-padrao.svg"}
           alt={`Avatar de ${jogador.nome}`}
           width={tamanho}
           height={tamanho}
           unoptimized
         />
-      ) : (
-        <User aria-hidden="true" />
-      )}
+        {jogador.molduraUrl ? (
+          <span
+            className={styles.molduraAvatar}
+            style={{
+              ...criarEstiloMolduraPerfil(jogador.molduraConfig),
+              backgroundImage: `url("${jogador.molduraUrl}")`,
+            }}
+            aria-hidden="true"
+          />
+        ) : null}
     </span>
   );
 }

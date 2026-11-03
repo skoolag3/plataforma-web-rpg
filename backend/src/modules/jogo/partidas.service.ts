@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { randomInt } from 'node:crypto';
 import { PrismaService } from '../../database/prisma.service';
 import {
   executarTurno as executarTurnoMotor,
@@ -100,7 +101,14 @@ export class PartidasService {
         nome: true,
         nivel: true,
         pontos_experiencia: true,
-        perfil: { select: { avatar_url: true, mostrar_no_ranking: true } },
+        perfil: {
+          select: {
+            avatar_url: true,
+            mostrar_no_ranking: true,
+            molduraSelecionada: { select: { classe_css: true } },
+            cartaMolduraSelecionada: { select: { moldura: true, config_visual: true } },
+          },
+        },
       },
     });
 
@@ -150,6 +158,11 @@ export class PartidasService {
           partidas: pontuacao?._count.id ?? 0,
           cartasColecionadas: colecaoPorUsuario.get(usuario.id) ?? 0,
           avatarUrl: usuario.perfil?.avatar_url ?? null,
+          molduraClasse: usuario.perfil?.cartaMolduraSelecionada
+            ? 'molduraCarta'
+            : (usuario.perfil?.molduraSelecionada?.classe_css ?? 'molduraPadrao'),
+          molduraUrl: usuario.perfil?.cartaMolduraSelecionada?.moldura ?? null,
+          molduraConfig: usuario.perfil?.cartaMolduraSelecionada?.config_visual ?? null,
         };
       })
       .filter((jogador) => jogador.pontos > 0)
@@ -178,6 +191,10 @@ export class PartidasService {
       etapa: number;
       dificuldade: Dificuldade;
       boss?: { cartas: string[] };
+      cartasAdversario?: string[];
+      quantidadeCartas?: number;
+      modoCartas?: 'ALEATORIO' | 'MANUAL';
+      mixed?: boolean;
     },
   ) {
     const existente = await this.prisma.logPartida.findFirst({
@@ -191,6 +208,7 @@ export class PartidasService {
       where: { id: idDeck, id_usuario: idUsuario, excluido_em: null },
       include: {
         cartas: {
+          where: { carta: { ativo: true, excluido_em: null } },
           include: { carta: { include: cartaBatalhaInclude } },
           orderBy: { posicao_slot: 'asc' },
         },
@@ -221,13 +239,25 @@ export class PartidasService {
         excluido_em: null,
         ...(contexto?.boss?.cartas.length
           ? { id: { in: contexto.boss.cartas } }
+          : contexto?.modoCartas === 'MANUAL'
+          ? { id: { in: contexto.cartasAdversario ?? [] } }
           : {}),
       },
       orderBy: [{ raridade: 'asc' }, { nome: 'asc' }],
-      take: contexto?.boss ? 100 : deck.cartas.length,
+      take: contexto?.boss ? 100 : 1000,
       include: cartaBatalhaInclude,
     });
     const cartasJogador = deck.cartas.map((item) => item.carta);
+    const candidatasEquilibradas = contexto?.boss || contexto?.modoCartas === 'MANUAL'
+      ? cartasCandidatas
+      : filtrarCartasPorForca(cartasCandidatas, cartasJogador);
+    const quantidadeDesejada = contexto?.boss
+      ? deck.cartas.length
+      : contexto?.quantidadeCartas ?? deck.cartas.length;
+    const quantidadeEsperada =
+      contexto?.modoCartas === 'MANUAL'
+        ? quantidadeDesejada
+        : Math.min(quantidadeDesejada, Math.max(1, candidatasEquilibradas.length));
     const cartasBot = contexto?.boss
       ? [...cartasCandidatas]
           .sort(
@@ -235,11 +265,14 @@ export class PartidasService {
               this.vantagemCarta(b, cartasJogador) -
               this.vantagemCarta(a, cartasJogador),
           )
-          .slice(0, deck.cartas.length)
-      : cartasCandidatas.slice(0, deck.cartas.length);
-    if (cartasBot.length !== deck.cartas.length) {
+          .slice(0, quantidadeEsperada)
+      : selecionarCartasAdversario(candidatasEquilibradas, quantidadeEsperada, {
+          ...contexto,
+          quantidadeCartas: quantidadeEsperada,
+        });
+    if (cartasBot.length !== quantidadeEsperada) {
       throw new BadRequestException(
-        `Cadastre pelo menos ${deck.cartas.length} cartas ativas para montar o adversário.`,
+        `Cadastre pelo menos ${quantidadeEsperada} cartas ativas para montar o adversário.`,
       );
     }
 
@@ -432,6 +465,9 @@ export class PartidasService {
           where: { id: idUsuario },
           data: {
             pontos_experiencia: { increment: recompensaVitoria.pontos },
+            ...(!partida.id_expedicao
+              ? { saldo_rubys_cache: { increment: recompensaVitoria.rubys } }
+              : {}),
             atualizado_em: new Date(),
           },
         });
@@ -601,6 +637,11 @@ export class PartidasService {
                 tipo: 'TURNO_MINIMO' as const,
                 turno: habilidade.requisito_valor ?? 1,
               }
+            : habilidade.requisito_tipo === 'INTERVALO_TURNOS'
+              ? {
+                  tipo: 'INTERVALO_TURNOS' as const,
+                  intervalo: habilidade.requisito_valor ?? 2,
+                }
             : { tipo: 'NENHUM' as const };
     const escala: ConfiguracaoHabilidade['escala'] =
       habilidade.escala_tipo === 'POR_TURNO' ||
@@ -702,4 +743,56 @@ export class PartidasService {
       finalizadoEm: partida.timestamp_fim,
     };
   }
+}
+
+export function filtrarCartasPorForca<T extends { hp_base: number; dano_base: number; defesa_base: number }>(
+  candidatas: T[],
+  deck: T[],
+): T[] {
+  if (!deck.length || !candidatas.length) return candidatas;
+  const forca = (carta: T) => carta.hp_base / 4 + carta.dano_base * 2 + carta.defesa_base;
+  const media = deck.reduce((total, carta) => total + forca(carta), 0) / deck.length;
+  const proximas = candidatas
+    .map((carta) => ({ carta, distancia: Math.abs(forca(carta) - media) }))
+    .sort((a, b) => a.distancia - b.distancia);
+  const limite = Math.max(deck.length, 12);
+  const faixa = proximas.filter(({ carta }) => forca(carta) >= media * 0.75 && forca(carta) <= media * 1.25);
+  return (faixa.length >= deck.length ? faixa : proximas.slice(0, limite)).map(({ carta }) => carta);
+}
+
+export function selecionarCartasAdversario<T extends { id: string }>(
+  candidatas: T[],
+  quantidadeDeck: number,
+  contexto?: { cartasAdversario?: string[]; quantidadeCartas?: number; modoCartas?: 'ALEATORIO' | 'MANUAL'; mixed?: boolean },
+): T[] {
+  const quantidade = contexto?.quantidadeCartas ?? quantidadeDeck;
+  if (!Number.isInteger(quantidade) || quantidade < 1 || quantidade > 6) {
+    throw new BadRequestException('Configure entre 1 e 6 cartas adversárias.');
+  }
+  const ids = contexto?.cartasAdversario ?? [];
+  const embaralhar = (cartas: T[]) => {
+    const resultado = [...cartas];
+    for (let indice = resultado.length - 1; indice > 0; indice--) {
+      const destino = randomInt(indice + 1);
+      [resultado[indice], resultado[destino]] = [resultado[destino], resultado[indice]];
+    }
+    return resultado;
+  };
+  if (contexto?.modoCartas === 'MANUAL') {
+    const selecionadas = ids.map((id) => candidatas.find((carta) => carta.id === id));
+    if (selecionadas.some((carta) => !carta) || new Set(ids).size !== ids.length) {
+      throw new BadRequestException('As cartas manuais estão indisponíveis ou repetidas.');
+    }
+    if (contexto.mixed) {
+      if (selecionadas.length < quantidade) throw new BadRequestException('O conjunto mixed precisa ter cartas suficientes.');
+      return embaralhar(selecionadas as T[]).slice(0, quantidade);
+    }
+    if (selecionadas.length !== quantidade) throw new BadRequestException('Selecione exatamente a quantidade de cartas configurada.');
+    return selecionadas as T[];
+  }
+  if (!contexto?.modoCartas && ids.length) {
+    const selecionadas = candidatas.filter((carta) => ids.includes(carta.id));
+    return [...selecionadas, ...embaralhar(candidatas.filter((carta) => !ids.includes(carta.id)))].slice(0, quantidade);
+  }
+  return embaralhar(candidatas).slice(0, quantidade);
 }

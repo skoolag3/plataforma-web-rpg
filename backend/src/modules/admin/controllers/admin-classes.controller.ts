@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -31,7 +32,10 @@ export class AdminClassesController {
   }
 
   @Patch(':id')
-  atualizar(@Param('id') id: string, @Body() dto: AtualizarAdminClasseDto) {
+  atualizar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AtualizarAdminClasseDto,
+  ) {
     return this.classesService.atualizar(id, dto);
   }
 }

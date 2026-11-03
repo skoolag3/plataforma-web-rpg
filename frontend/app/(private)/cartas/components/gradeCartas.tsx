@@ -1,9 +1,11 @@
+import { nomeElementoCarta } from "../../../components/elementosCarta";
 import { PackagePlus } from "lucide-react";
 
 import { CartaMontada } from "../../../components/cartaMontada";
 import { cardStyle } from "../cardData";
 import { styles } from "../styles";
-import type { Card } from "../types";
+import type { Card, CardStyle } from "../types";
+import { obterRaridadeJogo, useRaridadesJogo } from "../../../components/raridadesJogo";
 
 type GradeCartasProps = {
   cartas: Card[];
@@ -16,6 +18,7 @@ export function GradeCartas({
   cartaSelecionada,
   aoSelecionar,
 }: GradeCartasProps) {
+  const raridades = useRaridadesJogo();
   if (!cartas.length) {
     return <p className={styles.semResultados}>Nenhuma carta encontrada.</p>;
   }
@@ -28,6 +31,7 @@ export function GradeCartas({
         const classeSelecionada = selecionada
           ? styles.cardArtefatoSelecionado
           : "";
+        const corRaridade = obterRaridadeJogo(raridades, card.raridade)?.cor ?? card.borda;
 
         if (card.foto || card.moldura) {
           return (
@@ -35,7 +39,7 @@ export function GradeCartas({
               key={card.nome}
               type="button"
               className={[styles.cardArtefato, classeSelecionada].join(" ")}
-              style={cardStyle(card)}
+              style={{ ...cardStyle(card), "--borda": corRaridade, "--cor-raridade": corRaridade } as CardStyle}
               onClick={() => aoSelecionar(card.nome)}
               aria-pressed={selecionada}
             >
@@ -59,15 +63,15 @@ export function GradeCartas({
               styles.card,
               selecionada ? styles.cardSelecionado : "",
             ].join(" ")}
-            style={cardStyle(card)}
+            style={{ ...cardStyle(card), "--borda": corRaridade, "--cor-raridade": corRaridade } as CardStyle}
             onClick={() => aoSelecionar(card.nome)}
             aria-pressed={selecionada}
           >
             <span className={styles.arte} aria-hidden="true" />
             <span className={styles.silhueta} aria-hidden="true" />
-            <span className={styles.raridade}>{card.raridade}</span>
+            <span className={styles.raridade}>{obterRaridadeJogo(raridades, card.raridade)?.nome ?? card.raridade}</span>
             <span className={styles.elemento}>
-              <IconeElemento aria-label={card.elemento} />
+              <IconeElemento aria-label={nomeElementoCarta(card.elemento)} />
             </span>
             <span className={styles.cardInfo}>
               <strong>{card.nome}</strong>

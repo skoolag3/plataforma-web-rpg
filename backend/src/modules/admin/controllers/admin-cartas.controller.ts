@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -56,27 +57,38 @@ export class AdminCartasController {
   }
 
   @Get(':id')
-  buscar(@Param('id') id: string) {
+  buscar(@Param('id', ParseUUIDPipe) id: string) {
     return this.cartasService.buscar(id);
   }
 
   @Get(':id/impacto')
-  buscarImpacto(@Param('id') id: string) {
+  buscarImpacto(@Param('id', ParseUUIDPipe) id: string) {
     return this.cartasService.buscarImpacto(id);
   }
 
   @Post()
-  criar(@Body() dto: CreateAdminCartaDto, @CurrentUser() admin: AuthenticatedUser) {
+  criar(
+    @Body() dto: CreateAdminCartaDto,
+    @CurrentUser() admin: AuthenticatedUser,
+  ) {
     return this.cartasService.criar(dto, admin.id);
   }
 
   @Patch(':id')
-  atualizar(@Param('id') id: string, @Body() dto: UpdateAdminCartaDto, @CurrentUser() admin: AuthenticatedUser) {
+  atualizar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateAdminCartaDto,
+    @CurrentUser() admin: AuthenticatedUser,
+  ) {
     return this.cartasService.atualizar(id, dto, admin.id);
   }
 
   @Delete(':id')
-  remover(@Param('id') id: string, @Body() dto: RemoveAdminCartaDto, @CurrentUser() admin: AuthenticatedUser) {
+  remover(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RemoveAdminCartaDto,
+    @CurrentUser() admin: AuthenticatedUser,
+  ) {
     return this.cartasService.remover(
       id,
       dto.confirmarNome,

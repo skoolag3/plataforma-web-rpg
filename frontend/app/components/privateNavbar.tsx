@@ -1,6 +1,6 @@
 "use client";
 
-import { Gem, LogOut, Menu, ShieldCheck, User, X } from "lucide-react";
+import { LogOut, Menu, ShieldCheck, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -37,7 +37,7 @@ const links = [
   { href: "/home", label: "Início", icon: IconeInicio },
   { href: "/cartas", label: "Coleção", icon: IconeColecao },
   { href: "/decks", label: "Decks", icon: IconeDecks },
-  { href: "/gacha", label: "Gacha", icon: IconeGacha },
+  { href: "/banners", label: "Banners", icon: IconeGacha },
   { href: "/loja", label: "Loja", icon: IconeLoja },
   { href: "/expedicao", label: "Expedição", icon: IconeExpedicao },
   { href: "/ranking", label: "Ranking", icon: IconeRanking },
@@ -84,7 +84,24 @@ export function PrivateNavbar() {
       window.removeEventListener("perfil-atualizado", carregarResumoPerfil);
   }, [usuario?.id]);
 
+  const [rotaExpedicaoSessao, setRotaExpedicaoSessao] = useState("/expedicao");
+
+  useEffect(() => {
+    const chave = "animecards_rota_expedicao_sessao";
+    let ativo = true;
+    if (pathname === "/partida" || pathname === "/expedicao") {
+      const rota = `${pathname}${window.location.search}`;
+      window.sessionStorage.setItem(chave, rota);
+      queueMicrotask(() => { if (ativo) setRotaExpedicaoSessao(rota); });
+    } else {
+      const salva = window.sessionStorage.getItem(chave);
+      if (salva) queueMicrotask(() => { if (ativo) setRotaExpedicaoSessao(salva); });
+    }
+    return () => { ativo = false; };
+  }, [pathname]);
+
   function sair() {
+    window.sessionStorage.removeItem("animecards_rota_expedicao_sessao");
     clearSession();
     router.replace("/");
   }
@@ -93,8 +110,15 @@ export function PrivateNavbar() {
     (item) => ({
       titulo: item.label,
       icone: item.icon,
-      href: item.href,
-      ativa: pathname === item.href,
+      href:
+        item.href === "/expedicao" &&
+        pathname !== "/expedicao" &&
+        pathname !== "/partida"
+          ? rotaExpedicaoSessao
+          : item.href,
+      ativa:
+        pathname === item.href ||
+        (item.href === "/expedicao" && pathname === "/partida"),
       aoClicar: () => setAberto(false),
     }),
   );
@@ -119,9 +143,6 @@ export function PrivateNavbar() {
           className={styles.brand}
           onClick={() => setAberto(false)}
         >
-          <span>
-            <Gem aria-hidden="true" />
-          </span>
           <strong>
             Anime<em>Cards</em>
           </strong>
@@ -130,7 +151,8 @@ export function PrivateNavbar() {
           className={styles.menu}
           type="button"
           onClick={() => setAberto((valor) => !valor)}
-          aria-label="Abrir menu"
+          aria-label={aberto ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={aberto}
         >
           {aberto ? <X /> : <Menu />}
         </button>
@@ -141,10 +163,10 @@ export function PrivateNavbar() {
         />
         <div className={styles.usuario}>
           <div className={styles.saldos} aria-label="Saldos do jogador">
-            <span title="Rubys">
+            <Link href="/loja" title="Ir à loja de Rubys" aria-label={`Ir à loja de Rubys, saldo ${resumoPerfil.rubys.toLocaleString("pt-BR")}`}>
               <IconeRuby />
               {resumoPerfil.rubys.toLocaleString("pt-BR")}
-            </span>
+            </Link>
           </div>
           <div className={styles.correioArea}>
             <Correio />
@@ -163,14 +185,8 @@ export function PrivateNavbar() {
             >
               <span
                 className={styles.fotoAvatar}
-                style={
-                  resumoPerfil.avatarUrl
-                    ? { backgroundImage: `url("${resumoPerfil.avatarUrl}")` }
-                    : undefined
-                }
-              >
-                {!resumoPerfil.avatarUrl ? <User aria-hidden="true" /> : null}
-              </span>
+                style={{ backgroundImage: `url("${resumoPerfil.avatarUrl ?? "/avatar-padrao.svg"}")` }}
+              />
               {resumoPerfil.molduraUrl ? (
                 <i
                   className={styles.molduraImagem}
@@ -184,7 +200,6 @@ export function PrivateNavbar() {
             </span>
             <div>
               <strong>{usuario?.nome ?? "Jogador"}</strong>
-              <small>Nível {usuario?.nivel ?? 1}</small>
             </div>
           </Link>
           <button type="button" onClick={sair} title="Sair">

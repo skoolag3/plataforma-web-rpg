@@ -1,20 +1,27 @@
 "use client";
 
+import { nomeElementoCarta } from "../../components/elementosCarta";
 import {
   Bot,
+  Move,
   ScrollText,
   Shield,
   Sparkles,
   Swords,
   Trophy,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { createPortal } from "react-dom";
 import { CartaMontada } from "../../components/cartaMontada";
-import { CartaVerso } from "../../components/cartaVerso";
 import { IconeRuby } from "../../components/iconeRuby";
-import type { AcaoTurno, CartaPartida, EstadoPartida } from "../../lib/jogo";
+import { usePortalPronto } from "../../hooks/usePortalPronto";
+import { buscarColecao, type AcaoTurno, type CartaColecao, type CartaPartida, type EstadoPartida } from "../../lib/jogo";
+import { mapearCarta } from "../cartas/cardData";
+import { DetalheCarta } from "../cartas/components/detalheCarta";
+import detalheStyles from "../../styles/inventario/details.module.css";
 import styles from "../../styles/partida.module.css";
 import { useAnimacaoTurno, type AnimacaoDano } from "./useAnimacaoTurno";
+import { useHabilidadesTurno } from "./useHabilidadesTurno";
 
 type Props = {
   partida: EstadoPartida;
@@ -33,13 +40,16 @@ function CartaNaMesa({
   carta,
   lado,
   animacao,
+  habilidadeAtiva,
+  aoAbrirDetalhe,
 }: {
   carta: CartaPartida;
   lado: "jogador" | "bot";
   animacao: AnimacaoDano | null;
+  habilidadeAtiva: { id: string; nome: string; origem: "JOGADOR" | "BOT" } | null;
+  aoAbrirDetalhe: (carta: CartaPartida) => void;
 }) {
-  const passiva =
-    typeof carta.passiva.nome === "string" ? carta.passiva.nome : "Sem passiva";
+  const origem = lado === "jogador" ? "JOGADOR" : "BOT";
   return (
     <article
       className={`${styles.cartaCampo} ${styles[lado]}`}
@@ -55,7 +65,7 @@ function CartaNaMesa({
         <span>
           <strong>{carta.nome}</strong>
           <small>
-            {carta.raridade} · {carta.elemento} · P{carta.prioridadeAtaque}
+            {carta.raridade} · {nomeElementoCarta(carta.elemento)} · P{carta.prioridadeAtaque}
           </small>
         </span>
         <b>
@@ -65,7 +75,7 @@ function CartaNaMesa({
           <i style={{ width: `${percentualHp(carta)}%` }} />
         </span>
       </div>
-      <div className={styles.cartaVisual}>
+      <button type="button" className={styles.cartaVisual} onClick={() => aoAbrirDetalhe(carta)} aria-label={`Ver detalhes de ${carta.nome}`}>
         <CartaMontada
           arte={carta.foto ?? undefined}
           moldura={carta.moldura ?? undefined}
@@ -74,18 +84,13 @@ function CartaNaMesa({
           elemento={carta.elemento}
           config={carta.configVisual ?? undefined}
           placeholder={<Sparkles />}
-          verso={
-            <CartaVerso
-              nome={carta.nome}
-              raridade={carta.raridade}
-              elemento={carta.elemento}
-              hp={carta.hp}
-              ataque={carta.ataque}
-              defesa={carta.defesa}
-            />
-          }
         />
-      </div>
+      </button>
+      {habilidadeAtiva?.origem === origem ? (
+        <output key={habilidadeAtiva.id} className={styles.habilidadeAtivada} aria-live="polite">
+          <Sparkles aria-hidden="true" /> {habilidadeAtiva.nome}
+        </output>
+      ) : null}
       <div className={styles.atributosCarta}>
         <span
           className={
@@ -114,56 +119,29 @@ function CartaNaMesa({
           ) : null}
         </span>
       </div>
-      {passiva !== "Sem passiva" ? (
-        <p className={styles.passivaCarta}>
-          <Sparkles /> {passiva}
-        </p>
-      ) : null}
     </article>
   );
 }
 
-function FilaDeck({
+function DeckBatalha({
   cartas,
   ativa,
   lado,
+  aoAbrirDetalhe,
 }: {
   cartas: CartaPartida[];
   ativa: number;
-  lado: string;
-}) {
-  return (
-    <div className={styles.filaDeck} aria-label={`Ordem do deck ${lado}`}>
-      {cartas.map((carta, indice) => (
-        <span
-          key={`${carta.id}-${indice}`}
-          className={`${indice === ativa ? styles.cartaAtivaFila : ""} ${carta.derrotada ? styles.cartaDerrotada : ""}`}
-          style={
-            carta.foto ? { backgroundImage: `url("${carta.foto}")` } : undefined
-          }
-          title={`${indice + 1}. ${carta.nome}`}
-        >
-          <b>{indice + 1}</b>
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function DeckJogador({
-  cartas,
-  ativa,
-}: {
-  cartas: CartaPartida[];
-  ativa: number;
+  lado: "jogador" | "bot";
+  aoAbrirDetalhe: (carta: CartaPartida) => void;
 }) {
   const restantes = cartas.filter((carta) => !carta.derrotada).length;
+  const inimigo = lado === "bot";
 
   return (
-    <section className={styles.deckJogador} aria-label="Cartas do meu deck">
+    <section className={`${styles.deckJogador} ${inimigo ? styles.deckInimigo : ""}`} aria-label={inimigo ? "Cartas do deck adversário" : "Cartas do meu deck"}>
       <header>
         <span>
-          <strong>Meu deck</strong>
+          <strong>{inimigo ? "Deck adversário" : "Meu deck"}</strong>
           <small>
             {restantes} de {cartas.length} disponíveis
           </small>
@@ -172,10 +150,13 @@ function DeckJogador({
       </header>
       <div className={styles.gridDeckJogador}>
         {cartas.map((carta, indice) => (
-          <article
+          <button
+            type="button"
             key={`${carta.id}-${indice}`}
             className={`${indice === ativa ? styles.miniCartaAtiva : ""} ${carta.derrotada ? styles.miniCartaDerrotada : ""}`}
             title={`${indice + 1}. ${carta.nome} — ${carta.hpAtual}/${carta.hp} HP`}
+            aria-label={`Ver detalhes de ${carta.nome}`}
+            onClick={() => aoAbrirDetalhe(carta)}
           >
             <div className={styles.miniCartaVisual}>
               <CartaMontada
@@ -193,7 +174,7 @@ function DeckJogador({
             <span className={styles.miniCartaHp}>
               <i style={{ width: `${percentualHp(carta)}%` }} />
             </span>
-          </article>
+          </button>
         ))}
       </div>
     </section>
@@ -202,6 +183,12 @@ function DeckJogador({
 
 function LogBatalha({ eventos }: { eventos: EstadoPartida["eventos"] }) {
   const listaRef = useRef<HTMLDivElement>(null);
+  const arrasteRef = useRef<{ x: number; y: number; esquerda: number; topo: number } | null>(null);
+  const tamanhoRef = useRef<{ x: number; y: number; largura: number; altura: number } | null>(null);
+  const [alturaFixa, setAlturaFixa] = useState<number | null>(null);
+  const [tamanhoFlutuante, setTamanhoFlutuante] = useState<{ largura: number; altura: number } | null>(null);
+  const [flutuante, setFlutuante] = useState(false);
+  const [posicao, setPosicao] = useState<{ x: number; y: number } | null>(null);
   const turnos = [...new Set(eventos.map((evento) => evento.turno))]
     .sort((a, b) => a - b)
     .map((turno) => ({
@@ -216,12 +203,63 @@ function LogBatalha({ eventos }: { eventos: EstadoPartida["eventos"] }) {
     if (lista) lista.scrollTop = lista.scrollHeight;
   }, [eventos.length]);
 
+  function iniciarArraste(evento: PointerEvent<HTMLElement>) {
+    if (!flutuante || (evento.target as HTMLElement).closest("button")) return;
+    const painel = evento.currentTarget.parentElement;
+    if (!painel) return;
+    const limites = painel.getBoundingClientRect();
+    arrasteRef.current = { x: evento.clientX, y: evento.clientY, esquerda: limites.left, topo: limites.top };
+    evento.currentTarget.setPointerCapture(evento.pointerId);
+  }
+
+  function moverPainel(evento: PointerEvent<HTMLElement>) {
+    if (!arrasteRef.current) return;
+    const largura = evento.currentTarget.parentElement?.offsetWidth ?? 0;
+    const altura = evento.currentTarget.parentElement?.offsetHeight ?? 0;
+    setPosicao({
+      x: Math.max(16, Math.min(window.innerWidth - largura - 16, arrasteRef.current.esquerda + evento.clientX - arrasteRef.current.x)),
+      y: Math.max(96, Math.min(window.innerHeight - altura - 16, arrasteRef.current.topo + evento.clientY - arrasteRef.current.y)),
+    });
+  }
+
+  function iniciarRedimensionamento(evento: PointerEvent<HTMLButtonElement>) {
+    const painel = evento.currentTarget.parentElement;
+    if (!painel) return;
+    tamanhoRef.current = { x: evento.clientX, y: evento.clientY, largura: painel.offsetWidth, altura: painel.offsetHeight };
+    evento.currentTarget.setPointerCapture(evento.pointerId);
+    evento.preventDefault();
+  }
+
+  function redimensionar(evento: PointerEvent<HTMLButtonElement>) {
+    if (!tamanhoRef.current) return;
+    const alturaMaxima = flutuante ? window.innerHeight - (posicao?.y ?? 96) - 16 : window.innerHeight - 32;
+    const altura = Math.max(144, Math.min(alturaMaxima, tamanhoRef.current.altura + evento.clientY - tamanhoRef.current.y));
+    if (flutuante) {
+      setTamanhoFlutuante({
+        largura: Math.max(224, Math.min(window.innerWidth - 32, tamanhoRef.current.largura + evento.clientX - tamanhoRef.current.x)),
+        altura,
+      });
+    } else {
+      setAlturaFixa(altura);
+    }
+  }
+
   return (
-    <aside className={styles.logBatalha}>
-      <header>
+    <aside
+      className={`${styles.logBatalha} ${flutuante ? styles.logFlutuante : ""}`}
+      style={flutuante
+        ? { ...(tamanhoFlutuante ? { width: tamanhoFlutuante.largura, height: tamanhoFlutuante.altura } : {}), ...(posicao ? { left: posicao.x, top: posicao.y, bottom: "auto", right: "auto" } : {}) }
+        : alturaFixa ? { height: alturaFixa } : undefined}
+    >
+      <header onPointerDown={iniciarArraste} onPointerMove={moverPainel} onPointerUp={() => { arrasteRef.current = null; }}>
         <h2>
           <ScrollText /> Combate
         </h2>
+        <div className={styles.controlesLog}>
+          <button type="button" onClick={() => { setFlutuante((valor) => !valor); setPosicao(null); }} title={flutuante ? "Fixar log na lateral" : "Mover log como janela flutuante"} aria-label={flutuante ? "Fixar log na lateral" : "Mover log como janela flutuante"}>
+            <Move />
+          </button>
+        </div>
       </header>
       <div ref={listaRef} className={styles.listaTurnos}>
         {turnos.map((grupo) => (
@@ -245,6 +283,7 @@ function LogBatalha({ eventos }: { eventos: EstadoPartida["eventos"] }) {
           </section>
         ))}
       </div>
+      <button type="button" className={styles.alcaLog} aria-label="Arraste para redimensionar o log" title="Arraste para redimensionar" onPointerDown={iniciarRedimensionamento} onPointerMove={redimensionar} onPointerUp={() => { tamanhoRef.current = null; }} onPointerCancel={() => { tamanhoRef.current = null; }} />
     </aside>
   );
 }
@@ -261,9 +300,47 @@ export function MesaBatalha({
   const { animacaoAtual, animando, pularAnimacao } = useAnimacaoTurno(
     partida,
   );
+  const habilidadeAtiva = useHabilidadesTurno(partida);
   const cartaJogador = animacaoAtual?.cartaJogador ?? partida.jogador.cartas[partida.jogador.ativa];
   const cartaBot = animacaoAtual?.cartaBot ?? partida.bot.cartas[partida.bot.ativa];
   const bloqueado = processando || animando;
+  const [cartasColecao, setCartasColecao] = useState<CartaColecao[]>([]);
+  const [cartaDetalhada, setCartaDetalhada] = useState<CartaPartida | null>(null);
+  const portalPronto = usePortalPronto();
+
+  useEffect(() => {
+    void buscarColecao("todas").then((resposta) => setCartasColecao(resposta.itens)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!cartaDetalhada) return;
+    const aoTeclar = (evento: KeyboardEvent) => {
+      if (evento.key === "Escape") setCartaDetalhada(null);
+    };
+    window.addEventListener("keydown", aoTeclar);
+    return () => window.removeEventListener("keydown", aoTeclar);
+  }, [cartaDetalhada]);
+
+  const cartaColecao = cartaDetalhada ? cartasColecao.find((carta) => carta.id === cartaDetalhada.id) : null;
+  const cartaModal = cartaDetalhada ? mapearCarta(cartaColecao ?? {
+    id: cartaDetalhada.id,
+    nome: cartaDetalhada.nome,
+    raridade: cartaDetalhada.raridade,
+    elemento: cartaDetalhada.elemento as CartaColecao["elemento"],
+    classe: "—",
+    prioridadeAtaque: cartaDetalhada.prioridadeAtaque,
+    custo: 0,
+    hpBase: cartaDetalhada.hp,
+    danoBase: cartaDetalhada.ataqueBase,
+    defesaBase: cartaDetalhada.defesaBase,
+    passiva: cartaDetalhada.passiva,
+    foto: cartaDetalhada.foto,
+    moldura: cartaDetalhada.moldura,
+    configVisual: cartaDetalhada.configVisual,
+    quantidade: 0,
+    obtida: false,
+    obtidaEm: null,
+  }) : null;
 
   return (
     <section className={styles.batalhaLayout}>
@@ -277,11 +354,20 @@ export function MesaBatalha({
           </span>
           <strong>Turno {partida.turno}</strong>
         </header>
-        <FilaDeck
-          cartas={partida.bot.cartas}
-          ativa={animacaoAtual?.ativaBot ?? partida.bot.ativa}
-          lado="adversário"
-        />
+        <div className={styles.decksArena}>
+          <DeckBatalha
+            cartas={partida.bot.cartas}
+            ativa={animacaoAtual?.ativaBot ?? partida.bot.ativa}
+            lado="bot"
+            aoAbrirDetalhe={setCartaDetalhada}
+          />
+          <DeckBatalha
+            cartas={partida.jogador.cartas}
+            ativa={animacaoAtual?.ativaJogador ?? partida.jogador.ativa}
+            lado="jogador"
+            aoAbrirDetalhe={setCartaDetalhada}
+          />
+        </div>
         <div className={styles.mesaCampo}>
           {animacaoAtual ? (
             <output
@@ -294,7 +380,7 @@ export function MesaBatalha({
               <span>HP</span>
             </output>
           ) : null}
-          <CartaNaMesa carta={cartaBot} lado="bot" animacao={animacaoAtual} />
+          <CartaNaMesa carta={cartaBot} lado="bot" animacao={animacaoAtual} habilidadeAtiva={habilidadeAtiva} aoAbrirDetalhe={setCartaDetalhada} />
           <div className={styles.centroArena}>
             {animacaoAtual ? (
               <span className={styles.acaoAtual} aria-live="polite">
@@ -309,6 +395,8 @@ export function MesaBatalha({
             carta={cartaJogador}
             lado="jogador"
             animacao={animacaoAtual}
+            habilidadeAtiva={habilidadeAtiva}
+            aoAbrirDetalhe={setCartaDetalhada}
           />
         </div>
         {animando ? (
@@ -319,10 +407,6 @@ export function MesaBatalha({
           </div>
         ) : null}
         <div className={styles.rodapeArena}>
-          <DeckJogador
-            cartas={partida.jogador.cartas}
-            ativa={animacaoAtual?.ativaJogador ?? partida.jogador.ativa}
-          />
           {finalizada ? (
             <div className={styles.fimBatalha}>
               <Trophy />
@@ -378,6 +462,12 @@ export function MesaBatalha({
       </div>
 
       <LogBatalha eventos={partida.eventos} />
+      {cartaModal && portalPronto ? createPortal(
+        <div className={detalheStyles.modalDetalhe} role="dialog" aria-modal="true" aria-label={`Detalhes da carta ${cartaModal.nome}`} onClick={(evento) => {
+          if (evento.target === evento.currentTarget) setCartaDetalhada(null);
+        }}>
+          <DetalheCarta carta={cartaModal} favorita={false} aoAlternarFavorita={() => {}} aoAdicionarAoDeck={() => {}} aoFechar={() => setCartaDetalhada(null)} modoBatalha />
+        </div>, document.body) : null}
     </section>
   );
 }

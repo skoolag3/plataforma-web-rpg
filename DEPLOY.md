@@ -1,93 +1,85 @@
-# Deploy gratuito: Vercel, Render e Supabase
+# Deploy gratuito na Vercel e no Supabase
 
-O projeto deve ser publicado como três serviços:
+O projeto usa dois projetos gratuitos na Vercel, ambos configurados para a região de São Paulo (`gru1`):
 
-- `frontend/`: Vercel;
-- `backend/`: Render;
-- PostgreSQL: Supabase.
+- `frontend/`: aplicação Next.js;
+- `backend/`: API NestJS executada como uma Vercel Function;
+- PostgreSQL: Supabase;
+- imagens: Cloudinary.
 
-As imagens continuam no Cloudinary. Nunca envie os arquivos `.env` para o Git.
+Os arquivos `frontend/vercel.json` e `backend/vercel.json` já ativam Fluid Compute e fixam a execução em São Paulo. Nunca envie arquivos `.env` para o Git.
 
 ## 1. Preparar o Supabase
 
-1. Crie um projeto no Supabase.
-2. Abra **Connect** e selecione **Session pooler**.
-3. Copie a URL que usa o host `*.pooler.supabase.com` e a porta `5432`.
-4. Use essa URL em `DATABASE_URL` e `DIRECT_DATABASE_URL` no Render.
-5. Mantenha `sslmode=require` na URL fornecida pelo Supabase.
+1. Crie ou abra o projeto do Supabase.
+2. Em **Connect**, copie a URL do **Session Pooler**.
+3. Mantenha `sslmode=require` na URL.
+4. Use a URL do pooler em `DATABASE_URL` na Vercel.
+5. Use a conexão indicada pelo Supabase para migrations em `DIRECT_DATABASE_URL`.
 
-O Render não alcança a conexão direta gratuita `db.*.supabase.co`, pois ela depende de IPv6. O Session Pooler funciona por IPv4 e é compatível tanto com o backend persistente quanto com as migrations do Prisma.
+Antes do primeiro deploy, aplique as migrations em um ambiente seguro:
 
-## 2. Publicar o backend no Render
-
-1. Envie o repositório para o GitHub.
-2. No Render, escolha **New > Blueprint** e selecione o repositório.
-3. O arquivo `render.yaml` criará o serviço `animecards-api` usando a pasta `backend`.
-4. Preencha as variáveis solicitadas:
-   - `DATABASE_URL`;
-   - `DIRECT_DATABASE_URL`;
-   - `FRONTEND_URL`: inicialmente pode ficar com a futura URL da Vercel;
-   - `FRONTEND_URLS`: mesma URL; use vírgulas para autorizar mais de uma.
-5. Adicione manualmente as integrações utilizadas pelo ambiente:
-   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_URL` e `CLOUDINARY_ASSET_FOLDER`;
-   - `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`;
-   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_CALLBACK_URL`, se usar Google;
-   - `STRIPE_SECRET_KEY` e `STRIPE_WEBHOOK_SECRET`, se testar pagamentos;
-   - variáveis `SMTP_*` e `MAIL_FROM`, se o provedor/ambiente permitir SMTP.
-
-O build instala temporariamente as ferramentas de desenvolvimento, gera o Prisma Client, aplica `prisma migrate deploy`, compila o NestJS e remove as dependências usadas somente na compilação. Depois do deploy, confirme:
-
-```text
-https://animecards-api.onrender.com/
+```powershell
+cd backend
+$env:DIRECT_DATABASE_URL="postgresql://..."
+npm.cmd run prisma:deploy
 ```
 
-A resposta esperada é `Hello World!`. O subdomínio exato pode ser diferente se o nome já estiver ocupado.
+## 2. Publicar o backend
 
-> O Render gratuito pode suspender o serviço quando ele fica sem acessos. O primeiro carregamento após a suspensão será mais lento. O plano gratuito também pode bloquear SMTP tradicional; nesse caso, o envio de e-mails precisará usar uma API HTTP.
+1. Na Vercel, importe o repositório.
+2. Defina **Root Directory** como `backend`.
+3. Não informe framework, build command ou output directory manualmente. A Vercel detecta `src/main.ts` como NestJS.
+4. Cadastre as variáveis de produção:
+   - `DATABASE_URL` e `DIRECT_DATABASE_URL`;
+   - `JWT_SECRET` com um valor aleatório e longo;
+   - `NODE_ENV=production`;
+   - `FRONTEND_URL` e `FRONTEND_URLS` com a URL definitiva do frontend;
+   - variáveis `SUPABASE_*`, `CLOUDINARY_*`, `GOOGLE_*`, `STRIPE_*` e `SMTP_*` usadas pelo ambiente.
+5. Faça o deploy e copie o domínio da API, por exemplo `https://animecards-api.vercel.app`.
 
-## 3. Publicar o frontend na Vercel
+O script `postinstall` gera o Prisma Client durante a instalação. A API inteira é publicada como uma única Vercel Function com Fluid Compute.
 
-1. Na Vercel, importe o mesmo repositório.
-2. Em **Root Directory**, selecione `frontend`.
-3. O framework detectado deve ser **Next.js**.
-4. Cadastre estas variáveis em Production, Preview e Development:
+## 3. Publicar o frontend
+
+1. Importe novamente o mesmo repositório como outro projeto.
+2. Defina **Root Directory** como `frontend`.
+3. Cadastre em Production, Preview e Development:
 
 ```text
-BACKEND_URL=https://animecards-api.onrender.com
+BACKEND_URL=https://animecards-api.vercel.app
 NEXT_PUBLIC_API_URL=/api
 ```
 
-5. Faça o deploy e copie a URL final, por exemplo:
-
-```text
-https://animecards.vercel.app
-```
-
-6. Volte ao Render e ajuste:
+4. Faça o deploy e copie a URL final do frontend.
+5. Volte ao projeto do backend e atualize:
 
 ```text
 FRONTEND_URL=https://animecards.vercel.app
 FRONTEND_URLS=https://animecards.vercel.app
 ```
 
-Se quiser autorizar uma URL de preview específica, acrescente-a em `FRONTEND_URLS`, separada por vírgula.
+6. Refaça o deploy do backend para aplicar as URLs.
+
+O frontend encaminha `/api/*` para o backend. Assim, autenticação e cookies continuam usando o domínio público do site.
 
 ## 4. Ajustar integrações externas
 
-- Google OAuth: `GOOGLE_CALLBACK_URL=https://animecards.vercel.app/api/perfil/google/callback` (troque pelo domínio final do frontend e cadastre exatamente a mesma URL no Google Cloud);
-- Stripe: webhook `https://animecards-api.onrender.com/loja/stripe/webhook`;
-- Supabase Storage: mantenha o bucket e as políticas já usados pelo perfil;
-- Cloudinary: nenhuma alteração de URL é necessária.
+- Google OAuth: `GOOGLE_CALLBACK_URL=https://animecards.vercel.app/api/perfil/google/callback` e a mesma URL exata no Google Cloud;
+- Stripe: webhook `https://animecards.vercel.app/api/loja/stripe/webhook`;
+- Supabase Storage e Cloudinary: manter os buckets, pastas e credenciais existentes.
 
 ## 5. Verificação final
 
-- abrir a landing page da Vercel;
+- confirmar que frontend e backend indicam a região `gru1`;
+- abrir a landing page;
 - criar conta, verificar e-mail e entrar;
 - abrir coleção, decks, gacha e partida;
-- conferir upload de perfil e imagens administrativas;
-- confirmar que `/admin` continua exigindo autenticação administrativa;
-- observar os logs do Render durante a primeira requisição.
-- confirmar que o login cria `animecards_session` como cookie `HttpOnly`, sem JWT no `localStorage`;
-- validar os redirects de Google OAuth e Stripe usando exclusivamente os domínios definitivos.
+- testar upload de perfil e imagens administrativas;
+- confirmar que `/admin` exige autenticação administrativa;
+- verificar o cookie `animecards_session` como `HttpOnly` e `Secure`;
+- completar um login real pelo Google;
+- validar o webhook do Stripe no domínio definitivo;
+- acompanhar Functions e Runtime Logs no painel da Vercel.
 
-O CORS aceita somente as origens listadas explicitamente em `FRONTEND_URLS`. Para um teste temporário com ngrok, inclua a URL exata do túnel nessa variável e remova-a ao encerrar o teste.
+O plano Hobby é destinado a projeto pessoal e possui limites mensais. Se um limite for atingido, a Vercel pode interromper novas execuções até a renovação da franquia.

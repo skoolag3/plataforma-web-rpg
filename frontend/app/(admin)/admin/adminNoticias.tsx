@@ -1,5 +1,6 @@
 "use client";
 
+import { nomeCategoriaNoticia } from "../../lib/noticias";
 import {
   FileText,
   Link2,
@@ -22,6 +23,7 @@ import {
   type SalvarAdminNoticiaPayload,
 } from "../../lib/admin";
 import { SelectPadrao } from "../../components/ui/controlesFormulario";
+import { SwitchToggle } from "../../../components/ui/switch";
 import AnimatedFileUpload from "@/components/ui/animated-file-upload";
 import styles from "../../styles/admin/adminNoticias.module.css";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
@@ -29,7 +31,7 @@ import {
   notificarErro,
   notificarSucesso,
 } from "../../components/notificacoesGlobais";
-import { AdminLayout } from "./adminShared";
+import { AdminLayout, NomeComAlerta } from "./adminShared";
 
 const formularioVazio: SalvarAdminNoticiaPayload = {
   titulo: "",
@@ -216,7 +218,7 @@ export function AdminNoticias() {
               <tbody>
                 {noticias.map((noticia) => (
                   <tr key={noticia.id}>
-                    <td>
+                    <td data-label="Publicação">
                       <div className={styles.noticiaPrincipal}>
                         {noticia.imagem ? (
                           <Image
@@ -231,17 +233,25 @@ export function AdminNoticias() {
                           </span>
                         )}
                         <div>
-                          <strong>{noticia.titulo}</strong>
+                          <NomeComAlerta
+                            nome={noticia.titulo}
+                            tom="amarelo"
+                            motivo={
+                              !noticia.publicada
+                                ? "Notícia em rascunho (não visível na página inicial)."
+                                : null
+                            }
+                          />
                           <small>{noticia.resumo}</small>
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Categoria">
                       <span className={styles.categoria}>
-                        {noticia.categoria}
+                        {nomeCategoriaNoticia(noticia.categoria)}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span
                         className={
                           noticia.publicada
@@ -252,7 +262,7 @@ export function AdminNoticias() {
                         {noticia.publicada ? "Publicada" : "Rascunho"}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Ações">
                       <nav className={sharedStyles.rowActions}>
                         <button onClick={() => editar(noticia)} title="Editar">
                           <Pencil />
@@ -324,7 +334,7 @@ export function AdminNoticias() {
                     "AVISO",
                   ].map((categoria) => ({
                     valor: categoria,
-                    label: categoria,
+                    label: nomeCategoriaNoticia(categoria),
                   }))}
                 />
               </div>
@@ -409,14 +419,9 @@ export function AdminNoticias() {
                 </div>
               ))}
             </div>
-            <label className={styles.publicar}>
-              <input
-                type="checkbox"
-                checked={form.publicada}
-                onChange={(e) => atualizar("publicada", e.target.checked)}
-              />
-              <span>Publicar na página inicial</span>
-            </label>
+            <div className={styles.publicar}>
+              <SwitchToggle checked={form.publicada} onChange={(publicada) => atualizar("publicada", publicada)} label="Publicar na página inicial" />
+            </div>
             <button
               className={styles.salvar}
               disabled={salvando}

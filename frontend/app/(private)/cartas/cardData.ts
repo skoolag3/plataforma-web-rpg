@@ -175,7 +175,7 @@ export const FALLBACK_CARDS: Card[] = fallbackBase.map((card) => ({
   ...card,
   custo: obterValorVendaCarta(card.raridade),
   ...elementoVisual[card.elemento],
-  borda: bordaRaridade[card.raridade],
+  borda: bordaRaridade[card.raridade] ?? "#a78bfa",
 }));
 
 export function mapearCarta(carta: CartaColecao): Card {
@@ -183,7 +183,7 @@ export function mapearCarta(carta: CartaColecao): Card {
     ...carta,
     ...elementoVisual[carta.elemento],
     copias: String(carta.quantidade),
-    borda: bordaRaridade[carta.raridade],
+    borda: bordaRaridade[carta.raridade] ?? "#a78bfa",
   };
 }
 

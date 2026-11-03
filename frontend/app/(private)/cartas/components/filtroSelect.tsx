@@ -3,6 +3,7 @@ import { Gem, Shapes, Shield, SlidersHorizontal } from "lucide-react";
 
 import { SelectPadrao } from "../../../components/ui/controlesFormulario";
 import { obterElementoCarta } from "../../../components/elementosCarta";
+import { obterRaridadeJogo, useRaridadesJogo } from "../../../components/raridadesJogo";
 
 type FiltroSelectProps = {
   rotulo: string;
@@ -49,6 +50,7 @@ export function FiltroSelect({
   opcoes,
   aoAlterar,
 }: FiltroSelectProps) {
+  const raridades = useRaridadesJogo();
   return (
     <SelectPadrao
       rotulo={rotulo}
@@ -57,9 +59,9 @@ export function FiltroSelect({
       aoAlterar={aoAlterar}
       opcoes={opcoes.map((opcao) => ({
         valor: opcao,
-        label: opcao,
+        label: rotulo === "Raridade" ? obterRaridadeJogo(raridades, opcao)?.nome ?? opcao : opcao,
         icone: <IconeFiltro rotulo={rotulo} valor={opcao} />,
-        cor: obterCorFiltro(rotulo, opcao),
+        cor: rotulo === "Raridade" ? obterRaridadeJogo(raridades, opcao)?.cor : obterCorFiltro(rotulo, opcao),
       }))}
     />
   );

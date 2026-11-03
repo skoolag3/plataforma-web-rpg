@@ -41,3 +41,7 @@ export type ElementoCarta = (typeof elementosCarta)[number]["value"];
 export function obterElementoCarta(value: string) {
   return elementosCarta.find((elemento) => elemento.value === value);
 }
+
+export function nomeElementoCarta(value: string) {
+  return obterElementoCarta(value)?.label ?? value;
+}

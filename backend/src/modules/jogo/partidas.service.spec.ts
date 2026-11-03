@@ -1,5 +1,47 @@
-import { PrismaService } from '../../prisma/prisma.service';
-import { PartidasService } from './partidas.service';
+import { PrismaService } from '../../database/prisma.service';
+import { PartidasService, filtrarCartasPorForca, selecionarCartasAdversario } from './partidas.service';
+
+describe('equilibrio das partidas comuns', () => {
+  const carta = (id: number, hp_base: number, dano_base: number) => ({
+    id: String(id), hp_base, dano_base, defesa_base: 10,
+  });
+
+  it('sorteia adversarios proximos da forca media do deck', () => {
+    const deck = [carta(1, 100, 20), carta(2, 120, 22)];
+    const candidatas = [carta(3, 40, 5), carta(4, 100, 20), carta(5, 110, 21), carta(6, 900, 150)];
+    expect(filtrarCartasPorForca(candidatas, deck).map((item) => item.id).sort()).toEqual(['4', '5']);
+  });
+
+  it('usa as mais proximas quando o catalogo nao tem cartas na faixa', () => {
+    const deck = [carta(1, 200, 40)];
+    const candidatas = [carta(2, 10, 1), carta(3, 800, 100)];
+    expect(filtrarCartasPorForca(candidatas, deck)).toHaveLength(2);
+  });
+});
+
+describe('cartas adversárias da campanha', () => {
+  const cartas = ['a', 'b', 'c', 'd', 'e'].map((id) => ({ id }));
+
+  it('respeita a quantidade por caminho no modo aleatório', () => {
+    const resultado = selecionarCartasAdversario(cartas, 6, { quantidadeCartas: 2, modoCartas: 'ALEATORIO' });
+    expect(resultado).toHaveLength(2);
+    expect(resultado.every((carta) => cartas.includes(carta))).toBe(true);
+  });
+
+  it('usa a seleção manual fixa na ordem configurada', () => {
+    expect(selecionarCartasAdversario(cartas, 6, { quantidadeCartas: 2, modoCartas: 'MANUAL', cartasAdversario: ['d', 'b'], mixed: false }).map((carta) => carta.id)).toEqual(['d', 'b']);
+  });
+
+  it('mixed sorteia somente do conjunto manual', () => {
+    const resultado = selecionarCartasAdversario(cartas, 6, { quantidadeCartas: 2, modoCartas: 'MANUAL', cartasAdversario: ['a', 'c', 'e'], mixed: true });
+    expect(resultado).toHaveLength(2);
+    expect(resultado.every((carta) => ['a', 'c', 'e'].includes(carta.id))).toBe(true);
+  });
+
+  it('recusa seleção manual insuficiente', () => {
+    expect(() => selecionarCartasAdversario(cartas, 6, { quantidadeCartas: 3, modoCartas: 'MANUAL', cartasAdversario: ['a'], mixed: true })).toThrow();
+  });
+});
 
 describe('PartidasService - ranking', () => {
   it('exige e-mail verificado e não inclui jogador sem pontos', async () => {
@@ -42,7 +84,15 @@ describe('PartidasService - ranking', () => {
             nome: 'Gabriel',
             nivel: 1,
             pontos_experiencia: 10,
-            perfil: { avatar_url: null, mostrar_no_ranking: true },
+            perfil: {
+              avatar_url: null,
+              mostrar_no_ranking: true,
+              molduraSelecionada: null,
+              cartaMolduraSelecionada: {
+                moldura: 'https://exemplo.com/moldura.png',
+                config_visual: null,
+              },
+            },
           },
         ]),
       },
@@ -69,6 +119,8 @@ describe('PartidasService - ranking', () => {
           id: 'usuario-1',
           pontos: 10,
           partidas: 1,
+          molduraClasse: 'molduraCarta',
+          molduraUrl: 'https://exemplo.com/moldura.png',
         }),
       ],
     });

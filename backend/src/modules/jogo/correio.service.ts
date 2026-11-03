@@ -69,6 +69,8 @@ export class CorreioService {
       }),
       this.prisma.correioLeitura.findMany({
         where: { id_usuario: idUsuario },
+        orderBy: { lido_em: 'desc' },
+        take: 200,
         select: { chave: true },
       }),
     ]);

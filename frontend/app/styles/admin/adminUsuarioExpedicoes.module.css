@@ -1,20 +1,83 @@
 .painel { padding: 1.1rem 1.25rem 1.3rem; }
-.painel header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
-.painel header > span { display: flex; align-items: center; gap: .7rem; }
-.painel header svg { width: 1.2rem; color: #9d7aff; }
-.painel header div { display: grid; gap: .15rem; }
-.painel header small, .lista small { color: #9b9aac; }
-.painel header strong { color: #f4f1ff; }
-.painel header b { color: #bcb4d8; font-size: .8rem; }
-.lista { display: grid; gap: .55rem; }
-.lista article { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; gap: 1rem; padding: .75rem .8rem; border: 1px solid rgba(255,255,255,.08); border-radius: .7rem; background: rgba(255,255,255,.025); }
-.lista article > div { display: grid; gap: .15rem; min-width: 0; }
-.lista article strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #f4f1ff; }
-.lista article > span { padding: .25rem .5rem; border-radius: 999px; background: rgba(157,122,255,.15); color: #c7b6ff; font-size: .75rem; white-space: nowrap; }
-.lista article > span[data-status="CONCLUIDA"] { color: #8ee0b0; background: rgba(74,190,125,.12); }
-.lista article > span[data-status="FALHOU"], .lista article > span[data-status="ABANDONADA"] { color: #ffaaa8; background: rgba(232,93,93,.12); }
-.lista article b { display: inline-flex; align-items: center; gap: .25rem; color: #f5cf6a; font-size: .8rem; }
-.lista article b svg { width: .9rem; }
-.mensagem, .erro, .vazio { padding: 1.5rem 0; color: #aaa5b9; }
+.topo { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.topo > span { display: flex; align-items: center; gap: .7rem; }
+.topo > span > span { display: grid; gap: .15rem; }
+.topo svg { width: 1.2rem; color: #9d7aff; }
+.topo small, .identidade small, .linhaLuta small { color: #9b9aac; }
+.topo strong { color: #f4f1ff; }
+.topo b { color: #bcb4d8; font-size: .8rem; white-space: nowrap; }
+.lista, .listaLutas { display: grid; gap: .55rem; }
+.expedicao { overflow: hidden; border: 1px solid rgba(255,255,255,.09); border-radius: .7rem; background: rgba(255,255,255,.025); }
+.linhaExpedicao, .linhaLuta { display: grid; width: 100%; align-items: center; gap: 1rem; border: 0; background: transparent; color: #f4f1ff; cursor: pointer; font: inherit; text-align: left; }
+.linhaExpedicao { grid-template-columns: minmax(0,1fr) auto auto auto auto; min-height: 4.35rem; padding: .75rem .8rem; }
+.linhaExpedicao:hover, .linhaExpedicao[aria-expanded="true"] { background: rgba(139,92,246,.09); }
+.linhaExpedicao:focus-visible, .linhaLuta:focus-visible, .paginacao button:focus-visible { outline: 2px solid #bef264; outline-offset: -3px; }
+.identidade, .linhaLuta > span:first-child { display: grid; gap: .15rem; min-width: 0; }
+.identidade strong, .linhaLuta strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status { padding: .25rem .5rem; border-radius: 999px; background: rgba(157,122,255,.15); color: #c7b6ff; font-size: .75rem; white-space: nowrap; }
+.status[data-status="CONCLUIDA"], .status[data-status="VITORIA"] { color: #8ee0b0; background: rgba(74,190,125,.12); }
+.status[data-status="FALHOU"], .status[data-status="ABANDONADA"], .status[data-status="DERROTA"] { color: #ffaaa8; background: rgba(232,93,93,.12); }
+.linhaExpedicao > small { color: #a8a4b5; white-space: nowrap; }
+.linhaExpedicao b, .linhaLuta b { display: inline-flex; align-items: center; gap: .25rem; color: #f5cf6a; font-size: .8rem; white-space: nowrap; }
+.linhaExpedicao b svg, .linhaLuta b svg { width: .9rem; height: .9rem; }
+.seta { width: 1rem; height: 1rem; color: #9789b7; transition: transform .18s ease; }
+button[aria-expanded="true"] > .seta { transform: rotate(180deg); }
+.detalhesExpedicao { border-top: 1px solid rgba(157,122,255,.16); background: rgba(4,7,19,.42); padding: .85rem; }
+.detalhesExpedicao h4 { display: flex; align-items: center; gap: .45rem; margin: 0 0 .7rem; color: #d8cbff; font-size: .78rem; }
+.detalhesExpedicao h4 svg { width: 1rem; height: 1rem; }
+.detalhesExpedicao h4 span { border-radius: 999px; background: rgba(157,122,255,.16); padding: .1rem .4rem; }
+.luta { overflow: hidden; border: 1px solid rgba(148,163,184,.14); border-radius: .55rem; background: rgba(14,18,32,.9); }
+.linhaLuta { grid-template-columns: minmax(0,1fr) auto auto auto; min-height: 3.7rem; padding: .6rem .75rem; }
+.linhaLuta:hover, .linhaLuta[data-ativo="true"] { background: rgba(139,92,246,.1); }
+.modalBackdrop { position: fixed; z-index: 120; inset: 0; display: grid; place-items: center; padding: 1rem; background: rgba(1,3,12,.82); backdrop-filter: blur(6px); }
+.modalChatlog { display: flex; flex-direction: column; width: min(100%, 42rem); max-height: min(90dvh, 46rem); min-height: min(24rem, 90dvh); overflow: hidden; border: 1px solid rgba(167,139,250,.38); border-radius: .9rem; background: #0c1020; box-shadow: 0 1.5rem 5rem rgba(0,0,0,.6); }
+.modalCabecalho { display: flex; align-items: center; gap: .75rem; padding: 1rem 1.1rem .8rem; }
+.modalIcone { display: grid; flex: none; width: 2.4rem; height: 2.4rem; place-items: center; border: 1px solid rgba(167,139,250,.27); border-radius: .65rem; background: rgba(139,92,246,.16); color: #c7b6ff; }
+.modalIcone svg { width: 1.15rem; height: 1.15rem; }
+.modalIdentidade { display: grid; gap: .15rem; min-width: 0; }
+.modalIdentidade strong { color: #f4f1ff; font-size: 1rem; }
+.modalIdentidade small { color: #aaa4bd; font-size: .72rem; }
+.modalFechar { display: grid; flex: none; width: 2.25rem; height: 2.25rem; place-items: center; margin-left: auto; border: 1px solid rgba(167,139,250,.28); border-radius: .55rem; background: rgba(139,92,246,.1); color: #d9c8ff; cursor: pointer; }
+.modalFechar:hover { background: rgba(139,92,246,.24); }
+.modalFechar:focus-visible { outline: 2px solid #bef264; outline-offset: 2px; }
+.modalFechar svg { width: 1rem; height: 1rem; }
+.modalResumo { display: flex; align-items: center; gap: .65rem; padding: 0 1.1rem .85rem; }
+.modalResumo b { display: inline-flex; align-items: center; gap: .25rem; color: #f5cf6a; font-size: .75rem; }
+.modalResumo b svg { width: .85rem; height: .85rem; }
+.chatlog { flex: 1; min-height: 0; overflow-y: auto; border-top: 1px solid rgba(148,163,184,.14); padding: 1rem 1.1rem; scrollbar-width: thin; scrollbar-color: rgba(167,139,250,.6) transparent; }
+.chatlog::-webkit-scrollbar { width: .5rem; }
+.chatlog::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(167,139,250,.6); }
+.turno { display: grid; gap: .4rem; margin: 0 0 .8rem; }
+.turno h5 { margin: 0; color: #9f91bd; font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; }
+.evento { width: fit-content; max-width: min(100%, 36rem); border: 1px solid rgba(148,163,184,.14); border-radius: .55rem .55rem .55rem .1rem; background: #171b2d; padding: .42rem .65rem; }
+.evento[data-origem="BOT"] { margin-left: auto; border-color: rgba(239,100,100,.2); border-radius: .55rem .55rem .1rem .55rem; background: #261922; }
+.evento[data-origem="SISTEMA"] { margin-inline: auto; border-radius: .55rem; background: #17142a; }
+.evento small { color: #bba5f5; font-size: .6rem; font-weight: 800; text-transform: uppercase; }
+.evento p { margin: .2rem 0 0; color: #e1ddec; font-size: .75rem; line-height: 1.4; overflow-wrap: anywhere; }
+.mensagem, .erro, .vazio, .vazioLutas { margin: 0; padding: 1rem 0; color: #aaa5b9; font-size: .78rem; }
 .erro { color: #ffaaa8; }
-@media (max-width: 650px) { .lista article { grid-template-columns: 1fr auto; } .lista article > small { text-align: right; } }
+.paginacao { display: flex; align-items: center; justify-content: center; gap: .85rem; margin-top: 1rem; color: #a9a1c0; font-size: .75rem; }
+.paginacao button { display: inline-flex; align-items: center; gap: .25rem; min-height: 2rem; border: 1px solid rgba(157,122,255,.25); border-radius: .5rem; background: rgba(157,122,255,.1); color: #ded4ff; cursor: pointer; padding: 0 .55rem; font: inherit; }
+.paginacao button:hover:not(:disabled) { background: rgba(157,122,255,.2); }
+.paginacao button:disabled { opacity: .4; cursor: not-allowed; }
+.paginacao button svg { width: .85rem; height: .85rem; }
+@media (max-width: 650px) {
+  .painel { padding: .85rem .7rem 1rem; }
+  .linhaExpedicao { grid-template-columns: minmax(0,1fr) auto; gap: .4rem .7rem; }
+  .linhaExpedicao .identidade { grid-column: 1; grid-row: 1; }
+  .linhaExpedicao .status { grid-column: 1; grid-row: 2; justify-self: start; }
+  .linhaExpedicao > small { grid-column: 1; grid-row: 3; }
+  .linhaExpedicao > b { grid-column: 2; grid-row: 2; }
+  .linhaExpedicao > .seta { grid-column: 2; grid-row: 1; }
+  .linhaLuta { grid-template-columns: minmax(0,1fr) auto; gap: .4rem .6rem; }
+  .linhaLuta > span:first-child { grid-column: 1; grid-row: 1; }
+  .linhaLuta > .status { grid-column: 1; grid-row: 2; justify-self: start; }
+  .linhaLuta > .seta { grid-column: 2; grid-row: 1; }
+  .linhaLuta > b { grid-column: 2; grid-row: 2; }
+  .paginacao { gap: .35rem; }
+  .modalBackdrop { padding: .45rem; }
+  .modalChatlog { max-height: calc(100dvh - .9rem); min-height: min(24rem, calc(100dvh - .9rem)); }
+  .modalCabecalho { padding: .8rem; }
+  .modalResumo { padding: 0 .8rem .7rem; }
+  .chatlog { padding: .8rem; }
+}

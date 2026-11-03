@@ -1,0 +1,135 @@
+.secoes { display: grid; gap: .85rem; }
+.intro h3 { margin: 0; color: #f4f1ff; font-size: 1rem; }
+.intro p, .ajudaBoss { margin: .3rem 0 0; color: #91a0b5; font-size: .72rem; }
+.bloco { border: 1px solid rgba(167, 139, 250, .24); border-radius: .7rem; background: #0a1020; overflow: hidden; }
+.botaoBloco { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 1rem; border: 0; background: transparent; color: #f4f1ff; cursor: pointer; padding: 1rem; font: inherit; text-align: left; }
+.botaoBloco:hover { background: rgba(109, 40, 217, .14); }
+.botaoBloco > span { display: grid; gap: .18rem; }
+.botaoBloco small, .bossFinal span { color: #bca8f5; font-size: .62rem; font-weight: 800; text-transform: uppercase; }
+.botaoBloco strong, .bossFinal strong { font-size: .86rem; }
+.botaoBloco em, .bossFinal small { color: #91a0b5; font-size: .66rem; font-style: normal; }
+.botaoBloco svg { width: 1rem; height: 1rem; color: #bca8f5; }
+.modalBackdrop { position: fixed; z-index: 120; inset: 0; display: grid; place-items: center; background: rgba(1, 4, 12, .78); padding: 1rem; backdrop-filter: blur(4px); }
+.modalSecao { display: flex; width: min(100%, 68rem); height: min(52rem, calc(100dvh - 2rem)); flex-direction: column; overflow: hidden; border: 1px solid rgba(167, 139, 250, .4); border-radius: .85rem; background: #080d19; box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, .55); }
+.modalTopo, .modalRodape { display: flex; flex: none; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 1rem; }
+.modalTopo { border-bottom: 1px solid rgba(148, 163, 184, .16); }
+.modalTopo small { color: #bca8f5; font-size: .63rem; font-weight: 800; text-transform: uppercase; }
+.modalTopo h3 { margin: .18rem 0 0; color: #f4f1ff; font-size: 1.05rem; }
+.modalTopo button { display: grid; width: 2rem; height: 2rem; flex: none; place-items: center; border: 1px solid rgba(148, 163, 184, .25); border-radius: .45rem; background: transparent; color: #c4b5fd; cursor: pointer; }
+.modalTopo button svg { width: 1rem; height: 1rem; }
+.modalConteudo { display: grid; align-content: start; gap: .85rem; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 1rem; scrollbar-color: #7c3aed #101626; }
+.perdaSecao { display: grid; grid-template-columns: 1fr 6rem; align-items: center; gap: .35rem .8rem; border: 1px solid rgba(167, 139, 250, .28); border-radius: .55rem; background: #111329; color: #f4f1ff; padding: .8rem; font-size: .75rem; font-weight: 750; }
+.perdaSecao input { width: 100%; min-height: 2.25rem; border: 1px solid #35415a; border-radius: .4rem; background: #080d19; color: #fff; padding: .35rem .5rem; font: inherit; }
+.perdaSecao small { grid-column: 1 / -1; color: #aab7ca; font-size: .66rem; font-weight: 400; line-height: 1.4; }
+.modalRodape { border-top: 1px solid rgba(148, 163, 184, .16); }
+.modalRodape span { color: #91a0b5; font-size: .66rem; }
+.modalRodape button { min-height: 2.3rem; border: 1px solid #8b5cf6; border-radius: .45rem; background: #6d28d9; color: #fff; cursor: pointer; padding: .35rem .85rem; font: inherit; font-size: .7rem; font-weight: 800; }
+.acoesBloco { display: flex; align-items: stretch; flex-wrap: wrap; gap: .6rem; }
+.acaoSecundaria { display: inline-flex; min-width: 12rem; min-height: 2.55rem; align-items: center; justify-content: center; gap: .45rem; border: 1px solid rgba(167, 139, 250, .4); border-radius: .45rem; background: rgba(109, 40, 217, .08); color: #d8c9ff; cursor: pointer; padding: .55rem .8rem; font: inherit; font-size: .74rem; font-weight: 750; line-height: 1.2; }
+.acaoSecundaria:hover { border-color: #a98ae8; background: rgba(109, 40, 217, .17); }
+.acaoSecundaria svg { width: 1rem; height: 1rem; flex: none; }
+.bossFinal { display: grid; gap: .2rem; border: 1px solid rgba(167, 139, 250, .24); border-left: 3px solid #8b5cf6; border-radius: .6rem; background: #0a1020; padding: .85rem; }
+.secao { border: 1px solid rgba(167, 139, 250, .25); border-radius: .7rem; background: #0a1020; padding: .9rem; }
+.secao header, .caminhoTopo { display: flex; justify-content: space-between; align-items: center; gap: .7rem; }
+.secao header span { color: #bca8f5; font-size: .65rem; font-weight: 800; text-transform: uppercase; }
+.secao h4 { margin: .15rem 0 0; color: #f4f1ff; font-size: .84rem; }
+.caminhos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: .6rem; margin-top: .8rem; }
+.caminho { display: grid; gap: .55rem; border: 1px solid rgba(148, 163, 184, .17); border-radius: .55rem; background: #050a14; padding: .7rem; }
+.caminho strong { color: #f4f1ff; font-size: .72rem; }
+.quantidade { display: flex; align-items: center; gap: .6rem; margin-top: .8rem; color: #aebbd0; font-size: .7rem; }
+.quantidade select { min-height: 2rem; border: 1px solid #263147; border-radius: .4rem; background: #080d19; color: #f4f1ff; padding: .2rem .5rem; font: inherit; }
+.caminho label { display: grid; gap: .3rem; color: #aebbd0; font-size: .66rem; }
+.caminho select, .caminho input[type="number"], .caminho input[type="text"] { width: 100%; min-height: 2rem; border: 1px solid #263147; border-radius: .4rem; background: #080d19; color: #f4f1ff; padding: .3rem .5rem; font: inherit; }
+.remover, .adicionar, .adicionarSecao { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; border: 1px solid rgba(167, 139, 250, .4); border-radius: .45rem; background: rgba(109, 40, 217, .14); color: #d8c9ff; cursor: pointer; padding: .45rem .6rem; font: inherit; font-size: .68rem; font-weight: 750; }
+.remover { border-color: transparent; background: transparent; padding: .2rem; }
+.remover svg, .adicionar svg, .adicionarSecao svg { width: .9rem; height: .9rem; }
+.adicionar { min-width: 12rem; min-height: 2.55rem; padding: .55rem .8rem; font-size: .74rem; line-height: 1.2; }
+.adicionar:hover { border-color: #a98ae8; background: rgba(109, 40, 217, .24); }
+.adicionarSecao { justify-self: start; }
+.cartas { color: #bca8f5; font-size: .66rem; }
+.cartas summary { cursor: pointer; }
+.listaCartas { display: grid; gap: .4rem; max-height: 9rem; overflow: auto; margin-top: .5rem; }
+.listaCartas label { display: flex; align-items: center; gap: .35rem; }
+.configuracaoCartas { display: grid; gap: .4rem; border: 1px solid rgba(167, 139, 250, .2); border-radius: .4rem; padding: .55rem; }
+.configuracaoCartas small, .ajudaCartas { color: #91a0b5; font-size: .63rem; }
+.configuracaoCartas .opcaoMixed { display: flex; align-items: center; gap: .35rem; color: #d8c9ff; }
+.remover:focus-visible, .adicionar:focus-visible, .adicionarSecao:focus-visible, .botaoBloco:focus-visible, .acaoSecundaria:focus-visible, .modalTopo button:focus-visible, .modalRodape button:focus-visible, .cartas summary:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 2px; }
+.modalTopo p { margin: .3rem 0 0; color: #aab7ca; font-size: .76rem; line-height: 1.45; }
+.modalConteudo { gap: 1rem; }
+.modalRodape button:disabled { border-color: #394253; background: #252c3a; color: #9da8b9; cursor: not-allowed; }
+.avisoRodape { color: #f6c97e !important; }
+.secao { padding: 1rem; }
+.cabecalhoEtapa { align-items: flex-start !important; }
+.tituloEtapa { display: flex; align-items: center; gap: .75rem; }
+.tituloEtapa h4 { font-size: 1rem; }
+.tituloEtapa p { margin: .3rem 0 0; max-width: 42rem; color: #aab7ca; font-size: .75rem; line-height: 1.45; }
+.numeroEtapa { display: grid; width: 2.2rem; height: 2.2rem; flex: none; place-items: center; border: 1px solid #7952ba; border-radius: .55rem; background: #211637; color: #e4d5ff !important; font-size: .9rem !important; }
+.controlesEtapa { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem 1.2rem; margin-top: 1rem; }
+.quantidade { margin-top: 0; font-size: .76rem; font-weight: 650; }
+.quantidade > svg, .ordemAleatoria svg { width: .95rem; height: .95rem; color: #bca8f5; }
+.quantidade select { min-width: 3.8rem; font-size: .76rem; }
+.opcoesQuantidade { display: inline-flex; gap: .2rem; border: 1px solid #35415a; border-radius: .45rem; background: #070c17; padding: .2rem; }
+.opcoesQuantidade button { min-width: 2rem; min-height: 1.8rem; border: 0; border-radius: .3rem; background: transparent; color: #aebbd0; cursor: pointer; font: inherit; font-size: .73rem; font-weight: 800; }
+.opcoesQuantidade button[aria-pressed="true"] { background: #6d3ab4; color: #fff; }
+.opcoesQuantidade button:hover:not([aria-pressed="true"]) { background: #202b42; color: #fff; }
+.opcoesQuantidade button:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 2px; }
+.ordemAleatoria { display: inline-flex; align-items: center; gap: .4rem; color: #aab7ca; font-size: .72rem; }
+.caminhos { gap: .8rem; margin-top: 1rem; align-items: start; }
+.caminho { --cor-caminho: #aab7ca; --fundo-caminho: rgba(170, 183, 202, .08); align-content: start; gap: .85rem; border-color: rgba(148, 163, 184, .25); border-top: 3px solid var(--cor-caminho); padding: .9rem; }
+.dificuldadeFACIL { --cor-caminho: #75d4a9; --fundo-caminho: rgba(76, 175, 128, .13); }
+.dificuldadeMEDIA { --cor-caminho: #e8bd79; --fundo-caminho: rgba(222, 166, 76, .13); }
+.dificuldadeDIFICIL { --cor-caminho: #ed959c; --fundo-caminho: rgba(221, 101, 117, .13); }
+.caminhoTopo { align-items: flex-start; }
+.caminhoTopo > div { display: grid; gap: .2rem; }
+.caminhoTopo strong { color: var(--cor-caminho); font-size: 1rem; }
+.numeroEscolha { color: #acb9cb; font-size: .7rem; font-weight: 650; }
+.resumoCaminho { display: flex; flex-wrap: wrap; gap: .35rem; }
+.resumoCaminho span { display: inline-flex; align-items: center; gap: .3rem; border: 1px solid rgba(148, 163, 184, .18); border-radius: .35rem; background: var(--fundo-caminho); color: #e3e9f3; padding: .3rem .45rem; font-size: .68rem; font-variant-numeric: tabular-nums; }
+.resumoCaminho svg, .tituloConfiguracao svg, .ajudaCartas svg { width: .85rem; height: .85rem; flex: none; color: var(--cor-caminho); }
+.campoPrincipal { display: grid; gap: .7rem; }
+.caminho label { gap: .35rem; font-size: .74rem; font-weight: 600; }
+.caminho label small { color: #9facbf; font-size: .65rem; font-weight: 400; line-height: 1.4; }
+.caminho select, .caminho input[type="number"], .caminho input[type="text"] { min-height: 2.35rem; font-size: .75rem; }
+.caminho :is(select, input[type="number"], input[type="text"]):focus-visible { border-color: #a98ae8; outline: 2px solid rgba(169, 138, 232, .45); outline-offset: 1px; }
+.divisorCaminho { height: 1px; background: rgba(148, 163, 184, .18); }
+.tituloConfiguracao { display: flex; align-items: flex-start; gap: .5rem; }
+.tituloConfiguracao svg { width: 1rem; height: 1rem; margin-top: .1rem; }
+.tituloConfiguracao > div { display: grid; gap: .2rem; }
+.tituloConfiguracao strong { font-size: .8rem; }
+.tituloConfiguracao small { color: #9facbf; font-size: .65rem; line-height: 1.4; }
+.ajudaCartas { display: flex; gap: .4rem; align-items: flex-start; margin: -.2rem 0 0; font-size: .69rem; line-height: 1.45; }
+.configuracaoCartas { gap: .6rem; background: #0a1120; padding: .7rem; }
+.configuracaoCartas .opcaoMixed { align-items: flex-start; gap: .55rem; color: #e0d4ff; }
+.opcaoMixed input { margin: .1rem 0 0; accent-color: #9865e2; }
+.opcaoMixed span { display: grid; gap: .2rem; }
+.opcaoMixed strong { font-size: .72rem; }
+.opcaoMixed small { font-weight: 400; }
+.avisoSelecao, .selecaoCompleta { display: flex; align-items: center; gap: .35rem; margin: 0; font-size: .67rem; line-height: 1.45; }
+.avisoSelecao { color: #f6c97e; }
+.avisoSelecao svg { width: .85rem; height: .85rem; flex: none; }
+.selecaoCompleta { color: #94dab8; }
+.listaCartas { margin-top: 0; }
+.listaCartas label { font-weight: 400; }
+.listaCartas input { accent-color: #9865e2; }
+.seletorCartas { display: grid; gap: .5rem; }
+.seletorCartas input[type="search"] { width: 100%; min-height: 2.2rem; border: 1px solid #35415a; border-radius: .4rem; background: #080d19; color: #f4f1ff; padding: .35rem .55rem; font: inherit; font-size: .7rem; }
+.seletorCartas input[type="search"]:focus-visible { border-color: #a98ae8; outline: 2px solid rgba(169, 138, 232, .45); outline-offset: 1px; }
+.semCartas { color: #aebbd0; font-size: .68rem; line-height: 1.45; }
+.textoOpcional { border-top: 1px solid rgba(148, 163, 184, .18); padding-top: .75rem; }
+.textoOpcional summary { display: flex; align-items: center; gap: .5rem; color: #cdbcea; cursor: pointer; list-style: none; }
+.textoOpcional summary::-webkit-details-marker { display: none; }
+.textoOpcional summary > svg { width: .9rem; height: .9rem; flex: none; }
+.textoOpcional summary > svg:last-child { margin-left: auto; transition: transform .18s ease; }
+.textoOpcional[open] summary > svg:last-child { transform: rotate(180deg); }
+.textoOpcional summary span { display: grid; gap: .2rem; font-size: .71rem; font-weight: 650; }
+.textoOpcional summary small { color: #95a3b8; font-size: .62rem; font-weight: 400; }
+.textoOpcional > div { display: grid; gap: .6rem; margin-top: .75rem; }
+.textoOpcional summary:focus-visible, .opcaoMixed input:focus-visible, .listaCartas input:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 3px; }
+.botaoBloco, .remover, .adicionar, .adicionarSecao, .acaoSecundaria, .modalRodape button { transition: background-color .18s ease, border-color .18s ease, transform .18s ease; }
+.botaoBloco:active, .adicionar:active, .adicionarSecao:active, .acaoSecundaria:active, .modalRodape button:not(:disabled):active { transform: translateY(1px); }
+@media (max-width: 640px) {
+  .modalBackdrop { align-items: end; padding: 0; }
+  .modalSecao { height: 94dvh; border-radius: .85rem .85rem 0 0; }
+  .modalRodape span { display: none; }
+  .modalRodape button { width: 100%; }
+}

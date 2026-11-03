@@ -36,22 +36,23 @@ describe('Rotas críticas - Stripe e webhook', () => {
   });
 
   it('cria checkout somente para usuário autenticado', async () => {
+    const idPacote = '7d8259a0-7c8c-4d6f-88a0-36d526c55bc2';
     await request(app.getHttpServer())
-      .post('/loja/checkout/pacote-1')
+      .post(`/loja/checkout/${idPacote}`)
       .expect(401);
 
     lojaService.criarCheckout.mockResolvedValue({
       url: 'https://checkout.test',
     });
     await request(app.getHttpServer())
-      .post('/loja/checkout/pacote-1')
+      .post(`/loja/checkout/${idPacote}`)
       .set(comToken)
       .expect(201)
       .expect({ url: 'https://checkout.test' });
 
     expect(lojaService.criarCheckout).toHaveBeenCalledWith(
       usuarioTeste.id,
-      'pacote-1',
+      idPacote,
     );
   });
 
