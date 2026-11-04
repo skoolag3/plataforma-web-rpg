@@ -620,10 +620,12 @@
   }
 
   .btnFechar {
-    top: 0.75rem;
-    right: 0.75rem;
-    width: 2.25rem;
-    height: 2.25rem;
+    top: 0.45rem;
+    right: 0.45rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    z-index: 2;
+    touch-action: manipulation;
     background: rgba(255, 255, 255, 0.05);
   }
 
