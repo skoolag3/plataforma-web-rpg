@@ -1,4 +1,4 @@
-import { IsString, Length, Matches, MinLength } from 'class-validator';
+import { IsOptional, IsString, Length, Matches, MinLength } from 'class-validator';
 import {
   mensagemSenhaForte,
   senhaForteRegex,
@@ -8,8 +8,9 @@ import {
 
 export class AtualizarSenhaDto {
   @IsString()
+  @IsOptional()
   @MinLength(6)
-  senhaAtual!: string;
+  senhaAtual?: string;
 
   @IsString()
   @Length(TAMANHO_MINIMO_SENHA, TAMANHO_MAXIMO_SENHA)

@@ -128,6 +128,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       avatarUrl: perfil.avatar_url,
       bannerUrl: perfil.banner_url,
       googleVinculado: usuario.provedores.length > 0,
+      possuiSenha: usuario.senha_definida,
       googleConfigurado: Boolean(
         process.env.GOOGLE_CLIENT_ID &&
         process.env.GOOGLE_CLIENT_SECRET &&
@@ -336,9 +337,17 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
     }
 
     const usuario = await this.buscarUsuarioComSenha(idUsuario);
-    await this.validarSenha(usuario.senha_hash, dto.senhaAtual);
+    if (usuario.senha_definida) {
+      if (!dto.senhaAtual) {
+        throw new BadRequestException('Informe a senha atual.');
+      }
+      await this.validarSenha(usuario.senha_hash, dto.senhaAtual);
+    }
 
-    if (await bcrypt.compare(dto.novaSenha, usuario.senha_hash)) {
+    if (
+      usuario.senha_definida &&
+      (await bcrypt.compare(dto.novaSenha, usuario.senha_hash))
+    ) {
       throw new BadRequestException(
         'A nova senha deve ser diferente da senha atual.',
       );
@@ -348,6 +357,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       where: { id: idUsuario },
       data: {
         senha_hash: await bcrypt.hash(dto.novaSenha, 10),
+        senha_definida: true,
         bloqueado: false,
         tentativas_login: 0,
         token_redefinicao_senha: null,
@@ -355,7 +365,11 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
       },
     });
 
-    return { message: 'Senha atualizada com sucesso.' };
+    return {
+      message: usuario.senha_definida
+        ? 'Senha atualizada com sucesso.'
+        : 'Senha criada com sucesso.',
+    };
   }
 
   async atualizarPreferencias(
@@ -858,6 +872,7 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
           nome: true,
           email: true,
           senha_hash: true,
+          senha_definida: true,
         },
       })
       .catch(() => {

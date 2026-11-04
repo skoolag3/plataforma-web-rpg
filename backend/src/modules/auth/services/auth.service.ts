@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import type { Usuario } from '@prisma/client';
+import { Prisma, type Usuario } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { promises as dns } from 'dns';
@@ -69,18 +69,30 @@ export class AuthService {
 
     const tokenVerificacao = this.gerarTokenVerificacao();
     const senhaHash = await bcrypt.hash(data.senha, 10);
-    const usuario = await this.prisma.usuario.create({
-      data: {
-        nome: data.nome.trim(),
-        email,
-        senha_hash: senhaHash,
-        email_verificado: false,
-        token_verificacao_email: tokenVerificacao,
-        token_verificacao_expira_em: this.gerarExpiracaoToken(),
-        bloqueado: false,
-        tentativas_login: 0,
-      },
-    });
+    let usuario: Usuario;
+    try {
+      usuario = await this.prisma.usuario.create({
+        data: {
+          nome: data.nome.trim(),
+          email,
+          senha_hash: senhaHash,
+          senha_definida: true,
+          email_verificado: false,
+          token_verificacao_email: tokenVerificacao,
+          token_verificacao_expira_em: this.gerarExpiracaoToken(),
+          bloqueado: false,
+          tentativas_login: 0,
+        },
+      });
+    } catch (erro) {
+      if (
+        erro instanceof Prisma.PrismaClientKnownRequestError &&
+        erro.code === 'P2002'
+      ) {
+        return { message: mensagemVerificacaoPendente };
+      }
+      throw erro;
+    }
 
     await this.emailService.sendVerificationEmail({
       email: usuario.email,

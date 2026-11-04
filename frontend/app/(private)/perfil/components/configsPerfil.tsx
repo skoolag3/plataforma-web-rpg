@@ -78,12 +78,14 @@ export function ConfigsPerfil({
             </span>
             <span>
               <small>Senha</small>
-              <strong className={styles.senhaMascarada}>••••••••••••</strong>
+              <strong className={styles.senhaMascarada}>
+                {perfil.possuiSenha ? "••••••••••••" : "Não definida"}
+              </strong>
             </span>
             <button
               type="button"
               onClick={() => abrirModal("senha")}
-              aria-label="Alterar senha"
+              aria-label={perfil.possuiSenha ? "Alterar senha" : "Criar senha"}
             >
               <Pencil aria-hidden="true" />
             </button>
@@ -193,8 +195,12 @@ export function ConfigsPerfil({
 
       {modalAberto === "senha" ? (
         <ModalEdicao
-          titulo="Alterar senha"
-          descricao="Sua senha atual nunca será exibida."
+          titulo={perfil.possuiSenha ? "Alterar senha" : "Criar senha"}
+          descricao={
+            perfil.possuiSenha
+              ? "Sua senha atual nunca será exibida."
+              : "Crie uma senha para também entrar usando e-mail."
+          }
           aoFechar={() => setModalAberto(null)}
         >
           <form
@@ -234,24 +240,26 @@ export function ConfigsPerfil({
                 .finally(() => setSalvando(false));
             }}
           >
-            <label>
-              Senha atual
-              <span className={modalStyles.campoSenhaModal}>
-                <input
-                  type={mostrarSenhas ? "text" : "password"}
-                  name="senhaAtual"
-                  autoComplete="current-password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setMostrarSenhas((atual) => !atual)}
-                  aria-label={mostrarSenhas ? "Ocultar senha" : "Mostrar senha"}
-                >
-                  {mostrarSenhas ? <EyeOff /> : <Eye />}
-                </button>
-              </span>
-            </label>
+            {perfil.possuiSenha ? (
+              <label>
+                Senha atual
+                <span className={modalStyles.campoSenhaModal}>
+                  <input
+                    type={mostrarSenhas ? "text" : "password"}
+                    name="senhaAtual"
+                    autoComplete="current-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setMostrarSenhas((atual) => !atual)}
+                    aria-label={mostrarSenhas ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    {mostrarSenhas ? <EyeOff /> : <Eye />}
+                  </button>
+                </span>
+              </label>
+            ) : null}
             <label>
               Nova senha
               <span className={modalStyles.campoSenhaModal}>

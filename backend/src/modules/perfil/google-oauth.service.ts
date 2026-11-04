@@ -191,20 +191,28 @@ export class GoogleOAuthService {
                     randomBytes(32).toString('hex'),
                     10,
                   ),
+                  senha_definida: false,
                   bloqueado: false,
                   tentativas_login: 0,
                 }
               : {}),
           },
         })
-      : await this.prisma.usuario.create({
-          data: {
+      : await this.prisma.usuario.upsert({
+          where: { email },
+          create: {
             nome: nomeGoogle,
             email,
             senha_hash: await bcrypt.hash(randomBytes(32).toString('hex'), 10),
+            senha_definida: false,
             email_verificado: true,
             bloqueado: false,
             tentativas_login: 0,
+          },
+          update: {
+            email_verificado: true,
+            token_verificacao_email: null,
+            token_verificacao_expira_em: null,
           },
         });
 

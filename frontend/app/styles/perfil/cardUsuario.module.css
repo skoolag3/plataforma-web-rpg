@@ -480,6 +480,24 @@
 }
 
 @media (max-width: 650px) {
+  .listaMolduras button {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0.65rem;
+    min-width: 0;
+  }
+
+  .listaMolduras button strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+  }
+
+  .listaMolduras button small {
+    grid-column: 2;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+  }
+
   .identidadeUsuario {
     grid-template-columns: 5.25rem minmax(0, 1fr);
     align-items: center;

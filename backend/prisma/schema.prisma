@@ -11,6 +11,7 @@ model Usuario {
   nome                             String    @db.VarChar(100)
   email                            String    @unique @db.VarChar(255)
   senha_hash                       String    @db.VarChar(255)
+  senha_definida                   Boolean   @default(true)
   email_verificado                 Boolean   @default(false)
   token_verificacao_email          String?   @unique @db.VarChar(255)
   token_verificacao_expira_em      DateTime? @db.Timestamptz(0)

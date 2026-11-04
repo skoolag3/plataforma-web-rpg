@@ -19,6 +19,7 @@ export type PerfilConta = {
   avatarUrl?: string | null;
   bannerUrl?: string | null;
   googleVinculado: boolean;
+  possuiSenha: boolean;
   googleConfigurado: boolean;
   storageConfigurado: boolean;
   vitorias: number;
@@ -156,13 +157,17 @@ export function atualizarEmailApi(
 
 export function atualizarSenhaApi(
   token: string,
-  senhaAtual: string,
+  senhaAtual: string | undefined,
   novaSenha: string,
   confirmarSenha: string,
 ) {
   return requisicaoPerfil<RespostaMensagem>(token, "/perfil/senha", {
     method: "PATCH",
-    body: JSON.stringify({ senhaAtual, novaSenha, confirmarSenha }),
+    body: JSON.stringify({
+      ...(senhaAtual ? { senhaAtual } : {}),
+      novaSenha,
+      confirmarSenha,
+    }),
   });
 }
 

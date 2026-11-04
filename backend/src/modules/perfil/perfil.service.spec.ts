@@ -260,6 +260,48 @@ describe('PerfilService', () => {
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
+  it('permite que uma conta Google crie a primeira senha sem senha atual', async () => {
+    prisma.usuario.findFirstOrThrow.mockResolvedValue({
+      id: 'usuario-id',
+      nome: 'Jogador Google',
+      email: 'google@email.com',
+      senha_hash: await bcrypt.hash('senha-aleatoria-interna', 4),
+      senha_definida: false,
+    });
+    prisma.usuario.update.mockResolvedValue({});
+
+    const resposta = await service.atualizarSenha('usuario-id', {
+      novaSenha: 'NovaSenha1!',
+      confirmarSenha: 'NovaSenha1!',
+    });
+
+    expect(prisma.usuario.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'usuario-id' },
+        data: expect.objectContaining({ senha_definida: true }),
+      }),
+    );
+    expect(resposta.message).toBe('Senha criada com sucesso.');
+  });
+
+  it('continua exigindo a senha atual de quem já definiu uma senha', async () => {
+    prisma.usuario.findFirstOrThrow.mockResolvedValue({
+      id: 'usuario-id',
+      nome: 'Jogador',
+      email: 'jogador@email.com',
+      senha_hash: await bcrypt.hash('SenhaAtual1!', 4),
+      senha_definida: true,
+    });
+
+    await expect(
+      service.atualizarSenha('usuario-id', {
+        novaSenha: 'NovaSenha1!',
+        confirmarSenha: 'NovaSenha1!',
+      }),
+    ).rejects.toThrow('Informe a senha atual.');
+    expect(prisma.usuario.update).not.toHaveBeenCalled();
+  });
+
   it('rejeita token inválido de troca de e-mail', async () => {
     prisma.usuario.findUnique.mockResolvedValue(null);
 

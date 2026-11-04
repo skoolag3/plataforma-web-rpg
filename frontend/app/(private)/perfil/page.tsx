@@ -92,6 +92,7 @@ export default function PerfilPage() {
       novaSenha,
       confirmarSenha,
     );
+    setPerfil((atual) => (atual ? { ...atual, possuiSenha: true } : atual));
     return resposta.message;
   }
 
