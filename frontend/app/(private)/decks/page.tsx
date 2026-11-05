@@ -390,7 +390,7 @@ export default function DecksPage() {
       </header>
 
       <div className={`${styles.layout} ${inventarioNaLateral ? "" : styles.layoutSemLateral}`}>
-        <section className={styles.editor}>
+        <section className={styles.editor} data-guia="deck">
           <div className={styles.acoesEditor}>
             <button
               ref={btnMeusDecks}

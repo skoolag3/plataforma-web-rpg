@@ -312,6 +312,7 @@ function NovaExpedicao({
       <button
         type="button"
         className={styles.btnIniciar}
+        data-guia="expedicao"
         onClick={onIniciar}
         disabled={!idDeck || processando}
       >

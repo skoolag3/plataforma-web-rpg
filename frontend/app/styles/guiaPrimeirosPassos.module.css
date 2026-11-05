@@ -1,0 +1,34 @@
+.guia {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.destaque {
+  position: fixed;
+  border: 2px solid #bef264;
+  border-radius: 0.8rem;
+  box-shadow: 0 0 0 9999px rgba(4, 5, 12, 0.72), 0 0 1rem #bef264;
+  pointer-events: none;
+}
+
+.cartao {
+  position: fixed;
+  width: min(320px, calc(100vw - 32px));
+  padding: 1rem;
+  border: 1px solid rgba(190, 242, 100, 0.55);
+  border-radius: 1rem;
+  color: #f8fafc;
+  background: #151326;
+  box-shadow: 0 1.3rem 3rem rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+}
+
+.cartao small { color: #bef264; font-weight: 700; }
+.cartao h2 { margin: 0.5rem 0; font-size: 1.1rem; }
+.cartao p { margin: 0; color: #cbd5e1; font-size: 0.88rem; line-height: 1.5; }
+.acoes { display: flex; justify-content: space-between; gap: 0.7rem; margin-top: 1rem; }
+.acoes button { min-height: 44px; padding: 0.5rem 0.8rem; border: 1px solid #6d568f; border-radius: 0.65rem; color: #fff; background: transparent; cursor: pointer; }
+.acoes button:last-child { border-color: #8b5cf6; background: #6d28d9; font-weight: 700; }
+.acoes button:focus-visible { outline: 2px solid #bef264; outline-offset: 2px; }

@@ -284,7 +284,7 @@ export default function GachaPage() {
       </header>
 
       {estado === "selecao" && (
-        <section className={styles.selecao} aria-label="Seleção de banner">
+        <section className={styles.selecao} aria-label="Seleção de banner" data-guia="banner">
           {banners.length > 1 && (
             <nav className={styles.abas} aria-label="Banners disponíveis">
               {banners.map((banner) => (

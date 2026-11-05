@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { clearSession, getProfile, getToken } from "../lib/auth";
 import styles from "../styles/privateLayout.module.css";
 import { PrivateNavbar } from "../components/privateNavbar";
+import { GuiaPrimeirosPassos } from "../components/guiaPrimeirosPassos";
 import { RaridadesJogoProvider } from "../components/raridadesJogo";
 import { AbstractCubeIsometricLoader } from "../../components/ui/abstract-cube-isometric-loader";
 
@@ -44,6 +45,7 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
     <div className={styles.privateShell}>
       <PrivateNavbar />
       <RaridadesJogoProvider><div className={styles.privateContent}>{children}</div></RaridadesJogoProvider>
+      <GuiaPrimeirosPassos />
     </div>
   );
 }

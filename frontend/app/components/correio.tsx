@@ -165,6 +165,7 @@ export function Correio() {
     <div className={styles.raiz} ref={raizRef}>
       <button
         type="button"
+        data-guia="correio"
         className={styles.gatilho}
         aria-label={`Abrir correio${naoLidas ? `, ${naoLidas} não lidas` : ""}`}
         aria-expanded={aberto}
@@ -290,6 +291,7 @@ export function Correio() {
                     {conteudo}
                     <button
                       type="button"
+                      data-guia={item.chave.startsWith("semanal:") ? "recompensa" : undefined}
                       className={styles.btnReivindicar}
                       disabled={resgatando !== ""}
                       onClick={() => void reivindicar(item)}
