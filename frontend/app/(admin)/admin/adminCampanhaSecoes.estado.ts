@@ -3,16 +3,16 @@ import type { CaminhoCampanha, SecaoCampanha } from "../../lib/admin";
 const dificuldades = ["FACIL", "MEDIA", "DIFICIL"] as const;
 const ganhosIniciais = { FACIL: 20, MEDIA: 35, DIFICIL: 50 };
 
-export function novoCaminho(dificuldade: CaminhoCampanha["dificuldade"] = "MEDIA"): CaminhoCampanha {
-  return { dificuldade, recompensa: ganhosIniciais[dificuldade], cartas: [], quantidadeCartas: 3, modoCartas: "ALEATORIO", mixed: false };
+export function novoCaminho(dificuldade: CaminhoCampanha["dificuldade"] = "MEDIA", quantidadeCartas = 1): CaminhoCampanha {
+  return { dificuldade, recompensa: ganhosIniciais[dificuldade], cartas: [], quantidadeCartas, modoCartas: "ALEATORIO", mixed: false };
 }
 
-function novaEtapa(grupo: number): SecaoCampanha {
-  return { tipo: "BATALHA", grupo, caminhos: dificuldades.map(novoCaminho) };
+function novaEtapa(grupo: number, quantidadeCartas: number): SecaoCampanha {
+  return { tipo: "BATALHA", grupo, caminhos: dificuldades.map((dificuldade) => novoCaminho(dificuldade, quantidadeCartas)) };
 }
 
 export function secoesIniciais(): SecaoCampanha[] {
-  return [novaEtapa(1), novaEtapa(1), novaEtapa(2), { tipo: "BOSS" }];
+  return [novaEtapa(1, 1), novaEtapa(1, 2), novaEtapa(2, 3), { tipo: "BOSS" }];
 }
 
 export function grupoDaEtapa(secao: SecaoCampanha, indice: number) {
@@ -43,7 +43,7 @@ export function incluirEtapaNoGrupo(secoes: SecaoCampanha[], grupo: number): Sec
     });
   }
   if (secoes.length >= 8 || secoes.at(-1)?.tipo !== "BOSS") return secoes;
-  return [...secoes.slice(0, -1), novaEtapa(grupo), { tipo: "BOSS" }];
+  return [...secoes.slice(0, -1), novaEtapa(grupo, Math.min(secoes.length, 6)), { tipo: "BOSS" }];
 }
 
 export function separarUltimaEtapa(secoes: SecaoCampanha[], grupo: number): SecaoCampanha[] {
@@ -58,7 +58,7 @@ export function separarUltimaEtapa(secoes: SecaoCampanha[], grupo: number): Seca
 export function adicionarGrupo(secoes: SecaoCampanha[]) {
   const grupo = proximoGrupoDisponivel(secoes);
   if (!grupo || secoes.length >= 8 || secoes.at(-1)?.tipo !== "BOSS") return null;
-  return { grupo, secoes: [...secoes.slice(0, -1), novaEtapa(grupo), { tipo: "BOSS" } as const] };
+  return { grupo, secoes: [...secoes.slice(0, -1), novaEtapa(grupo, Math.min(secoes.length, 6)), { tipo: "BOSS" } as const] };
 }
 
 export function removerEtapa(secoes: SecaoCampanha[], indice: number): SecaoCampanha[] {

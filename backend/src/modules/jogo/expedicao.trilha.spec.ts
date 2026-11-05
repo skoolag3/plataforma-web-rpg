@@ -17,6 +17,22 @@ describe('trilha da expedição', () => {
     );
     expect(trilha.chefe.id).toBe('chefe-final');
     expect(trilha.chefe.dificuldade).toBe('CHEFE');
+    expect(trilha.etapas.map((etapa) => etapa.opcoes.map((opcao) => opcao.quantidadeCartas)))
+      .toEqual([[1, 1, 1], [2, 2, 2], [3, 3, 3]]);
+  });
+
+  it('reduz equipes automáticas antigas sem alterar escolhas manuais', () => {
+    const automatico = { dificuldade: 'FACIL' as const, recompensa: 20, cartas: [], quantidadeCartas: 3, modoCartas: 'ALEATORIO' as const };
+    const manual = { dificuldade: 'MEDIA' as const, recompensa: 35, cartas: ['a', 'b', 'c'], quantidadeCartas: 3, modoCartas: 'MANUAL' as const };
+    const trilha = gerarTrilhaExpedicao(42, undefined, undefined, [
+      { tipo: 'BATALHA', caminhos: [automatico, manual] },
+      { tipo: 'BATALHA', caminhos: [automatico] },
+      { tipo: 'BATALHA', caminhos: [automatico] },
+      { tipo: 'BOSS' },
+    ]);
+    expect(trilha.etapas.map((etapa) => etapa.opcoes.find((opcao) => opcao.modoCartas === 'ALEATORIO')?.quantidadeCartas))
+      .toEqual([1, 2, 3]);
+    expect(trilha.etapas[0].opcoes.find((opcao) => opcao.modoCartas === 'MANUAL')?.quantidadeCartas).toBe(3);
   });
 
   it('repete a mesma trilha quando a seed é igual', () => {

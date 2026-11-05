@@ -81,7 +81,10 @@ export function AdminCampanha() {
       bossPersonalidade: item.bossPersonalidade, bossProvocacao: item.bossProvocacao,
       bossPerguntas: item.bossPerguntas, bossCartas: item.bossCartas,
       secoes: item.secoes.map((secao, indice) => secao.tipo === "BATALHA"
-        ? { ...secao, caminhos: secao.caminhos.slice(0, 3), grupo: secao.grupo ?? (indice < 2 ? 1 : indice) }
+        ? { ...secao, caminhos: secao.caminhos.slice(0, 3).map((caminho) =>
+          (caminho.modoCartas ?? (caminho.cartas.length ? "MANUAL" : "ALEATORIO")) === "MANUAL" ? caminho : {
+            ...caminho, quantidadeCartas: Math.min(caminho.quantidadeCartas ?? indice + 1, indice + 1, 6),
+          }), grupo: secao.grupo ?? (indice < 2 ? 1 : indice) }
         : secao),
     } : {
       ...produtoInicial,

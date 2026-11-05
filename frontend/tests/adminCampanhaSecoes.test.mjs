@@ -32,6 +32,12 @@ test("separar e juntar uma etapa preserva todos os campos dos caminhos", () => {
   assert.equal(reunidas.at(-1).tipo, "BOSS");
 });
 
+test("as etapas iniciais aumentam de uma para três cartas inimigas", () => {
+  assert.deepEqual(secoesIniciais().slice(0, 3).map((secao) =>
+    secao.caminhos.map((caminho) => caminho.quantidadeCartas)),
+  [[1, 1, 1], [2, 2, 2], [3, 3, 3]]);
+});
+
 test("inserir, juntar e remover uma etapa conserva as outras", () => {
   const originais = secoesIniciais();
   originais[1].caminhos[2].titulo = "Caminho antigo";
