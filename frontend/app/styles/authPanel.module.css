@@ -370,43 +370,14 @@
   padding: 0.3rem 0;
 }
 
-.rotuloCheck input {
-  appearance: none;
-  display: grid;
-  width: 1.1rem;
-  height: 1.1rem;
-  flex: none;
-  place-items: center;
-  margin: 0;
-  border: 1px solid #77758e;
-  border-radius: 0.27rem;
-  background: #171724;
-  cursor: pointer;
-}
-
-.rotuloCheck input:checked {
-  border-color: #a78bfa;
-  background: #7c3aed;
-}
-
-.rotuloCheck input:checked::after {
-  width: 0.32rem;
-  height: 0.56rem;
-  border-right: 2px solid #fff;
-  border-bottom: 2px solid #fff;
-  content: "";
-  transform: translateY(-0.08rem) rotate(45deg);
-}
-
-.rotuloCheck input:focus-visible,
-.rotuloCheck button:focus-visible {
+.rotuloCheck > span > button:focus-visible {
   outline: 2px solid #bef264;
   outline-offset: 2px;
 }
 
 .rotuloCheck label { cursor: pointer; }
 
-.rotuloCheck button {
+.rotuloCheck > span > button {
   border: 0;
   background: none;
   color: #c4b5fd;

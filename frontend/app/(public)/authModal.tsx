@@ -37,6 +37,7 @@ import {
 import styles from "../styles/authPanel.module.css";
 import { AuthTabs } from "./authTabs";
 import { CadastroDocumentos, type DocumentoCadastro } from "./cadastroDocumentos";
+import { Checkbox } from "@/components/ui/checkbox-1";
 import { AbstractCubeIsometricLoader } from "../../components/ui/abstract-cube-isometric-loader";
 
 type TipoModal = "login" | "cadastro" | "forgot" | null;
@@ -429,11 +430,11 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
         <IndicadorSenha id="requisitos-senha-cadastro" senha={senha} />
 
         <div className={styles.rotuloCheck}>
-          <input
+          <Checkbox
             id="aceite-cadastro"
-            type="checkbox"
+            type="button"
             checked={aceitou}
-            onChange={(event) => setAceitou(event.target.checked)}
+            onCheckedChange={(valor) => setAceitou(valor === true)}
             aria-label="Aceito os Termos de Uso e a Privacidade"
           />
           <span>
