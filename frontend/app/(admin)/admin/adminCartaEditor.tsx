@@ -17,6 +17,7 @@ import {
   type UpdateAdminCartaPayload,
 } from "../../lib/admin";
 import { SelectPadrao } from "../../components/ui/controlesFormulario";
+import { notificarErro } from "../../components/notificacoesGlobais";
 import {
   normalizarConfigVisual,
   type ConfigVisualCarta,
@@ -247,7 +248,7 @@ export function CartaEditor({
     event.preventDefault();
     if (envioEmAndamento.current || salvando) return;
     if (!form.idClasse) {
-      setErroLocal("Selecione uma classe para a carta antes de salvar.");
+      notificarErro("Selecione uma classe para a carta antes de salvar.");
       return;
     }
     envioEmAndamento.current = true;
