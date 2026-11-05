@@ -362,17 +362,60 @@
 
 .rotuloCheck {
   display: flex;
-  gap: 0.55rem;
-  align-items: center;
+  gap: 0.7rem;
+  align-items: flex-start;
   color: #d4d4df;
   font-size: 0.9rem;
-  padding: 0;
+  line-height: 1.5;
+  padding: 0.45rem 0;
 }
 
 .rotuloCheck input {
-  width: 1.1rem;
-  height: 1.1rem;
-  accent-color: var(--corRoxo);
+  appearance: none;
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+  place-items: center;
+  margin: 0.05rem 0 0;
+  border: 1px solid rgba(167, 139, 250, 0.72);
+  border-radius: 0.38rem;
+  background: #11111e;
+  cursor: pointer;
+}
+
+.rotuloCheck input:checked {
+  border-color: #a78bfa;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.14);
+}
+
+.rotuloCheck input:checked::after {
+  content: "✓";
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.rotuloCheck input:focus-visible,
+.rotuloCheck button:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 2px;
+}
+
+.rotuloCheck label { cursor: pointer; }
+
+.rotuloCheck button {
+  border: 0;
+  background: none;
+  color: #c4b5fd;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+  text-decoration: underline;
+  text-decoration-color: rgba(196, 181, 253, 0.45);
+  text-underline-offset: 0.18rem;
 }
 
 .entrada:-webkit-autofill,
@@ -389,8 +432,6 @@
   background: #0b0b13;
   color: var(--corTexto);
 }
-
-.rotuloCheck strong { color: #c4b5fd; }
 
 .rodape {
   margin: 1.15rem 0 0;

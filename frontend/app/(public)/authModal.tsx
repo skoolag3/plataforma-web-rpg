@@ -36,6 +36,7 @@ import {
 } from "../lib/senha";
 import styles from "../styles/authPanel.module.css";
 import { AuthTabs } from "./authTabs";
+import { CadastroDocumentos, type DocumentoCadastro } from "./cadastroDocumentos";
 import { AbstractCubeIsometricLoader } from "../../components/ui/abstract-cube-isometric-loader";
 
 type TipoModal = "login" | "cadastro" | "forgot" | null;
@@ -288,6 +289,7 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [aceitou, setAceitou] = useState(false);
+  const [documentoAberto, setDocumentoAberto] = useState<DocumentoCadastro | null>(null);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
   const [carregando, setCarregando] = useState(false);
@@ -308,7 +310,7 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
     }
 
     if (!aceitou) {
-      setErro("Aceite os termos para criar sua conta.");
+      setErro("Aceite os Termos de Uso e a Privacidade para criar sua conta.");
       return;
     }
 
@@ -426,14 +428,22 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
 
         <IndicadorSenha id="requisitos-senha-cadastro" senha={senha} />
 
-        <label className={styles.rotuloCheck}>
+        <div className={styles.rotuloCheck}>
           <input
+            id="aceite-cadastro"
             type="checkbox"
             checked={aceitou}
             onChange={(event) => setAceitou(event.target.checked)}
+            aria-label="Aceito os Termos de Uso e a Privacidade"
           />
-          <span>Li e aceito os <strong>termos de uso</strong>.</span>
-        </label>
+          <span>
+            <label htmlFor="aceite-cadastro">Li e aceito os </label>
+            <button type="button" onClick={() => setDocumentoAberto("termos")}>Termos de Uso</button>
+            <span> e a </span>
+            <button type="button" onClick={() => setDocumentoAberto("privacidade")}>Privacidade</button>
+            <span>.</span>
+          </span>
+        </div>
 
         {erro ? <Alerta tom="erro">{erro}</Alerta> : null}
         {sucesso ? <Alerta tom="aviso">{sucesso}</Alerta> : null}
@@ -448,6 +458,12 @@ export function ModalCadastro({ aoFechar, aoTrocar }: PropsModal) {
         </button>
       </form>
 
+      {documentoAberto ? (
+        <CadastroDocumentos
+          documento={documentoAberto}
+          aoFechar={() => setDocumentoAberto(null)}
+        />
+      ) : null}
     </EstruturaModal>
   );
 }
