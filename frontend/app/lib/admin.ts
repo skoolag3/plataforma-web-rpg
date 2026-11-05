@@ -785,6 +785,13 @@ export function removerAdminCarta(
   );
 }
 
+const uploadsRecentes = new Map<string, UploadedAsset>();
+
+async function fingerprintArquivo(arquivo: File) {
+  const bytes = await crypto.subtle.digest("SHA-256", await arquivo.arrayBuffer());
+  return Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 export async function uploadCartaAssets(formData: FormData): Promise<UploadCartaAssetsResponse> {
   const resultado: UploadCartaAssetsResponse = { foto: null, fotoPerfil: null, moldura: null };
   const tipos = ["foto", "fotoPerfil", "moldura"] as const;
@@ -792,12 +799,16 @@ export async function uploadCartaAssets(formData: FormData): Promise<UploadCarta
   for (const tipo of tipos) {
     const arquivo = formData.get(tipo);
     if (!(arquivo instanceof File)) continue;
+    const fingerprint = await fingerprintArquivo(arquivo);
+    const chave = `${tipo}:${fingerprint}`;
+    const existente = uploadsRecentes.get(chave);
+    if (existente) { resultado[tipo] = existente; continue; }
     const assinatura = await adminRequest<{
       cloudName: string; apiKey: string; folder: string; publicId: string;
       timestamp: number; overwrite: boolean; signature: string;
     }>("/admin/uploads/cartas/assinatura", {
       method: "POST",
-      body: JSON.stringify({ tipo }),
+      body: JSON.stringify({ tipo, fingerprint }),
     });
     const dados = new FormData();
     dados.append("file", arquivo);
@@ -816,7 +827,7 @@ export async function uploadCartaAssets(formData: FormData): Promise<UploadCarta
     if (!resposta.ok || !dadosImagem?.secure_url) {
       throw new Error(dadosImagem?.error?.message ?? `Não foi possível enviar ${tipo} ao Cloudinary.`);
     }
-    resultado[tipo] = {
+    const enviado: UploadedAsset = {
       url: dadosImagem.secure_url,
       publicId: dadosImagem.public_id,
       bytes: dadosImagem.bytes,
@@ -824,6 +835,9 @@ export async function uploadCartaAssets(formData: FormData): Promise<UploadCarta
       height: dadosImagem.height,
       format: dadosImagem.format,
     };
+    resultado[tipo] = enviado;
+    if (uploadsRecentes.size >= 50) uploadsRecentes.delete(uploadsRecentes.keys().next().value!);
+    uploadsRecentes.set(chave, enviado);
   }
 
   return resultado;

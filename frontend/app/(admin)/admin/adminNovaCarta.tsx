@@ -4,6 +4,7 @@ import { ChevronDown, Power, RefreshCw, Save } from "lucide-react";
 import Link from "next/link";
 import {
   useEffect,
+  useRef,
   useState,
   type CSSProperties,
   type FormEvent,
@@ -91,6 +92,7 @@ export function NovaCarta() {
     null,
   );
   const [salvando, setSalvando] = useState(false);
+  const envioEmAndamento = useRef(false);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
     text: string;
@@ -169,6 +171,8 @@ export function NovaCarta() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (envioEmAndamento.current) return;
+    envioEmAndamento.current = true;
     setFeedback(null);
     setSalvando(true);
 
@@ -215,6 +219,7 @@ export function NovaCarta() {
             : "Não foi possível salvar a carta.",
       });
     } finally {
+      envioEmAndamento.current = false;
       setSalvando(false);
     }
   }

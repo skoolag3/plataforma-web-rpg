@@ -62,11 +62,14 @@ export class AdminUploadsController {
   constructor(private readonly cloudinaryService: AdminCloudinaryService) {}
 
   @Post('uploads/cartas/assinatura')
-  assinarUploadCarta(@Body('tipo') tipo: string) {
+  assinarUploadCarta(@Body('tipo') tipo: string, @Body('fingerprint') fingerprint: string) {
     if (!['foto', 'fotoPerfil', 'moldura'].includes(tipo)) {
       throw new BadRequestException('Tipo de imagem inválido.');
     }
-    return this.cloudinaryService.assinarUploadCarta(tipo as 'foto' | 'fotoPerfil' | 'moldura');
+    if (typeof fingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(fingerprint)) {
+      throw new BadRequestException('Identificador da imagem inválido.');
+    }
+    return this.cloudinaryService.assinarUploadCarta(tipo as 'foto' | 'fotoPerfil' | 'moldura', fingerprint);
   }
 
   @Post('uploads/cartas')

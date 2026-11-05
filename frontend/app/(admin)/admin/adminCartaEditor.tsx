@@ -3,6 +3,7 @@
 import { ChevronDown, Power, RefreshCw, Save, Trash2, X } from "lucide-react";
 import {
   useEffect,
+  useRef,
   useState,
   type CSSProperties,
   type FormEvent,
@@ -97,6 +98,8 @@ export function CartaEditor({
     null,
   );
   const [erroLocal, setErroLocal] = useState<string | null>(null);
+  const envioEmAndamento = useRef(false);
+  const [enviando, setEnviando] = useState(false);
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
   const [confirmacaoExclusao, setConfirmacaoExclusao] = useState("");
   const [impactoExclusao, setImpactoExclusao] = useState<number | null>(null);
@@ -225,6 +228,9 @@ export function CartaEditor({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (envioEmAndamento.current || salvando) return;
+    envioEmAndamento.current = true;
+    setEnviando(true);
     setErroLocal(null);
 
     try {
@@ -290,6 +296,9 @@ export function CartaEditor({
           ? error.message
           : "Não foi possível salvar a carta.",
       );
+    } finally {
+      envioEmAndamento.current = false;
+      setEnviando(false);
     }
   }
 
@@ -721,9 +730,9 @@ export function CartaEditor({
             <button
               type="submit"
               className={styles.primaryBtn}
-              disabled={salvando}
+              disabled={salvando || enviando}
             >
-              <Save aria-hidden="true" /> {salvando ? "Salvando..." : "Salvar"}
+              <Save aria-hidden="true" /> {salvando || enviando ? "Salvando..." : "Salvar"}
             </button>
           </div>
         </aside>

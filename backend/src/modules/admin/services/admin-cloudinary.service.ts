@@ -6,7 +6,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
-import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../../../database/prisma.service';
 
 type CartaAssetFiles = {
@@ -31,11 +30,11 @@ export class AdminCloudinaryService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  assinarUploadCarta(tipo: 'foto' | 'fotoPerfil' | 'moldura') {
+  assinarUploadCarta(tipo: 'foto' | 'fotoPerfil' | 'moldura', fingerprint: string) {
     this.configureCloudinary();
     const subpasta = { foto: 'fotos', fotoPerfil: 'perfil', moldura: 'molduras' }[tipo];
     const folder = this.getFolder(`cartas/${subpasta}`);
-    const publicId = randomUUID();
+    const publicId = fingerprint;
     const timestamp = Math.floor(Date.now() / 1000);
     const overwrite = false;
     const config = cloudinary.config();
@@ -111,10 +110,13 @@ export class AdminCloudinaryService {
     const publicId = this.publicIdDaCarta(imagemUrl);
     if (!publicId) return;
     try {
-      const referencias = await this.prisma.carta.count({
-        where: { OR: [{ foto: imagemUrl }, { foto_perfil: imagemUrl }, { moldura: imagemUrl }] },
-      });
-      if (referencias > 0) return;
+      const [cartas, avatares] = await Promise.all([
+        this.prisma.carta.count({
+          where: { OR: [{ foto: imagemUrl }, { foto_perfil: imagemUrl }, { moldura: imagemUrl }] },
+        }),
+        this.prisma.perfilUsuario.count({ where: { avatar_url: imagemUrl } }),
+      ]);
+      if (cartas > 0 || avatares > 0) return;
       this.configureCloudinary();
       await cloudinary.uploader.destroy(publicId, { invalidate: true });
     } catch (erro) {
