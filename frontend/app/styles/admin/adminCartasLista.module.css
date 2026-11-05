@@ -299,7 +299,7 @@
 
 .cartasListaPanel .cardThumb {
   width: 1.8rem;
-  height: 2.2rem;
+  height: 2.7rem;
 }
 
 .cartasListaPanel .elementoVisual {
@@ -594,7 +594,7 @@
 .cardThumb {
   display: inline-block;
   width: 2.25rem;
-  height: 2.75rem;
+  height: 3.375rem;
   border: 1px solid rgba(168, 85, 247, 0.55);
   border-radius: 0.3rem;
   display: inline-grid;
@@ -603,6 +603,7 @@
   background: linear-gradient(145deg, #24283a, #10131c);
   background-position: center;
   background-size: cover;
+  flex: none;
 }
 
 .cardThumb svg {

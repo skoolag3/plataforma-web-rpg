@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { CartaMontada } from "../../components/cartaMontada";
 import {
   atualizarAdminCarta,
   listarAdminCartas,
@@ -388,17 +389,13 @@ export function Cartas() {
                   <tr key={carta.id}>
                     <td data-label="Carta">
                       <span className={styles.cardCell}>
-                        <span
-                          className={styles.cardThumb}
-                          style={
-                            carta.foto
-                              ? { backgroundImage: `url("${carta.foto}")` }
-                              : undefined
-                          }
-                        >
-                          {!carta.foto ? (
-                            <ImagePlus aria-label="Sem imagem" />
-                          ) : null}
+                        <span className={styles.cardThumb}>
+                          <CartaMontada
+                            arte={carta.foto ?? undefined}
+                            moldura={carta.moldura ?? undefined}
+                            config={carta.configVisual ?? undefined}
+                            placeholder={<ImagePlus aria-label="Sem imagem" />}
+                          />
                         </span>
                         <NomeComAlerta
                           nome={carta.nome}

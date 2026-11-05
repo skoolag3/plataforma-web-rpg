@@ -41,6 +41,10 @@ const lista = combinarEstilos(sharedStyles, listaStyles);
 function formatarTempo(ms: number) {
   const segundos = Math.max(0, Math.floor(ms / 1000));
   const minutos = Math.floor(segundos / 60);
+  const horas = Math.floor(minutos / 60);
+  const dias = Math.floor(horas / 24);
+  if (dias > 0) return `${dias}d ${horas % 24}h`;
+  if (horas > 0) return `${horas}h ${minutos % 60}min`;
   return `${String(minutos).padStart(2, "0")}:${String(segundos % 60).padStart(2, "0")}`;
 }
 
