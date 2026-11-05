@@ -88,10 +88,12 @@ export function CartaEditor({
   );
 
   const [foto, setFoto] = useState<File | null>(null);
+  const [fotoInputVersao, setFotoInputVersao] = useState(0);
   const [fotoRemovida, setFotoRemovida] = useState(false);
   const [ajusteFotoPerfil, setAjusteFotoPerfil] = useState<AjusteFotoPerfil>(() => normalizarConfigVisual(carta.configVisual).fotoPerfil);
   const [fotoPerfilAlterada, setFotoPerfilAlterada] = useState(false);
   const [moldura, setMoldura] = useState<File | null>(null);
+  const [molduraInputVersao, setMolduraInputVersao] = useState(0);
   const [molduraRemovida, setMolduraRemovida] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [molduraPreviewUrl, setMolduraPreviewUrl] = useState<string | null>(
@@ -202,10 +204,12 @@ export function CartaEditor({
   function removerImagem(tipo: "foto" | "moldura") {
     if (tipo === "foto") {
       handleFotoChange([]);
+      setFotoInputVersao((versao) => versao + 1);
       setFotoRemovida(true);
       setFotoPerfilAlterada(false);
     } else {
       handleMolduraChange([]);
+      setMolduraInputVersao((versao) => versao + 1);
       setMolduraRemovida(true);
     }
   }
@@ -219,7 +223,9 @@ export function CartaEditor({
       link.href = arquivo;
       const extensao = resposta.headers.get("content-type")?.includes("jpeg") ? "jpg" : resposta.headers.get("content-type")?.includes("webp") ? "webp" : "png";
       link.download = `${nome}.${extensao}`;
+      document.body.appendChild(link);
       link.click();
+      link.remove();
       window.setTimeout(() => URL.revokeObjectURL(arquivo), 1000);
     } catch {
       setErroLocal("Não foi possível baixar a imagem. Tente novamente.");
@@ -277,8 +283,10 @@ export function CartaEditor({
         normalizarConfigVisual(atualizada.configVisual).fotoPerfil,
       );
       setFoto(null);
+      setFotoInputVersao((versao) => versao + 1);
       setFotoRemovida(false);
       setMoldura(null);
+      setMolduraInputVersao((versao) => versao + 1);
       setMolduraRemovida(false);
       setFotoPerfilAlterada(false);
       setPreviewUrl((current) => {
@@ -547,11 +555,11 @@ export function CartaEditor({
             </summary>
             <div className={styles.editorSectionContent}>
               <div className={styles.campoImagemEditor}>
-                <CampoArquivo rotulo="Foto/personagem" rotuloBotao={cardImage ? "Modificar imagem" : "Escolher imagem"} accept="image/*" ajuda="PNG, JPG ou WEBP, até 5 MB." onFilesSelected={handleFotoChange} />
+                <CampoArquivo key={fotoInputVersao} rotulo="Foto/personagem" rotuloBotao={cardImage ? "Modificar imagem" : "Escolher imagem"} accept="image/*" ajuda="PNG, JPG ou WEBP, até 5 MB." onFilesSelected={handleFotoChange} />
                 {cardImage ? <div className={styles.acoesImagem}><button type="button" onClick={() => void baixarImagem(cardImage, `${form.nome || "carta"}-foto`)}>Baixar imagem</button><button type="button" onClick={() => removerImagem("foto")}>Remover imagem</button></div> : null}
               </div>
               <div className={styles.campoImagemEditor}>
-                <CampoArquivo rotulo="Moldura" rotuloBotao={cardFrame ? "Modificar imagem" : "Escolher moldura"} accept="image/png,image/webp" ajuda="PNG ou WEBP transparente, até 5 MB. Ajuste o encaixe no compositor." onFilesSelected={handleMolduraChange} />
+                <CampoArquivo key={molduraInputVersao} rotulo="Moldura" rotuloBotao={cardFrame ? "Modificar imagem" : "Escolher moldura"} accept="image/png,image/webp" ajuda="PNG ou WEBP transparente, até 5 MB. Ajuste o encaixe no compositor." onFilesSelected={handleMolduraChange} />
                 {cardFrame ? <div className={styles.acoesImagem}><button type="button" onClick={() => void baixarImagem(cardFrame, `${form.nome || "carta"}-moldura`)}>Baixar imagem</button><button type="button" onClick={() => removerImagem("moldura")}>Remover imagem</button></div> : null}
               </div>
               <ControleVisualCarta

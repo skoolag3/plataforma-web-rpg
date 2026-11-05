@@ -36,7 +36,7 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co",
       "font-src 'self' data:",
-      `connect-src 'self' https://api.cloudinary.com${desenvolvimento ? " ws: wss:" : ""}`,
+      `connect-src 'self' https://api.cloudinary.com https://res.cloudinary.com${desenvolvimento ? " ws: wss:" : ""}`,
       ...(desenvolvimento ? [] : ["upgrade-insecure-requests"]),
     ].join("; ");
 

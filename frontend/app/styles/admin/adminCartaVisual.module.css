@@ -496,23 +496,34 @@
 .valorFaixa {
   display: inline-flex;
   align-items: center;
-  min-width: 3rem;
+  width: 3.1rem;
+  min-width: 3.1rem;
   border-radius: 0.35rem;
   background: rgba(2, 6, 23, 0.72);
   color: #e9d5ff;
-  padding: 0.18rem 0.35rem;
+  padding: 0.15rem 0.25rem;
   text-align: right;
 }
 
-.valorFaixa input {
-  width: 3.2rem;
+.controleFaixa .valorFaixa input {
+  width: 100%;
+  min-width: 0;
+  height: 1rem;
+  min-height: 0;
   border: 0;
   outline: 0;
   background: transparent;
   color: inherit;
   font: inherit;
+  padding: 0;
   text-align: right;
   appearance: textfield;
+}
+
+.controleFaixa .valorFaixa input:focus {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .valorFaixa input::-webkit-inner-spin-button,
