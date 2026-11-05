@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../database/prisma.service';
-import { BannerRotacaoService } from './banner-rotacao.service';
+import { PrismaService } from '../../../database/prisma.service';
+import { BannerRotacaoService } from '../banners/banner-rotacao.service';
 import {
   giroGratuitoDisponivel,
   obterInicioJanelaGiroGratuito,
   obterProximoGiroGratuito,
-} from './gacha.config';
+} from '../gacha/gacha.config';
 import {
   obterInicioSemana,
   obterProximaRecompensaSemanal,
   RECOMPENSA_SEMANAL_RUBYS,
   recompensaSemanalDisponivel,
-} from './recompensas.config';
+} from '../recompensas/recompensas.config';
 
 type ItemCorreio = {
   chave: string;

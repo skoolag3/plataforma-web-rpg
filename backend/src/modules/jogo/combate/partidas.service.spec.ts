@@ -1,4 +1,4 @@
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../../database/prisma.service';
 import { PartidasService, filtrarCartasPorForca, selecionarCartasAdversario } from './partidas.service';
 
 describe('equilibrio das partidas comuns', () => {

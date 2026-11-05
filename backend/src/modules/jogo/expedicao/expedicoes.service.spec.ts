@@ -1,8 +1,8 @@
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../../database/prisma.service';
 import { Prisma } from '@prisma/client';
 import { ExpedicoesService } from './expedicoes.service';
 import { gerarTrilhaExpedicao } from './expedicao.trilha';
-import { PartidasService } from './partidas.service';
+import { PartidasService } from '../combate/partidas.service';
 
 function criarExpedicao(
   sobrescrever: Record<string, unknown> = {},

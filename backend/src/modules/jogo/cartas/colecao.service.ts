@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../database/prisma.service';
-import { ListarColecaoDto } from './dto/listar-colecao.dto';
+import { PrismaService } from '../../../database/prisma.service';
+import { ListarColecaoDto } from '../dto/listar-colecao.dto';
 import { obterValorVendaPorRaridade } from './valor-venda-raridade';
 
 @Injectable()

@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { randomInt } from 'node:crypto';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from '../../database/prisma.service';
-import { PartidasService } from './partidas.service';
+import { PrismaService } from '../../../database/prisma.service';
+import { PartidasService } from '../combate/partidas.service';
 import {
   gerarSeedExpedicao,
   gerarTrilhaExpedicao,

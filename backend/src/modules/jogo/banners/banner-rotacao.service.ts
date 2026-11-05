@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from '../../database/prisma.service';
-import { obterProximaRotacaoBanner } from './gacha.config';
+import { PrismaService } from '../../../database/prisma.service';
+import { obterProximaRotacaoBanner } from '../gacha/gacha.config';
 
 @Injectable()
 export class BannerRotacaoService {

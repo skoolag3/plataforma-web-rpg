@@ -75,7 +75,7 @@ backend/
   src/common/             guards, decorators e filtro HTTP
   src/modules/auth/       autenticação e recuperação de conta
   src/modules/perfil/     dados e mídia do jogador
-  src/modules/jogo/       coleção, decks, gacha, expedição, batalha e notícias públicas
+  src/modules/jogo/       módulo, controller e pastas por função (cartas, combate, expedição, gacha etc.)
   src/modules/admin/      manutenção e auditoria administrativa
 frontend/
   app/(public)/           landing e autenticação

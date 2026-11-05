@@ -4,8 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from '../../database/prisma.service';
-import { AtualizarDeckDto, CriarDeckDto } from './dto/salvar-deck.dto';
+import { PrismaService } from '../../../database/prisma.service';
+import { AtualizarDeckDto, CriarDeckDto } from '../dto/salvar-deck.dto';
 
 @Injectable()
 export class DecksService {

@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { randomInt } from 'crypto';
-import { PrismaService } from '../../database/prisma.service';
-import { BannerRotacaoService } from './banner-rotacao.service';
+import { PrismaService } from '../../../database/prisma.service';
+import { BannerRotacaoService } from '../banners/banner-rotacao.service';
 import {
   giroGratuitoDisponivel,
   LIMITE_PITY,
@@ -16,8 +16,8 @@ import {
   PROBABILIDADES_RARIDADE,
   type RaridadeGacha,
 } from './gacha.config';
-import { obterValorVendaPorRaridade } from './valor-venda-raridade';
-import { calcularContadoresPity, lerConfiguracaoBanner, sortearRaridadeBanner } from './banner-configuracao';
+import { obterValorVendaPorRaridade } from '../cartas/valor-venda-raridade';
+import { calcularContadoresPity, lerConfiguracaoBanner, sortearRaridadeBanner } from '../banners/banner-configuracao';
 
 const PESOS: Record<string, number> = { UR: 1, SSR: 3, SR: 8, R: 18, N: 35 };
 

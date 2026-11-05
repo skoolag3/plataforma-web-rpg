@@ -3,7 +3,7 @@ import {
   executarTurno,
   iniciarBatalha,
 } from './batalha.engine';
-import type { ConfiguracaoHabilidade } from './habilidades/habilidade.types';
+import type { ConfiguracaoHabilidade } from '../habilidades/habilidade.types';
 
 const carta = (
   nome: string,

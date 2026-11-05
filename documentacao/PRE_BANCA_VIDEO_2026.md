@@ -42,7 +42,7 @@ O fluxo principal deve ser mostrado funcionando. Evitar gastar os seis minutos n
 
 **Na tela:** um diagrama e poucos arquivos, com fonte ampliada.
 
-Percorrer uma operação concreta: escolha de rota na interface → requisição à API → autenticação e validação → `backend/src/modules/jogo/expedicoes.service.ts` → `partidas.service.ts` → gravação no PostgreSQL → resposta exibida ao jogador. Mostrar uma regra fácil de defender, como a quantidade progressiva de cartas inimigas em `expedicao.trilha.ts` ou a recompensa calculada no servidor.
+Percorrer uma operação concreta: escolha de rota na interface → requisição à API → autenticação e validação → `backend/src/modules/jogo/expedicao/expedicoes.service.ts` → `backend/src/modules/jogo/combate/partidas.service.ts` → gravação no PostgreSQL → resposta exibida ao jogador. Mostrar uma regra fácil de defender, como a quantidade progressiva de cartas inimigas em `expedicao/expedicao.trilha.ts` ou a recompensa calculada no servidor.
 
 Apontar o esquema em `backend/prisma/schema.prisma`, os guards em `backend/src/common/guards/` e um teste de serviço em `backend/src/modules/jogo/`. Dizer quais testes foram efetivamente executados para a versão gravada; os números dos relatórios antigos são históricos e precisam ser revalidados antes de serem citados.
 

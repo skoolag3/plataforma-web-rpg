@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { LIMITE_PITY, PROBABILIDADES_RARIDADE } from './gacha.config';
+import { LIMITE_PITY, PROBABILIDADES_RARIDADE } from '../gacha/gacha.config';
 
 export type ChanceBanner = { raridade: string; percentual: number };
 export type PityBanner = { raridade: string; limite: number };

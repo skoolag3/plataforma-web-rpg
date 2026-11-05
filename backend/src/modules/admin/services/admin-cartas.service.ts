@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
-import { obterValorVendaPorRaridade } from '../../jogo/valor-venda-raridade';
+import { obterValorVendaPorRaridade } from '../../jogo/cartas/valor-venda-raridade';
 import {
   CreateAdminCartaDto,
   UpdateAdminCartaDto,

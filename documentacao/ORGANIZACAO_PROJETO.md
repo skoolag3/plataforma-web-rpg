@@ -2,6 +2,7 @@
 
 - `README.md` e `DEPLOY.md`: orientação principal na raiz.
 - `frontend/` e `backend/`: aplicação e testes.
+- `backend/src/modules/jogo/`: módulo e controller na raiz; serviços, regras e testes organizados em `banners/`, `cartas/`, `combate/`, `correio/`, `expedicao/`, `gacha/`, `habilidades/`, `noticias/`, `recompensas/` e `vitrine/`. Os DTOs compartilhados ficam em `dto/`.
 - `documentacao/diagramas/`: diagramas editáveis e imagens usados no TCC.
 - `documentacao/`: relatórios históricos, objetivos e roteiro da pré-banca.
 - `scripts/`: utilitários versionados que continuam fazendo parte do projeto.

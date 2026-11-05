@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
-import { BannerRotacaoService } from '../../jogo/banner-rotacao.service';
-import { PROBABILIDADES_RARIDADE } from '../../jogo/gacha.config';
-import { lerConfiguracaoBanner } from '../../jogo/banner-configuracao';
+import { BannerRotacaoService } from '../../jogo/banners/banner-rotacao.service';
+import { PROBABILIDADES_RARIDADE } from '../../jogo/gacha/gacha.config';
+import { lerConfiguracaoBanner } from '../../jogo/banners/banner-configuracao';
 import type {
   AtualizarAdminBannerDto,
   ChanceBannerDto,

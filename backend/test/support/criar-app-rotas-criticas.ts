@@ -18,14 +18,14 @@ import { AdminDashboardController } from '../../src/modules/admin/controllers/ad
 import { AdminDashboardService } from '../../src/modules/admin/services/admin-dashboard.service';
 import { AuthController } from '../../src/modules/auth/controllers/auth.controller';
 import { AuthService } from '../../src/modules/auth/services/auth.service';
-import { ColecaoService } from '../../src/modules/jogo/colecao.service';
-import { CorreioService } from '../../src/modules/jogo/correio.service';
-import { DecksService } from '../../src/modules/jogo/decks.service';
-import { ExpedicoesService } from '../../src/modules/jogo/expedicoes.service';
-import { GachaService } from '../../src/modules/jogo/gacha.service';
+import { ColecaoService } from '../../src/modules/jogo/cartas/colecao.service';
+import { CorreioService } from '../../src/modules/jogo/correio/correio.service';
+import { DecksService } from '../../src/modules/jogo/cartas/decks.service';
+import { ExpedicoesService } from '../../src/modules/jogo/expedicao/expedicoes.service';
+import { GachaService } from '../../src/modules/jogo/gacha/gacha.service';
 import { JogoController } from '../../src/modules/jogo/jogo.controller';
-import { PartidasService } from '../../src/modules/jogo/partidas.service';
-import { RecompensasService } from '../../src/modules/jogo/recompensas.service';
+import { PartidasService } from '../../src/modules/jogo/combate/partidas.service';
+import { RecompensasService } from '../../src/modules/jogo/recompensas/recompensas.service';
 import { LojaController } from '../../src/modules/loja/loja.controller';
 import { LojaService } from '../../src/modules/loja/loja.service';
 

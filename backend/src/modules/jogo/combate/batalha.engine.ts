@@ -1,9 +1,9 @@
-import { calcularValorEscalado } from './habilidades/habilidade.escala';
-import { limitesHabilidade } from './habilidades/habilidade.limites';
+import { calcularValorEscalado } from '../habilidades/habilidade.escala';
+import { limitesHabilidade } from '../habilidades/habilidade.limites';
 import type {
   ConfiguracaoHabilidade,
   GatilhoHabilidade,
-} from './habilidades/habilidade.types';
+} from '../habilidades/habilidade.types';
 
 export type Dificuldade = 'FACIL' | 'MEDIA' | 'DIFICIL' | 'CHEFE';
 export type Lado = 'JOGADOR' | 'BOT';

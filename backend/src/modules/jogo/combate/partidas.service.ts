@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { randomInt } from 'node:crypto';
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../../database/prisma.service';
 import {
   executarTurno as executarTurnoMotor,
   iniciarBatalha,
@@ -17,7 +17,7 @@ import {
   type Lado,
   type AcaoTurno,
 } from './batalha.engine';
-import type { ConfiguracaoHabilidade } from './habilidades/habilidade.types';
+import type { ConfiguracaoHabilidade } from '../habilidades/habilidade.types';
 
 const partidaInclude = {
   deck: { select: { id: true, nome: true } },

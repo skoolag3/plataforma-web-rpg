@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma, type ProdutoExpedicao } from '@prisma/client';
-import { secoesPadraoCampanha, type SecaoCampanha } from '../../jogo/expedicao.trilha';
+import { secoesPadraoCampanha, type SecaoCampanha } from '../../jogo/expedicao/expedicao.trilha';
 import { PrismaService } from '../../../database/prisma.service';
 import {
   AtualizarAdminCampanhaDto,
