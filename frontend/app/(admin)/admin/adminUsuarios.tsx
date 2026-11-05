@@ -75,7 +75,7 @@ export function UsuarioAvatarMoldura({ usuario }: { usuario: AdminUsuario }) {
 function Status({ value }: { value: string }) {
   const ativo = value === "Ativo" || value === "Ativa";
   return (
-    <span className={ativo ? styles.statusAtivo : styles.statusInativo}>
+    <span className={ativo ? styles.statusAtivo : value === "E-mail pendente" ? styles.statusAlerta : styles.statusInativo}>
       {value}
     </span>
   );
@@ -400,9 +400,11 @@ export function Usuarios() {
                         value={
                           usuario.bloqueado
                             ? "Bloqueado"
-                            : usuario.ativo
-                              ? "Ativo"
-                              : "Inativo"
+                            : !usuario.ativo
+                              ? "Inativo"
+                              : usuario.emailVerificado
+                                ? "Ativo"
+                                : "E-mail pendente"
                         }
                       />
                     </td>

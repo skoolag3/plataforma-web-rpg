@@ -18,7 +18,7 @@ type Props = {
 export function situacaoCampanha(produto: AdminProdutoExpedicao, agora = Date.now()) {
   if (!produto.ativo) return "pausada";
   if (produto.inicioEm && new Date(produto.inicioEm).getTime() > agora) return "agendada";
-  if (produto.fimEm && new Date(produto.fimEm).getTime() < agora) return "encerrada";
+  if (produto.fimEm && new Date(produto.fimEm).getTime() <= agora) return "encerrada";
   return "disponivel";
 }
 
@@ -105,12 +105,12 @@ export function AdminCampanhaCatalogo({
                 const campanhas = produtos.filter((produto) => produto.tema.trim().toUpperCase() === nome);
                 const ativas = campanhas.filter((produto) => situacaoCampanha(produto) === "disponivel").length;
                 return (
-                  <button key={nome} type="button" className={styles.cardTema} onClick={() => selecionarTema(nome)}>
+                  <button key={nome} type="button" className={styles.cardTema} data-no-sorteio={ativas > 0 || undefined} onClick={() => selecionarTema(nome)}>
                     <span className={styles.iconeTema} aria-hidden="true">{nome === "FOGO" ? <Flame /> : <Layers3 />}</span>
                     <strong>{formatarTema(nome)}</strong>
                     <small>{campanhas.length} {campanhas.length === 1 ? "campanha" : "campanhas"}</small>
                     <span className={styles.temaCampanhas}>{campanhas.length ? campanhas.slice(0, 3).map((produto) => <span key={produto.id}>{produto.nome} <em>{rotulosSituacao[situacaoCampanha(produto)]}</em></span>) : <span>Nenhuma campanha criada</span>}{campanhas.length > 3 ? <span>+ {campanhas.length - 3} outras</span> : null}</span>
-                    <span className={styles.temaRodape}>{ativas} {ativas === 1 ? "campanha no sorteio" : "campanhas no sorteio"}<ArrowUpRight aria-hidden="true" /></span>
+                    <span className={styles.temaRodape}>{ativas > 0 ? <span className={styles.seloSorteio}>No sorteio</span> : "Nenhuma campanha no sorteio"}<ArrowUpRight aria-hidden="true" /></span>
                   </button>
                 );
               })}
@@ -142,7 +142,7 @@ function CampanhaCard({ produto, editarCampanha }: {
 }) {
   const situacao = situacaoCampanha(produto);
   return (
-    <article className={styles.campanhaCard}>
+    <article className={styles.campanhaCard} data-no-sorteio={situacao === "disponivel" || undefined}>
       <div className={styles.campanhaPrincipal}>
         <div className={styles.campanhaCardTopo}>
           <span className={styles.situacaoCampanha} data-situacao={situacao}>{rotulosSituacao[situacao]}</span>

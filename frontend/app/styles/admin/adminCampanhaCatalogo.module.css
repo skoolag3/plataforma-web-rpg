@@ -121,6 +121,11 @@
   text-align: left;
   transition: border-color .2s, background .2s, transform .2s;
 }
+.cardTema[data-no-sorteio="true"] {
+  border-color: rgba(190, 242, 100, .38);
+  background: linear-gradient(110deg, rgba(190, 242, 100, .055), #050a14 58%);
+  box-shadow: inset 3px 0 rgba(190, 242, 100, .7);
+}
 .temaCampanhas { display: grid; width: 100%; gap: .35rem; margin-top: .8rem; border-top: 1px solid rgba(148, 163, 184, .16); padding-top: .7rem; }
 .temaCampanhas > span { display: flex; justify-content: space-between; gap: .6rem; color: #e5def5; font-size: .68rem; }
 .temaCampanhas em { flex: none; color: #aab7ca; font-size: .6rem; font-style: normal; }
@@ -168,6 +173,12 @@
   color: #b9a6ee;
   font-size: .61rem;
   font-weight: 700;
+}
+.seloSorteio {
+  border-radius: 999px;
+  background: rgba(34, 197, 94, .15);
+  color: #86efac;
+  padding: .22rem .45rem;
 }
 
 .voltarTemas {
@@ -238,6 +249,11 @@
   border-radius: .65rem;
   background: linear-gradient(110deg, #101126, #090e1b 48%, #080d19);
   padding: 1.1rem 1.25rem;
+}
+.campanhaCard[data-no-sorteio="true"] {
+  border-color: rgba(190, 242, 100, .35);
+  border-left-color: #bef264;
+  background: linear-gradient(110deg, rgba(190, 242, 100, .065), #090e1b 48%, #080d19);
 }
 
 .campanhaPrincipal {
