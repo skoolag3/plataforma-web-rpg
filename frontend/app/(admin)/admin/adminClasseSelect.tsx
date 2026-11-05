@@ -89,7 +89,7 @@ export function AdminClasseSelect({
   return (
     <div className={styles.campoClasse}>
       <div className={styles.cabecalhoClasse}>
-        <span>Classe</span>
+        <span>Classe *</span>
         <div className={styles.acoesClasse}>
           {selecionada ? <small>Prioridade {selecionada.prioridadeAtaque}</small> : null}
           <button type="button" onClick={() => abrir()} title="Criar classe" aria-label="Criar classe">
@@ -122,8 +122,8 @@ export function AdminClasseSelect({
                 valor: "",
                 label: classeLegada
                   ? `${classeLegada} (legada, sem vínculo)`
-                  : "Sem classe",
-                labelCurto: classeLegada ?? "Sem classe",
+                  : "Selecione uma classe",
+                labelCurto: classeLegada ?? "Selecione uma classe",
               },
               ...classes
                 .filter((classe) => classe.ativo || classe.id === idClasse)

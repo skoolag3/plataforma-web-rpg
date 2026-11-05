@@ -172,6 +172,10 @@ export function NovaCarta() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (envioEmAndamento.current) return;
+    if (!form.idClasse) {
+      setFeedback({ type: "error", text: "Selecione uma classe para a carta antes de salvar." });
+      return;
+    }
     envioEmAndamento.current = true;
     setFeedback(null);
     setSalvando(true);

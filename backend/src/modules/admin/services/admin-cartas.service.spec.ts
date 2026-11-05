@@ -11,6 +11,7 @@ describe('AdminCartasService', () => {
     dano_base: 190,
     defesa_base: 120,
     passiva: {},
+    id_classe: 'classe-id',
     foto: null,
     moldura: null,
     config_visual: null,
@@ -35,6 +36,7 @@ describe('AdminCartasService', () => {
     },
     logAdminCarta: { create: jest.fn() },
     raridadeCarta: { findUnique: jest.fn(), findMany: jest.fn() },
+    classeCarta: { findFirst: jest.fn() },
   };
   const imagens = { removerImagemSeNaoUsada: jest.fn() };
   let service: AdminCartasService;
@@ -51,6 +53,7 @@ describe('AdminCartasService', () => {
       Promise.resolve({ codigo: where.codigo, valor_venda: { N: 50, R: 100, SR: 200, SSR: 400, UR: 800 }[where.codigo] ?? 0 }),
     );
     prisma.raridadeCarta.findMany.mockResolvedValue([]);
+    prisma.classeCarta.findFirst.mockResolvedValue({ id: 'classe-id', nome: 'Mago' });
     service = new AdminCartasService(prisma as never, imagens as never);
   });
 
@@ -182,6 +185,25 @@ describe('AdminCartasService', () => {
     expect(prisma.carta.create).not.toHaveBeenCalled();
   });
 
+  it('recusa criar carta sem classe', async () => {
+    await expect(service.criar({
+      nome: 'Flare', elemento: 'fogo', raridade: 'UR',
+      hpBase: 320, danoBase: 190, defesaBase: 120,
+    })).rejects.toThrow('Selecione uma classe para a carta.');
+    expect(prisma.carta.create).not.toHaveBeenCalled();
+  });
+
+  it('recusa salvar carta sem classe vinculada', async () => {
+    prisma.carta.findFirst.mockResolvedValue({ ...carta, id_classe: null });
+    await expect(service.atualizar(carta.id, { nome: 'Flare' })).rejects.toThrow('Selecione uma classe para a carta.');
+    expect(prisma.carta.update).not.toHaveBeenCalled();
+  });
+
+  it('recusa retirar a classe de uma carta', async () => {
+    await expect(service.atualizar(carta.id, { idClasse: null, classe: '' })).rejects.toThrow('Selecione uma classe para a carta.');
+    expect(prisma.carta.update).not.toHaveBeenCalled();
+  });
+
   it('vincula habilidades publicadas na ordem informada', async () => {
     prisma.habilidade.findMany.mockResolvedValue([
       { id: 'habilidade-1' },
@@ -196,6 +218,7 @@ describe('AdminCartasService', () => {
       danoBase: 190,
       defesaBase: 120,
       habilidadesIds: ['habilidade-2', 'habilidade-1'],
+      idClasse: 'classe-id',
     });
 
     expect(prisma.habilidade.findMany).toHaveBeenCalledWith({

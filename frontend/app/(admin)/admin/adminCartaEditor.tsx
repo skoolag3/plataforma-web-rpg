@@ -246,6 +246,10 @@ export function CartaEditor({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (envioEmAndamento.current || salvando) return;
+    if (!form.idClasse) {
+      setErroLocal("Selecione uma classe para a carta antes de salvar.");
+      return;
+    }
     envioEmAndamento.current = true;
     setEnviando(true);
     setErroLocal(null);
@@ -612,40 +616,18 @@ export function CartaEditor({
                       : "A carta permanece cadastrada, mas não fica disponível no jogo."}
                   </small>
                 </div>
-                {impactoStatus === null ? (
-                  <button
-                    type="button"
-                    onClick={() => void prepararAlteracaoStatus()}
-                    disabled={salvando || carregandoImpacto}
-                  >
-                    <Power aria-hidden="true" />
-                    {carregandoImpacto
-                      ? "Verificando..."
-                      : form.ativo
-                        ? "Desativar carta"
-                        : "Ativar carta"}
-                  </button>
-                ) : (
-                  <div className={styles.impactConfirmation}>
-                    <strong>{mensagemImpacto(impactoStatus)}</strong>
-                    <span>Deseja mesmo desativar esta carta?</span>
-                    <div>
-                      <button
-                        type="button"
-                        onClick={() => setImpactoStatus(null)}
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void confirmarDesativacao()}
-                        disabled={salvando}
-                      >
-                        Confirmar desativação
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={() => void prepararAlteracaoStatus()}
+                  disabled={salvando || carregandoImpacto}
+                >
+                  <Power aria-hidden="true" />
+                  {carregandoImpacto
+                    ? "Verificando..."
+                    : form.ativo
+                      ? "Desativar carta"
+                      : "Ativar carta"}
+                </button>
               </div>
 
               <div className={styles.dangerZone}>
@@ -757,6 +739,37 @@ export function CartaEditor({
         </aside>
       </section>
     </form>
+    {impactoStatus !== null && portalPronto
+      ? createPortal(
+          <div
+            className={styles.fundoConfirmacaoImagem}
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setImpactoStatus(null);
+            }}
+          >
+            <section
+              className={styles.confirmacaoImagem}
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="titulo-confirmar-desativacao"
+              aria-describedby="descricao-confirmar-desativacao"
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setImpactoStatus(null);
+              }}
+            >
+              <h2 id="titulo-confirmar-desativacao">Desativar carta?</h2>
+              <p id="descricao-confirmar-desativacao">
+                {mensagemImpacto(impactoStatus)} A alteração será aplicada quando você clicar em Salvar.
+              </p>
+              <div className={styles.acoesConfirmacaoImagem}>
+                <button type="button" autoFocus onClick={() => setImpactoStatus(null)}>Cancelar</button>
+                <button type="button" onClick={() => void confirmarDesativacao()}>Confirmar desativação</button>
+              </div>
+            </section>
+          </div>,
+          document.body,
+        )
+      : null}
     {imagemParaRemover && portalPronto
       ? createPortal(
           <div

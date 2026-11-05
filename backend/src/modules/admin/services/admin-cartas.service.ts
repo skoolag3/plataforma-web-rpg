@@ -180,6 +180,7 @@ export class AdminCartasService {
     const raridade = await this.validarRaridade(dto.raridade);
     await this.validarHabilidades(dto.habilidadesIds);
     const classe = await this.resolverClasse(dto.idClasse, dto.classe);
+    if (!classe) throw new BadRequestException('Selecione uma classe para a carta.');
     const carta = await this.prisma.$transaction(async (tx) => {
       const criada = await tx.carta.create({
         data: this.toCreateData(dto, classe, raridade.valor_venda),
@@ -202,6 +203,9 @@ export class AdminCartasService {
       dto.idClasse !== undefined || dto.classe !== undefined
         ? await this.resolverClasse(dto.idClasse, dto.classe)
         : undefined;
+    if (classe === null || (classe === undefined && !atual.idClasse)) {
+      throw new BadRequestException('Selecione uma classe para a carta.');
+    }
 
     if (atual.ativo && dto.ativo === false && !dto.confirmarImpacto) {
       throw new BadRequestException(
