@@ -15,7 +15,7 @@ Plataforma web de RPG de cartas desenvolvida como Trabalho de Conclusão de Curs
 - batalha 1x1 por turnos contra adversário controlado pelo servidor, com decisões de atacar ou defender;
 - persistência de partidas, snapshots das cartas e eventos de auditoria por turno;
 - recompensas em rubys registradas em ledger relacional;
-- expedição procedural com três etapas de escolhas, confronto final e recompensa própria;
+- expedição com etapas e caminhos configuráveis, confronto final e recompensa própria;
 - painel administrativo de usuários, cartas, habilidades e notícias;
 - ajuste administrativo de coleção e rubys com motivo e log de autoria;
 - criação, teste, publicação e vínculo de habilidades automáticas às cartas;
@@ -34,7 +34,7 @@ Plataforma web de RPG de cartas desenvolvida como Trabalho de Conclusão de Curs
 
 - o adversário atual é básico e a dificuldade é calculada no servidor, sem IA avançada;
 - o diálogo do boss usa Gemini (`GEMINI_API_KEY`) como primeira opção, OpenAI (`OPENAI_API_KEY`) como segunda e avaliação local se não houver chave ou a API falhar;
-- a tela administrativa de banners permite consultar a rotação e forçar um banner, mas ainda não possui CRUD completo de banners e pacotes;
+- a rotação de banners e seus períodos são configuráveis no painel; pagamentos da loja seguem em modo de teste;
 - o pagamento por Stripe está integrado em modo de teste; Pix e operação em produção ainda não foram configurados;
 - não existe PvP em tempo real;
 - não existe MongoDB ou Redis: auditoria, economia e batalha usam PostgreSQL.
@@ -176,7 +176,7 @@ Copie o segredo `whsec_...` exibido pela CLI para `STRIPE_WEBHOOK_SECRET` e rein
 - nomes e descrições das habilidades vinculadas exibidos na coleção e durante a batalha;
 - correção da recompensa final da Expedição no ledger, incluindo o motivo `EXPEDICAO_CONCLUIDA` na restrição do PostgreSQL;
 - senha fortalecida com mínimo de oito caracteres, letra maiúscula, número e caractere especial;
-- relatório de autenticação criado em `RELATORIO_TESTES_AUTENTICACAO.md`;
+- relatório de autenticação em `documentacao/RELATORIO_TESTES_AUTENTICACAO.md`;
 - correção dos motivos do ledger usados pelo gacha para respeitar as constraints do PostgreSQL;
 - animação de invocação e revelação das cartas no gacha;
 - retorno da compra do Stripe direcionado à loja, sem interferir na rota do gacha;
