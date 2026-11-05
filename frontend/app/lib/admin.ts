@@ -785,11 +785,48 @@ export function removerAdminCarta(
   );
 }
 
-export function uploadCartaAssets(formData: FormData) {
-  return adminRequest<UploadCartaAssetsResponse>("/admin/uploads/cartas", {
-    method: "POST",
-    body: formData,
-  });
+export async function uploadCartaAssets(formData: FormData): Promise<UploadCartaAssetsResponse> {
+  const resultado: UploadCartaAssetsResponse = { foto: null, fotoPerfil: null, moldura: null };
+  const tipos = ["foto", "fotoPerfil", "moldura"] as const;
+
+  for (const tipo of tipos) {
+    const arquivo = formData.get(tipo);
+    if (!(arquivo instanceof File)) continue;
+    const assinatura = await adminRequest<{
+      cloudName: string; apiKey: string; folder: string; publicId: string;
+      timestamp: number; overwrite: boolean; signature: string;
+    }>("/admin/uploads/cartas/assinatura", {
+      method: "POST",
+      body: JSON.stringify({ tipo }),
+    });
+    const dados = new FormData();
+    dados.append("file", arquivo);
+    dados.append("api_key", assinatura.apiKey);
+    dados.append("timestamp", String(assinatura.timestamp));
+    dados.append("signature", assinatura.signature);
+    dados.append("folder", assinatura.folder);
+    dados.append("public_id", assinatura.publicId);
+    dados.append("overwrite", String(assinatura.overwrite));
+
+    const resposta = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(assinatura.cloudName)}/image/upload`, {
+      method: "POST",
+      body: dados,
+    });
+    const dadosImagem = await resposta.json().catch(() => null);
+    if (!resposta.ok || !dadosImagem?.secure_url) {
+      throw new Error(dadosImagem?.error?.message ?? `Não foi possível enviar ${tipo} ao Cloudinary.`);
+    }
+    resultado[tipo] = {
+      url: dadosImagem.secure_url,
+      publicId: dadosImagem.public_id,
+      bytes: dadosImagem.bytes,
+      width: dadosImagem.width,
+      height: dadosImagem.height,
+      format: dadosImagem.format,
+    };
+  }
+
+  return resultado;
 }
 
 export function listarAdminNoticias() {

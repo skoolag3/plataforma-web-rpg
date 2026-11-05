@@ -542,7 +542,7 @@ export function CartaEditor({
                 {cardImage ? <div className={styles.acoesImagem}><button type="button" onClick={() => void baixarImagem(cardImage, `${form.nome || "carta"}-foto`)}>Baixar imagem</button><button type="button" onClick={() => removerImagem("foto")}>Remover imagem</button></div> : null}
               </div>
               <div className={styles.campoImagemEditor}>
-                <CampoArquivo rotulo="Moldura" rotuloBotao={cardFrame ? "Modificar imagem" : "Escolher moldura"} accept="image/png,image/webp" ajuda="PNG ou WEBP transparente, proporção 2:3." onFilesSelected={handleMolduraChange} />
+                <CampoArquivo rotulo="Moldura" rotuloBotao={cardFrame ? "Modificar imagem" : "Escolher moldura"} accept="image/png,image/webp" ajuda="PNG ou WEBP transparente, até 5 MB. Ajuste o encaixe no compositor." onFilesSelected={handleMolduraChange} />
                 {cardFrame ? <div className={styles.acoesImagem}><button type="button" onClick={() => void baixarImagem(cardFrame, `${form.nome || "carta"}-moldura`)}>Baixar imagem</button><button type="button" onClick={() => removerImagem("moldura")}>Remover imagem</button></div> : null}
               </div>
               <ControleVisualCarta

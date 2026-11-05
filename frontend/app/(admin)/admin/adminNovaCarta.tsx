@@ -396,7 +396,7 @@ export function NovaCarta() {
               <CampoArquivo
                 rotulo="Moldura"
                 accept="image/png,image/webp"
-                ajuda="PNG ou WEBP transparente, proporção 2:3."
+                ajuda="PNG ou WEBP transparente, até 5 MB. Ajuste o encaixe no compositor."
                 onFilesSelected={handleMolduraChange}
               />
               <ControleVisualCarta

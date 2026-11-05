@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Param,
   ParseUUIDPipe,
@@ -59,6 +60,14 @@ const cartaAssetInterceptor = FileFieldsInterceptor(
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminUploadsController {
   constructor(private readonly cloudinaryService: AdminCloudinaryService) {}
+
+  @Post('uploads/cartas/assinatura')
+  assinarUploadCarta(@Body('tipo') tipo: string) {
+    if (!['foto', 'fotoPerfil', 'moldura'].includes(tipo)) {
+      throw new BadRequestException('Tipo de imagem inválido.');
+    }
+    return this.cloudinaryService.assinarUploadCarta(tipo as 'foto' | 'fotoPerfil' | 'moldura');
+  }
 
   @Post('uploads/cartas')
   @UseInterceptors(cartaAssetInterceptor)

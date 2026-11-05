@@ -49,4 +49,16 @@ describe('AdminCloudinaryService: limpeza de imagens', () => {
     expect(remover).toHaveBeenCalledWith('anime-cards/cartas/fotos/flare', { invalidate: true });
     remover.mockRestore();
   });
+
+  it('assina upload direto em pasta isolada sem expor o segredo', () => {
+    const assinatura = service.assinarUploadCarta('moldura');
+    expect(assinatura).toEqual(expect.objectContaining({
+      cloudName: 'conta-teste',
+      apiKey: 'teste',
+      folder: 'anime-cards/cartas/molduras',
+      overwrite: false,
+      signature: expect.any(String),
+    }));
+    expect(JSON.stringify(assinatura)).not.toContain('apiSecret');
+  });
 });

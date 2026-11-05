@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
+import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../../../database/prisma.service';
 
 type CartaAssetFiles = {
@@ -29,6 +30,21 @@ export class AdminCloudinaryService {
   private readonly logger = new Logger(AdminCloudinaryService.name);
 
   constructor(private readonly prisma: PrismaService) {}
+
+  assinarUploadCarta(tipo: 'foto' | 'fotoPerfil' | 'moldura') {
+    this.configureCloudinary();
+    const subpasta = { foto: 'fotos', fotoPerfil: 'perfil', moldura: 'molduras' }[tipo];
+    const folder = this.getFolder(`cartas/${subpasta}`);
+    const publicId = randomUUID();
+    const timestamp = Math.floor(Date.now() / 1000);
+    const overwrite = false;
+    const config = cloudinary.config();
+    const signature = cloudinary.utils.api_sign_request(
+      { folder, public_id: publicId, timestamp, overwrite },
+      config.api_secret!,
+    );
+    return { cloudName: config.cloud_name, apiKey: config.api_key, folder, publicId, timestamp, overwrite, signature };
+  }
 
   async uploadCartaAssets(files: CartaAssetFiles) {
     const { foto, fotoPerfil, moldura } = this.extractFiles(files);

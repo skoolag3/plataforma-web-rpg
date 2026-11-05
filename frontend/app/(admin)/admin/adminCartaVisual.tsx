@@ -18,11 +18,9 @@ import {
 } from "react";
 import {
   CartaMontada,
-  PROPORCAO_CARTA,
   criarEstiloMolduraPerfil,
   criarConfigVisualPadrao,
   type ConfigVisualCarta,
-  type DimensoesImagem,
 } from "../../components/cartaMontada";
 import AnimatedFileUpload from "@/components/ui/animated-file-upload";
 import { elementosCarta } from "../../components/elementosCarta";
@@ -358,24 +356,10 @@ export function PreviewCarta({
   configVisual: ConfigVisualCarta;
   onAbrirDetalhes?: () => void;
 }) {
-  const [dimensoesArte, setDimensoesArte] = useState<DimensoesImagem | null>(
-    null,
-  );
-  const [dimensoesMoldura, setDimensoesMoldura] =
-    useState<DimensoesImagem | null>(null);
   const [fundoPreview, setFundoPreview] = useState<
     "branco" | "preto" | "verde"
   >("preto");
   const [mostrarTextos, setMostrarTextos] = useState(true);
-  const proporcoesDiferentes = Boolean(
-    (dimensoesArte &&
-      Math.abs(dimensoesArte.largura / dimensoesArte.altura - PROPORCAO_CARTA) >
-        0.015) ||
-    (dimensoesMoldura &&
-      Math.abs(
-        dimensoesMoldura.largura / dimensoesMoldura.altura - PROPORCAO_CARTA,
-      ) > 0.015),
-  );
 
   return (
     <div className={styles.cardPreviewMontagem}>
@@ -427,24 +411,9 @@ export function PreviewCarta({
             elemento={mostrarTextos ? elemento : undefined}
             config={configVisual}
             placeholder={<ImagePlus aria-label="Sem arte" />}
-            onDimensoesArte={setDimensoesArte}
-            onDimensoesMoldura={setDimensoesMoldura}
           />
         </button>
       </div>
-      {proporcoesDiferentes ? (
-        <small className={styles.avisoProporcao}>
-          O padrão da carta é 2:3 (ex.: 1024x1536). Arte:{" "}
-          {dimensoesArte
-            ? `${dimensoesArte.largura}x${dimensoesArte.altura}`
-            : "não selecionada"}
-          ; moldura:{" "}
-          {dimensoesMoldura
-            ? `${dimensoesMoldura.largura}x${dimensoesMoldura.altura}`
-            : "não selecionada"}
-          .
-        </small>
-      ) : null}
     </div>
   );
 }
