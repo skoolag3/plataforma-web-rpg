@@ -61,7 +61,7 @@ export function CadastroDocumentos({
             <>
               <p>Usamos os dados de cadastro, como nome no jogo e e-mail, para criar e proteger sua conta. Guardamos também seu progresso, cartas e atividades necessárias ao funcionamento do jogo.</p>
               <p>Seu nome no jogo e informações públicas do perfil podem ser vistos por outros jogadores. Não exibimos sua senha; ela é usada apenas para autenticação.</p>
-              <p>Você pode gerenciar seus dados de conta e solicitar a exclusão do perfil nas configurações. Imagens enviadas para o perfil ou para o jogo podem ser armazenadas em serviços de hospedagem de imagens.</p>
+              <p>Você pode gerenciar seus dados de conta e solicitar a exclusão do perfil nas configurações. As imagens das cartas e do jogo são cadastradas pela administração.</p>
             </>
           )}
         </div>
