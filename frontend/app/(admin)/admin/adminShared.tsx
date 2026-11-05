@@ -174,6 +174,24 @@ function Status({ value }: { value: string }) {
   );
 }
 
+type PerfilAdminNav = {
+  nome: string;
+  avatarUrl: string | null;
+  molduraUrl: string | null;
+  molduraConfig: ConfigVisualCarta | null;
+  molduraClasse: string;
+};
+
+const perfilAdminVazio: PerfilAdminNav = {
+  nome: "",
+  avatarUrl: null,
+  molduraUrl: null,
+  molduraConfig: null,
+  molduraClasse: "molduraPadrao",
+};
+
+let perfilAdminCache: { idUsuario: string; perfil: PerfilAdminNav } | null = null;
+
 export function AdminLayout({
   title,
   subtitle,
@@ -190,35 +208,42 @@ export function AdminLayout({
     getStoredUser,
     () => null,
   );
-  const [perfilAdmin, setPerfilAdmin] = useState({
-    nome: "",
-    avatarUrl: null as string | null,
-    molduraUrl: null as string | null,
-    molduraConfig: null as ConfigVisualCarta | null,
-    molduraClasse: "molduraPadrao",
-  });
+  const [perfilAdmin, setPerfilAdmin] = useState<PerfilAdminNav>(
+    () => perfilAdminCache?.perfil ?? perfilAdminVazio,
+  );
+  const perfilAdminVisivel = perfilAdminCache?.idUsuario === usuario?.id
+    ? perfilAdmin
+    : perfilAdminVazio;
 
   useEffect(() => {
+    let ativo = true;
+    const idUsuario = usuario?.id;
+
     function carregarPerfilAdmin() {
       const token = getToken();
-      if (!token) return;
+      if (!token || !idUsuario) return;
       void buscarPerfilApi(token)
-        .then((perfil) =>
-          setPerfilAdmin({
+        .then((perfil) => {
+          if (!ativo) return;
+          const atualizado: PerfilAdminNav = {
             nome: perfil.user,
             avatarUrl: perfil.avatarUrl ?? null,
             molduraUrl: perfil.molduraUrl ?? null,
             molduraConfig: perfil.molduraConfig ?? null,
             molduraClasse: perfil.molduraClasse,
-          }),
-        )
+          };
+          perfilAdminCache = { idUsuario, perfil: atualizado };
+          setPerfilAdmin(atualizado);
+        })
         .catch(() => undefined);
     }
 
-    carregarPerfilAdmin();
+    if (!idUsuario || perfilAdminCache?.idUsuario !== idUsuario) carregarPerfilAdmin();
     window.addEventListener("perfil-atualizado", carregarPerfilAdmin);
-    return () =>
+    return () => {
+      ativo = false;
       window.removeEventListener("perfil-atualizado", carregarPerfilAdmin);
+    };
   }, [usuario?.id]);
 
   useEffect(() => {
@@ -294,27 +319,27 @@ export function AdminLayout({
           <div className={layoutStyles.navAcoes}>
             <Link href="/perfil" className={layoutStyles.adminUser}>
               <span
-                className={`${layoutStyles.adminAvatarVisual} ${layoutStyles[perfilAdmin.molduraClasse] ?? ""}`}
+                className={`${layoutStyles.adminAvatarVisual} ${layoutStyles[perfilAdminVisivel.molduraClasse] ?? ""}`}
               >
                 <span
                   className={layoutStyles.adminFotoAvatar}
                   style={{
-                    backgroundImage: `url("${perfilAdmin.avatarUrl ?? "/avatar-padrao.svg"}")`,
+                    backgroundImage: `url("${perfilAdminVisivel.avatarUrl ?? "/avatar-padrao.svg"}")`,
                   }}
                 />
-                {perfilAdmin.molduraUrl ? (
+                {perfilAdminVisivel.molduraUrl ? (
                   <i
                     className={layoutStyles.adminMolduraImagem}
                     style={{
-                      ...criarEstiloMolduraPerfil(perfilAdmin.molduraConfig),
-                      backgroundImage: `url("${perfilAdmin.molduraUrl}")`,
+                      ...criarEstiloMolduraPerfil(perfilAdminVisivel.molduraConfig),
+                      backgroundImage: `url("${perfilAdminVisivel.molduraUrl}")`,
                     }}
                     aria-hidden="true"
                   />
                 ) : null}
               </span>
               <div>
-                <strong>{perfilAdmin.nome || usuario?.nome || "Admin"}</strong>
+                <strong>{perfilAdminVisivel.nome || usuario?.nome || "Admin"}</strong>
                 <small>Modo admin</small>
               </div>
             </Link>
