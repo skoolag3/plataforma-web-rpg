@@ -84,8 +84,6 @@ frontend/
   app/components/         componentes reutilizáveis, incluindo CartaMontada
   app/lib/                clientes HTTP e tipos
   app/styles/             CSS Modules por tela ou responsabilidade
-scripts/
-  startproject.js         inicialização local dos dois servidores
 ```
 
 ## Executar localmente
@@ -122,8 +120,7 @@ npm --prefix backend run prisma:deploy
 Para iniciar frontend e backend juntos:
 
 ```powershell
-npm link
-startproject
+npm run startproject
 ```
 
 Também é possível iniciar separadamente:

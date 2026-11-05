@@ -32,15 +32,9 @@ NOTAS_PRIVADAS_DESENVOLVIMENTO.md
 .opencode/
 .agents/
 documentacao/
-scripts/__pycache__/
+scripts/
 backend-live*.log
 backend-server*.log
 frontend-live*.log
 frontend-server*.log
 
-# Rascunhos locais de scripts acadêmicos
-scripts/*.py
-!scripts/inspect_rt_docx.py
-!scripts/make_docx_contact_sheets.py
-!scripts/remove_rt_rn20.py
-!scripts/update_rt_usecases.py
