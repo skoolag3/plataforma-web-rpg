@@ -137,12 +137,13 @@ export class EmailService {
       from: smtpConfig.from,
       to: email,
       subject: 'AnimeCards: confirme a troca do seu e-mail',
-      html: `
-        <p>Ola, ${nomeSeguro}.</p>
-        <p>Recebemos uma solicitacao para trocar seu e-mail para ${novoEmailSeguro}.</p>
-        <p><a href="${confirmationUrl}">Confirmar troca de e-mail</a></p>
-        <p>Esse link expira em 30 minutos. Se voce nao solicitou a troca, ignore esta mensagem.</p>
-      `,
+      html: this.buildEmailHtml(
+        `Olá, ${nomeSeguro}.`,
+        `Recebemos uma solicitação para trocar seu e-mail para ${novoEmailSeguro}.`,
+        'Confirmar troca de e-mail',
+        confirmationUrl,
+        'O link expira em 30 minutos. Se você não solicitou a troca, ignore esta mensagem.',
+      ),
       text: `Ola, ${nome}. Confirme a troca para ${novoEmail}: ${confirmationUrl}`,
     });
     this.logger.log('SMTP aceitou o e-mail de confirmação de troca.');
@@ -181,12 +182,13 @@ export class EmailService {
       from: smtpConfig.from,
       to: email,
       subject: 'AnimeCards: confirme seu novo e-mail',
-      html: `
-        <p>Ola, ${nomeSeguro}.</p>
-        <p>O endereco atual ${emailAtualSeguro} autorizou a troca para este e-mail.</p>
-        <p><a href="${confirmationUrl}">Concluir troca de e-mail</a></p>
-        <p>Esse link expira em 30 minutos. A troca so acontece depois deste clique.</p>
-      `,
+      html: this.buildEmailHtml(
+        `Olá, ${nomeSeguro}.`,
+        `O endereço atual ${emailAtualSeguro} autorizou a troca para este e-mail.`,
+        'Concluir troca de e-mail',
+        confirmationUrl,
+        'O link expira em 30 minutos. A troca só acontece depois deste clique.',
+      ),
       text: `Ola, ${nome}. Conclua a troca do e-mail ${emailAtual}: ${confirmationUrl}`,
     });
     this.logger.log('SMTP aceitou o e-mail para o novo endereço.');
@@ -247,25 +249,52 @@ export class EmailService {
 
   private buildVerificationHtml(nome: string, verificationUrl: string) {
     const nomeSeguro = this.escaparHtml(nome);
-    return `
-      <div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#1f2937;line-height:1.6">
-        <h1 style="font-size:22px;color:#6d28d9">AnimeCards</h1>
-        <p>Olá, ${nomeSeguro}.</p>
-        <p>Você criou uma conta no AnimeCards. Confirme seu e-mail para começar a jogar.</p>
-        <p><a href="${verificationUrl}" style="color:#6d28d9;font-weight:bold">Confirmar meu e-mail</a></p>
-        <p style="font-size:13px;color:#6b7280">O link expira em 24 horas. Se você não criou essa conta, ignore esta mensagem.</p>
-      </div>
-    `;
+    return this.buildEmailHtml(
+      `Olá, ${nomeSeguro}.`,
+      'Você criou uma conta no AnimeCards. Confirme seu e-mail para começar a jogar.',
+      'Confirmar meu e-mail',
+      verificationUrl,
+      'O link expira em 24 horas. Se você não criou essa conta, ignore esta mensagem.',
+    );
   }
 
   private buildPasswordResetHtml(nome: string, resetUrl: string) {
     const nomeSeguro = this.escaparHtml(nome);
-    return `
-      <p>Ola, ${nomeSeguro}.</p>
-      <p>Recebemos uma solicitacao para alterar sua senha.</p>
-      <p><a href="${resetUrl}">Alterar senha</a></p>
-      <p>Esse link expira em 1 hora. Se voce nao pediu isso, ignore este e-mail.</p>
-    `;
+    return this.buildEmailHtml(
+      `Olá, ${nomeSeguro}.`,
+      'Recebemos uma solicitação para alterar sua senha.',
+      'Alterar senha',
+      resetUrl,
+      'O link expira em 1 hora. Se você não pediu isso, ignore este e-mail.',
+    );
+  }
+
+  private buildEmailHtml(
+    saudacao: string,
+    descricao: string,
+    acao: string,
+    url: string,
+    aviso: string,
+  ) {
+    const frontendUrl = (
+      process.env.FRONTEND_URL ?? 'http://localhost:3000'
+    ).replace(/\/$/, '');
+    const bannerUrl = `${frontendUrl}/email/animecards-banner.png`;
+    return `<!doctype html>
+      <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+      <body style="margin:0;padding:24px 12px;background:#0a0a14;font-family:Arial,sans-serif;color:#f4f1ff">
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;margin:0 auto;background:#111020;border:1px solid #34254f;border-radius:16px;overflow:hidden">
+          <tr><td style="padding:0;background:#000;text-align:center">
+            <img src="${bannerUrl}" alt="AnimeCards" width="560" style="display:block;width:100%;max-width:560px;height:auto;border:0;color:#fff;font-size:24px;font-weight:bold">
+          </td></tr>
+          <tr><td style="padding:28px 30px 32px;line-height:1.6">
+            <p style="margin:0 0 14px;font-size:18px;font-weight:bold;color:#fff">${saudacao}</p>
+            <p style="margin:0 0 26px;font-size:15px;color:#ded8ed">${descricao}</p>
+            <p style="margin:0 0 26px"><a href="${url}" style="display:inline-block;padding:13px 22px;border-radius:9px;background:#7938d9;color:#fff;font-size:15px;font-weight:bold;text-decoration:none">${acao}</a></p>
+            <p style="margin:0;font-size:13px;color:#aaa2bb">${aviso}</p>
+          </td></tr>
+        </table>
+      </body></html>`;
   }
 
   private escaparHtml(valor: string) {

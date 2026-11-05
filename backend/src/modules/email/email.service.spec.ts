@@ -12,6 +12,7 @@ describe('EmailService', () => {
     pass: process.env.SMTP_PASS,
     port: process.env.SMTP_PORT,
     from: process.env.MAIL_FROM,
+    frontendUrl: process.env.FRONTEND_URL,
   };
 
   afterEach(() => {
@@ -23,6 +24,7 @@ describe('EmailService', () => {
       SMTP_PASS: anterior.pass,
       SMTP_PORT: anterior.port,
       MAIL_FROM: anterior.from,
+      FRONTEND_URL: anterior.frontendUrl,
     })) {
       if (valor === undefined) delete process.env[chave];
       else process.env[chave] = valor;
@@ -66,6 +68,7 @@ describe('EmailService', () => {
     process.env.SMTP_PASS = 'senha-de-teste';
     process.env.SMTP_PORT = '587';
     process.env.MAIL_FROM = 'AnimeCards <animecards@example.com>';
+    process.env.FRONTEND_URL = 'https://animecards.example.com';
     const enviar = jest.fn().mockResolvedValue({ messageId: 'teste' });
     (nodemailer.createTransport as jest.Mock).mockReturnValue({
       sendMail: enviar,
@@ -88,6 +91,9 @@ describe('EmailService', () => {
     expect(mensagem.to).toBe('jogador@example.com');
     expect(mensagem.subject).toBe('AnimeCards: confirme seu e-mail');
     expect(mensagem.html).toContain('Se você não criou essa conta');
+    expect(mensagem.html).toContain(
+      'src="https://animecards.example.com/email/animecards-banner.png"',
+    );
     expect(mensagem.text).toContain('AnimeCards');
   });
 });
