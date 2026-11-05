@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
 type SendVerificationEmailInput = {
@@ -23,7 +27,7 @@ type SmtpConfig = {
   secure: boolean;
   user: string;
   pass: string;
-  from: string;
+  from: { name: string; address: string };
 };
 
 @Injectable()
@@ -58,10 +62,11 @@ export class EmailService {
     await transporter.sendMail({
       from: smtpConfig.from,
       to: email,
-      subject: 'Verifique seu e-mail',
+      subject: 'AnimeCards: confirme seu e-mail',
       html: this.buildVerificationHtml(nome, verificationUrl),
-      text: `Ola, ${nome}. Verifique seu e-mail acessando: ${verificationUrl}`,
+      text: `Olá, ${nome}. Você criou uma conta no AnimeCards. Confirme seu e-mail para começar a jogar: ${verificationUrl}\n\nO link expira em 24 horas. Se você não criou essa conta, ignore esta mensagem.`,
     });
+    this.logger.log('SMTP aceitou o e-mail de verificação.');
   }
 
   async sendPasswordResetEmail({
@@ -92,10 +97,11 @@ export class EmailService {
     await transporter.sendMail({
       from: smtpConfig.from,
       to: email,
-      subject: 'Redefina sua senha',
+      subject: 'AnimeCards: redefina sua senha',
       html: this.buildPasswordResetHtml(nome, resetUrl),
       text: `Ola, ${nome}. Redefina sua senha acessando: ${resetUrl}`,
     });
+    this.logger.log('SMTP aceitou o e-mail de redefinição de senha.');
   }
 
   async sendEmailChangeConfirmation({
@@ -130,7 +136,7 @@ export class EmailService {
     await transporter.sendMail({
       from: smtpConfig.from,
       to: email,
-      subject: 'Confirme a troca do seu e-mail',
+      subject: 'AnimeCards: confirme a troca do seu e-mail',
       html: `
         <p>Ola, ${nomeSeguro}.</p>
         <p>Recebemos uma solicitacao para trocar seu e-mail para ${novoEmailSeguro}.</p>
@@ -139,6 +145,7 @@ export class EmailService {
       `,
       text: `Ola, ${nome}. Confirme a troca para ${novoEmail}: ${confirmationUrl}`,
     });
+    this.logger.log('SMTP aceitou o e-mail de confirmação de troca.');
   }
 
   async sendPendingEmailVerification({
@@ -173,7 +180,7 @@ export class EmailService {
     await transporter.sendMail({
       from: smtpConfig.from,
       to: email,
-      subject: 'Confirme seu novo e-mail',
+      subject: 'AnimeCards: confirme seu novo e-mail',
       html: `
         <p>Ola, ${nomeSeguro}.</p>
         <p>O endereco atual ${emailAtualSeguro} autorizou a troca para este e-mail.</p>
@@ -182,6 +189,7 @@ export class EmailService {
       `,
       text: `Ola, ${nome}. Conclua a troca do e-mail ${emailAtual}: ${confirmationUrl}`,
     });
+    this.logger.log('SMTP aceitou o e-mail para o novo endereço.');
   }
 
   private getSmtpConfig(): SmtpConfig | null {
@@ -190,7 +198,7 @@ export class EmailService {
     const user = process.env.SMTP_USER;
     const pass = process.env.SMTP_PASS;
     const secure = this.parseBoolean(process.env.SMTP_SECURE) ?? port === 465;
-    const from = process.env.MAIL_FROM ?? user;
+    const from = process.env.MAIL_FROM?.trim() || user;
 
     const missing = [
       ['SMTP_HOST', host],
@@ -202,11 +210,21 @@ export class EmailService {
 
     if (missing.length > 0) {
       this.logger.warn(`Variaveis SMTP ausentes: ${missing.join(', ')}`);
+      if (process.env.NODE_ENV === 'production') {
+        throw new ServiceUnavailableException(
+          'Envio de e-mail indisponível. Tente novamente mais tarde.',
+        );
+      }
       return null;
     }
 
-    if (Number.isNaN(port)) {
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
       this.logger.warn('SMTP_PORT inválido.');
+      if (process.env.NODE_ENV === 'production') {
+        throw new ServiceUnavailableException(
+          'Envio de e-mail indisponível. Tente novamente mais tarde.',
+        );
+      }
       return null;
     }
 
@@ -220,17 +238,23 @@ export class EmailService {
       secure,
       user,
       pass,
-      from,
+      from: {
+        name: 'AnimeCards',
+        address: from.match(/<([^<>]+)>/)?.[1] ?? from,
+      },
     };
   }
 
   private buildVerificationHtml(nome: string, verificationUrl: string) {
     const nomeSeguro = this.escaparHtml(nome);
     return `
-      <p>Ola, ${nomeSeguro}.</p>
-      <p>Confirme seu e-mail para verificar sua conta.</p>
-      <p><a href="${verificationUrl}">Verificar e-mail</a></p>
-      <p>Esse link expira em 24 horas.</p>
+      <div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#1f2937;line-height:1.6">
+        <h1 style="font-size:22px;color:#6d28d9">AnimeCards</h1>
+        <p>Olá, ${nomeSeguro}.</p>
+        <p>Você criou uma conta no AnimeCards. Confirme seu e-mail para começar a jogar.</p>
+        <p><a href="${verificationUrl}" style="color:#6d28d9;font-weight:bold">Confirmar meu e-mail</a></p>
+        <p style="font-size:13px;color:#6b7280">O link expira em 24 horas. Se você não criou essa conta, ignore esta mensagem.</p>
+      </div>
     `;
   }
 
