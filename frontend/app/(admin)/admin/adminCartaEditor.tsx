@@ -103,6 +103,7 @@ export function CartaEditor({
   const envioEmAndamento = useRef(false);
   const [enviando, setEnviando] = useState(false);
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [imagemParaRemover, setImagemParaRemover] = useState<"foto" | "moldura" | null>(null);
   const [confirmacaoExclusao, setConfirmacaoExclusao] = useState("");
   const [impactoExclusao, setImpactoExclusao] = useState<number | null>(null);
   const [impactoStatus, setImpactoStatus] = useState<number | null>(null);
@@ -130,6 +131,15 @@ export function CartaEditor({
     document.addEventListener("keydown", fecharComEscape);
     return () => document.removeEventListener("keydown", fecharComEscape);
   }, [detalhesAbertos]);
+
+  useEffect(() => {
+    if (!imagemParaRemover) return;
+    function fecharComEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setImagemParaRemover(null);
+    }
+    document.addEventListener("keydown", fecharComEscape);
+    return () => document.removeEventListener("keydown", fecharComEscape);
+  }, [imagemParaRemover]);
 
   useEffect(() => {
     function confirmarSaida(event: BeforeUnloadEvent) {
@@ -212,6 +222,7 @@ export function CartaEditor({
       setMolduraInputVersao((versao) => versao + 1);
       setMolduraRemovida(true);
     }
+    setImagemParaRemover(null);
   }
 
   async function baixarImagem(url: string, nome: string) {
@@ -556,11 +567,11 @@ export function CartaEditor({
             <div className={styles.editorSectionContent}>
               <div className={styles.campoImagemEditor}>
                 <CampoArquivo key={fotoInputVersao} rotulo="Foto/personagem" rotuloBotao={cardImage ? "Modificar imagem" : "Escolher imagem"} accept="image/*" ajuda="PNG, JPG ou WEBP, até 5 MB." onFilesSelected={handleFotoChange} />
-                {cardImage ? <div className={styles.acoesImagem}><button type="button" onClick={() => void baixarImagem(cardImage, `${form.nome || "carta"}-foto`)}>Baixar imagem</button><button type="button" onClick={() => removerImagem("foto")}>Remover imagem</button></div> : null}
+                {cardImage ? <div className={styles.acoesImagem}><button type="button" onClick={() => void baixarImagem(cardImage, `${form.nome || "carta"}-foto`)}>Baixar imagem</button><button type="button" onClick={() => setImagemParaRemover("foto")}>Remover imagem</button></div> : null}
               </div>
               <div className={styles.campoImagemEditor}>
                 <CampoArquivo key={molduraInputVersao} rotulo="Moldura" rotuloBotao={cardFrame ? "Modificar imagem" : "Escolher moldura"} accept="image/png,image/webp" ajuda="PNG ou WEBP transparente, até 5 MB. Ajuste o encaixe no compositor." onFilesSelected={handleMolduraChange} />
-                {cardFrame ? <div className={styles.acoesImagem}><button type="button" onClick={() => void baixarImagem(cardFrame, `${form.nome || "carta"}-moldura`)}>Baixar imagem</button><button type="button" onClick={() => removerImagem("moldura")}>Remover imagem</button></div> : null}
+                {cardFrame ? <div className={styles.acoesImagem}><button type="button" onClick={() => void baixarImagem(cardFrame, `${form.nome || "carta"}-moldura`)}>Baixar imagem</button><button type="button" onClick={() => setImagemParaRemover("moldura")}>Remover imagem</button></div> : null}
               </div>
               <ControleVisualCarta
                 value={form.configVisual}
@@ -746,6 +757,36 @@ export function CartaEditor({
         </aside>
       </section>
     </form>
+    {imagemParaRemover && portalPronto
+      ? createPortal(
+          <div
+            className={styles.fundoConfirmacaoImagem}
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setImagemParaRemover(null);
+            }}
+          >
+            <section
+              className={styles.confirmacaoImagem}
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="titulo-confirmar-remocao-imagem"
+              aria-describedby="descricao-confirmar-remocao-imagem"
+            >
+              <h2 id="titulo-confirmar-remocao-imagem">
+                Remover {imagemParaRemover === "foto" ? "foto/personagem" : "moldura"}?
+              </h2>
+              <p id="descricao-confirmar-remocao-imagem">
+                A prévia ficará sem essa imagem. A alteração será aplicada à carta quando você clicar em Salvar.
+              </p>
+              <div className={styles.acoesConfirmacaoImagem}>
+                <button type="button" autoFocus onClick={() => setImagemParaRemover(null)}>Cancelar</button>
+                <button type="button" onClick={() => removerImagem(imagemParaRemover)}>Remover imagem</button>
+              </div>
+            </section>
+          </div>,
+          document.body,
+        )
+      : null}
     {detalhesAbertos && portalPronto
       ? createPortal(
           <div

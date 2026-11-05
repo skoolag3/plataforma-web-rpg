@@ -309,6 +309,33 @@
 .acoesImagem button:last-child { color: #fca5a5; border-color: rgba(248, 113, 113, 0.4); }
 .acoesImagem button:focus-visible { outline: 2px solid #bef264; outline-offset: 2px; }
 
+.fundoConfirmacaoImagem {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(2, 4, 12, 0.8);
+}
+
+.confirmacaoImagem {
+  width: min(100%, 26rem);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  border-radius: 0.85rem;
+  background: #101424;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.5);
+  color: #f8fafc;
+  padding: 1.25rem;
+}
+
+.confirmacaoImagem h2 { margin: 0 0 0.6rem; font-size: 1.1rem; }
+.confirmacaoImagem p { margin: 0; color: #aebbd0; line-height: 1.5; }
+.acoesConfirmacaoImagem { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.3rem; }
+.acoesConfirmacaoImagem button { min-height: 2.6rem; border: 1px solid rgba(167, 139, 250, 0.35); border-radius: 0.55rem; padding: 0.55rem 0.8rem; color: #f8fafc; background: #1a2033; cursor: pointer; }
+.acoesConfirmacaoImagem button:last-child { border-color: #b94a63; background: #7f243d; }
+.acoesConfirmacaoImagem button:focus-visible { outline: 2px solid #bef264; outline-offset: 2px; }
+
 .campoElemento {
   grid-template-rows: 1.5rem auto;
 }
