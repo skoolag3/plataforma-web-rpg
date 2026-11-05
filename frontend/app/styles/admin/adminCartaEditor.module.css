@@ -294,6 +294,21 @@
   padding: 0.8rem;
 }
 
+.campoImagemEditor { display: grid; gap: 0.45rem; min-width: 0; }
+.acoesImagem { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.acoesImagem button {
+  min-height: 36px;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 0.5rem;
+  background: rgba(124, 58, 237, 0.12);
+  color: #ede9fe;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+.acoesImagem button:last-child { color: #fca5a5; border-color: rgba(248, 113, 113, 0.4); }
+.acoesImagem button:focus-visible { outline: 2px solid #bef264; outline-offset: 2px; }
+
 .campoElemento {
   grid-template-rows: 1.5rem auto;
 }

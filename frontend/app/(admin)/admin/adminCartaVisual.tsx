@@ -314,11 +314,13 @@ export function CampoArquivo({
   rotulo,
   accept,
   ajuda,
+  rotuloBotao,
   onFilesSelected,
 }: {
   rotulo: string;
   accept: string;
   ajuda?: string;
+  rotuloBotao?: string;
   onFilesSelected: (files: File[]) => void;
 }) {
   return (
@@ -327,7 +329,7 @@ export function CampoArquivo({
       <AnimatedFileUpload
         accept={accept}
         maxSize={5 * 1024 * 1024}
-        rotulo={`Escolher ${rotulo.toLowerCase()}`}
+        rotulo={rotuloBotao ?? `Escolher ${rotulo.toLowerCase()}`}
         ajuda={ajuda}
         onFilesSelected={onFilesSelected}
       />
@@ -714,22 +716,39 @@ export function ControleFaixa({
   onChange: (value: number) => void;
 }) {
   return (
-    <label className={styles.controleFaixa}>
+    <div className={styles.controleFaixa}>
       <span>
         {rotulo}
-        <output>
-          {Number(value.toFixed(2))}
+        <span className={styles.valorFaixa}>
+          <input
+            key={value}
+            type="number"
+            aria-label={`${rotulo}: valor`}
+            defaultValue={Number(value.toFixed(2))}
+            min={min}
+            max={max}
+            step={step}
+            onBlur={(event) => {
+              const numero = Number(event.target.value);
+              if (!Number.isFinite(numero)) { event.target.value = String(value); return; }
+              const ajustado = Math.min(max, Math.max(min, numero));
+              event.target.value = String(ajustado);
+              onChange(ajustado);
+            }}
+            onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }}
+          />
           {sufixo}
-        </output>
+        </span>
       </span>
       <input
         type="range"
+        aria-label={`${rotulo}: ajuste`}
         value={value}
         min={min}
         max={max}
         step={step}
         onChange={(event) => onChange(Number(event.target.value))}
       />
-    </label>
+    </div>
   );
 }

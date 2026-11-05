@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
+import { AdminCloudinaryService } from './admin-cloudinary.service';
 import { obterValorVendaPorRaridade } from '../../jogo/cartas/valor-venda-raridade';
 import {
   CreateAdminCartaDto,
@@ -25,7 +26,7 @@ type CartaComHabilidades = Prisma.CartaGetPayload<{
 
 @Injectable()
 export class AdminCartasService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly imagens: AdminCloudinaryService) {}
 
   async historico(filtros: { pagina?: string; busca?: string; acao?: string }) {
     const pagina = Math.max(1, Math.min(100000, Number.parseInt(filtros.pagina ?? '1', 10) || 1));
@@ -227,7 +228,12 @@ export class AdminCartasService {
       return editada;
     });
 
-    return this.toResponse(carta);
+    const resposta = await this.toResponse(carta);
+    const antigas = new Set([[atual.foto, resposta.foto], [atual.fotoPerfil, resposta.fotoPerfil], [atual.moldura, resposta.moldura]]
+      .filter(([antiga, nova]) => antiga && antiga !== nova)
+      .map(([antiga]) => antiga as string));
+    for (const antiga of antigas) await this.imagens.removerImagemSeNaoUsada(antiga);
+    return resposta;
   }
 
   async remover(id: string, confirmarNome: string, confirmarImpacto: boolean, idAdmin?: string) {

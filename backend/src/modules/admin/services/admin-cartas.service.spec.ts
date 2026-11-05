@@ -36,6 +36,7 @@ describe('AdminCartasService', () => {
     logAdminCarta: { create: jest.fn() },
     raridadeCarta: { findUnique: jest.fn(), findMany: jest.fn() },
   };
+  const imagens = { removerImagemSeNaoUsada: jest.fn() };
   let service: AdminCartasService;
 
   beforeEach(() => {
@@ -50,7 +51,7 @@ describe('AdminCartasService', () => {
       Promise.resolve({ codigo: where.codigo, valor_venda: { N: 50, R: 100, SR: 200, SSR: 400, UR: 800 }[where.codigo] ?? 0 }),
     );
     prisma.raridadeCarta.findMany.mockResolvedValue([]);
-    service = new AdminCartasService(prisma as never);
+    service = new AdminCartasService(prisma as never, imagens as never);
   });
 
   it('recusa a remoção quando o nome de confirmação não corresponde', async () => {
@@ -105,6 +106,19 @@ describe('AdminCartasService', () => {
       }),
       include: expect.any(Object),
     });
+  });
+
+  it('remove a referência da imagem e limpa o arquivo antigo após salvar', async () => {
+    const comFoto = { ...carta, foto: 'https://res.cloudinary.com/exemplo/image/upload/v1/anime-cards/cartas/fotos/flare.png' };
+    prisma.carta.findFirst.mockResolvedValue(comFoto);
+    prisma.carta.update.mockResolvedValue({ ...comFoto, foto: null });
+
+    await service.atualizar(carta.id, { foto: null });
+
+    expect(prisma.carta.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ foto: null }),
+    }));
+    expect(imagens.removerImagemSeNaoUsada).toHaveBeenCalledWith(comFoto.foto);
   });
 
   it('faz soft delete quando o nome é confirmado', async () => {

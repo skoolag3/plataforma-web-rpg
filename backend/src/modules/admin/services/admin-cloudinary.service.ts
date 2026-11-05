@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
@@ -25,6 +26,7 @@ type UploadedAsset = {
 @Injectable()
 export class AdminCloudinaryService {
   private configured = false;
+  private readonly logger = new Logger(AdminCloudinaryService.name);
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -87,6 +89,35 @@ export class AdminCloudinaryService {
 
   uploadNoticiaImagem(imagem: Express.Multer.File) {
     return this.uploadImage(imagem, 'noticias');
+  }
+
+  async removerImagemSeNaoUsada(imagemUrl: string) {
+    const publicId = this.publicIdDaCarta(imagemUrl);
+    if (!publicId) return;
+    try {
+      const referencias = await this.prisma.carta.count({
+        where: { OR: [{ foto: imagemUrl }, { foto_perfil: imagemUrl }, { moldura: imagemUrl }] },
+      });
+      if (referencias > 0) return;
+      this.configureCloudinary();
+      await cloudinary.uploader.destroy(publicId, { invalidate: true });
+    } catch (erro) {
+      this.logger.warn(`Não foi possível remover imagem antiga: ${publicId}`, erro instanceof Error ? erro.stack : undefined);
+    }
+  }
+
+  private publicIdDaCarta(imagemUrl: string) {
+    try {
+      const url = new URL(imagemUrl);
+      const cloudName = process.env.CLOUDINARY_URL
+        ? this.parseCloudinaryUrl(process.env.CLOUDINARY_URL).cloudName
+        : process.env.CLOUDINARY_CLOUD_NAME;
+      if (url.hostname !== 'res.cloudinary.com' || url.pathname.split('/')[1] !== cloudName) return null;
+      const caminho = url.pathname.match(/\/image\/upload\/v\d+\/(.+)\.[a-z0-9]+$/i)?.[1];
+      const pasta = this.getFolder('cartas/');
+      const publicId = caminho ? decodeURIComponent(caminho) : null;
+      return publicId?.startsWith(pasta) ? publicId : null;
+    } catch { return null; }
   }
 
   private extractFiles(files: CartaAssetFiles) {

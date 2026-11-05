@@ -142,8 +142,11 @@ export type CreateAdminCartaPayload = {
   habilidadesIds?: string[];
 };
 
-export type UpdateAdminCartaPayload = Partial<CreateAdminCartaPayload> & {
+export type UpdateAdminCartaPayload = Omit<Partial<CreateAdminCartaPayload>, "foto" | "fotoPerfil" | "moldura"> & {
   confirmarImpacto?: boolean;
+  foto?: string | null;
+  fotoPerfil?: string | null;
+  moldura?: string | null;
 };
 
 export type AdminCartaImpacto = {

@@ -148,17 +148,17 @@ export class UpdateAdminCartaDto {
   @IsOptional()
   @IsString()
   @MaxLength(500)
-  foto?: string;
+  foto?: string | null;
 
   @IsOptional()
   @IsString()
   @MaxLength(500)
-  fotoPerfil?: string;
+  fotoPerfil?: string | null;
 
   @IsOptional()
   @IsString()
   @MaxLength(500)
-  moldura?: string;
+  moldura?: string | null;
 
   @IsOptional()
   @IsObject()

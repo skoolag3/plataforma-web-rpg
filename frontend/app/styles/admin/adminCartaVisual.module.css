@@ -493,7 +493,9 @@
   font-weight: 700;
 }
 
-.controleFaixa output {
+.valorFaixa {
+  display: inline-flex;
+  align-items: center;
   min-width: 3rem;
   border-radius: 0.35rem;
   background: rgba(2, 6, 23, 0.72);
@@ -501,6 +503,22 @@
   padding: 0.18rem 0.35rem;
   text-align: right;
 }
+
+.valorFaixa input {
+  width: 3.2rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: right;
+  appearance: textfield;
+}
+
+.valorFaixa input::-webkit-inner-spin-button,
+.valorFaixa input::-webkit-outer-spin-button { appearance: none; }
+
+.valorFaixa:focus-within { outline: 2px solid #bef264; outline-offset: 2px; }
 
 .controleFaixa input[type="range"] {
   width: 100%;
