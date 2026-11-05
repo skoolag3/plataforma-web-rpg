@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('../frontend/node_modules/sharp');
 
-const pastaSaida = path.resolve(__dirname, '../documentacao/diagramas/casos-de-uso-separados');
+const pastaSaida = path.resolve(__dirname, '../../plataforma-web-rpg-arquivos/documentacao/diagramas/casos-de-uso-separados');
 fs.mkdirSync(pastaSaida, { recursive: true });
 
 const escapeXml = (texto) => String(texto)

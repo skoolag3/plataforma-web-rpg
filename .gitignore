@@ -29,6 +29,9 @@ NOTAS_PRIVADAS_DESENVOLVIMENTO.md
 # Anexos e artefatos temporários de trabalho
 .codex-remote-attachments/
 .local/
+.opencode/
+.agents/
+documentacao/
 scripts/__pycache__/
 backend-live*.log
 backend-server*.log

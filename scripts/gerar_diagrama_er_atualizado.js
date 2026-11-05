@@ -4,7 +4,8 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 
-const outputDir = path.resolve("documentacao/diagramas");
+const outputDir = path.resolve(__dirname, "../../plataforma-web-rpg-arquivos/documentacao/diagramas");
+fs.mkdirSync(outputDir, { recursive: true });
 const svgPath = path.join(outputDir, "03-modelo-dados-relacional-atualizado.svg");
 const pngPath = path.join(outputDir, "03-modelo-dados-relacional-atualizado.png");
 

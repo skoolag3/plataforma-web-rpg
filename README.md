@@ -176,7 +176,6 @@ Copie o segredo `whsec_...` exibido pela CLI para `STRIPE_WEBHOOK_SECRET` e rein
 - nomes e descrições das habilidades vinculadas exibidos na coleção e durante a batalha;
 - correção da recompensa final da Expedição no ledger, incluindo o motivo `EXPEDICAO_CONCLUIDA` na restrição do PostgreSQL;
 - senha fortalecida com mínimo de oito caracteres, letra maiúscula, número e caractere especial;
-- relatório de autenticação em `documentacao/RELATORIO_TESTES_AUTENTICACAO.md`;
 - correção dos motivos do ledger usados pelo gacha para respeitar as constraints do PostgreSQL;
 - animação de invocação e revelação das cartas no gacha;
 - retorno da compra do Stripe direcionado à loja, sem interferir na rota do gacha;
