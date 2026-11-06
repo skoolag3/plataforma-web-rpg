@@ -304,21 +304,153 @@
   resize: vertical;
   line-height: 1.5;
 }
+.campoImagemEditor {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 0.75rem;
+}
 .imagemCampo {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  margin: 0 0.75rem;
+  margin: 0;
 }
 .imagemCampo > :first-child {
   flex: 1;
   min-width: 0;
 }
-.imagemCampo img {
-  width: 7rem;
-  height: 3.5rem;
+.previaImagemWrapper {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.previaImagemWrapper img {
+  width: 7.5rem;
+  height: 3.75rem;
   border-radius: 0.45rem;
   object-fit: cover;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+.acoesImagem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+.acoesImagem button {
+  min-height: 32px;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 0.5rem;
+  background: rgba(124, 58, 237, 0.12);
+  color: #ede9fe;
+  padding: 0.35rem 0.65rem;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.acoesImagem button:hover {
+  background: rgba(124, 58, 237, 0.22);
+  border-color: rgba(167, 139, 250, 0.55);
+}
+.acoesImagem button:active {
+  transform: scale(0.98);
+}
+.acoesImagem button:last-child {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.4);
+  background: rgba(239, 68, 68, 0.1);
+}
+.acoesImagem button:last-child:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(248, 113, 113, 0.6);
+}
+.acoesImagem button:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 2px;
+}
+
+.fundoConfirmacaoImagem {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(2, 4, 12, 0.82);
+  backdrop-filter: blur(4px);
+}
+
+.confirmacaoImagem {
+  width: min(100%, 26rem);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  border-radius: 0.85rem;
+  background: #101424;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.5);
+  color: #f8fafc;
+  padding: 1.25rem;
+}
+
+.confirmacaoImagem h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.08rem;
+}
+
+.confirmacaoImagem p {
+  margin: 0;
+  color: #aebbd0;
+  line-height: 1.5;
+  font-size: 0.84rem;
+}
+
+.acoesConfirmacaoImagem {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.3rem;
+}
+
+.acoesConfirmacaoImagem button {
+  min-height: 2.5rem;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 0.55rem;
+  padding: 0.5rem 0.85rem;
+  color: #f8fafc;
+  background: #1a2033;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.acoesConfirmacaoImagem button:first-child:hover {
+  background: #252e47;
+  border-color: rgba(167, 139, 250, 0.5);
+}
+
+.acoesConfirmacaoImagem button:last-child {
+  border-color: #b94a63;
+  background: #7f243d;
+  color: #ffe4e6;
+}
+
+.acoesConfirmacaoImagem button:last-child:hover {
+  background: #9f1c3f;
+  border-color: #f43f5e;
+}
+
+.acoesConfirmacaoImagem button:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 2px;
 }
 .anexos {
   display: grid;
@@ -454,9 +586,25 @@
   .formulario {
     max-height: calc(100dvh - 1.1rem);
   }
+  .campoImagemEditor {
+    margin: 0 0.5rem;
+  }
   .imagemCampo {
     align-items: stretch;
     flex-direction: column;
+  }
+  .previaImagemWrapper img {
+    width: 100%;
+    max-width: 14rem;
+    height: auto;
+    aspect-ratio: 2 / 1;
+  }
+  .acoesImagem {
+    width: 100%;
+  }
+  .acoesImagem button {
+    flex: 1 1 7rem;
+    justify-content: center;
   }
   .camposDuplos {
     grid-template-columns: 1fr;

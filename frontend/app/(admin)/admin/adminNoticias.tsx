@@ -2,6 +2,7 @@
 
 import { nomeCategoriaNoticia } from "../../lib/noticias";
 import {
+  Download,
   FileText,
   Link2,
   Pencil,
@@ -12,6 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   atualizarAdminNoticia,
   criarAdminNoticia,
@@ -50,10 +52,15 @@ export function AdminNoticias() {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
   const [excluindo, setExcluindo] = useState<AdminNoticia | null>(null);
+  const [imagemInputVersao, setImagemInputVersao] = useState(0);
+  const [confirmarRemoverImagem, setConfirmarRemoverImagem] = useState(false);
+  const [portalPronto, setPortalPronto] = useState(false);
   const campoTituloRef = useRef<HTMLInputElement>(null);
   const btnCriarRef = useRef<HTMLButtonElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    setPortalPronto(true);
     void carregar();
   }, []);
 
@@ -67,14 +74,20 @@ export function AdminNoticias() {
     document.body.style.overflow = "hidden";
     campoTituloRef.current?.focus();
     function fecharComEscape(evento: KeyboardEvent) {
-      if (evento.key === "Escape") fecharEditor();
+      if (evento.key === "Escape") {
+        if (confirmarRemoverImagem) {
+          setConfirmarRemoverImagem(false);
+          return;
+        }
+        fecharEditor();
+      }
     }
     document.addEventListener("keydown", fecharComEscape);
     return () => {
       document.body.style.overflow = overflowAnterior;
       document.removeEventListener("keydown", fecharComEscape);
     };
-  }, [editorAberto]);
+  }, [editorAberto, confirmarRemoverImagem]);
 
   async function carregar() {
     try {
@@ -95,6 +108,8 @@ export function AdminNoticias() {
     setEditando(null);
     setForm(formularioVazio);
     setErro("");
+    setConfirmarRemoverImagem(false);
+    setImagemInputVersao((versao) => versao + 1);
     setEditorAberto(true);
   }
 
@@ -102,6 +117,7 @@ export function AdminNoticias() {
     setEditando(null);
     setForm(formularioVazio);
     setErro("");
+    setConfirmarRemoverImagem(false);
     setEditorAberto(false);
     btnCriarRef.current?.focus();
   }
@@ -109,6 +125,8 @@ export function AdminNoticias() {
   function editar(noticia: AdminNoticia) {
     setEditando(noticia.id);
     setEditorAberto(true);
+    setConfirmarRemoverImagem(false);
+    setImagemInputVersao((versao) => versao + 1);
     setForm({
       titulo: noticia.titulo,
       resumo: noticia.resumo,
@@ -127,12 +145,58 @@ export function AdminNoticias() {
     dados.append("imagem", arquivo);
     setSalvando(true);
     try {
-      atualizar("imagem", (await uploadNoticiaImagem(dados)).url);
-      notificarSucesso("Imagem de capa enviada.");
+      const resposta = await uploadNoticiaImagem(dados);
+      atualizar("imagem", resposta.url);
+      setImagemInputVersao((versao) => versao + 1);
+      notificarSucesso("Imagem de capa atualizada.");
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro no upload.");
     } finally {
       setSalvando(false);
+    }
+  }
+
+  function removerImagemCapa() {
+    atualizar("imagem", undefined);
+    setImagemInputVersao((versao) => versao + 1);
+    setConfirmarRemoverImagem(false);
+    notificarSucesso("Imagem de capa removida da publicação.");
+  }
+
+  async function baixarImagem(url: string, nome: string) {
+    try {
+      const resposta = await fetch(url);
+      if (!resposta.ok) throw new Error();
+      const arquivo = URL.createObjectURL(await resposta.blob());
+      const link = document.createElement("a");
+      link.href = arquivo;
+      const tipo = resposta.headers.get("content-type") ?? "";
+      const extensao = tipo.includes("jpeg")
+        ? "jpg"
+        : tipo.includes("webp")
+          ? "webp"
+          : "png";
+      const nomeLimpo = nome
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9_-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      link.download = `${nomeLimpo || "noticia-capa"}.${extensao}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(arquivo), 1000);
+      notificarSucesso("Download iniciado.");
+    } catch {
+      const link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.download = `${nome || "noticia-capa"}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     }
   }
 
@@ -356,22 +420,77 @@ export function AdminNoticias() {
                 onChange={(e) => atualizar("conteudo", e.target.value)}
               />
             </label>
-            <div className={styles.imagemCampo}>
-              <AnimatedFileUpload
+            <div className={styles.campoImagemEditor}>
+              <input
+                ref={fileInputRef}
+                type="file"
                 accept="image/png,image/jpeg,image/webp"
-                maxSize={5 * 1024 * 1024}
-                rotulo="Imagem de capa"
-                ajuda="Arraste ou clique para escolher · PNG, JPG ou WEBP · Até 5 MB"
-                disabled={salvando}
-                onFilesSelected={(arquivos) => { if (arquivos.length) void enviarImagem(arquivos); }}
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  if (files.length) void enviarImagem(files);
+                  e.target.value = "";
+                }}
               />
-              {form.imagem ? (
-                <Image
-                  src={form.imagem}
-                  alt="Prévia"
-                  width={220}
-                  height={110}
+              <div className={styles.imagemCampo}>
+                <AnimatedFileUpload
+                  key={imagemInputVersao}
+                  accept="image/png,image/jpeg,image/webp"
+                  maxSize={5 * 1024 * 1024}
+                  rotulo={form.imagem ? "Modificar imagem" : "Imagem de capa"}
+                  ajuda={
+                    form.imagem
+                      ? "Arraste ou clique para trocar a imagem de capa · PNG, JPG ou WEBP"
+                      : "Arraste ou clique para escolher · PNG, JPG ou WEBP · Até 5 MB"
+                  }
+                  disabled={salvando}
+                  onFilesSelected={(arquivos) => {
+                    if (arquivos.length) void enviarImagem(arquivos);
+                  }}
                 />
+                {form.imagem ? (
+                  <div className={styles.previaImagemWrapper}>
+                    <Image
+                      src={form.imagem}
+                      alt="Prévia da capa"
+                      width={220}
+                      height={110}
+                    />
+                  </div>
+                ) : null}
+              </div>
+              {form.imagem ? (
+                <div className={styles.acoesImagem}>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Escolher outra imagem para substituir a capa"
+                  >
+                    <Pencil size={13} aria-hidden="true" />
+                    Trocar imagem
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void baixarImagem(
+                        form.imagem!,
+                        `${form.titulo || "noticia"}-capa`,
+                      )
+                    }
+                    title="Baixar imagem atual para o seu dispositivo"
+                  >
+                    <Download size={13} aria-hidden="true" />
+                    Baixar imagem
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmarRemoverImagem(true)}
+                    title="Remover imagem de capa desta publicação"
+                  >
+                    <Trash2 size={13} aria-hidden="true" />
+                    Remover imagem
+                  </button>
+                </div>
               ) : null}
             </div>
             <div className={styles.anexos}>
@@ -464,6 +583,45 @@ export function AdminNoticias() {
           </section>
         </div>
       ) : null}
+      {confirmarRemoverImagem && portalPronto
+        ? createPortal(
+            <div
+              className={styles.fundoConfirmacaoImagem}
+              onMouseDown={(event) => {
+                if (event.target === event.currentTarget)
+                  setConfirmarRemoverImagem(false);
+              }}
+            >
+              <section
+                className={styles.confirmacaoImagem}
+                role="alertdialog"
+                aria-modal="true"
+                aria-labelledby="titulo-confirmar-remocao-capa"
+                aria-describedby="descricao-confirmar-remocao-capa"
+              >
+                <h2 id="titulo-confirmar-remocao-capa">
+                  Remover imagem de capa?
+                </h2>
+                <p id="descricao-confirmar-remocao-capa">
+                  A prévia ficará sem essa imagem. A alteração será aplicada à publicação quando você clicar em Salvar.
+                </p>
+                <div className={styles.acoesConfirmacaoImagem}>
+                  <button
+                    type="button"
+                    autoFocus
+                    onClick={() => setConfirmarRemoverImagem(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button type="button" onClick={removerImagemCapa}>
+                    Remover imagem
+                  </button>
+                </div>
+              </section>
+            </div>,
+            document.body,
+          )
+        : null}
     </AdminLayout>
   );
 }
