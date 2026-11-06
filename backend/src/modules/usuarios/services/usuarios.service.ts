@@ -19,7 +19,15 @@ export class UsuariosService {
     });
 
     if (usuarioExistente) {
-      throw new ConflictException('E-mail já cadastrado.');
+      if (usuarioExistente.excluido_em) {
+        const identificador = usuarioExistente.id.replaceAll('-', '');
+        await this.prisma.usuario.update({
+          where: { id: usuarioExistente.id },
+          data: { email: `excluido-${identificador}@anon.invalid` },
+        });
+      } else {
+        throw new ConflictException('E-mail já cadastrado.');
+      }
     }
 
     const senhaHash = await bcrypt.hash(senha, 10);

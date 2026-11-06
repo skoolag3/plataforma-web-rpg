@@ -193,11 +193,19 @@ export class PerfilService implements OnModuleInit, OnModuleDestroy {
 
     const emailEmUso = await this.prisma.usuario.findUnique({
       where: { email },
-      select: { id: true },
+      select: { id: true, excluido_em: true },
     });
 
     if (emailEmUso) {
-      throw new ConflictException('Este e-mail já está em uso.');
+      if (emailEmUso.excluido_em) {
+        const identificador = emailEmUso.id.replaceAll('-', '');
+        await this.prisma.usuario.update({
+          where: { id: emailEmUso.id },
+          data: { email: `excluido-${identificador}@anon.invalid` },
+        });
+      } else {
+        throw new ConflictException('Este e-mail já está em uso.');
+      }
     }
 
     const token = randomBytes(32).toString('hex');

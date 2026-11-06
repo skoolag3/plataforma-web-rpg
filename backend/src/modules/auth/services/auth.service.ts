@@ -51,7 +51,29 @@ export class AuthService {
     });
 
     if (userExiste) {
-      if (!userExiste.email_verificado) {
+      if (userExiste.excluido_em) {
+        const identificador = userExiste.id.replaceAll('-', '');
+        await this.prisma.$transaction([
+          this.prisma.provedorUsuario.deleteMany({
+            where: { id_usuario: userExiste.id },
+          }),
+          this.prisma.usuario.update({
+            where: { id: userExiste.id },
+            data: {
+              email: `excluido-${identificador}@anon.invalid`,
+              token_verificacao_email: null,
+              token_verificacao_expira_em: null,
+              token_redefinicao_senha: null,
+              token_redefinicao_expira_em: null,
+              email_pendente: null,
+              token_confirmacao_troca_email: null,
+              token_troca_email_expira_em: null,
+              token_verificacao_email_pendente: null,
+              token_email_pendente_expira_em: null,
+            },
+          }),
+        ]);
+      } else if (!userExiste.email_verificado) {
         const usuario = await this.atualizarTokenVerificacao(userExiste.id);
         await this.emailService.sendVerificationEmail({
           email: usuario.email,
@@ -62,9 +84,9 @@ export class AuthService {
         return {
           message: mensagemVerificacaoPendente,
         };
+      } else {
+        throw new ConflictException('Já existe um usuário com este e-mail.');
       }
-
-      throw new ConflictException('Já existe um usuário com este e-mail.');
     }
 
     const tokenVerificacao = this.gerarTokenVerificacao();
@@ -144,7 +166,11 @@ export class AuthService {
       where: { email },
     });
 
-    if (!usuarioExistente || usuarioExistente.email_verificado) {
+    if (
+      !usuarioExistente ||
+      usuarioExistente.email_verificado ||
+      usuarioExistente.excluido_em
+    ) {
       return {
         message: mensagemReenvioPadrao,
       };
