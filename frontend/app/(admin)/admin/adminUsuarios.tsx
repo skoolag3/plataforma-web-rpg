@@ -492,7 +492,7 @@ export function Usuarios() {
           }}
         >
           <form
-            className={`${styles.usuarioEditor} ${styles.usuarioModal}`}
+            className={`${styles.usuarioEditorModal} ${styles.usuarioModal}`}
             data-modal-panel
             onSubmit={salvarUsuario}
             role="dialog"
@@ -509,13 +509,14 @@ export function Usuarios() {
               </div>
               <button
                 type="button"
+                className={styles.btnFecharEditor}
                 onClick={fecharEdicao}
                 aria-label="Fechar editor"
               >
                 <X aria-hidden="true" />
               </button>
             </header>
-            <label>
+            <label className={styles.campoNome}>
               Nome
               <input
                 value={nomeEdicao}
@@ -526,52 +527,67 @@ export function Usuarios() {
                 autoFocus
               />
             </label>
-            <div className={styles.usuarioToggle}>
-              <SwitchToggle checked={ativoEdicao} disabled={adminEdicao} onChange={setAtivoEdicao} aria-label="Conta ativa" />
-              <span>
-                <strong>Conta ativa</strong>
-                <small>
-                  {adminEdicao
-                    ? "Contas administrativas permanecem ativas."
-                    : "Permite que o usuário acesse a plataforma."}
-                </small>
-              </span>
-            </div>
-            <div className={styles.usuarioToggle}>
-              <SwitchToggle
-                checked={adminEdicao}
-                disabled={editando.admin}
-                onChange={(admin) => {
-                  setAdminEdicao(admin);
-                  if (admin) setAtivoEdicao(true);
-                }}
-                aria-label="Conceder acesso de administrador"
-              />
-              <span>
-                <strong>Administrador</strong>
-                <small>
-                  {editando.admin
-                    ? "Esta conta já possui acesso administrativo."
-                    : "Concede acesso ao painel administrativo e desbloqueia a conta."}
-                </small>
-              </span>
-            </div>
-            <div className={styles.usuarioToggle}>
-              <SwitchToggle checked={emailVerificadoEdicao} onChange={setEmailVerificadoEdicao} aria-label="E-mail verificado" />
-              <span>
-                <strong>E-mail verificado</strong>
-                <small>
-                  Confirma manualmente que o endereço pertence ao usuário.
-                </small>
-              </span>
+            <div className={styles.usuarioTogglesGrade}>
+              <div className={styles.usuarioToggle}>
+                <SwitchToggle
+                  checked={ativoEdicao}
+                  disabled={adminEdicao}
+                  onChange={setAtivoEdicao}
+                  aria-label="Conta ativa"
+                />
+                <div className={styles.usuarioToggleTexto}>
+                  <strong>Conta ativa</strong>
+                  <small>
+                    {adminEdicao
+                      ? "Contas administrativas permanecem ativas."
+                      : "Permite que o usuário acesse a plataforma."}
+                  </small>
+                </div>
+              </div>
+              <div className={styles.usuarioToggle}>
+                <SwitchToggle
+                  checked={adminEdicao}
+                  disabled={editando.admin}
+                  onChange={(admin) => {
+                    setAdminEdicao(admin);
+                    if (admin) setAtivoEdicao(true);
+                  }}
+                  aria-label="Conceder acesso de administrador"
+                />
+                <div className={styles.usuarioToggleTexto}>
+                  <strong>Administrador</strong>
+                  <small>
+                    {editando.admin
+                      ? "Esta conta já possui acesso administrativo."
+                      : "Concede acesso ao painel administrativo e desbloqueia a conta."}
+                  </small>
+                </div>
+              </div>
+              <div className={styles.usuarioToggle}>
+                <SwitchToggle
+                  checked={emailVerificadoEdicao}
+                  onChange={setEmailVerificadoEdicao}
+                  aria-label="E-mail verificado"
+                />
+                <div className={styles.usuarioToggleTexto}>
+                  <strong>E-mail verificado</strong>
+                  <small>
+                    Confirma manualmente que o endereço pertence ao usuário.
+                  </small>
+                </div>
+              </div>
             </div>
             <div className={styles.editorActions}>
-              <button type="button" onClick={fecharEdicao}>
+              <button
+                type="button"
+                className={styles.btnCancelar}
+                onClick={fecharEdicao}
+              >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className={styles.primaryBtn}
+                className={styles.btnSalvar}
                 disabled={salvando}
               >
                 <Save aria-hidden="true" />{" "}

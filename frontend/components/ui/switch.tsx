@@ -9,11 +9,12 @@ type SwitchProps = {
   label?: string;
   disabled?: boolean;
   "aria-label"?: string;
+  className?: string;
 };
 
-export function SwitchToggle({ checked, onChange, label, disabled, "aria-label": ariaLabel }: SwitchProps) {
+export function SwitchToggle({ checked, onChange, label, disabled, "aria-label": ariaLabel, className }: SwitchProps) {
   return (
-    <span className={styles.campo}>
+    <span className={`${styles.campo} ${className ?? ""}`.trim()}>
       <button
         type="button"
         role="switch"
