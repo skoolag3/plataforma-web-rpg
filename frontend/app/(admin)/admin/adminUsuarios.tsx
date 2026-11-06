@@ -29,7 +29,10 @@ import { AdminLayout } from "./adminShared";
 import { AdminUsuarioPainel } from "./adminUsuarioPainel";
 import { combinarEstilos } from "./combinarEstilos";
 import { FiltroUsuariosModal } from "./filtroUsuariosModal";
-import { ConfirmarRemocaoUsuario } from "./confirmarRemocaoUsuario";
+import {
+  ConfirmarRemocaoUsuario,
+  ConfirmarBloqueioUsuario,
+} from "./confirmarRemocaoUsuario";
 import { SwitchToggle } from "../../../components/ui/switch";
 import {
   Tooltip,
@@ -97,6 +100,9 @@ export function Usuarios() {
   const [usuarioParaRemover, setUsuarioParaRemover] = useState<AdminUsuario | null>(null);
   const [removendo, setRemovendo] = useState(false);
   const [erroRemocao, setErroRemocao] = useState<string | null>(null);
+  const [usuarioParaBloquear, setUsuarioParaBloquear] = useState<AdminUsuario | null>(null);
+  const [bloqueando, setBloqueando] = useState(false);
+  const [erroBloqueio, setErroBloqueio] = useState<string | null>(null);
   const [nomeEdicao, setNomeEdicao] = useState("");
   const [ativoEdicao, setAtivoEdicao] = useState(true);
   const [adminEdicao, setAdminEdicao] = useState(false);
@@ -193,26 +199,50 @@ export function Usuarios() {
   }
 
   async function alternarBloqueio(usuario: AdminUsuario) {
-    const acao = usuario.bloqueado ? "desbloquear" : "bloquear";
-    if (!window.confirm(`Deseja ${acao} ${usuario.nome}?`)) return;
+    if (!usuario.bloqueado) {
+      setErroBloqueio(null);
+      setFeedback(null);
+      setUsuarioParaBloquear(usuario);
+      return;
+    }
     setSalvando(true);
     setErro(null);
     try {
       const atualizado = await atualizarAdminUsuario(usuario.id, {
-        bloqueado: !usuario.bloqueado,
+        bloqueado: false,
       });
       sincronizarUsuario(atualizado);
-      setFeedback(
-        `Usuário ${usuario.bloqueado ? "desbloqueado" : "bloqueado"}.`,
-      );
+      setFeedback(`Usuário ${usuario.nome} desbloqueado.`);
     } catch (error) {
       setErro(
         error instanceof Error
           ? error.message
-          : `Não foi possível ${acao} o usuário.`,
+          : "Não foi possível desbloquear o usuário.",
       );
     } finally {
       setSalvando(false);
+    }
+  }
+
+  async function confirmarBloqueio() {
+    if (!usuarioParaBloquear || bloqueando) return;
+    setBloqueando(true);
+    setErroBloqueio(null);
+    try {
+      const atualizado = await atualizarAdminUsuario(usuarioParaBloquear.id, {
+        bloqueado: true,
+      });
+      sincronizarUsuario(atualizado);
+      setUsuarioParaBloquear(null);
+      setFeedback(`Usuário ${usuarioParaBloquear.nome} bloqueado.`);
+    } catch (error) {
+      setErroBloqueio(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível bloquear o usuário.",
+      );
+    } finally {
+      setBloqueando(false);
     }
   }
 
@@ -474,6 +504,13 @@ export function Usuarios() {
         erro={erroRemocao}
         aoFechar={() => { if (!removendo) setUsuarioParaRemover(null); }}
         aoConfirmar={() => { void confirmarRemocao(); }}
+      /> : null}
+      {usuarioParaBloquear ? <ConfirmarBloqueioUsuario
+        usuario={usuarioParaBloquear}
+        bloqueando={bloqueando}
+        erro={erroBloqueio}
+        aoFechar={() => { if (!bloqueando) setUsuarioParaBloquear(null); }}
+        aoConfirmar={() => { void confirmarBloqueio(); }}
       /> : null}
       {selecionado ? (
         <AdminUsuarioPainel

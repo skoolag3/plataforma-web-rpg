@@ -11,6 +11,7 @@
 .conta { display: grid; min-width: 0; gap: .18rem; border: 1px solid rgba(148,163,184,.16); border-radius: .55rem; background: rgba(15,23,42,.5); padding: .7rem .85rem; }
 .conta strong { font-size: .8rem; }
 .conta span { overflow: hidden; color: #8fa0b8; font-size: .7rem; text-overflow: ellipsis; }
+.pergunta { margin: .2rem 0; color: #f1f5f9; font-size: .88rem; font-weight: 600; line-height: 1.45; }
 .campo { display: grid; gap: .45rem; color: #bac6d7; font-size: .73rem; }
 .campo > span { display: block; line-height: 1.4; }
 .campo strong { color: #fff; }

@@ -1,0 +1,1 @@
+export { ConfirmarBloqueioUsuario } from "./confirmarRemocaoUsuario";
