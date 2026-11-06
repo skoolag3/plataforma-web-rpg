@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Activity, ArrowUpRight, Layers3 } from "lucide-react";
 import Link from "next/link";
 import type {
@@ -7,6 +8,7 @@ import type {
 import baseStyles from "../../styles/admin/adminShared.module.css";
 import styles from "../../styles/admin/adminDashboardPainel.module.css";
 import { useAdminRaridades } from "./useAdminRaridades";
+import { ModalHistoricoGeral } from "./modalHistoricoGeral";
 
 const formatarNmr = (valor: number) =>
   new Intl.NumberFormat("pt-BR").format(valor);
@@ -116,6 +118,7 @@ export function DashboardPainel({
   periodo: PeriodoDashboardAdmin;
   carregando: boolean;
 }) {
+  const [modalHistoricoAberto, setModalHistoricoAberto] = useState(false);
   const raridades = useAdminRaridades();
   const dadosRaridade = resumo?.raridades ?? [];
   const totalRaridades = dadosRaridade.reduce(
@@ -428,9 +431,13 @@ export function DashboardPainel({
             <small>Integridade & Logs</small>
             <h2>Saúde do Catálogo & Auditoria</h2>
           </div>
-          <Link href="/admin/cartas/historico">
-            Histórico <Activity />
-          </Link>
+          <button
+            type="button"
+            onClick={() => setModalHistoricoAberto(true)}
+            aria-label="Abrir modal com histórico geral e auditoria"
+          >
+            Histórico <Activity aria-hidden="true" />
+          </button>
         </header>
         <GraficoDonut
           segmentos={segmentosSaude}
@@ -468,6 +475,13 @@ export function DashboardPainel({
           Notícias <ArrowUpRight />
         </Link>
       </nav>
+
+      {modalHistoricoAberto ? (
+        <ModalHistoricoGeral
+          resumo={resumo}
+          aoFechar={() => setModalHistoricoAberto(false)}
+        />
+      ) : null}
     </section>
   );
 }

@@ -40,17 +40,29 @@
   white-space: nowrap;
 }
 .card header > a,
+.card header > button,
 .atalhos a {
   display: inline-flex;
   align-items: center;
   gap: 0.22rem;
+  border: 0;
+  background: transparent;
   color: #a995dc;
+  font: inherit;
   font-size: 0.59rem;
   font-weight: 780;
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
+  padding: 0;
+}
+.card header > a:hover,
+.card header > button:hover,
+.atalhos a:hover {
+  color: #c4b5fd;
 }
 .card header > a svg,
+.card header > button svg,
 .atalhos a svg {
   width: 0.72rem;
 }
