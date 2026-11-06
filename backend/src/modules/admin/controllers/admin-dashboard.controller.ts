@@ -19,4 +19,11 @@ export class AdminDashboardController {
         : '7d';
     return this.dashboardService.resumo(periodoNormalizado);
   }
+
+  @Get('pity')
+  listarPity(@Query('limite') limite?: string) {
+    return this.dashboardService.listarUltimosPities(
+      limite ? Number(limite) : 50,
+    );
+  }
 }

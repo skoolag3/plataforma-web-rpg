@@ -380,6 +380,34 @@ export type AdminDashboardResumo = {
   }[];
 };
 
+export type AdminLogPityGacha = {
+  id: string;
+  pityContador: number;
+  limitePityBanner: number | null;
+  foiPityGarantido: boolean;
+  rubysGastos: number;
+  dataHora: string | null;
+  jogador: {
+    id: string;
+    nome: string;
+    email: string;
+    avatarUrl: string | null;
+  };
+  banner: {
+    id: string;
+    nome: string;
+  };
+  carta: {
+    id: string;
+    nome: string;
+    raridade: string;
+    elemento: string;
+    foto: string | null;
+    moldura: string | null;
+    configVisual: unknown;
+  };
+};
+
 export type AnexoNoticia = { titulo: string; url: string };
 
 export type AdminNoticia = {
@@ -604,6 +632,12 @@ async function adminRequest<T>(path: string, options: RequestInit = {}) {
 export function obterAdminDashboard(periodo: PeriodoDashboardAdmin = "7d") {
   return adminRequest<AdminDashboardResumo>(
     `/admin/dashboard?periodo=${encodeURIComponent(periodo)}`,
+  );
+}
+
+export function obterAdminPityHistorico(limite = 50) {
+  return adminRequest<AdminLogPityGacha[]>(
+    `/admin/dashboard/pity?limite=${limite}`,
   );
 }
 
@@ -961,11 +995,12 @@ export function forcarAdminBanner(idBanner: string) {
 }
 
 export function listarAdminUsuarios(
-  filtros: { busca?: string; status?: string } = {},
+  filtros: { busca?: string; status?: string; limite?: number } = {},
 ) {
   const params = new URLSearchParams();
   if (filtros.busca?.trim()) params.set("q", filtros.busca.trim());
   if (filtros.status) params.set("status", filtros.status);
+  if (filtros.limite) params.set("limite", String(filtros.limite));
   const query = params.toString();
   return adminRequest<AdminUsuario[]>(
     `/admin/usuarios${query ? `?${query}` : ""}`,

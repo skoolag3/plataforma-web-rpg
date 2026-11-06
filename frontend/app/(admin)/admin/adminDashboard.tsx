@@ -10,12 +10,18 @@ import styles from "../../styles/admin/adminShared.module.css";
 import { AdminLayout } from "./adminShared";
 import { DashboardPainel } from "./adminDashboardPainel";
 import { DashboardResumo } from "./adminDashboardResumo";
+import { ModalUsuariosRecentes } from "./modalUsuariosRecentes";
+import { ModalExpedicoesDashboard } from "./modalExpedicoesDashboard";
+import { ModalPityGacha } from "./modalPityGacha";
 
 export function AdminDashboard() {
   const [resumo, setResumo] = useState<AdminDashboardResumo | null>(null);
   const [periodo, setPeriodo] = useState<PeriodoDashboardAdmin>("7d");
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [modalAberto, setModalAberto] = useState<
+    "usuariosRecentes" | "expedicoes" | "pity" | null
+  >(null);
 
   const carregarDashboard = useCallback(
     async (periodoSelecionado: PeriodoDashboardAdmin = periodo) => {
@@ -52,12 +58,28 @@ export function AdminDashboard() {
         onChangePeriodo={setPeriodo}
         carregando={carregando}
         onAtualizar={() => carregarDashboard(periodo)}
+        onAbrirUsuariosRecentes={() => setModalAberto("usuariosRecentes")}
+        onAbrirExpedicoes={() => setModalAberto("expedicoes")}
+        onAbrirPityGacha={() => setModalAberto("pity")}
       />
       <DashboardPainel
         resumo={resumo}
         periodo={periodo}
         carregando={carregando}
+        onAbrirExpedicoes={() => setModalAberto("expedicoes")}
       />
+
+      {modalAberto === "usuariosRecentes" ? (
+        <ModalUsuariosRecentes aoFechar={() => setModalAberto(null)} />
+      ) : null}
+
+      {modalAberto === "expedicoes" ? (
+        <ModalExpedicoesDashboard aoFechar={() => setModalAberto(null)} />
+      ) : null}
+
+      {modalAberto === "pity" ? (
+        <ModalPityGacha aoFechar={() => setModalAberto(null)} />
+      ) : null}
     </AdminLayout>
   );
 }

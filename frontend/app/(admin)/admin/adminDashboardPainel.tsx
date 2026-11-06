@@ -113,10 +113,12 @@ export function DashboardPainel({
   resumo,
   periodo,
   carregando,
+  onAbrirExpedicoes,
 }: {
   resumo: AdminDashboardResumo | null;
   periodo: PeriodoDashboardAdmin;
   carregando: boolean;
+  onAbrirExpedicoes?: () => void;
 }) {
   const [modalHistoricoAberto, setModalHistoricoAberto] = useState(false);
   const raridades = useAdminRaridades();
@@ -235,9 +237,19 @@ export function DashboardPainel({
             <small>Combate ({periodo.toUpperCase()})</small>
             <h2>Desfecho das Batalhas</h2>
           </div>
-          <Link href="/admin/usuarios/expedicoes">
-            Detalhes <ArrowUpRight />
-          </Link>
+          {onAbrirExpedicoes ? (
+            <button
+              type="button"
+              onClick={onAbrirExpedicoes}
+              aria-label="Abrir modal com histórico de expedições dos jogadores"
+            >
+              Detalhes <ArrowUpRight />
+            </button>
+          ) : (
+            <Link href="/admin/usuarios/expedicoes">
+              Detalhes <ArrowUpRight />
+            </Link>
+          )}
         </header>
         <GraficoDonut
           segmentos={segmentosCombate}

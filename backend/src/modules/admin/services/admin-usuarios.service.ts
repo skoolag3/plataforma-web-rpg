@@ -48,7 +48,7 @@ type UsuarioSelecionado = Prisma.UsuarioGetPayload<{
 export class AdminUsuariosService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listar(filtros: { busca?: string; status?: string }) {
+  async listar(filtros: { busca?: string; status?: string; limite?: number }) {
     const q = filtros.busca?.trim();
     const status = filtros.status?.trim();
     const usuarios = await this.prisma.usuario.findMany({
@@ -69,6 +69,9 @@ export class AdminUsuariosService {
       },
       select: usuarioSelect,
       orderBy: [{ criado_em: 'desc' }, { nome: 'asc' }],
+      take: filtros.limite
+        ? Math.min(200, Math.max(1, filtros.limite))
+        : undefined,
     });
 
     return usuarios.map((usuario) => this.toResponse(usuario));

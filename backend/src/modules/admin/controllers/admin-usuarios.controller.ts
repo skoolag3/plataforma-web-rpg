@@ -27,8 +27,16 @@ export class AdminUsuariosController {
   constructor(private readonly usuariosService: AdminUsuariosService) {}
 
   @Get()
-  listar(@Query('q') busca?: string, @Query('status') status?: string) {
-    return this.usuariosService.listar({ busca, status });
+  listar(
+    @Query('q') busca?: string,
+    @Query('status') status?: string,
+    @Query('limite') limite?: string,
+  ) {
+    return this.usuariosService.listar({
+      busca,
+      status,
+      limite: limite ? Number(limite) : undefined,
+    });
   }
 
   @Get(':id')

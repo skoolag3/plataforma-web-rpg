@@ -477,4 +477,93 @@ export class AdminDashboardService {
       }),
     };
   }
+
+  async listarUltimosPities(limite = 50) {
+    const logs = await this.prisma.logGacha.findMany({
+      take: Math.min(100, Math.max(1, limite)),
+      orderBy: { timestamp_pull: 'desc' },
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            email: true,
+            perfil: {
+              select: {
+                avatar_url: true,
+              },
+            },
+          },
+        },
+        banner: {
+          select: {
+            id: true,
+            nome: true,
+            configuracao: true,
+          },
+        },
+        cartaObtida: {
+          select: {
+            id: true,
+            nome: true,
+            raridade: true,
+            elemento: true,
+            foto: true,
+            moldura: true,
+            config_visual: true,
+          },
+        },
+      },
+    });
+
+    return logs.map((log) => {
+      let limitePityBanner: number | null = null;
+      if (
+        log.banner.configuracao &&
+        typeof log.banner.configuracao === 'object' &&
+        'pities' in (log.banner.configuracao as object) &&
+        Array.isArray((log.banner.configuracao as any).pities)
+      ) {
+        const pities = (log.banner.configuracao as any).pities as Array<{
+          raridade: string;
+          limite: number;
+        }>;
+        const pityDaRaridade = pities.find(
+          (p) => p.raridade === log.cartaObtida.raridade,
+        );
+        if (pityDaRaridade) {
+          limitePityBanner = pityDaRaridade.limite;
+        }
+      }
+
+      return {
+        id: log.id,
+        pityContador: log.pity_contador,
+        limitePityBanner,
+        foiPityGarantido:
+          limitePityBanner !== null && log.pity_contador >= limitePityBanner,
+        rubysGastos: log.rubys_gastos,
+        dataHora: log.timestamp_pull ? log.timestamp_pull.toISOString() : null,
+        jogador: {
+          id: log.usuario.id,
+          nome: log.usuario.nome,
+          email: log.usuario.email,
+          avatarUrl: log.usuario.perfil?.avatar_url || null,
+        },
+        banner: {
+          id: log.banner.id,
+          nome: log.banner.nome,
+        },
+        carta: {
+          id: log.cartaObtida.id,
+          nome: log.cartaObtida.nome,
+          raridade: log.cartaObtida.raridade,
+          elemento: log.cartaObtida.elemento,
+          foto: log.cartaObtida.foto,
+          moldura: log.cartaObtida.moldura,
+          configVisual: log.cartaObtida.config_visual,
+        },
+      };
+    });
+  }
 }

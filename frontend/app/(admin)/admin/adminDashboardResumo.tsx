@@ -23,6 +23,9 @@ type Props = {
   onChangePeriodo: (periodo: PeriodoDashboardAdmin) => void;
   carregando: boolean;
   onAtualizar: () => Promise<void>;
+  onAbrirUsuariosRecentes?: () => void;
+  onAbrirExpedicoes?: () => void;
+  onAbrirPityGacha?: () => void;
 };
 
 type Metrica = {
@@ -34,7 +37,8 @@ type Metrica = {
   progresso?: number;
   tom?: "verde" | "roxo" | "amarelo";
   icon: LucideIcon;
-  href: string;
+  href?: string;
+  onClick?: () => void;
 };
 
 const formatarNmr = (valor: number) =>
@@ -58,6 +62,9 @@ export function DashboardResumo({
   onChangePeriodo,
   carregando,
   onAtualizar,
+  onAbrirUsuariosRecentes,
+  onAbrirExpedicoes,
+  onAbrirPityGacha,
 }: Props) {
   const metricas = resumo?.metricas;
   const combate = resumo?.combate;
@@ -123,6 +130,7 @@ export function DashboardResumo({
       progresso: taxaEngajamento,
       tom: "verde",
       icon: Users,
+      onClick: onAbrirUsuariosRecentes,
       href: "/admin/usuarios",
     },
     {
@@ -134,6 +142,7 @@ export function DashboardResumo({
       progresso: combate?.taxaVitoria ?? 0,
       tom: "roxo",
       icon: Swords,
+      onClick: onAbrirExpedicoes,
       href: "/admin/usuarios/expedicoes",
     },
     {
@@ -143,6 +152,7 @@ export function DashboardResumo({
       destaque: `${formatarNmr(economia?.rubysGastosGachaPeriodo ?? 0)} rubys`,
       detalhe: `Loja: ${formatarMoeda(economia?.receitaBrlPeriodo ?? 0)}`,
       icon: Coins,
+      onClick: onAbrirPityGacha,
       href: "/admin/banners",
     },
     {
@@ -225,37 +235,60 @@ export function DashboardResumo({
             tom,
             icon: Icon,
             href,
-          }) => (
-            <Link
-              className={styles.metrica}
-              data-tom={tom}
-              href={href}
-              key={label}
-            >
-              <div className={styles.metricaTopo}>
-                <span className={styles.metricaIcone}>
-                  <Icon />
-                </span>
-                <div>
-                  <span className={styles.metricaLabel}>{label}</span>
-                  <small className={styles.metricaPergunta}>{pergunta}</small>
+            onClick,
+          }) => {
+            const conteudo = (
+              <>
+                <div className={styles.metricaTopo}>
+                  <span className={styles.metricaIcone}>
+                    <Icon />
+                  </span>
+                  <div>
+                    <span className={styles.metricaLabel}>{label}</span>
+                    <small className={styles.metricaPergunta}>{pergunta}</small>
+                  </div>
+                  <ArrowUpRight className={styles.metricaSeta} />
                 </div>
-                <ArrowUpRight className={styles.metricaSeta} />
-              </div>
 
-              <div className={styles.metricaLinha}>
-                <strong>{valor}</strong>
-                <span className={styles.metricaDestaque}>{destaque}</span>
-              </div>
-              <small className={styles.metricaDetalhe}>{detalhe}</small>
+                <div className={styles.metricaLinha}>
+                  <strong>{valor}</strong>
+                  <span className={styles.metricaDestaque}>{destaque}</span>
+                </div>
+                <small className={styles.metricaDetalhe}>{detalhe}</small>
 
-              {progresso !== undefined ? (
-                <span className={styles.progresso}>
-                  <i style={{ width: `${progresso}%` }} />
-                </span>
-              ) : null}
-            </Link>
-          ),
+                {progresso !== undefined ? (
+                  <span className={styles.progresso}>
+                    <i style={{ width: `${progresso}%` }} />
+                  </span>
+                ) : null}
+              </>
+            );
+
+            if (onClick) {
+              return (
+                <button
+                  type="button"
+                  className={styles.metrica}
+                  data-tom={tom}
+                  key={label}
+                  onClick={onClick}
+                >
+                  {conteudo}
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                className={styles.metrica}
+                data-tom={tom}
+                href={href ?? "#"}
+                key={label}
+              >
+                {conteudo}
+              </Link>
+            );
+          },
         )}
       </section>
     </>
