@@ -409,3 +409,10 @@ export function DataTable({
     </div>
   );
 }
+
+export {
+  AdminPaginacao,
+  paginasVisiveis,
+  type AdminPaginacaoProps,
+} from "./adminPaginacao";
+

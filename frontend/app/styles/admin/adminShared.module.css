@@ -360,6 +360,84 @@
   box-shadow: inset 3px 0 #7c3aed;
 }
 
+.rodapeTabela {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+  color: #8b99ae;
+  font-size: 0.72rem;
+}
+
+.cartasListaPanel .rodapeTabela {
+  margin-top: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  padding: 0.65rem 0.85rem;
+}
+
+.paginacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.paginacao button {
+  display: grid;
+  min-width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.19);
+  border-radius: 0.4rem;
+  background: #050a14;
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: 0 0.35rem;
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.72rem;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.paginacao button:hover:not(:disabled):not([aria-current="page"]) {
+  border-color: rgba(167, 139, 250, 0.45);
+  background: rgba(124, 58, 237, 0.16);
+  color: #fff;
+}
+
+.paginacao button[aria-current="page"] {
+  border-color: #8b5cf6;
+  background: #6d28d9;
+  color: #fff;
+}
+
+.paginacao button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.paginacao button:focus-visible {
+  outline: 2px solid #c4b5fd;
+  outline-offset: 2px;
+}
+
+.paginacao svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.paginacaoReticencias {
+  display: inline-block;
+  padding: 0 0.2rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  user-select: none;
+}
+
 .statusAtivo,
 .statusInativo,
 .statusAlerta {
@@ -741,5 +819,10 @@
 
   .editorActions {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rodapeTabela {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

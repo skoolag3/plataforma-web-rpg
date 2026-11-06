@@ -36,11 +36,13 @@ import {
 } from "./adminHabilidadeFormulario";
 import { AdminHabilidadeTeste } from "./adminHabilidadeTeste";
 import { AjudaTiposHabilidade, TipoHabilidade } from "./adminHabilidadeTipos";
-import { AdminLayout, NomeComAlerta } from "./adminShared";
+import { AdminLayout, AdminPaginacao, NomeComAlerta } from "./adminShared";
 import { combinarEstilos } from "./combinarEstilos";
 import { FiltroHabilidadesModal } from "./filtroHabilidadesModal";
 
 const styles = combinarEstilos(sharedStyles, listaStyles, featureStyles);
+
+const ITENS_POR_PAGINA = 10;
 
 const formularioVazio: FormHabilidade = {
   nome: "",
@@ -124,6 +126,7 @@ export function Habilidades() {
   const [busca, setBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
+  const [pagina, setPagina] = useState(1);
   const [modalFiltrosAberto, setModalFiltrosAberto] = useState(false);
   const btnFiltrosRef = useRef<HTMLButtonElement>(null);
   const [form, setForm] = useState<FormHabilidade | null>(null);
@@ -219,6 +222,21 @@ export function Habilidades() {
       );
     });
   }, [busca, filtroStatus, filtroTipo, habilidades]);
+
+  useEffect(() => {
+    setPagina(1);
+  }, [busca, filtroStatus, filtroTipo]);
+
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(habilidadesFiltradas.length / ITENS_POR_PAGINA),
+  );
+  const paginaValida = Math.min(pagina, totalPaginas);
+
+  const habilidadesPaginadas = useMemo(() => {
+    const inicio = (paginaValida - 1) * ITENS_POR_PAGINA;
+    return habilidadesFiltradas.slice(inicio, inicio + ITENS_POR_PAGINA);
+  }, [habilidadesFiltradas, paginaValida]);
 
   function atualizarForm<K extends keyof FormHabilidade>(
     campo: K,
@@ -428,7 +446,7 @@ export function Habilidades() {
                     <td colSpan={6}>Nenhuma habilidade encontrada.</td>
                   </tr>
                 ) : null}
-                {habilidadesFiltradas.map((habilidade) => {
+                {habilidadesPaginadas.map((habilidade) => {
                   const motivoAlerta =
                     habilidade.status === "RASCUNHO"
                       ? !habilidade.testadaEm
@@ -507,6 +525,14 @@ export function Habilidades() {
               </tbody>
             </table>
           </div>
+          <AdminPaginacao
+            pagina={paginaValida}
+            totalPaginas={totalPaginas}
+            totalItens={habilidadesFiltradas.length}
+            porPagina={ITENS_POR_PAGINA}
+            aoMudarPagina={setPagina}
+            ariaLabel="Páginas de habilidades"
+          />
         </section>
 
       </div>

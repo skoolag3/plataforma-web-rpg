@@ -1,12 +1,12 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Gem, Map, PauseCircle, PlayCircle, Swords, Users } from "lucide-react";
+import { Gem, Map, PauseCircle, PlayCircle, Swords, Users } from "lucide-react";
 import Link from "next/link";
-import { Fragment, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { obterAdminExpedicoes, type AdminExpedicoesPainel } from "../../lib/admin";
 import styles from "../../styles/admin/adminExpedicoes.module.css";
-import { AdminLayout } from "./adminShared";
+import { AdminLayout, AdminPaginacao } from "./adminShared";
 
 export function AdminExpedicoes() {
   const [pagina, setPagina] = useState(1);
@@ -51,11 +51,6 @@ export function AdminExpedicoes() {
   }
 
   const paginacao = painel?.paginacao;
-  const paginas = paginacao ? paginasVisiveis(paginacao.pagina, paginacao.totalPaginas) : [];
-  const inicio = paginacao && paginacao.total > 0
-    ? (paginacao.pagina - 1) * paginacao.porPagina + 1
-    : 0;
-  const fim = paginacao ? Math.min(paginacao.pagina * paginacao.porPagina, paginacao.total) : 0;
 
   return (
     <AdminLayout
@@ -114,17 +109,14 @@ export function AdminExpedicoes() {
             </table>
           </div>
 
-          <footer className={styles.rodapeTabela}>
-            <span>Mostrando {inicio}–{fim} de {paginacao?.total ?? 0}</span>
-            {paginacao && paginacao.totalPaginas > 1 ? <nav className={styles.paginacao} aria-label="Páginas do histórico">
-              <button type="button" aria-label="Página anterior" disabled={pagina === 1} onClick={() => mudarPagina(pagina - 1)}><ChevronLeft aria-hidden="true" /></button>
-              {paginas.map((numero, indice) => <Fragment key={numero}>
-                {indice > 0 && numero > paginas[indice - 1] + 1 ? <span aria-hidden="true">…</span> : null}
-                <button type="button" aria-label={`Página ${numero}`} aria-current={pagina === numero ? "page" : undefined} onClick={() => mudarPagina(numero)}>{numero}</button>
-              </Fragment>)}
-              <button type="button" aria-label="Próxima página" disabled={pagina === paginacao.totalPaginas} onClick={() => mudarPagina(pagina + 1)}><ChevronRight aria-hidden="true" /></button>
-            </nav> : null}
-          </footer>
+          <AdminPaginacao
+            pagina={paginacao?.pagina ?? pagina}
+            totalPaginas={paginacao?.totalPaginas ?? 1}
+            totalItens={paginacao?.total ?? 0}
+            porPagina={paginacao?.porPagina ?? 10}
+            aoMudarPagina={mudarPagina}
+            ariaLabel="Páginas do histórico"
+          />
         </> : null}
       </section>
     </AdminLayout>
@@ -133,12 +125,6 @@ export function AdminExpedicoes() {
 
 function Metrica({ icone, rotulo, valor }: { icone: ReactNode; rotulo: string; valor: number }) {
   return <article><span>{icone}</span><div><small>{rotulo}</small><strong>{valor}</strong></div></article>;
-}
-
-function paginasVisiveis(atual: number, total: number) {
-  return [...new Set([1, atual - 1, atual, atual + 1, total])]
-    .filter((numero) => numero >= 1 && numero <= total)
-    .sort((a, b) => a - b);
 }
 
 function formatarStatus(status: string) {
