@@ -195,14 +195,14 @@ export function ModalHistoricoGeral({ resumo, aoFechar }: Props) {
         aria-labelledby="titulo-historico-geral"
       >
         <header className={styles.cabecalho}>
-          <div className={styles.tituloWrap}>
+          <div className={styles.cabecalhoInfo}>
             <span className={styles.iconeTopo}>
               <Activity aria-hidden="true" />
             </span>
             <div>
-              <h2 id="titulo-historico-geral">
+              <h3 id="titulo-historico-geral">
                 Saúde do Catálogo & Auditoria Geral
-              </h2>
+              </h3>
               <p>
                 Histórico consolidado de alterações de cartas, integridade e
                 registros do sistema.
@@ -256,37 +256,39 @@ export function ModalHistoricoGeral({ resumo, aoFechar }: Props) {
           </button>
         </nav>
 
-        <div className={styles.conteudo}>
+        {abaAtiva === "cartas" && (
+          <form className={styles.filtros} onSubmit={onSubmitBusca}>
+            <div className={styles.busca}>
+              <Search aria-hidden="true" />
+              <input
+                type="search"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar carta no histórico..."
+                aria-label="Buscar carta no histórico"
+              />
+            </div>
+            <select
+              className={styles.seletorAcao}
+              value={acao}
+              onChange={(e) => {
+                setPagina(1);
+                setAcao(e.target.value);
+              }}
+              aria-label="Filtrar por tipo de ação"
+            >
+              <option value="">Todas as ações</option>
+              <option value="CRIADA">Criadas</option>
+              <option value="ALTERADA">Alteradas</option>
+              <option value="REMOVIDA">Removidas</option>
+              <option value="RESTAURADA">Restauradas</option>
+            </select>
+          </form>
+        )}
+
+        <div className={styles.corpoScroll}>
           {abaAtiva === "cartas" && (
             <>
-              <form className={styles.filtrosCartas} onSubmit={onSubmitBusca}>
-                <div className={styles.buscaWrap}>
-                  <Search aria-hidden="true" />
-                  <input
-                    type="search"
-                    value={busca}
-                    onChange={(e) => setBusca(e.target.value)}
-                    placeholder="Buscar carta no histórico..."
-                    aria-label="Buscar carta no histórico"
-                  />
-                </div>
-                <select
-                  className={styles.seletorAcao}
-                  value={acao}
-                  onChange={(e) => {
-                    setPagina(1);
-                    setAcao(e.target.value);
-                  }}
-                  aria-label="Filtrar por tipo de ação"
-                >
-                  <option value="">Todas as ações</option>
-                  <option value="CRIADA">Criadas</option>
-                  <option value="ALTERADA">Alteradas</option>
-                  <option value="REMOVIDA">Removidas</option>
-                  <option value="RESTAURADA">Restauradas</option>
-                </select>
-              </form>
-
               {carregandoCartas ? (
                 <p className={styles.estadoCarregando}>
                   Carregando histórico de cartas...
@@ -364,36 +366,6 @@ export function ModalHistoricoGeral({ resumo, aoFechar }: Props) {
                   })}
                 </div>
               )}
-
-              {painelCartas && painelCartas.paginacao.totalPaginas > 1 ? (
-                <nav
-                  className={styles.paginacao}
-                  aria-label="Paginação do histórico de cartas"
-                >
-                  <button
-                    type="button"
-                    className={styles.btnPagina}
-                    disabled={pagina <= 1 || carregandoCartas}
-                    onClick={() => setPagina((p) => p - 1)}
-                  >
-                    <ChevronLeft aria-hidden="true" /> Anterior
-                  </button>
-                  <span>
-                    Página {pagina} de {painelCartas.paginacao.totalPaginas}
-                  </span>
-                  <button
-                    type="button"
-                    className={styles.btnPagina}
-                    disabled={
-                      pagina >= painelCartas.paginacao.totalPaginas ||
-                      carregandoCartas
-                    }
-                    onClick={() => setPagina((p) => p + 1)}
-                  >
-                    Próxima <ChevronRight aria-hidden="true" />
-                  </button>
-                </nav>
-              ) : null}
             </>
           )}
 
@@ -560,6 +532,40 @@ export function ModalHistoricoGeral({ resumo, aoFechar }: Props) {
         </div>
 
         <footer className={styles.rodape}>
+          {abaAtiva === "cartas" &&
+          painelCartas &&
+          painelCartas.paginacao.totalPaginas > 1 ? (
+            <nav
+              className={styles.paginacao}
+              aria-label="Paginação do histórico de cartas"
+            >
+              <button
+                type="button"
+                className={styles.btnPagina}
+                disabled={pagina <= 1 || carregandoCartas}
+                onClick={() => setPagina((p) => p - 1)}
+              >
+                <ChevronLeft aria-hidden="true" /> Anterior
+              </button>
+              <span>
+                Página {pagina} de {painelCartas.paginacao.totalPaginas}
+              </span>
+              <button
+                type="button"
+                className={styles.btnPagina}
+                disabled={
+                  pagina >= painelCartas.paginacao.totalPaginas ||
+                  carregandoCartas
+                }
+                onClick={() => setPagina((p) => p + 1)}
+              >
+                Próxima <ChevronRight aria-hidden="true" />
+              </button>
+            </nav>
+          ) : (
+            <div />
+          )}
+
           <button
             type="button"
             className={styles.btnFecharRodape}
