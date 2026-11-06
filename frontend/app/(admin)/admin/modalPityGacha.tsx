@@ -226,6 +226,14 @@ export function ModalPityGacha({ aoFechar }: Props) {
           ) : (
             <div className={styles.tabelaWrap}>
               <table className={styles.tabela}>
+                <colgroup>
+                  <col style={{ width: "27%" }} />
+                  <col style={{ width: "16%" }} />
+                  <col style={{ width: "20%" }} />
+                  <col style={{ width: "15%" }} />
+                  <col style={{ width: "14%" }} />
+                  <col style={{ width: "8%" }} />
+                </colgroup>
                 <thead>
                   <tr>
                     <th scope="col">Carta Obtida</th>

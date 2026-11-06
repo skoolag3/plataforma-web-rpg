@@ -14,7 +14,7 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  width: min(100%, 54rem);
+  width: min(96vw, 62rem);
   height: min(90dvh, 46rem);
   max-height: min(90dvh, 46rem);
   overflow: hidden;
@@ -233,42 +233,65 @@
 /* Conteudo Principal & Tabela */
 .conteudo {
   flex: 1 1 auto;
-  overflow-y: auto;
   min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #6d5c9c #090d18;
+}
+
+.conteudo::-webkit-scrollbar {
+  width: 6px;
+}
+.conteudo::-webkit-scrollbar-track {
+  background: #090d18;
+}
+.conteudo::-webkit-scrollbar-thumb {
+  background: #6d5c9c;
+  border-radius: 999px;
+}
+.conteudo::-webkit-scrollbar-thumb:hover {
+  background: #8b5cf6;
 }
 
 .tabelaWrap {
   width: 100%;
-  overflow-x: auto;
+  overflow: visible;
 }
 
 .tabela {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.75rem;
+  font-size: 0.73rem;
+  table-layout: fixed;
 }
 
 .tabela th {
   position: sticky;
   top: 0;
-  z-index: 2;
-  background: #0f1526;
+  z-index: 5;
+  background: #0d1222;
   color: #94a3b8;
   font-weight: 600;
-  font-size: 0.67rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 0.65rem 0.9rem;
+  letter-spacing: 0.04em;
+  padding: 0.65rem 0.75rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.16);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tabela td {
-  padding: 0.68rem 0.9rem;
+  padding: 0.58rem 0.75rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.08);
   color: #cbd5e1;
   vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tabela tr:hover td {
@@ -279,8 +302,9 @@
 .jogadorWrap {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  min-width: 10rem;
+  gap: 0.55rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .avatarWrap {
@@ -407,8 +431,9 @@
 .cartaCell {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  min-width: 12rem;
+  gap: 0.55rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .cartaMiniatura {
@@ -536,23 +561,31 @@
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
-  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .horarioExato {
   font-weight: 600;
   color: #f1f5f9;
   font-size: 0.72rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tempoRelativo {
   font-size: 0.65rem;
   color: #717d9e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Deck & Rubys */
 .deckBadge {
   display: inline-block;
+  max-width: 100%;
   padding: 0.15rem 0.5rem;
   border-radius: 0.35rem;
   background: rgba(255, 255, 255, 0.04);
@@ -560,6 +593,8 @@
   color: #e2e8f0;
   font-size: 0.72rem;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rubysCell {
@@ -579,8 +614,9 @@
 .btnAcaoTabela {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.3rem 0.6rem;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.22rem 0.5rem;
   border: 1px solid rgba(167, 139, 250, 0.35);
   border-radius: 0.45rem;
   background: rgba(124, 58, 237, 0.12);

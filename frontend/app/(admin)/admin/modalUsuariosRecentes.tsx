@@ -198,6 +198,14 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
           ) : (
             <div className={styles.tabelaWrap}>
               <table className={styles.tabela}>
+                <colgroup>
+                  <col style={{ width: "27%" }} />
+                  <col style={{ width: "17%" }} />
+                  <col style={{ width: "14%" }} />
+                  <col style={{ width: "18%" }} />
+                  <col style={{ width: "16%" }} />
+                  <col style={{ width: "8%" }} />
+                </colgroup>
                 <thead>
                   <tr>
                     <th scope="col">Jogador</th>

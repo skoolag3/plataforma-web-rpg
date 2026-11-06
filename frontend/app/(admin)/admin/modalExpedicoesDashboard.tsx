@@ -200,6 +200,14 @@ export function ModalExpedicoesDashboard({ aoFechar }: Props) {
           ) : (
             <div className={styles.tabelaWrap}>
               <table className={styles.tabela}>
+                <colgroup>
+                  <col style={{ width: "26%" }} />
+                  <col style={{ width: "17%" }} />
+                  <col style={{ width: "15%" }} />
+                  <col style={{ width: "11%" }} />
+                  <col style={{ width: "13%" }} />
+                  <col style={{ width: "18%" }} />
+                </colgroup>
                 <thead>
                   <tr>
                     <th scope="col">Jogador</th>
