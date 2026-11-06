@@ -1,13 +1,15 @@
 "use client";
 
 import {
+  ChevronLeft,
+  ChevronRight,
   Copy,
   Pencil,
   Swords,
   Trophy,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { criarEstiloMolduraPerfil } from "../../../components/cartaMontada";
 import VLabel8 from "@/components/ui/v-label-8";
 import type { FotoCartaPerfil, MolduraConta, PerfilConta } from "../../../lib/perfil";
@@ -38,12 +40,41 @@ export function CardUsuario({
   const [editandoNome, setEditandoNome] = useState(false);
   const [modalPerfil, setModalPerfil] = useState<"bio" | "aparencia" | null>(null);
   const [abaAparencia, setAbaAparencia] = useState<"icone" | "moldura">("icone");
+  const [paginaMolduras, setPaginaMolduras] = useState(1);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
+
+  const ITENS_POR_PAGINA_MOLDURAS = 5;
+
+  const moldurasOrdenadas = useMemo(() => {
+    return [...molduras].sort((a, b) => {
+      const emUsoA = perfil.moldura === a.nome;
+      const emUsoB = perfil.moldura === b.nome;
+      if (emUsoA && !emUsoB) return -1;
+      if (!emUsoA && emUsoB) return 1;
+
+      if (a.obtida && !b.obtida) return -1;
+      if (!a.obtida && b.obtida) return 1;
+
+      const isPadraoA = a.id === "padrao" || a.nome.toLowerCase() === "padrão";
+      const isPadraoB = b.id === "padrao" || b.nome.toLowerCase() === "padrão";
+      if (isPadraoA && !isPadraoB) return -1;
+      if (!isPadraoA && isPadraoB) return 1;
+
+      return a.nome.localeCompare(b.nome, "pt-BR");
+    });
+  }, [molduras, perfil.moldura]);
+
+  const totalPaginasMolduras = Math.ceil(moldurasOrdenadas.length / ITENS_POR_PAGINA_MOLDURAS) || 1;
+  const moldurasPaginadas = moldurasOrdenadas.slice(
+    (paginaMolduras - 1) * ITENS_POR_PAGINA_MOLDURAS,
+    paginaMolduras * ITENS_POR_PAGINA_MOLDURAS,
+  );
 
   function abrirAparencia() {
     setErro("");
     setAbaAparencia("icone");
+    setPaginaMolduras(1);
     setModalPerfil("aparencia");
   }
 
@@ -176,7 +207,7 @@ export function CardUsuario({
         >
           <div className={styles.abasAparencia} role="tablist" aria-label="Personalização do perfil">
             <button type="button" role="tab" id="aba-icone" aria-controls="painel-icone" aria-selected={abaAparencia === "icone"} className={abaAparencia === "icone" ? styles.abaAtiva : ""} onClick={() => { setErro(""); setAbaAparencia("icone"); }}>Ícone</button>
-            <button type="button" role="tab" id="aba-moldura" aria-controls="painel-moldura" aria-selected={abaAparencia === "moldura"} className={abaAparencia === "moldura" ? styles.abaAtiva : ""} onClick={() => { setErro(""); setAbaAparencia("moldura"); }}>Moldura</button>
+            <button type="button" role="tab" id="aba-moldura" aria-controls="painel-moldura" aria-selected={abaAparencia === "moldura"} className={abaAparencia === "moldura" ? styles.abaAtiva : ""} onClick={() => { setErro(""); setPaginaMolduras(1); setAbaAparencia("moldura"); }}>Moldura</button>
           </div>
           {abaAparencia === "icone" ? <div id="painel-icone" role="tabpanel" aria-labelledby="aba-icone">
           <div className={styles.listaFotosCartas}>
@@ -209,7 +240,7 @@ export function CardUsuario({
           {fotosCartas.length === 0 ? <p className={styles.avisoFotos}>As fotos das cartas que você obtiver vão aparecer aqui.</p> : null}
           </div> : <div id="painel-moldura" role="tabpanel" aria-labelledby="aba-moldura">
             <div className={styles.listaMolduras}>
-              {molduras.map((moldura) => (
+              {moldurasPaginadas.map((moldura) => (
                 <button type="button" key={moldura.id} disabled={!moldura.obtida || salvando} aria-pressed={perfil.moldura === moldura.nome} onClick={() => escolherMoldura(moldura.id)}>
                   <span className={[styles.amostraMoldura, styles[moldura.classeCss] ?? ""].join(" ")}>
                     {moldura.imagemUrl ? <i className={styles.imagemAmostraMoldura} style={{ ...criarEstiloMolduraPerfil(moldura.configVisual), backgroundImage: `url("${moldura.imagemUrl}")` }} aria-hidden="true" /> : null}
@@ -219,6 +250,30 @@ export function CardUsuario({
                 </button>
               ))}
             </div>
+
+            {totalPaginasMolduras > 1 ? (
+              <nav className={styles.paginacao} aria-label="Paginação de molduras">
+                <button
+                  type="button"
+                  className={styles.btnPagina}
+                  disabled={paginaMolduras <= 1 || salvando}
+                  onClick={() => setPaginaMolduras((p) => p - 1)}
+                >
+                  <ChevronLeft aria-hidden="true" /> Anterior
+                </button>
+                <span>
+                  Página {paginaMolduras} de {totalPaginasMolduras}
+                </span>
+                <button
+                  type="button"
+                  className={styles.btnPagina}
+                  disabled={paginaMolduras >= totalPaginasMolduras || salvando}
+                  onClick={() => setPaginaMolduras((p) => p + 1)}
+                >
+                  Próxima <ChevronRight aria-hidden="true" />
+                </button>
+              </nav>
+            ) : null}
           </div>}
           {erro ? <p className={modalStyles.erroForm} role="alert">{erro}</p> : null}
         </ModalEdicao>

@@ -438,6 +438,48 @@
   opacity: 0.45;
 }
 
+.paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.btnPagina {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 0.45rem;
+  background: #0d111d;
+  color: #e2e8f0;
+  padding: 0.35rem 0.65rem;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnPagina:hover:not(:disabled) {
+  background: #1a2235;
+  border-color: #8b5cf6;
+  color: #fff;
+}
+
+.btnPagina:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btnPagina svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
 .amostraMoldura {
   position: relative;
   width: 2.1rem;
