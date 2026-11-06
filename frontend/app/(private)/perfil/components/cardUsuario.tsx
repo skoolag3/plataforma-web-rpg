@@ -47,22 +47,21 @@ export function CardUsuario({
   const ITENS_POR_PAGINA_MOLDURAS = 5;
 
   const moldurasOrdenadas = useMemo(() => {
-    return [...molduras].sort((a, b) => {
-      const emUsoA = perfil.moldura === a.nome;
-      const emUsoB = perfil.moldura === b.nome;
-      if (emUsoA && !emUsoB) return -1;
-      if (!emUsoA && emUsoB) return 1;
+    return molduras
+      .filter((m) => m.obtida)
+      .sort((a, b) => {
+        const emUsoA = perfil.moldura === a.nome;
+        const emUsoB = perfil.moldura === b.nome;
+        if (emUsoA && !emUsoB) return -1;
+        if (!emUsoA && emUsoB) return 1;
 
-      if (a.obtida && !b.obtida) return -1;
-      if (!a.obtida && b.obtida) return 1;
+        const isPadraoA = a.id === "padrao" || a.nome.toLowerCase() === "padrão";
+        const isPadraoB = b.id === "padrao" || b.nome.toLowerCase() === "padrão";
+        if (isPadraoA && !isPadraoB) return -1;
+        if (!isPadraoA && isPadraoB) return 1;
 
-      const isPadraoA = a.id === "padrao" || a.nome.toLowerCase() === "padrão";
-      const isPadraoB = b.id === "padrao" || b.nome.toLowerCase() === "padrão";
-      if (isPadraoA && !isPadraoB) return -1;
-      if (!isPadraoA && isPadraoB) return 1;
-
-      return a.nome.localeCompare(b.nome, "pt-BR");
-    });
+        return a.nome.localeCompare(b.nome, "pt-BR");
+      });
   }, [molduras, perfil.moldura]);
 
   const totalPaginasMolduras = Math.ceil(moldurasOrdenadas.length / ITENS_POR_PAGINA_MOLDURAS) || 1;
@@ -241,15 +240,16 @@ export function CardUsuario({
           </div> : <div id="painel-moldura" role="tabpanel" aria-labelledby="aba-moldura">
             <div className={styles.listaMolduras}>
               {moldurasPaginadas.map((moldura) => (
-                <button type="button" key={moldura.id} disabled={!moldura.obtida || salvando} aria-pressed={perfil.moldura === moldura.nome} onClick={() => escolherMoldura(moldura.id)}>
+                <button type="button" key={moldura.id} disabled={salvando} aria-pressed={perfil.moldura === moldura.nome} onClick={() => escolherMoldura(moldura.id)}>
                   <span className={[styles.amostraMoldura, styles[moldura.classeCss] ?? ""].join(" ")}>
                     {moldura.imagemUrl ? <i className={styles.imagemAmostraMoldura} style={{ ...criarEstiloMolduraPerfil(moldura.configVisual), backgroundImage: `url("${moldura.imagemUrl}")` }} aria-hidden="true" /> : null}
                   </span>
                   <strong>{moldura.nome}</strong>
-                  <small>{moldura.obtida ? perfil.moldura === moldura.nome ? "Em uso" : "Disponível" : moldura.requisito ?? "Bloqueada"}</small>
+                  <small>{perfil.moldura === moldura.nome ? "Em uso" : "Disponível"}</small>
                 </button>
               ))}
             </div>
+            {moldurasOrdenadas.length === 0 ? <p className={styles.avisoFotos}>As molduras que você obtiver vão aparecer aqui.</p> : null}
 
             {totalPaginasMolduras > 1 ? (
               <nav className={styles.paginacao} aria-label="Paginação de molduras">
