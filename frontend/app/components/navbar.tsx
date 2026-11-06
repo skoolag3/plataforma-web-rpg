@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  faGaugeHigh,
+  faGamepad,
   faRightToBracket,
   faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
@@ -143,9 +143,9 @@ export function Navbar() {
 
         <div className={styles.acoes}>
           {estaAutenticado ? (
-            <Link href="/home" className={styles.btn}>
-              <FontAwesomeIcon icon={faGaugeHigh} aria-hidden="true" />
-              <span className={styles.textoAcao}>Meu painel</span>
+            <Link href="/home" className={styles.btnPrimario}>
+              <FontAwesomeIcon icon={faGamepad} aria-hidden="true" />
+              <span className={styles.textoAcao}>Entrar no jogo</span>
             </Link>
           ) : (
             <>

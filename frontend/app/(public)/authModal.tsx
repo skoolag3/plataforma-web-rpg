@@ -149,8 +149,7 @@ export function ModalLogin({ aoFechar, aoTrocar }: PropsModal) {
 
     try {
       await login(email, senha);
-      router.push("/home");
-      router.refresh();
+      window.location.assign("/home");
     } catch (erroCapturado) {
       setErro(
         erroCapturado instanceof Error

@@ -257,9 +257,13 @@ export function Correio() {
                 </button>
               </div>
             ) : itensVisiveis.length ? (
-              itensVisiveis.map((item) => {
-                const Icone = icones[item.tipo];
-                const recompensa = item.chave.startsWith("giro:") || item.chave.startsWith("semanal:");
+              (() => {
+                const primeiroItemRecompensa = itensVisiveis.find(
+                  (it) => it.chave.startsWith("giro:") || it.chave.startsWith("semanal:") || it.tipo === "RECOMPENSA",
+                );
+                return itensVisiveis.map((item) => {
+                  const Icone = icones[item.tipo];
+                  const recompensa = item.chave.startsWith("giro:") || item.chave.startsWith("semanal:");
                 const conteudo = (
                   <>
                     <span className={styles.icone}>
@@ -291,7 +295,7 @@ export function Correio() {
                     {conteudo}
                     <button
                       type="button"
-                      data-guia={item.chave.startsWith("semanal:") ? "recompensa" : undefined}
+                      data-guia={item.chave === primeiroItemRecompensa?.chave ? "recompensa" : undefined}
                       className={styles.btnReivindicar}
                       disabled={resgatando !== ""}
                       onClick={() => void reivindicar(item)}
@@ -320,7 +324,8 @@ export function Correio() {
                     <ChevronRight aria-hidden="true" />
                   </Link>
                 );
-              })
+              });
+              })()
             ) : (
               <div className={styles.vazio}>
                 <CalendarDays aria-hidden="true" />

@@ -9,26 +9,119 @@
   position: fixed;
   border: 2px solid #bef264;
   border-radius: 0.8rem;
-  box-shadow: 0 0 0 9999px rgba(4, 5, 12, 0.72), 0 0 1rem #bef264;
+  box-shadow: 0 0 0 9999px rgba(4, 5, 12, 0.76), 0 0 1.25rem rgba(190, 242, 100, 0.45);
   pointer-events: none;
+  transition: top 0.22s ease-out, left 0.22s ease-out, width 0.22s ease-out, height 0.22s ease-out;
 }
 
 .cartao {
   position: fixed;
-  width: min(320px, calc(100vw - 32px));
-  padding: 1rem;
-  border: 1px solid rgba(190, 242, 100, 0.55);
+  width: min(340px, calc(100vw - 32px));
+  padding: 1.15rem 1.25rem;
+  border: 1px solid rgba(190, 242, 100, 0.6);
   border-radius: 1rem;
   color: #f8fafc;
-  background: #151326;
-  box-shadow: 0 1.3rem 3rem rgba(0, 0, 0, 0.45);
+  background: #0f1020;
+  box-shadow: 0 1.5rem 3.5rem rgba(0, 0, 0, 0.75), 0 0 1px rgba(255, 255, 255, 0.15);
   pointer-events: auto;
+  z-index: 210;
+  animation: surgimentoSuave 0.2s ease-out;
 }
 
-.cartao small { color: #bef264; font-weight: 700; }
-.cartao h2 { margin: 0.5rem 0; font-size: 1.1rem; }
-.cartao p { margin: 0; color: #cbd5e1; font-size: 0.88rem; line-height: 1.5; }
-.acoes { display: flex; justify-content: space-between; gap: 0.7rem; margin-top: 1rem; }
-.acoes button { min-height: 44px; padding: 0.5rem 0.8rem; border: 1px solid #6d568f; border-radius: 0.65rem; color: #fff; background: transparent; cursor: pointer; }
-.acoes button:last-child { border-color: #8b5cf6; background: #6d28d9; font-weight: 700; }
-.acoes button:focus-visible { outline: 2px solid #bef264; outline-offset: 2px; }
+@keyframes surgimentoSuave {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cartao small {
+  color: #bef264;
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cartao h2 {
+  margin: 0.4rem 0 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.cartao p {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.acoes {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+}
+
+.btnPular {
+  min-height: 38px;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 0.55rem;
+  color: #94a3b8;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnPular:hover {
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.45);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.btnAvancar {
+  min-height: 38px;
+  padding: 0.45rem 1.05rem;
+  border: 1px solid #a78bfa;
+  border-radius: 0.55rem;
+  color: #fff;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+}
+
+.btnAvancar:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.5);
+  transform: translateY(-1px);
+}
+
+.btnAvancar:focus-visible,
+.btnPular:focus-visible {
+  outline: 2px solid #bef264;
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .cartao {
+    bottom: 1.25rem !important;
+    top: auto !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    width: auto !important;
+  }
+}

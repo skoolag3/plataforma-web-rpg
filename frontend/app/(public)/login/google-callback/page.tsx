@@ -56,8 +56,7 @@ export default function GoogleCallbackPage() {
 
     concluir
       .then(() => {
-        router.replace("/home");
-        router.refresh();
+        window.location.replace("/home");
       })
       .catch((erroCapturado) => {
         setErro(
