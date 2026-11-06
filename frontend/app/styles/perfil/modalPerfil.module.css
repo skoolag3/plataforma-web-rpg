@@ -94,6 +94,27 @@
   color: #8790a3;
 }
 
+.formModal input:-webkit-autofill,
+.formModal input:-webkit-autofill:hover,
+.formModal input:-webkit-autofill:focus,
+.formModal input:-webkit-autofill:active {
+  -webkit-text-fill-color: #f8fafc !important;
+  caret-color: #f8fafc !important;
+  box-shadow: 0 0 0 1000px #030612 inset !important;
+  border-color: #717d9e5c !important;
+  transition: background-color 9999s ease-out 0s;
+}
+
+.formModal input:-webkit-autofill:focus {
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 1000px #030612 inset, 0 0 0 1px #8b5cf6 !important;
+}
+
+.formModal input:-moz-autofill {
+  background: #030612 !important;
+  color: #f8fafc !important;
+}
+
 .campoSenhaModal {
   position: relative;
   display: block;

@@ -97,6 +97,21 @@ body {
   :where(input[type="checkbox"]), :where(input[type="checkbox"])::after { transition: none; }
 }
 
+:where(input):-webkit-autofill,
+:where(input):-webkit-autofill:hover,
+:where(input):-webkit-autofill:focus,
+:where(input):-webkit-autofill:active {
+  -webkit-text-fill-color: #f8fafc !important;
+  caret-color: #f8fafc !important;
+  box-shadow: 0 0 0 1000px #060914 inset !important;
+  transition: background-color 9999s ease-out 0s;
+}
+
+:where(input):-moz-autofill {
+  background: #060914 !important;
+  color: #f8fafc !important;
+}
+
 .publicRouteLoading {
   min-height: 100svh;
   background: #07070b;
