@@ -275,23 +275,11 @@ export class AdminUsuariosService {
         );
       }
 
-      const identificador = id.replaceAll('-', '');
       const removido = await tx.usuario.updateMany({
         where: { id, excluido_em: null, is_admin: { not: true } },
         data: {
-          email: `excluido-${identificador}@anon.invalid`,
           ativo: false,
           bloqueado: true,
-          email_verificado: false,
-          token_verificacao_email: null,
-          token_verificacao_expira_em: null,
-          token_redefinicao_senha: null,
-          token_redefinicao_expira_em: null,
-          email_pendente: null,
-          token_confirmacao_troca_email: null,
-          token_troca_email_expira_em: null,
-          token_verificacao_email_pendente: null,
-          token_email_pendente_expira_em: null,
           excluido_em: new Date(),
           atualizado_em: new Date(),
         },
@@ -301,22 +289,6 @@ export class AdminUsuariosService {
           'A conta foi alterada. Atualize a lista e tente novamente.',
         );
       }
-
-      await tx.provedorUsuario.deleteMany({
-        where: { id_usuario: id },
-      });
-
-      await tx.perfilUsuario.updateMany({
-        where: { id_usuario: id },
-        data: {
-          biografia: '',
-          avatar_url: null,
-          banner_url: null,
-          receber_notificacoes: false,
-          mostrar_no_ranking: false,
-          ocultar_historico: true,
-        },
-      });
 
       await tx.logAdminUsuario.create({
         data: {

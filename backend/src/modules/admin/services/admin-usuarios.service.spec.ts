@@ -13,8 +13,6 @@ describe('AdminUsuariosService.remover', () => {
       findFirst: jest.fn(),
       updateMany: jest.fn(),
     },
-    provedorUsuario: { deleteMany: jest.fn() },
-    perfilUsuario: { updateMany: jest.fn() },
     logAdminUsuario: { create: jest.fn() },
   };
   const prisma = {
@@ -29,8 +27,6 @@ describe('AdminUsuariosService.remover', () => {
     jest.clearAllMocks();
     tx.usuario.findFirst.mockResolvedValue(usuario);
     tx.usuario.updateMany.mockResolvedValue({ count: 1 });
-    tx.provedorUsuario.deleteMany.mockResolvedValue({ count: 0 });
-    tx.perfilUsuario.updateMany.mockResolvedValue({ count: 1 });
     tx.logAdminUsuario.create.mockResolvedValue({});
   });
 
@@ -41,12 +37,7 @@ describe('AdminUsuariosService.remover', () => {
     const chamadasAtualizacao = tx.usuario.updateMany.mock.calls as unknown as [
       {
         where: { id: string; excluido_em: null; is_admin: { not: boolean } };
-        data: {
-          email: string;
-          ativo: boolean;
-          bloqueado: boolean;
-          excluido_em: Date;
-        };
+        data: { ativo: boolean; bloqueado: boolean; excluido_em: Date };
       },
     ][];
     const atualizacao = chamadasAtualizacao[0][0];
@@ -55,13 +46,9 @@ describe('AdminUsuariosService.remover', () => {
       excluido_em: null,
       is_admin: { not: true },
     });
-    expect(atualizacao.data.email).toBe('excluido-usuario1@anon.invalid');
     expect(atualizacao.data.ativo).toBe(false);
     expect(atualizacao.data.bloqueado).toBe(true);
     expect(atualizacao.data.excluido_em).toBeInstanceOf(Date);
-    expect(tx.provedorUsuario.deleteMany).toHaveBeenCalledWith({
-      where: { id_usuario: 'usuario-1' },
-    });
 
     const chamadasLog = tx.logAdminUsuario.create.mock.calls as unknown as [
       {

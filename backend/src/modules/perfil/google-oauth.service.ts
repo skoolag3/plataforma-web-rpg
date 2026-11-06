@@ -163,38 +163,19 @@ export class GoogleOAuthService {
     });
 
     if (vinculo) {
-      if (vinculo.usuario.excluido_em) {
-        const identificador = vinculo.usuario.id.replaceAll('-', '');
-        await this.prisma.$transaction([
-          this.prisma.provedorUsuario.delete({ where: { id: vinculo.id } }),
-          this.prisma.usuario.update({
-            where: { id: vinculo.usuario.id },
-            data: { email: `excluido-${identificador}@anon.invalid` },
-          }),
-        ]);
-      } else {
-        await this.prisma.provedorUsuario.update({
-          where: { id: vinculo.id },
-          data: { ultimo_login_em: new Date(), email_provedor: email },
-        });
-        return {
-          finalidade: 'LOGIN_GOOGLE' as const,
-          sessao: await this.authService.criarSessaoOAuth(vinculo.usuario),
-        };
-      }
+      await this.prisma.provedorUsuario.update({
+        where: { id: vinculo.id },
+        data: { ultimo_login_em: new Date(), email_provedor: email },
+      });
+      return {
+        finalidade: 'LOGIN_GOOGLE' as const,
+        sessao: await this.authService.criarSessaoOAuth(vinculo.usuario),
+      };
     }
 
-    let usuarioExistente = await this.prisma.usuario.findUnique({
+    const usuarioExistente = await this.prisma.usuario.findUnique({
       where: { email },
     });
-    if (usuarioExistente && usuarioExistente.excluido_em) {
-      const identificador = usuarioExistente.id.replaceAll('-', '');
-      await this.prisma.usuario.update({
-        where: { id: usuarioExistente.id },
-        data: { email: `excluido-${identificador}@anon.invalid` },
-      });
-      usuarioExistente = null;
-    }
     const nomeGoogle = info.name?.trim().slice(0, 100) || email.split('@')[0];
     const usuario = usuarioExistente
       ? await this.prisma.usuario.update({
