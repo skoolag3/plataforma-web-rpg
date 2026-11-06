@@ -21,6 +21,11 @@ body:has([aria-modal="true"]) {
 :where([aria-modal="true"], [aria-modal="true"] *, [data-modal-overlay], [data-modal-overlay] *) {
   scrollbar-color: #7c3aed #111421;
   scrollbar-width: thin;
+}
+
+/* Contém o scroll só na raiz do modal; aplicar em todos os descendentes
+   (células com overflow hidden, textos com ellipsis) bloqueava a roda do mouse. */
+:where([aria-modal="true"], [data-modal-overlay]) {
   overscroll-behavior: contain;
 }
 
