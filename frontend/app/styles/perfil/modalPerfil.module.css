@@ -71,9 +71,9 @@
 .formModal input,
 .formModal textarea {
   min-height: 2.7rem;
-  border: 1px solid #717d9e5c;
+  border: 1px solid #303648;
   border-radius: 0.48rem;
-  outline: 0;
+  outline: none;
   background: #020610bf;
   color: #fff;
   font: inherit;
@@ -87,6 +87,7 @@
 .formModal input:focus,
 .formModal textarea:focus {
   border-color: #8b5cf6;
+  outline: none;
   box-shadow: none;
 }
 
@@ -98,21 +99,37 @@
 .formModal input:-webkit-autofill:hover,
 .formModal input:-webkit-autofill:focus,
 .formModal input:-webkit-autofill:active {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  border: 1px solid #303648 !important;
   -webkit-text-fill-color: #f8fafc !important;
   caret-color: #f8fafc !important;
   box-shadow: 0 0 0 1000px #030612 inset !important;
-  border-color: #717d9e5c !important;
+  -webkit-box-shadow: 0 0 0 1000px #030612 inset !important;
   transition: background-color 9999s ease-out 0s;
 }
 
 .formModal input:-webkit-autofill:focus {
-  border-color: #8b5cf6 !important;
+  border: 1px solid #8b5cf6 !important;
+  outline: none !important;
   box-shadow: 0 0 0 1000px #030612 inset, 0 0 0 1px #8b5cf6 !important;
+  -webkit-box-shadow: 0 0 0 1000px #030612 inset, 0 0 0 1px #8b5cf6 !important;
 }
 
-.formModal input:-moz-autofill {
+.formModal input:-moz-autofill,
+.formModal input:autofill {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  border: 1px solid #303648 !important;
   background: #030612 !important;
   color: #f8fafc !important;
+}
+
+.formModal input:autofill:focus {
+  border: 1px solid #8b5cf6 !important;
+  outline: none !important;
 }
 
 .campoSenhaModal {

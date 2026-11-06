@@ -394,15 +394,35 @@
 .entrada:-webkit-autofill:hover,
 .entrada:-webkit-autofill:focus,
 .entrada:-webkit-autofill:active {
-  -webkit-text-fill-color: var(--corTexto);
-  caret-color: var(--corTexto);
-  box-shadow: 0 0 0 1000px #0b0b13 inset;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  border: 1px solid rgba(167, 139, 250, 0.24) !important;
+  -webkit-text-fill-color: var(--corTexto) !important;
+  caret-color: var(--corTexto) !important;
+  box-shadow: 0 0 0 1000px #0b0b13 inset !important;
+  -webkit-box-shadow: 0 0 0 1000px #0b0b13 inset !important;
   transition: background-color 9999s ease-out 0s;
 }
 
-.entrada:-moz-autofill {
-  background: #0b0b13;
-  color: var(--corTexto);
+.entrada:-webkit-autofill:focus {
+  border-color: rgba(190, 242, 100, 0.48) !important;
+  outline: none !important;
+}
+
+.entrada:-moz-autofill,
+.entrada:autofill {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  border: 1px solid rgba(167, 139, 250, 0.24) !important;
+  background: #0b0b13 !important;
+  color: var(--corTexto) !important;
+}
+
+.entrada:autofill:focus {
+  border-color: rgba(190, 242, 100, 0.48) !important;
+  outline: none !important;
 }
 
 .rodape {

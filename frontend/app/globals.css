@@ -100,16 +100,46 @@ body {
 :where(input):-webkit-autofill,
 :where(input):-webkit-autofill:hover,
 :where(input):-webkit-autofill:focus,
-:where(input):-webkit-autofill:active {
+:where(input):-webkit-autofill:active,
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  border-color: #303648 !important;
   -webkit-text-fill-color: #f8fafc !important;
   caret-color: #f8fafc !important;
   box-shadow: 0 0 0 1000px #060914 inset !important;
+  -webkit-box-shadow: 0 0 0 1000px #060914 inset !important;
   transition: background-color 9999s ease-out 0s;
 }
 
-:where(input):-moz-autofill {
+:where(input):-webkit-autofill:focus,
+input:-webkit-autofill:focus {
+  border-color: #8b5cf6 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1000px #060914 inset, 0 0 0 1px #8b5cf6 !important;
+  -webkit-box-shadow: 0 0 0 1000px #060914 inset, 0 0 0 1px #8b5cf6 !important;
+}
+
+:where(input):-moz-autofill,
+:where(input):autofill,
+input:-moz-autofill,
+input:autofill {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  border-color: #303648 !important;
   background: #060914 !important;
   color: #f8fafc !important;
+}
+
+:where(input):autofill:focus,
+input:autofill:focus {
+  border-color: #8b5cf6 !important;
+  outline: none !important;
 }
 
 .publicRouteLoading {
