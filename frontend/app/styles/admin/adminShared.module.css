@@ -19,10 +19,7 @@
 .adminActions button:disabled,
 .toolbar button:disabled,
 .primaryBtn:disabled,
-.editorActions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.65;
-}
+.editorActions button:disabled { cursor: not-allowed; opacity: 0.65; }
 
 .toolbar {
   display: grid;
@@ -49,16 +46,9 @@
   padding: 0 0.75rem;
 }
 
-.toolbar input {
-  border: 0;
-  background: transparent;
-  outline: 0;
-}
+.toolbar input { border: 0; background: transparent; outline: 0; }
 
-.toolbar select {
-  min-width: 8.5rem;
-  height: 2.5rem;
-}
+.toolbar select { min-width: 8.5rem; height: 2.5rem; }
 
 .toolbar > button,
 .toolbar > .primaryBtn {
@@ -70,10 +60,7 @@
   white-space: nowrap;
 }
 
-.toolbar svg {
-  width: 0.95rem;
-  height: 0.95rem;
-}
+.toolbar svg { width: 0.95rem; height: 0.95rem; }
 
 .cartasToolbar {
   grid-template-columns: minmax(13rem, 1fr) repeat(3, minmax(7.5rem, 9rem)) auto;
@@ -92,12 +79,7 @@
   padding: 0 0.7rem;
 }
 
-.cartasToolbar label svg {
-  width: 0.88rem;
-  height: 0.88rem;
-  flex: 0 0 auto;
-  color: #94a3b8;
-}
+.cartasToolbar label svg { width: 0.88rem; height: 0.88rem; flex: 0 0 auto; color: #94a3b8; }
 
 .cartasToolbar input {
   min-width: 0;
@@ -107,10 +89,7 @@
   font-weight: 600;
 }
 
-.cartasToolbar input::placeholder {
-  color: #78859b;
-  opacity: 1;
-}
+.cartasToolbar input::placeholder { color: #78859b; opacity: 1; }
 
 .cartasToolbar > select {
   min-width: 0;
@@ -133,13 +112,9 @@
   font-weight: 800;
 }
 
-.cartasToolbar > button {
-  color: #cbd5e1;
-}
+.cartasToolbar > button { color: #cbd5e1; }
 
-.cartasToolbar > .primaryBtn {
-  box-shadow: none;
-}
+.cartasToolbar > .primaryBtn { box-shadow: none; }
 
 .cartasWorkspace {
   position: relative;
@@ -172,26 +147,13 @@
   padding: 0.55rem 0.7rem 0.55rem 0.85rem;
 }
 
-.cartasListaTopo > div {
-  display: grid;
-  gap: 0.14rem;
-}
+.cartasListaTopo > div { display: grid; gap: 0.14rem; }
 
-.cartasListaTopo strong {
-  color: #f8fafc;
-  font-size: 0.82rem;
-}
+.cartasListaTopo strong { color: #f8fafc; font-size: 0.82rem; }
 
-.cartasListaTopo small {
-  color: #71809a;
-  font-size: 0.65rem;
-}
+.cartasListaTopo small { color: #71809a; font-size: 0.65rem; }
 
-.cartasListaTopo .primaryBtn {
-  min-height: 2.35rem;
-  padding: 0.45rem 0.7rem;
-  font-size: 0.68rem;
-}
+.cartasListaTopo .primaryBtn { min-height: 2.35rem; padding: 0.45rem 0.7rem; font-size: 0.68rem; }
 
 .cartasWorkspace > .cartasToolbar {
   position: sticky;
@@ -222,10 +184,7 @@
     0 1px rgba(255, 255, 255, 0.018);
 }
 
-.cartasWorkspace > .cartasToolbar > select {
-  padding-left: 0.78rem !important;
-  padding-right: 1.8rem !important;
-}
+.cartasWorkspace > .cartasToolbar > select { padding-left: 0.78rem !important; padding-right: 1.8rem !important; }
 
 .filtrosTopo {
   display: grid;
@@ -236,48 +195,23 @@
   padding: 0.05rem 0.1rem 0.55rem;
 }
 
-.filtrosTopo strong {
-  color: #f8fafc;
-  font-size: 0.78rem;
-}
+.filtrosTopo strong { color: #f8fafc; font-size: 0.78rem; }
 
-.filtrosTopo small {
-  color: #71809a;
-  font-size: 0.62rem;
-}
+.filtrosTopo small { color: #71809a; font-size: 0.62rem; }
 
-.cartasListaPanel .tableWrap {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
+.cartasListaPanel .tableWrap { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 
-.cartasListaPanel .tableWrap table {
-  min-width: 42rem;
-}
+.cartasListaPanel .tableWrap table { min-width: 42rem; }
 
 .cartasListaPanel .tableWrap th,
-.cartasListaPanel .tableWrap td {
-  padding: 0.58rem 0.62rem;
-  font-size: 0.75rem;
-}
+.cartasListaPanel .tableWrap td { padding: 0.58rem 0.62rem; font-size: 0.75rem; }
 
 .cartasListaPanel .statusAtivo,
-.cartasListaPanel .statusInativo {
-  font-size: 0.65rem;
-  padding: 0.16rem 0.4rem;
-}
+.cartasListaPanel .statusInativo { font-size: 0.65rem; padding: 0.16rem 0.4rem; }
 
-.cartasListaPanel .rowActions button {
-  width: 1.8rem;
-  height: 1.8rem;
-}
+.cartasListaPanel .rowActions button { width: 1.8rem; height: 1.8rem; }
 
-.cartasListaPanel .emptyTableRow:hover {
-  background: transparent;
-  box-shadow: none;
-}
+.cartasListaPanel .emptyTableRow:hover { background: transparent; box-shadow: none; }
 
 .cartasListaPanel .emptyTableRow td {
   height: 4rem;
@@ -287,32 +221,15 @@
   text-align: center;
 }
 
-.habilidadeNome {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #e2e8f0;
-}
+.habilidadeNome { display: inline-flex; align-items: center; gap: 0.5rem; color: #e2e8f0; }
 
-.habilidadeNome svg {
-  width: 1rem;
-  height: 1rem;
-  color: #a78bfa;
-}
+.habilidadeNome svg { width: 1rem; height: 1rem; color: #a78bfa; }
 
-.habilidadeNome strong {
-  font-size: 0.76rem;
-}
+.habilidadeNome strong { font-size: 0.76rem; }
 
-.habilidadeNome > span {
-  display: grid;
-  gap: 0.08rem;
-}
+.habilidadeNome > span { display: grid; gap: 0.08rem; }
 
-.habilidadeNome small {
-  color: #64748b;
-  font-size: 0.58rem;
-}
+.habilidadeNome small { color: #64748b; font-size: 0.58rem; }
 
 .primaryBtn {
   display: inline-flex;
@@ -323,16 +240,9 @@
   color: #fff;
 }
 
-.tableWrap {
-  overflow: auto;
-  border-radius: 0.8rem;
-}
+.tableWrap { overflow: auto; border-radius: 0.8rem; }
 
-.tableWrap table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 46rem;
-}
+.tableWrap table { width: 100%; border-collapse: collapse; min-width: 46rem; }
 
 .tableWrap th,
 .tableWrap td {
@@ -343,22 +253,11 @@
   text-align: left;
 }
 
-.tableWrap th {
-  background: rgba(7, 12, 25, 0.92);
-  color: #94a3b8;
-  font-weight: 850;
-}
+.tableWrap th { background: rgba(7, 12, 25, 0.92); color: #94a3b8; font-weight: 850; }
 
-.tableWrap tbody tr {
-  transition:
-    background 150ms ease,
-    box-shadow 150ms ease;
-}
+.tableWrap tbody tr { transition: background 150ms ease, box-shadow 150ms ease; }
 
-.tableWrap tbody tr:hover {
-  background: rgba(124, 58, 237, 0.07);
-  box-shadow: inset 3px 0 #7c3aed;
-}
+.tableWrap tbody tr:hover { background: rgba(124, 58, 237, 0.07); box-shadow: inset 3px 0 #7c3aed; }
 
 .rodapeTabela {
   display: flex;
@@ -370,18 +269,9 @@
   font-size: 0.72rem;
 }
 
-.cartasListaPanel .rodapeTabela {
-  margin-top: 0;
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
-  padding: 0.65rem 0.85rem;
-}
+.cartasListaPanel .rodapeTabela { margin-top: 0; border-top: 1px solid rgba(148, 163, 184, 0.12); padding: 0.65rem 0.85rem; }
 
-.paginacao {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.3rem;
-}
+.paginacao { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; }
 
 .paginacao button {
   display: grid;
@@ -403,32 +293,15 @@
     color 0.15s ease;
 }
 
-.paginacao button:hover:not(:disabled):not([aria-current="page"]) {
-  border-color: rgba(167, 139, 250, 0.45);
-  background: rgba(124, 58, 237, 0.16);
-  color: #fff;
-}
+.paginacao button:hover:not(:disabled):not([aria-current="page"]) { border-color: rgba(167, 139, 250, 0.45); background: rgba(124, 58, 237, 0.16); color: #fff; }
 
-.paginacao button[aria-current="page"] {
-  border-color: #8b5cf6;
-  background: #6d28d9;
-  color: #fff;
-}
+.paginacao button[aria-current="page"] { border-color: #8b5cf6; background: #6d28d9; color: #fff; }
 
-.paginacao button:disabled {
-  cursor: default;
-  opacity: 0.45;
-}
+.paginacao button:disabled { cursor: default; opacity: 0.45; }
 
-.paginacao button:focus-visible {
-  outline: 2px solid #c4b5fd;
-  outline-offset: 2px;
-}
+.paginacao button:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 2px; }
 
-.paginacao svg {
-  width: 0.85rem;
-  height: 0.85rem;
-}
+.paginacao svg { width: 0.85rem; height: 0.85rem; }
 
 .paginacaoReticencias {
   display: inline-block;
@@ -440,27 +313,13 @@
 
 .statusAtivo,
 .statusInativo,
-.statusAlerta {
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 900;
-  padding: 0.2rem 0.5rem;
-}
+.statusAlerta { border-radius: 999px; font-size: 0.75rem; font-weight: 900; padding: 0.2rem 0.5rem; }
 
-.statusAtivo {
-  background: rgba(34, 197, 94, 0.15);
-  color: #86efac;
-}
+.statusAtivo { background: rgba(34, 197, 94, 0.15); color: #86efac; }
 
-.statusInativo {
-  background: rgba(239, 68, 68, 0.14);
-  color: #fca5a5;
-}
+.statusInativo { background: rgba(239, 68, 68, 0.14); color: #fca5a5; }
 
-.statusAlerta {
-  background: rgba(245, 158, 11, 0.16);
-  color: #fde68a;
-}
+.statusAlerta { background: rgba(245, 158, 11, 0.16); color: #fde68a; }
 
 .nomeItemAlerta {
   color: #facc15 !important;
@@ -471,16 +330,9 @@
   text-underline-offset: 0.18rem;
 }
 
-.nomeItemAlerta[data-tom="vermelho"] {
-  color: #f87171 !important;
-  text-decoration-color: rgba(248, 113, 113, 0.55);
-}
+.nomeItemAlerta[data-tom="vermelho"] { color: #f87171 !important; text-decoration-color: rgba(248, 113, 113, 0.55); }
 
-.rowActions {
-  display: inline-flex;
-  gap: 0.55rem;
-  color: #94a3b8;
-}
+.rowActions { display: inline-flex; gap: 0.55rem; color: #94a3b8; }
 
 .rowActions button {
   display: grid;
@@ -494,17 +346,9 @@
   cursor: pointer;
 }
 
-.rowActions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
+.rowActions button:disabled { cursor: not-allowed; opacity: 0.55; }
 
-.rowActions .rowActionSelected {
-  border-color: #8b5cf6;
-  background: linear-gradient(135deg, #7c3aed, #9333ea);
-  color: #fff;
-  box-shadow: none;
-}
+.rowActions .rowActionSelected { border-color: #8b5cf6; background: linear-gradient(135deg, #7c3aed, #9333ea); color: #fff; box-shadow: none; }
 
 .usuarioDetalhes,
 .usuarioEditor {
@@ -532,18 +376,10 @@
 }
 
 .usuarioDetalhes h2,
-.usuarioEditor h2 {
-  margin: 0;
-  color: #f8fafc;
-  font-size: 0.9rem;
-}
+.usuarioEditor h2 { margin: 0; color: #f8fafc; font-size: 0.9rem; }
 
 .usuarioDetalhes header p,
-.usuarioEditor header p {
-  margin: 0.2rem 0 0;
-  color: #71809a;
-  font-size: 0.7rem;
-}
+.usuarioEditor header p { margin: 0.2rem 0 0; color: #71809a; font-size: 0.7rem; }
 
 .usuarioDetalhes header button,
 .usuarioEditor header button {
@@ -559,19 +395,12 @@
 }
 
 .usuarioDetalhes header svg,
-.usuarioEditor header svg {
-  width: 0.9rem;
-  height: 0.9rem;
-}
+.usuarioEditor header svg { width: 0.9rem; height: 0.9rem; }
 
-.usuarioEditor {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
+.usuarioEditor { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 .usuarioEditor > header,
-.usuarioEditor > .editorActions {
-  grid-column: 1 / -1;
-}
+.usuarioEditor > .editorActions { grid-column: 1 / -1; }
 
 .usuarioEditor > label {
   display: grid;
@@ -603,19 +432,9 @@
 }
 
 .usuarioEditor input:focus,
-.usuarioEditor select:focus {
-  border-color: rgba(168, 85, 247, 0.7);
-  box-shadow: none;
-}
+.usuarioEditor select:focus { border-color: rgba(168, 85, 247, 0.7); box-shadow: none; }
 
-.habilidadeEditor {
-  border-color: rgba(148, 163, 184, 0.16);
-  background: #080d19;
-  box-shadow:
-    inset 1px 1px rgba(255, 255, 255, 0.04),
-    inset -1px -1px rgba(0, 0, 0, 0.48),
-    0 2px 4px rgba(0, 0, 0, 0.12);
-}
+.habilidadeEditor { border-color: rgba(148, 163, 184, 0.16); background: #080d19; box-shadow: inset 1px 1px rgba(255, 255, 255, 0.04), inset -1px -1px rgba(0, 0, 0, 0.48), 0 2px 4px rgba(0, 0, 0, 0.12); }
 
 .modalBackdrop {
   position: fixed;
@@ -654,22 +473,11 @@
   padding: 0.65rem 0.75rem;
 }
 
-.usuarioToggle > span {
-  display: grid;
-  gap: 0.12rem;
-  min-width: 0;
-}
+.usuarioToggle > span { display: grid; gap: 0.12rem; min-width: 0; }
 
-.usuarioToggle strong {
-  color: #e2e8f0;
-  font-size: 0.72rem;
-}
+.usuarioToggle strong { color: #e2e8f0; font-size: 0.72rem; }
 
-.usuarioToggle small {
-  color: #71809a;
-  font-size: 0.64rem;
-  font-weight: 600;
-}
+.usuarioToggle small { color: #71809a; font-size: 0.64rem; font-weight: 600; }
 
 .feedbackInfo,
 .feedbackSuccess,
@@ -682,20 +490,11 @@
   font-weight: 800;
 }
 
-.feedbackInfo {
-  background: rgba(59, 130, 246, 0.1);
-  color: #bfdbfe;
-}
+.feedbackInfo { background: rgba(59, 130, 246, 0.1); color: #bfdbfe; }
 
-.feedbackSuccess {
-  background: rgba(34, 197, 94, 0.12);
-  color: #86efac;
-}
+.feedbackSuccess { background: rgba(34, 197, 94, 0.12); color: #86efac; }
 
-.feedbackError {
-  background: rgba(239, 68, 68, 0.12);
-  color: #fecaca;
-}
+.feedbackError { background: rgba(239, 68, 68, 0.12); color: #fecaca; }
 
 .editorActions {
   display: grid;
@@ -706,123 +505,56 @@
 }
 
 .editorActions a,
-.editorActions button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
+.editorActions button { display: inline-flex; align-items: center; justify-content: center; }
 
-.editorActions > :first-child {
-  border-color: rgba(248, 113, 113, 0.42);
-  background: rgba(127, 29, 29, 0.72);
-  color: #fecaca;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.045);
-}
+.editorActions > :first-child { border-color: rgba(248, 113, 113, 0.42); background: rgba(127, 29, 29, 0.72); color: #fecaca; box-shadow: inset 0 1px rgba(255, 255, 255, 0.045); }
 
 .editorActions > :last-child,
-.editorActions > .primaryBtn:last-child {
-  border-color: rgba(74, 222, 128, 0.42);
-  background: rgba(20, 83, 45, 0.86);
-  color: #dcfce7;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.055);
-}
+.editorActions > .primaryBtn:last-child { border-color: rgba(74, 222, 128, 0.42); background: rgba(20, 83, 45, 0.86); color: #dcfce7; box-shadow: inset 0 1px rgba(255, 255, 255, 0.055); }
 
-.editorActions > :first-child:hover {
-  background: rgba(153, 27, 27, 0.78);
-}
+.editorActions > :first-child:hover { background: rgba(153, 27, 27, 0.78); }
 
-.editorActions > :last-child:hover {
-  background: rgba(22, 101, 52, 0.92);
-}
+.editorActions > :last-child:hover { background: rgba(22, 101, 52, 0.92); }
 
 @media (max-width: 1080px) {
-  .cartasToolbar {
-    grid-template-columns: minmax(14rem, 1fr) repeat(3, minmax(7rem, 1fr));
-  }
-  .cartasWorkspace {
-    grid-template-columns: 1fr;
-  }
-  .cartasWorkspace > .cartasToolbar {
-    position: static;
-    grid-row: 1;
-    grid-template-columns: repeat(2, minmax(7rem, 1fr));
-  }
-  .cartasListaPanel {
-    grid-row: 2;
-  }
-  .filtrosTopo {
-    grid-column: 1 / -1;
-  }
-  .cartasToolbar > .primaryBtn {
-    grid-column: 4;
-  }
+  .cartasToolbar { grid-template-columns: minmax(14rem, 1fr) repeat(3, minmax(7rem, 1fr)); }
+  .cartasWorkspace { grid-template-columns: 1fr; }
+  .cartasWorkspace > .cartasToolbar { position: static; grid-row: 1; grid-template-columns: repeat(2, minmax(7rem, 1fr)); }
+  .cartasListaPanel { grid-row: 2; }
+  .filtrosTopo { grid-column: 1 / -1; }
+  .cartasToolbar > .primaryBtn { grid-column: 4; }
 }
 
 @media (max-width: 720px) {
   .topbar,
-  .toolbar {
-    display: grid;
-  }
-  .cartasWorkspace > .cartasToolbar {
-    grid-template-columns: 1fr;
-  }
-  .cartasListaTopo {
-    align-items: stretch;
-    flex-direction: column;
-  }
+  .toolbar { display: grid; }
+  .cartasWorkspace > .cartasToolbar { grid-template-columns: 1fr; }
+  .cartasListaTopo { align-items: stretch; flex-direction: column; }
   .cartasToolbar > button,
-  .cartasToolbar > .primaryBtn {
-    grid-column: auto;
-  }
+  .cartasToolbar > .primaryBtn { grid-column: auto; }
   .usuarioEditor > header,
   .usuarioEditor > .editorActions,
-  .usuarioEditor > .usuarioToggle {
-    grid-column: auto;
-  }
-  .modalBackdrop {
-    align-items: start;
-    padding: 0.6rem;
-  }
-  .habilidadeModal {
-    max-height: calc(100dvh - 1.2rem);
-  }
-  .toolbar label {
-    min-width: 0;
-  }
+  .usuarioEditor > .usuarioToggle { grid-column: auto; }
+  .modalBackdrop { align-items: start; padding: 0.6rem; }
+  .habilidadeModal { max-height: calc(100dvh - 1.2rem); }
+  .toolbar label { min-width: 0; }
 
   .toolbar,
   .cartasToolbar,
-  .usuarioEditor {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  .usuarioEditor { grid-template-columns: minmax(0, 1fr); }
 
   .toolbar > *,
   .cartasToolbar > *,
-  .usuarioEditor > * {
-    min-width: 0;
-    grid-column: auto;
-  }
+  .usuarioEditor > * { min-width: 0; grid-column: auto; }
 
   .toolbar > button,
   .toolbar > .primaryBtn,
   .cartasToolbar > button,
-  .cartasToolbar > .primaryBtn {
-    width: 100%;
-  }
+  .cartasToolbar > .primaryBtn { width: 100%; }
 
-  .tableWrap {
-    max-width: 100%;
-    overscroll-behavior-inline: contain;
-    scrollbar-color: #6d28d9 #111421;
-    scrollbar-width: thin;
-  }
+  .tableWrap { max-width: 100%; overscroll-behavior-inline: contain; scrollbar-color: #6d28d9 #111421; scrollbar-width: thin; }
 
-  .editorActions {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  .editorActions { grid-template-columns: minmax(0, 1fr); }
 
-  .rodapeTabela {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+  .rodapeTabela { align-items: flex-start; flex-direction: column; }
 }

@@ -11,38 +11,11 @@ import {
   RemoverAdminUsuarioDto,
   UpdateAdminUsuarioDto,
 } from '../dto/admin-usuario.dto';
-
-const usuarioSelect = {
-  id: true,
-  nome: true,
-  email: true,
-  nivel: true,
-  saldo_rubys_cache: true,
-  ativo: true,
-  bloqueado: true,
-  is_admin: true,
-  email_verificado: true,
-  criado_em: true,
-  ultimo_login_em: true,
-  _count: { select: { partidas: true } },
-  perfil: {
-    select: {
-      avatar_url: true,
-      id_moldura: true,
-      id_carta_moldura: true,
-      molduraSelecionada: {
-        select: { nome: true, classe_css: true },
-      },
-      cartaMolduraSelecionada: {
-        select: { nome: true, moldura: true, config_visual: true },
-      },
-    },
-  },
-} satisfies Prisma.UsuarioSelect;
-
-type UsuarioSelecionado = Prisma.UsuarioGetPayload<{
-  select: typeof usuarioSelect;
-}>;
+import {
+  consultarAtividadeUsuarioAdmin,
+  formatarUsuarioAdminResponse,
+  usuarioSelect,
+} from './admin-usuarios.helpers';
 
 @Injectable()
 export class AdminUsuariosService {
@@ -74,7 +47,7 @@ export class AdminUsuariosService {
         : undefined,
     });
 
-    return usuarios.map((usuario) => this.toResponse(usuario));
+    return usuarios.map((usuario) => formatarUsuarioAdminResponse(usuario));
   }
 
   async buscar(id: string) {
@@ -84,14 +57,16 @@ export class AdminUsuariosService {
     });
 
     if (!usuario) throw new NotFoundException('Usuário não encontrado.');
-    return this.toResponse(usuario);
+    return formatarUsuarioAdminResponse(usuario);
   }
 
   async buscarExpedicoes(id: string, paginaInformada?: string) {
     await this.buscar(id);
     const paginaConvertida = Number(paginaInformada);
-    const pagina = Number.isSafeInteger(paginaConvertida) && paginaConvertida > 0
-      ? Math.min(paginaConvertida, 1000000) : 1;
+    const pagina =
+      Number.isSafeInteger(paginaConvertida) && paginaConvertida > 0
+        ? Math.min(paginaConvertida, 1000000)
+        : 1;
     const porPagina = 10;
     const where = { id_usuario: id };
     const [total, expedicoes] = await Promise.all([
@@ -107,35 +82,52 @@ export class AdminUsuariosService {
             where: { id_usuario: id },
             orderBy: [{ etapa_expedicao: 'asc' }, { timestamp_inicio: 'asc' }],
             select: {
-              id: true, etapa_expedicao: true, resultado: true,
-              turnos_jogados: true, recompensa_rubys: true,
-              timestamp_inicio: true, timestamp_fim: true,
+              id: true,
+              etapa_expedicao: true,
+              resultado: true,
+              turnos_jogados: true,
+              recompensa_rubys: true,
+              timestamp_inicio: true,
+              timestamp_fim: true,
             },
           },
         },
       }),
     ]);
-    return { itens: expedicoes.map((expedicao) => ({
-      id: expedicao.id,
-      deck: expedicao.deck.nome,
-      status: expedicao.status,
-      etapaAtual: expedicao.etapa_atual,
-      rubys: expedicao.partidas.reduce((total, partida) => total + partida.recompensa_rubys, 0),
-      criadoEm: expedicao.criado_em,
-      finalizadoEm: expedicao.finalizado_em,
-      lutas: expedicao.partidas.map((partida) => ({
-        id: partida.id,
-        etapa: partida.etapa_expedicao,
-        resultado: partida.resultado,
-        turnos: partida.turnos_jogados,
-        rubys: partida.recompensa_rubys,
-        iniciadoEm: partida.timestamp_inicio,
-        finalizadoEm: partida.timestamp_fim,
+    return {
+      itens: expedicoes.map((expedicao) => ({
+        id: expedicao.id,
+        deck: expedicao.deck.nome,
+        status: expedicao.status,
+        etapaAtual: expedicao.etapa_atual,
+        rubys: expedicao.partidas.reduce(
+          (soma, partida) => soma + partida.recompensa_rubys,
+          0,
+        ),
+        criadoEm: expedicao.criado_em,
+        finalizadoEm: expedicao.finalizado_em,
+        lutas: expedicao.partidas.map((partida) => ({
+          id: partida.id,
+          etapa: partida.etapa_expedicao,
+          resultado: partida.resultado,
+          turnos: partida.turnos_jogados,
+          rubys: partida.recompensa_rubys,
+          iniciadoEm: partida.timestamp_inicio,
+          finalizadoEm: partida.timestamp_fim,
+        })),
       })),
-    })), total, pagina, porPagina, totalPaginas: Math.max(1, Math.ceil(total / porPagina)) };
+      total,
+      pagina,
+      porPagina,
+      totalPaginas: Math.max(1, Math.ceil(total / porPagina)),
+    };
   }
 
-  async buscarLogLutaExpedicao(id: string, idExpedicao: string, idLuta: string) {
+  async buscarLogLutaExpedicao(
+    id: string,
+    idExpedicao: string,
+    idLuta: string,
+  ) {
     const partida = await this.prisma.logPartida.findFirst({
       where: {
         id: idLuta,
@@ -144,19 +136,33 @@ export class AdminUsuariosService {
         expedicao: { id_usuario: id },
       },
       select: {
-        id: true, etapa_expedicao: true, resultado: true,
-        turnos_jogados: true, recompensa_rubys: true,
-        timestamp_inicio: true, timestamp_fim: true,
+        id: true,
+        etapa_expedicao: true,
+        resultado: true,
+        turnos_jogados: true,
+        recompensa_rubys: true,
+        timestamp_inicio: true,
+        timestamp_fim: true,
         eventos: {
           orderBy: { sequencia: 'asc' },
           select: {
-            id: true, sequencia: true, turno: true, tipo: true,
-            origem: true, texto: true, valor: true, criado_em: true,
+            id: true,
+            sequencia: true,
+            turno: true,
+            tipo: true,
+            origem: true,
+            texto: true,
+            valor: true,
+            criado_em: true,
           },
         },
       },
     });
-    if (!partida) throw new NotFoundException('Luta não encontrada para este usuário e expedição.');
+    if (!partida) {
+      throw new NotFoundException(
+        'Luta não encontrada para este usuário e expedição.',
+      );
+    }
     return {
       id: partida.id,
       etapa: partida.etapa_expedicao,
@@ -181,10 +187,14 @@ export class AdminUsuariosService {
   async atualizar(id: string, dto: UpdateAdminUsuarioDto, idAdmin: string) {
     const atual = await this.buscar(id);
     if (dto.admin === false) {
-      throw new BadRequestException('A remoção de acesso administrativo não está disponível neste editor.');
+      throw new BadRequestException(
+        'A remoção de acesso administrativo não está disponível neste editor.',
+      );
     }
     if (dto.admin && (dto.ativo === false || dto.bloqueado === true)) {
-      throw new BadRequestException('Uma conta administrativa deve permanecer ativa e desbloqueada.');
+      throw new BadRequestException(
+        'Uma conta administrativa deve permanecer ativa e desbloqueada.',
+      );
     }
     if (atual.admin && (dto.bloqueado === true || dto.ativo === false)) {
       throw new BadRequestException(
@@ -228,11 +238,15 @@ export class AdminUsuariosService {
         data: {
           id_admin: idAdmin,
           id_usuario: id,
-          acao: dto.admin && !atual.admin ? 'ADMIN_CONCEDIDO' : 'PERFIL_ATUALIZADO',
+          acao:
+            dto.admin && !atual.admin
+              ? 'ADMIN_CONCEDIDO'
+              : 'PERFIL_ATUALIZADO',
           categoria: 'CONTA',
-          descricao: dto.admin && !atual.admin
-            ? 'Acesso administrativo concedido à conta.'
-            : 'Dados administrativos da conta atualizados.',
+          descricao:
+            dto.admin && !atual.admin
+              ? 'Acesso administrativo concedido à conta.'
+              : 'Dados administrativos da conta atualizados.',
           detalhes: {
             alteracoes: { ...dto },
             estadoAnterior: {
@@ -250,7 +264,7 @@ export class AdminUsuariosService {
       return atualizado;
     });
 
-    return this.toResponse(usuario);
+    return formatarUsuarioAdminResponse(usuario);
   }
 
   async remover(id: string, dto: RemoverAdminUsuarioDto, idAdmin: string) {
@@ -357,7 +371,9 @@ export class AdminUsuariosService {
       );
     }
     if (dto.quantidade > 1) {
-      throw new BadRequestException('Só é permitido adicionar uma cópia por carta.');
+      throw new BadRequestException(
+        'Só é permitido adicionar uma cópia por carta.',
+      );
     }
 
     await this.buscar(id);
@@ -365,7 +381,9 @@ export class AdminUsuariosService {
       where: { id: dto.idCarta, ativo: true, excluido_em: null },
       select: { id: true, nome: true },
     });
-    if (!carta) throw new NotFoundException('Carta não encontrada ou inativa.');
+    if (!carta) {
+      throw new NotFoundException('Carta não encontrada ou inativa.');
+    }
 
     await this.prisma.$transaction(async (tx) => {
       const itemAtual = await tx.inventario.findUnique({
@@ -398,7 +416,10 @@ export class AdminUsuariosService {
               data: { id_usuario: id, id_carta: dto.idCarta, quantidade: 1 },
             });
           } catch (error) {
-            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+            if (
+              error instanceof Prisma.PrismaClientKnownRequestError &&
+              error.code === 'P2002'
+            ) {
               throw new BadRequestException('O usuário já possui essa carta.');
             }
             throw error;
@@ -522,7 +543,7 @@ export class AdminUsuariosService {
       });
     });
 
-    return this.toResponse(usuario);
+    return formatarUsuarioAdminResponse(usuario);
   }
 
   async buscarAtividade(id: string, limiteInformado?: string) {
@@ -532,172 +553,6 @@ export class AdminUsuariosService {
       ? Math.min(100, Math.max(10, limiteConvertido))
       : 50;
 
-    const [rubys, compras, gachas, auditorias] = await Promise.all([
-      this.prisma.ledgerRuby.findMany({
-        where: { id_usuario: id },
-        orderBy: { criado_em: 'desc' },
-        take: limite,
-      }),
-      this.prisma.logTransacao.findMany({
-        where: { id_usuario: id },
-        select: {
-          id: true,
-          valor_brl: true,
-          status_pagamento: true,
-          timestamp_compra: true,
-          pacote: { select: { nome: true, quantidade_rubys: true } },
-        },
-        orderBy: { timestamp_compra: 'desc' },
-        take: limite,
-      }),
-      this.prisma.logGacha.findMany({
-        where: { id_usuario: id },
-        select: {
-          id: true,
-          rubys_gastos: true,
-          timestamp_pull: true,
-          cartaObtida: { select: { nome: true } },
-          banner: { select: { nome: true } },
-        },
-        orderBy: { timestamp_pull: 'desc' },
-        take: limite,
-      }),
-      this.prisma.logAdminUsuario.findMany({
-        where: { id_usuario: id },
-        select: {
-          id: true,
-          acao: true,
-          categoria: true,
-          descricao: true,
-          detalhes: true,
-          criado_em: true,
-          admin: { select: { id: true, nome: true, email: true } },
-        },
-        orderBy: { criado_em: 'desc' },
-        take: limite,
-      }),
-    ]);
-
-    const idsAutoria = rubys
-      .map((item) => item.id_referencia)
-      .filter((item): item is string => Boolean(item));
-    const autores = idsAutoria.length
-      ? await this.prisma.usuario.findMany({
-          where: { id: { in: idsAutoria }, is_admin: true },
-          select: { id: true, nome: true, email: true },
-        })
-      : [];
-    const autorPorId = new Map(autores.map((autor) => [autor.id, autor]));
-
-    const atividade = [
-      ...rubys.map((item) => ({
-        id: `ruby:${item.id}`,
-        tipo: 'RUBY',
-        titulo: this.formatarMotivo(item.motivo, 'Movimentação de Rubys'),
-        descricao: item.descricao,
-        valor: item.quantidade,
-        unidade: 'RUBYS',
-        natureza: item.quantidade >= 0 ? 'ENTRADA' : 'SAIDA',
-        criadoEm: item.criado_em,
-        autoria: item.id_referencia
-          ? (autorPorId.get(item.id_referencia) ?? null)
-          : null,
-        detalhes: null,
-      })),
-      ...compras.map((item) => ({
-        id: `compra:${item.id}`,
-        tipo: 'COMPRA',
-        titulo: item.pacote?.nome ?? 'Compra de Rubys',
-        descricao: `Pagamento ${item.status_pagamento.toLocaleLowerCase('pt-BR')}.`,
-        valor: Number(item.valor_brl),
-        unidade: 'BRL',
-        natureza: 'NEUTRO',
-        criadoEm: item.timestamp_compra,
-        autoria: null,
-        detalhes: item.pacote
-          ? { rubysRecebidos: item.pacote.quantidade_rubys }
-          : null,
-      })),
-      ...gachas.map((item) => ({
-        id: `gacha:${item.id}`,
-        tipo: 'GACHA',
-        titulo: `Carta obtida: ${item.cartaObtida.nome}`,
-        descricao: `Banner ${item.banner.nome}.`,
-        valor: -item.rubys_gastos,
-        unidade: 'RUBYS',
-        natureza: 'SAIDA',
-        criadoEm: item.timestamp_pull,
-        autoria: null,
-        detalhes: null,
-      })),
-      ...auditorias.map((item) => ({
-        id: `admin:${item.id}`,
-        tipo: 'ADMIN',
-        titulo: this.formatarMotivo(item.acao, 'Ação administrativa'),
-        descricao: item.descricao,
-        valor: null,
-        unidade: null,
-        natureza: 'NEUTRO',
-        criadoEm: item.criado_em,
-        autoria: item.admin,
-        detalhes: {
-          categoria: item.categoria,
-          dados: item.detalhes,
-        },
-      })),
-    ];
-
-    return atividade
-      .sort(
-        (a, b) =>
-          new Date(b.criadoEm ?? 0).getTime() -
-          new Date(a.criadoEm ?? 0).getTime(),
-      )
-      .slice(0, limite);
-  }
-
-  private formatarMotivo(motivo: string, fallback: string) {
-    const titulos: Record<string, string> = {
-      AJUSTE_ADMIN: 'Ajuste administrativo',
-      GIRO_BANNER: 'Gasto no gacha',
-      RECOMPENSA_DIARIA: 'Recompensa diária',
-      RECOMPENSA_SEMANAL: 'Recompensa semanal',
-      COMPRA: 'Compra de Rubys',
-      BONUS_ADMIN: 'Bônus administrativo',
-      REEMBOLSO: 'Reembolso',
-      ESTORNO: 'Estorno',
-      PERFIL_ATUALIZADO: 'Conta atualizada',
-      CONTA_REMOVIDA: 'Conta removida',
-      CARTA_ADICIONADA: 'Ação administrativa: carta adicionada',
-      CARTA_REMOVIDA: 'Ação administrativa: carta removida',
-      SALDO_AJUSTADO: 'Ação administrativa: saldo ajustado',
-    };
-    return titulos[motivo] ?? fallback;
-  }
-
-  private toResponse(usuario: UsuarioSelecionado) {
-    return {
-      id: usuario.id,
-      nome: usuario.nome,
-      email: usuario.email,
-      nivel: usuario.nivel ?? 1,
-      partidas: usuario._count.partidas,
-      rubys: usuario.saldo_rubys_cache ?? 0,
-      ativo: Boolean(usuario.ativo),
-      bloqueado: Boolean(usuario.bloqueado),
-      admin: Boolean(usuario.is_admin),
-      emailVerificado: usuario.email_verificado,
-      criadoEm: usuario.criado_em,
-      ultimoLoginEm: usuario.ultimo_login_em,
-      avatarUrl: usuario.perfil?.avatar_url ?? null,
-      molduraId:
-        usuario.perfil?.id_moldura ?? usuario.perfil?.id_carta_moldura ?? null,
-      molduraClasse: usuario.perfil?.cartaMolduraSelecionada
-        ? 'molduraCarta'
-        : (usuario.perfil?.molduraSelecionada?.classe_css ?? 'molduraPadrao'),
-      molduraUrl: usuario.perfil?.cartaMolduraSelecionada?.moldura ?? null,
-      molduraConfig:
-        usuario.perfil?.cartaMolduraSelecionada?.config_visual ?? null,
-    };
+    return consultarAtividadeUsuarioAdmin(this.prisma, id, limite);
   }
 }
