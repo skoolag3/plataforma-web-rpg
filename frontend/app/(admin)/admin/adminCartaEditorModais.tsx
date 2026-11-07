@@ -9,7 +9,7 @@ import {
 } from "../../components/cartaMontada";
 import { obterValorVendaCarta } from "../../lib/valorVendaCarta";
 import { DetalheCarta } from "../../(private)/cartas/components/detalheCarta";
-import type { CartaDoJogo } from "../../(private)/cartas/cardData";
+import type { Card } from "../../(private)/cartas/types";
 import { styles as inventarioStyles } from "../../(private)/cartas/styles";
 import sharedStyles from "../../styles/admin/adminShared.module.css";
 import editorStyles from "../../styles/admin/adminCartaEditor.module.css";
@@ -273,7 +273,7 @@ export function ModaisCartaEditor({
   removerImagem: (tipo: "foto" | "moldura") => void;
   detalhesAbertos: boolean;
   setDetalhesAbertos: (valor: boolean) => void;
-  cartaDetalhe: CartaDoJogo;
+  cartaDetalhe: Card;
 }) {
   if (!portalPronto) return null;
 

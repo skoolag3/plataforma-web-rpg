@@ -573,8 +573,8 @@ export function CartaEditor({
             </div>
           </details>
           <SecaoAvancadaCartaEditor
-            form={form}
-            carta={carta}
+            nomeCarta={carta.nome}
+            ativo={form.ativo}
             salvando={salvando}
             carregandoImpacto={carregandoImpacto}
             confirmandoExclusao={confirmandoExclusao}
