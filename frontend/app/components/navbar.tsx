@@ -104,8 +104,10 @@ export function Navbar() {
       "/decks",
       "/gacha",
       "/banners",
+      "/loja",
       "/expedicao",
       "/partida",
+      "/ranking",
     ].some((rota) => caminho === rota || caminho.startsWith(`${rota}/`)) ||
     caminho.startsWith("/admin")
   ) {
