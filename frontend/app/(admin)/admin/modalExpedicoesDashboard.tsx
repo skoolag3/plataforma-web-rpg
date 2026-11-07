@@ -103,6 +103,7 @@ export function ModalExpedicoesDashboard({ aoFechar }: Props) {
   const modalJSX = (
     <div
       className={styles.fundo}
+      data-modal-overlay
       role="presentation"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) aoFechar();
@@ -110,6 +111,7 @@ export function ModalExpedicoesDashboard({ aoFechar }: Props) {
     >
       <section
         className={styles.modal}
+        data-modal-panel
         role="dialog"
         aria-modal="true"
         aria-labelledby="titulo-expedicoes-jogadores"
@@ -201,12 +203,12 @@ export function ModalExpedicoesDashboard({ aoFechar }: Props) {
             <div className={styles.tabelaWrap}>
               <table className={styles.tabela}>
                 <colgroup>
-                  <col style={{ width: "26%" }} />
-                  <col style={{ width: "17%" }} />
-                  <col style={{ width: "15%" }} />
-                  <col style={{ width: "11%" }} />
-                  <col style={{ width: "13%" }} />
+                  <col style={{ width: "28%" }} />
                   <col style={{ width: "18%" }} />
+                  <col style={{ width: "16%" }} />
+                  <col style={{ width: "9%" }} />
+                  <col style={{ width: "12%" }} />
+                  <col style={{ width: "17%" }} />
                 </colgroup>
                 <thead>
                   <tr>
@@ -221,32 +223,36 @@ export function ModalExpedicoesDashboard({ aoFechar }: Props) {
                 <tbody>
                   {painel.expedicoes.map((item) => (
                     <tr key={item.id}>
-                      <td>
+                      <td data-label="Jogador">
                         <div className={styles.jogadorTextos}>
-                          <strong className={styles.jogadorNome}>{item.jogador}</strong>
-                          <small className={styles.jogadorEmail}>{item.email}</small>
+                          <strong className={styles.jogadorNome} title={item.jogador}>
+                            <span className={styles.jogadorNomeTexto}>{item.jogador}</span>
+                          </strong>
+                          <small className={styles.jogadorEmail} title={item.email}>
+                            {item.email}
+                          </small>
                         </div>
                       </td>
-                      <td>
-                        <span className={styles.deckBadge}>{item.deck || "Meu Deck"}</span>
+                      <td data-label="Deck">
+                        <span className={styles.deckBadge} title={item.deck || "Meu Deck"}>
+                          {item.deck || "Meu Deck"}
+                        </span>
                       </td>
-                      <td>
+                      <td data-label="Status">
                         <span className={`${styles.statusBadge} ${obterClasseStatus(item.status)}`}>
                           {item.status}
                         </span>
                       </td>
-                      <td>
-                        <span style={{ fontWeight: 600, color: "#f8fafc" }}>
-                          {item.etapaAtual}/4
-                        </span>
+                      <td data-label="Etapa">
+                        <span className={styles.nivelTexto}>{item.etapaAtual}/4</span>
                       </td>
-                      <td>
+                      <td data-label="Rubys">
                         <span className={styles.rubysCell}>
                           <Gem size={13} aria-hidden="true" />
-                          {item.rubys}
+                          {item.rubys.toLocaleString("pt-BR")}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Início">
                         <span className={styles.horarioExato}>
                           {formatarDataHora(item.criadoEm)}
                         </span>

@@ -10,13 +10,14 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   obterAdminPityHistorico,
   type AdminLogPityGacha,
 } from "../../lib/admin";
 import styles from "../../styles/admin/modalDashboardCards.module.css";
+import { useAdminRaridades } from "./useAdminRaridades";
 
 function formatarDataHoraCompleta(dataStr: string | null) {
   if (!dataStr) return "-";
@@ -32,7 +33,7 @@ function formatarDataHoraCompleta(dataStr: string | null) {
     minute: "2-digit",
     second: "2-digit",
   }).format(data);
-  return `${diaMesAno} às ${horaMinSeg}`;
+  return `${diaMesAno}, ${horaMinSeg}`;
 }
 
 function formatarTempoRelativo(dataStr: string | null) {
@@ -51,32 +52,28 @@ function formatarTempoRelativo(dataStr: string | null) {
   return "";
 }
 
-function obterClasseRaridade(raridade: string) {
-  switch (raridade.toUpperCase()) {
-    case "UR":
-      return styles.raridadeUR;
-    case "SSR":
-      return styles.raridadeSSR;
-    case "SR":
-      return styles.raridadeSR;
-    case "R":
-      return styles.raridadeR;
-    default:
-      return styles.raridadeN;
-  }
-}
-
 type Props = {
   aoFechar: () => void;
 };
 
 export function ModalPityGacha({ aoFechar }: Props) {
+  const raridades = useAdminRaridades();
   const [logs, setLogs] = useState<AdminLogPityGacha[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [filtroRaridade, setFiltroRaridade] = useState<string>("todas");
   const aoFecharRef = useRef(aoFechar);
+
+  const raridadesOrdenadas = useMemo(
+    () => [...raridades].sort((a, b) => b.ordem - a.ordem),
+    [raridades],
+  );
+
+  const mapaRaridades = useMemo(
+    () => new Map(raridades.map((item) => [item.codigo.toUpperCase(), item])),
+    [raridades],
+  );
 
   useEffect(() => {
     aoFecharRef.current = aoFechar;
@@ -139,6 +136,7 @@ export function ModalPityGacha({ aoFechar }: Props) {
   const modalJSX = (
     <div
       className={styles.fundo}
+      data-modal-overlay
       role="presentation"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) aoFechar();
@@ -146,6 +144,7 @@ export function ModalPityGacha({ aoFechar }: Props) {
     >
       <section
         className={styles.modal}
+        data-modal-panel
         role="dialog"
         aria-modal="true"
         aria-labelledby="titulo-pity-gacha"
@@ -189,11 +188,11 @@ export function ModalPityGacha({ aoFechar }: Props) {
             onChange={(e) => setFiltroRaridade(e.target.value)}
           >
             <option value="todas">Todas as raridades</option>
-            <option value="UR">UR (Ultra Raras)</option>
-            <option value="SSR">SSR (Super Super Raras)</option>
-            <option value="SR">SR (Super Raras)</option>
-            <option value="R">R (Raras)</option>
-            <option value="N">N (Normais)</option>
+            {raridadesOrdenadas.map((raridade) => (
+              <option key={raridade.codigo} value={raridade.codigo}>
+                {raridade.nome}
+              </option>
+            ))}
           </select>
 
           <span className={styles.tagContador}>
@@ -227,113 +226,129 @@ export function ModalPityGacha({ aoFechar }: Props) {
             <div className={styles.tabelaWrap}>
               <table className={styles.tabela}>
                 <colgroup>
-                  <col style={{ width: "27%" }} />
-                  <col style={{ width: "16%" }} />
-                  <col style={{ width: "20%" }} />
-                  <col style={{ width: "15%" }} />
-                  <col style={{ width: "14%" }} />
-                  <col style={{ width: "8%" }} />
+                  <col style={{ width: "26%" }} />
+                  <col style={{ width: "13%" }} />
+                  <col style={{ width: "21%" }} />
+                  <col style={{ width: "13%" }} />
+                  <col style={{ width: "17%" }} />
+                  <col style={{ width: "10%" }} />
                 </colgroup>
                 <thead>
                   <tr>
                     <th scope="col">Carta Obtida</th>
-                    <th scope="col">Pity no Pull</th>
+                    <th scope="col">Pity</th>
                     <th scope="col">Jogador</th>
                     <th scope="col">Banner</th>
-                    <th scope="col">Horário da Obtenção</th>
-                    <th scope="col">Custo</th>
+                    <th scope="col">Obtida em</th>
+                    <th scope="col" className={styles.colunaDireita}>Custo</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {logsFiltrados.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <div className={styles.cartaCell}>
-                          <div className={styles.cartaMiniatura}>
-                            {item.carta.foto ? (
-                              <Image
-                                src={item.carta.foto}
-                                alt=""
-                                width={36}
-                                height={45}
-                              />
-                            ) : (
-                              <ImageIcon size={16} color="#717d9e" />
-                            )}
-                          </div>
-                          <div className={styles.cartaTextos}>
-                            <span className={styles.cartaNome}>{item.carta.nome}</span>
-                            <div className={styles.cartaTags}>
-                              <span
-                                className={`${styles.raridadeTag} ${obterClasseRaridade(item.carta.raridade)}`}
-                              >
-                                {item.carta.raridade}
+                  {logsFiltrados.map((item) => {
+                    const infoRaridade = mapaRaridades.get(item.carta.raridade.toUpperCase());
+                    return (
+                      <tr key={item.id}>
+                        <td data-label="Carta">
+                          <div className={styles.cartaCell}>
+                            <div className={styles.cartaMiniatura}>
+                              {item.carta.foto ? (
+                                <Image
+                                  src={item.carta.foto}
+                                  alt=""
+                                  width={36}
+                                  height={45}
+                                />
+                              ) : (
+                                <ImageIcon size={16} color="#717d9e" />
+                              )}
+                            </div>
+                            <div className={styles.cartaTextos}>
+                              <span className={styles.cartaNome} title={item.carta.nome}>
+                                {item.carta.nome}
                               </span>
-                              <span className={styles.elementoTag}>
-                                {item.carta.elemento}
-                              </span>
+                              <div className={styles.cartaTags}>
+                                <span
+                                  className={`${styles.raridadeTag} ${styles.raridadeDinamica}`}
+                                  style={
+                                    infoRaridade
+                                      ? ({ "--cor-raridade": infoRaridade.cor } as CSSProperties)
+                                      : undefined
+                                  }
+                                >
+                                  {infoRaridade?.nome ?? item.carta.raridade}
+                                </span>
+                                <span className={styles.elementoTag}>
+                                  {item.carta.elemento}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className={styles.pityWrap}>
-                          <span className={styles.pityBadge}>
-                            Pity <span className={styles.pityDestaque}>#{item.pityContador}</span>
-                          </span>
-                          {item.foiPityGarantido ? (
-                            <span className={styles.pityGarantidoTag}>Garantido</span>
-                          ) : item.limitePityBanner ? (
-                            <small style={{ fontSize: "0.62rem", color: "#8790a3" }}>
-                              Limite: {item.limitePityBanner}
-                            </small>
-                          ) : null}
-                        </div>
-                      </td>
-                      <td>
-                        <div className={styles.jogadorWrap}>
-                          <div className={styles.avatarWrap}>
-                            {item.jogador.avatarUrl ? (
-                              <Image
-                                src={item.jogador.avatarUrl}
-                                alt=""
-                                width={32}
-                                height={32}
-                                className={styles.avatarImg}
-                              />
-                            ) : (
-                              <span className={styles.avatarPlaceholder}>
-                                {item.jogador.nome.charAt(0)}
-                              </span>
-                            )}
+                        </td>
+                        <td data-label="Pity">
+                          <div className={styles.pityWrap}>
+                            <span className={styles.pityBadge}>
+                              Pity <span className={styles.pityDestaque}>#{item.pityContador}</span>
+                            </span>
+                            {item.foiPityGarantido ? (
+                              <span className={styles.pityGarantidoTag}>Garantido</span>
+                            ) : item.limitePityBanner ? (
+                              <small style={{ fontSize: "0.62rem", color: "#8790a3" }}>
+                                Limite: {item.limitePityBanner}
+                              </small>
+                            ) : null}
                           </div>
-                          <div className={styles.jogadorTextos}>
-                            <strong className={styles.jogadorNome}>{item.jogador.nome}</strong>
-                            <small className={styles.jogadorEmail}>{item.jogador.email}</small>
+                        </td>
+                        <td data-label="Jogador">
+                          <div className={styles.jogadorWrap}>
+                            <div className={styles.avatarWrap}>
+                              {item.jogador.avatarUrl ? (
+                                <Image
+                                  src={item.jogador.avatarUrl}
+                                  alt=""
+                                  width={32}
+                                  height={32}
+                                  className={styles.avatarImg}
+                                />
+                              ) : (
+                                <span className={styles.avatarPlaceholder}>
+                                  {item.jogador.nome.charAt(0)}
+                                </span>
+                              )}
+                            </div>
+                            <div className={styles.jogadorTextos}>
+                              <strong className={styles.jogadorNome} title={item.jogador.nome}>
+                                <span className={styles.jogadorNomeTexto}>{item.jogador.nome}</span>
+                              </strong>
+                              <small className={styles.jogadorEmail} title={item.jogador.email}>
+                                {item.jogador.email}
+                              </small>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={styles.deckBadge}>{item.banner.nome}</span>
-                      </td>
-                      <td>
-                        <div className={styles.horarioWrap}>
-                          <span className={styles.horarioExato}>
-                            {formatarDataHoraCompleta(item.dataHora)}
+                        </td>
+                        <td data-label="Banner">
+                          <span className={styles.deckBadge} title={item.banner.nome}>
+                            {item.banner.nome}
                           </span>
-                          <span className={styles.tempoRelativo}>
-                            {formatarTempoRelativo(item.dataHora)}
+                        </td>
+                        <td data-label="Obtida em">
+                          <div className={styles.horarioWrap}>
+                            <span className={styles.horarioExato}>
+                              {formatarDataHoraCompleta(item.dataHora)}
+                            </span>
+                            <span className={styles.tempoRelativo}>
+                              {formatarTempoRelativo(item.dataHora)}
+                            </span>
+                          </div>
+                        </td>
+                        <td data-label="Custo" className={styles.colunaDireita}>
+                          <span className={styles.rubysCell}>
+                            <Gem size={13} aria-hidden="true" />
+                            {item.rubysGastos.toLocaleString("pt-BR")}
                           </span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={styles.rubysCell}>
-                          <Gem size={13} aria-hidden="true" />
-                          {item.rubysGastos}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

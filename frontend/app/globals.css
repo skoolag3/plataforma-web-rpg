@@ -18,9 +18,18 @@ body:has([aria-modal="true"]) {
   overflow: hidden;
 }
 
-:where([aria-modal="true"], [aria-modal="true"] *, [data-modal-overlay], [data-modal-overlay] *) {
-  scrollbar-color: #7c3aed #111421;
-  scrollbar-width: thin;
+@supports selector(::-webkit-scrollbar) {
+  :where([aria-modal="true"], [aria-modal="true"] *, [data-modal-overlay], [data-modal-overlay] *) {
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+  }
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  :where([aria-modal="true"], [aria-modal="true"] *, [data-modal-overlay], [data-modal-overlay] *) {
+    scrollbar-color: #7c3aed #111421;
+    scrollbar-width: thin;
+  }
 }
 
 /* Contém o scroll só na raiz do modal; aplicar em todos os descendentes
@@ -30,8 +39,14 @@ body:has([aria-modal="true"]) {
 }
 
 :where([aria-modal="true"], [aria-modal="true"] *, [data-modal-overlay], [data-modal-overlay] *)::-webkit-scrollbar {
-  width: 0.45rem;
-  height: 0.45rem;
+  width: 0.42rem;
+  height: 0.42rem;
+}
+
+:where([aria-modal="true"], [aria-modal="true"] *, [data-modal-overlay], [data-modal-overlay] *)::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 :where([aria-modal="true"], [aria-modal="true"] *, [data-modal-overlay], [data-modal-overlay] *)::-webkit-scrollbar-track {

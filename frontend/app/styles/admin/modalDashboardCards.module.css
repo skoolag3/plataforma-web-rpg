@@ -232,17 +232,35 @@
 
 /* Conteudo Principal & Tabela */
 .conteudo {
-  flex: 1 1 auto;
+  flex: 1 1 0%;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: #6d5c9c #090d18;
+  scrollbar-gutter: stable;
+}
+
+@supports selector(::-webkit-scrollbar) {
+  .conteudo {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .conteudo {
+    scrollbar-width: thin;
+    scrollbar-color: #6d5c9c #090d18;
+  }
 }
 
 .conteudo::-webkit-scrollbar {
   width: 6px;
+}
+.conteudo::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 .conteudo::-webkit-scrollbar-track {
   background: #090d18;
@@ -278,7 +296,7 @@
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 0.65rem 0.75rem;
+  padding: 0.65rem 0.65rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.16);
   white-space: nowrap;
   overflow: hidden;
@@ -286,12 +304,26 @@
 }
 
 .tabela td {
-  padding: 0.58rem 0.75rem;
+  padding: 0.6rem 0.65rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.08);
   color: #cbd5e1;
   vertical-align: middle;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.tabela th:first-child,
+.tabela td:first-child {
+  padding-left: 1.25rem;
+}
+
+.tabela th:last-child,
+.tabela td:last-child {
+  padding-right: 1rem;
+}
+
+.colunaDireita {
+  text-align: right;
 }
 
 .tabela tr:hover td {
@@ -339,6 +371,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  flex: 1;
 }
 
 .jogadorNome {
@@ -347,21 +380,50 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  min-width: 0;
+}
+
+.jogadorNomeTexto {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .badgeAdmin {
+  flex-shrink: 0;
   display: inline-block;
-  padding: 0.1rem 0.35rem;
+  padding: 0.08rem 0.35rem;
   border-radius: 0.3rem;
   background: rgba(234, 179, 8, 0.18);
   border: 1px solid rgba(234, 179, 8, 0.35);
   color: #fde047;
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.nivelSaldoWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.nivelTexto {
+  font-weight: 700;
+  color: #f8fafc;
+  font-size: 0.72rem;
+}
+
+.saldoRubysTexto {
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 0.68rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .jogadorEmail {
@@ -474,15 +536,24 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  min-width: 0;
 }
 
 .raridadeTag {
+  flex-shrink: 0;
   display: inline-block;
   padding: 0.08rem 0.38rem;
   border-radius: 0.3rem;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 800;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.raridadeDinamica {
+  color: var(--cor-raridade, #e2e8f0);
+  background: color-mix(in srgb, var(--cor-raridade, #94a3b8) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cor-raridade, #94a3b8) 46%, transparent);
 }
 
 .raridadeUR {
@@ -520,6 +591,15 @@
   font-size: 0.62rem;
   color: #94a3b8;
   text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ultimoLoginVazio {
+  font-size: 0.7rem;
+  color: #64748b;
+  white-space: nowrap;
 }
 
 /* Pity Badge */
@@ -734,13 +814,64 @@
 }
 
 /* Responsividade */
-@media (max-width: 640px) {
+@media (max-width: 760px) {
   .metricasGrid {
     grid-template-columns: repeat(2, 1fr);
+    padding: 0.65rem 1rem;
   }
+
+  .cabecalho,
+  .filtros,
+  .rodape {
+    padding-inline: 1rem;
+  }
+
   .modal {
     width: 100%;
     height: 94dvh;
     max-height: 94dvh;
+  }
+
+  .tabela,
+  .tabela tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .tabela colgroup,
+  .tabela thead {
+    display: none;
+  }
+
+  .tabela tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  }
+
+  .tabela tbody td {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.18rem;
+    padding: 0 !important;
+    border: 0;
+    text-align: left;
+  }
+
+  .tabela tbody td:first-child {
+    grid-column: 1 / -1;
+    padding-bottom: 0.25rem !important;
+  }
+
+  .tabela tbody td[data-label]:not(:first-child)::before {
+    content: attr(data-label);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #748097;
   }
 }

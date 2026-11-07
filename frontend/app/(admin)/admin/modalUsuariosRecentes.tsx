@@ -113,6 +113,7 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
   const modalJSX = (
     <div
       className={styles.fundo}
+      data-modal-overlay
       role="presentation"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) aoFechar();
@@ -120,6 +121,7 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
     >
       <section
         className={styles.modal}
+        data-modal-panel
         role="dialog"
         aria-modal="true"
         aria-labelledby="titulo-usuarios-recentes"
@@ -199,12 +201,12 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
             <div className={styles.tabelaWrap}>
               <table className={styles.tabela}>
                 <colgroup>
-                  <col style={{ width: "27%" }} />
-                  <col style={{ width: "17%" }} />
-                  <col style={{ width: "14%" }} />
-                  <col style={{ width: "18%" }} />
+                  <col style={{ width: "28%" }} />
                   <col style={{ width: "16%" }} />
-                  <col style={{ width: "8%" }} />
+                  <col style={{ width: "15%" }} />
+                  <col style={{ width: "14%" }} />
+                  <col style={{ width: "16%" }} />
+                  <col style={{ width: "11%" }} />
                 </colgroup>
                 <thead>
                   <tr>
@@ -213,13 +215,13 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
                     <th scope="col">Status</th>
                     <th scope="col">Nível & Saldo</th>
                     <th scope="col">Último Login</th>
-                    <th scope="col">Ação</th>
+                    <th scope="col" className={styles.colunaDireita}>Ação</th>
                   </tr>
                 </thead>
                 <tbody>
                   {usuariosFiltrados.map((item) => (
                     <tr key={item.id}>
-                      <td>
+                      <td data-label="Jogador">
                         <div className={styles.jogadorWrap}>
                           <div className={styles.avatarWrap}>
                             {item.avatarUrl ? (
@@ -237,17 +239,19 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
                             )}
                           </div>
                           <div className={styles.jogadorTextos}>
-                            <span className={styles.jogadorNome}>
-                              {item.nome}
+                            <span className={styles.jogadorNome} title={item.nome}>
+                              <span className={styles.jogadorNomeTexto}>{item.nome}</span>
                               {item.admin ? (
                                 <span className={styles.badgeAdmin}>Admin</span>
                               ) : null}
                             </span>
-                            <small className={styles.jogadorEmail}>{item.email}</small>
+                            <small className={styles.jogadorEmail} title={item.email}>
+                              {item.email}
+                            </small>
                           </div>
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Criado em">
                         <div className={styles.horarioWrap}>
                           <span className={styles.horarioExato}>
                             {formatarDataHora(item.criadoEm)}
@@ -257,7 +261,7 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
                           </span>
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Status">
                         {item.bloqueado ? (
                           <span className={`${styles.statusBadge} ${styles.statusBloqueado}`}>
                             Bloqueado
@@ -276,27 +280,31 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
                           </span>
                         )}
                       </td>
-                      <td>
-                        <span style={{ fontWeight: 600, color: "#f8fafc" }}>
-                          Nv. {item.nivel}
-                        </span>{" "}
-                        ·{" "}
-                        <span style={{ color: "#38bdf8", fontWeight: 700 }}>
-                          {item.rubys.toLocaleString("pt-BR")} rubys
-                        </span>
+                      <td data-label="Nível & Saldo">
+                        <div className={styles.nivelSaldoWrap}>
+                          <span className={styles.nivelTexto}>Nv. {item.nivel}</span>
+                          <span className={styles.saldoRubysTexto}>
+                            {item.rubys.toLocaleString("pt-BR")} rubys
+                          </span>
+                        </div>
                       </td>
-                      <td>
-                        <span style={{ fontSize: "0.72rem", color: item.ultimoLoginEm ? "#cbd5e1" : "#64748b" }}>
-                          {item.ultimoLoginEm ? formatarDataHora(item.ultimoLoginEm) : "Nunca acessou"}
-                        </span>
+                      <td data-label="Último login">
+                        {item.ultimoLoginEm ? (
+                          <span className={styles.horarioExato}>
+                            {formatarDataHora(item.ultimoLoginEm)}
+                          </span>
+                        ) : (
+                          <span className={styles.ultimoLoginVazio}>Nunca acessou</span>
+                        )}
                       </td>
-                      <td>
+                      <td data-label="Ação" className={styles.colunaDireita}>
                         <Link
                           href={`/admin/usuarios?q=${encodeURIComponent(item.email)}`}
                           className={styles.btnAcaoTabela}
+                          title="Abrir usuário no painel"
                           onClick={aoFechar}
                         >
-                          Ver perfil <ExternalLink size={12} aria-hidden="true" />
+                          Ver <ExternalLink size={12} aria-hidden="true" />
                         </Link>
                       </td>
                     </tr>

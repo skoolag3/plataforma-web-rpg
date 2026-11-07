@@ -219,16 +219,34 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
   padding: 0.5rem 1.25rem 1.1rem;
-  scrollbar-width: thin;
-  scrollbar-color: #6d5c9c #090d18;
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
 }
 
+@supports selector(::-webkit-scrollbar) {
+  .corpoScroll {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .corpoScroll {
+    scrollbar-width: thin;
+    scrollbar-color: #6d5c9c #090d18;
+  }
+}
+
 .corpoScroll::-webkit-scrollbar {
   width: 6px;
+}
+.corpoScroll::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 .corpoScroll::-webkit-scrollbar-track {
   background: #090d18;
