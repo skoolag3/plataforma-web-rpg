@@ -56,6 +56,7 @@ export function ModalExpedicoesDashboard({ aoFechar }: Props) {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const aoFecharRef = useRef(aoFechar);
+  const conteudoRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     aoFecharRef.current = aoFechar;
@@ -178,7 +179,7 @@ export function ModalExpedicoesDashboard({ aoFechar }: Props) {
           </div>
         ) : null}
 
-        <div className={styles.conteudo}>
+        <div className={styles.conteudo} ref={conteudoRef}>
           {carregando && !painel ? (
             <div className={styles.carregandoWrap}>
               <RefreshCw aria-hidden="true" />
@@ -266,33 +267,33 @@ export function ModalExpedicoesDashboard({ aoFechar }: Props) {
         </div>
 
         <footer className={styles.rodape}>
-          {paginacao && paginacao.totalPaginas > 1 ? (
-            <nav className={styles.paginacao} aria-label="Paginação de expedições">
-              <button
-                type="button"
-                className={styles.btnPagina}
-                disabled={pagina <= 1 || carregando}
-                onClick={() => setPagina((p) => Math.max(1, p - 1))}
-              >
-                <ChevronLeft size={14} aria-hidden="true" /> Anterior
-              </button>
-              <span>
-                Página {pagina} de {paginacao.totalPaginas}
-              </span>
-              <button
-                type="button"
-                className={styles.btnPagina}
-                disabled={pagina >= paginacao.totalPaginas || carregando}
-                onClick={() => setPagina((p) => p + 1)}
-              >
-                Próxima <ChevronRight size={14} aria-hidden="true" />
-              </button>
-            </nav>
-          ) : (
-            <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>
-              {paginacao?.total ?? 0} expedições registradas
+          <nav className={styles.paginacao} aria-label="Paginação de expedições">
+            <button
+              type="button"
+              className={styles.btnPagina}
+              disabled={pagina <= 1 || carregando}
+              onClick={() => {
+                setPagina((p) => Math.max(1, p - 1));
+                conteudoRef.current?.scrollTo({ top: 0 });
+              }}
+            >
+              <ChevronLeft size={14} aria-hidden="true" /> Anterior
+            </button>
+            <span>
+              Página {pagina} de {Math.max(1, paginacao?.totalPaginas ?? 1)}
             </span>
-          )}
+            <button
+              type="button"
+              className={styles.btnPagina}
+              disabled={pagina >= Math.max(1, paginacao?.totalPaginas ?? 1) || carregando}
+              onClick={() => {
+                setPagina((p) => p + 1);
+                conteudoRef.current?.scrollTo({ top: 0 });
+              }}
+            >
+              Próxima <ChevronRight size={14} aria-hidden="true" />
+            </button>
+          </nav>
 
           <button
             type="button"

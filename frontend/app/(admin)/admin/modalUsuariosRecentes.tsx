@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  ChevronLeft,
+  ChevronRight,
   ExternalLink,
   RefreshCw,
   Search,
@@ -45,6 +47,8 @@ function formatarTempoRelativo(dataStr: string | null) {
   return "";
 }
 
+const ITENS_POR_PAGINA = 6;
+
 type Props = {
   aoFechar: () => void;
 };
@@ -55,7 +59,9 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
   const [erro, setErro] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [statusFiltro, setStatusFiltro] = useState<"todos" | "ativos" | "bloqueados" | "pendentes">("todos");
+  const [pagina, setPagina] = useState(1);
   const aoFecharRef = useRef(aoFechar);
+  const conteudoRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     aoFecharRef.current = aoFechar;
@@ -82,7 +88,7 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
     setCarregando(true);
     setErro(null);
     try {
-      const lista = await listarAdminUsuarios({ limite: 60 });
+      const lista = await listarAdminUsuarios({ limite: 100 });
       setUsuarios(lista);
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro ao carregar usuários recentes.");
@@ -109,6 +115,19 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
       );
     });
   }, [usuarios, busca, statusFiltro]);
+
+  const totalPaginas = Math.max(1, Math.ceil(usuariosFiltrados.length / ITENS_POR_PAGINA));
+  const paginaAtual = Math.min(pagina, totalPaginas);
+
+  const usuariosPaginados = useMemo(() => {
+    const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
+    return usuariosFiltrados.slice(inicio, inicio + ITENS_POR_PAGINA);
+  }, [usuariosFiltrados, paginaAtual]);
+
+  function irParaPagina(novaPagina: number) {
+    setPagina(Math.max(1, Math.min(totalPaginas, novaPagina)));
+    conteudoRef.current?.scrollTo({ top: 0 });
+  }
 
   const modalJSX = (
     <div
@@ -155,14 +174,20 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
               className={styles.inputBusca}
               placeholder="Buscar por nome ou e-mail..."
               value={busca}
-              onChange={(e) => setBusca(e.target.value)}
+              onChange={(e) => {
+                setBusca(e.target.value);
+                setPagina(1);
+              }}
             />
           </div>
 
           <select
             className={styles.selectFiltro}
             value={statusFiltro}
-            onChange={(e) => setStatusFiltro(e.target.value as typeof statusFiltro)}
+            onChange={(e) => {
+              setStatusFiltro(e.target.value as typeof statusFiltro);
+              setPagina(1);
+            }}
           >
             <option value="todos">Todos os status</option>
             <option value="ativos">Somente ativos</option>
@@ -176,7 +201,7 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
           </span>
         </div>
 
-        <div className={styles.conteudo}>
+        <div className={styles.conteudo} ref={conteudoRef}>
           {carregando ? (
             <div className={styles.carregandoWrap}>
               <RefreshCw aria-hidden="true" />
@@ -219,7 +244,7 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {usuariosFiltrados.map((item) => (
+                  {usuariosPaginados.map((item) => (
                     <tr key={item.id}>
                       <td data-label="Jogador">
                         <div className={styles.jogadorWrap}>
@@ -316,9 +341,28 @@ export function ModalUsuariosRecentes({ aoFechar }: Props) {
         </div>
 
         <footer className={styles.rodape}>
-          <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>
-            Total de {usuarios.length} novos cadastros listados.
-          </span>
+          <nav className={styles.paginacao} aria-label="Paginação de usuários recentes">
+            <button
+              type="button"
+              className={styles.btnPagina}
+              disabled={paginaAtual <= 1 || carregando}
+              onClick={() => irParaPagina(paginaAtual - 1)}
+            >
+              <ChevronLeft size={14} aria-hidden="true" /> Anterior
+            </button>
+            <span>
+              Página {paginaAtual} de {totalPaginas}
+            </span>
+            <button
+              type="button"
+              className={styles.btnPagina}
+              disabled={paginaAtual >= totalPaginas || carregando}
+              onClick={() => irParaPagina(paginaAtual + 1)}
+            >
+              Próxima <ChevronRight size={14} aria-hidden="true" />
+            </button>
+          </nav>
+
           <button
             type="button"
             className={styles.btnFecharRodape}

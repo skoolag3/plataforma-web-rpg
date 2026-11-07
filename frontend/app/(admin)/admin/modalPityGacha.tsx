@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  ChevronLeft,
+  ChevronRight,
   Coins,
   Gem,
   Image as ImageIcon,
@@ -52,6 +54,8 @@ function formatarTempoRelativo(dataStr: string | null) {
   return "";
 }
 
+const ITENS_POR_PAGINA = 6;
+
 type Props = {
   aoFechar: () => void;
 };
@@ -63,7 +67,9 @@ export function ModalPityGacha({ aoFechar }: Props) {
   const [erro, setErro] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [filtroRaridade, setFiltroRaridade] = useState<string>("todas");
+  const [pagina, setPagina] = useState(1);
   const aoFecharRef = useRef(aoFechar);
+  const conteudoRef = useRef<HTMLDivElement | null>(null);
 
   const raridadesOrdenadas = useMemo(
     () => [...raridades].sort((a, b) => b.ordem - a.ordem),
@@ -100,7 +106,7 @@ export function ModalPityGacha({ aoFechar }: Props) {
     setCarregando(true);
     setErro(null);
     try {
-      const lista = await obterAdminPityHistorico(60);
+      const lista = await obterAdminPityHistorico(100);
       setLogs(lista);
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro ao carregar histórico de pity.");
@@ -132,6 +138,19 @@ export function ModalPityGacha({ aoFechar }: Props) {
       );
     });
   }, [logs, busca, filtroRaridade]);
+
+  const totalPaginas = Math.max(1, Math.ceil(logsFiltrados.length / ITENS_POR_PAGINA));
+  const paginaAtual = Math.min(pagina, totalPaginas);
+
+  const logsPaginados = useMemo(() => {
+    const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
+    return logsFiltrados.slice(inicio, inicio + ITENS_POR_PAGINA);
+  }, [logsFiltrados, paginaAtual]);
+
+  function irParaPagina(novaPagina: number) {
+    setPagina(Math.max(1, Math.min(totalPaginas, novaPagina)));
+    conteudoRef.current?.scrollTo({ top: 0 });
+  }
 
   const modalJSX = (
     <div
@@ -178,14 +197,20 @@ export function ModalPityGacha({ aoFechar }: Props) {
               className={styles.inputBusca}
               placeholder="Buscar por carta, jogador ou banner..."
               value={busca}
-              onChange={(e) => setBusca(e.target.value)}
+              onChange={(e) => {
+                setBusca(e.target.value);
+                setPagina(1);
+              }}
             />
           </div>
 
           <select
             className={styles.selectFiltro}
             value={filtroRaridade}
-            onChange={(e) => setFiltroRaridade(e.target.value)}
+            onChange={(e) => {
+              setFiltroRaridade(e.target.value);
+              setPagina(1);
+            }}
           >
             <option value="todas">Todas as raridades</option>
             {raridadesOrdenadas.map((raridade) => (
@@ -201,7 +226,7 @@ export function ModalPityGacha({ aoFechar }: Props) {
           </span>
         </div>
 
-        <div className={styles.conteudo}>
+        <div className={styles.conteudo} ref={conteudoRef}>
           {carregando ? (
             <div className={styles.carregandoWrap}>
               <RefreshCw aria-hidden="true" />
@@ -244,7 +269,7 @@ export function ModalPityGacha({ aoFechar }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {logsFiltrados.map((item) => {
+                  {logsPaginados.map((item) => {
                     const infoRaridade = mapaRaridades.get(item.carta.raridade.toUpperCase());
                     return (
                       <tr key={item.id}>
@@ -356,9 +381,28 @@ export function ModalPityGacha({ aoFechar }: Props) {
         </div>
 
         <footer className={styles.rodape}>
-          <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>
-            Exibindo as {logs.length} invocações mais recentes registradas.
-          </span>
+          <nav className={styles.paginacao} aria-label="Paginação do histórico de pity">
+            <button
+              type="button"
+              className={styles.btnPagina}
+              disabled={paginaAtual <= 1 || carregando}
+              onClick={() => irParaPagina(paginaAtual - 1)}
+            >
+              <ChevronLeft size={14} aria-hidden="true" /> Anterior
+            </button>
+            <span>
+              Página {paginaAtual} de {totalPaginas}
+            </span>
+            <button
+              type="button"
+              className={styles.btnPagina}
+              disabled={paginaAtual >= totalPaginas || carregando}
+              onClick={() => irParaPagina(paginaAtual + 1)}
+            >
+              Próxima <ChevronRight size={14} aria-hidden="true" />
+            </button>
+          </nav>
+
           <button
             type="button"
             className={styles.btnFecharRodape}
