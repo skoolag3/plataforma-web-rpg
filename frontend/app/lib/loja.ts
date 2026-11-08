@@ -34,3 +34,9 @@ export function iniciarCheckoutRuby(idPacote: string) {
     method: "POST",
   });
 }
+export function confirmarSessaoCheckoutRuby(sessionId: string) {
+  return lojaRequest<{ confirmado: boolean }>(
+    `/loja/confirmar/${encodeURIComponent(sessionId)}`,
+    { method: "POST" },
+  );
+}

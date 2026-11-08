@@ -25,8 +25,18 @@ export class LojaController {
   checkout(
     @CurrentUser() usuario: AuthenticatedUser,
     @Param('idPacote', ParseUUIDPipe) idPacote: string,
+    @Headers('origin') origin?: string,
+    @Headers('referer') referer?: string,
   ) {
-    return this.service.criarCheckout(usuario.id, idPacote);
+    return this.service.criarCheckout(usuario.id, idPacote, origin ?? referer);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('confirmar/:sessionId')
+  confirmar(
+    @CurrentUser() usuario: AuthenticatedUser,
+    @Param('sessionId') sessionId: string,
+  ) {
+    return this.service.confirmarSessaoCheckout(usuario.id, sessionId);
   }
   @Post('stripe/webhook') webhook(
     @Req() req: Request,

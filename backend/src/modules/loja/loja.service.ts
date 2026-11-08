@@ -83,7 +83,25 @@ export class LojaService implements OnModuleInit {
     });
   }
 
-  async criarCheckout(idUsuario: string, idPacote: string) {
+  private resolverUrlBaseFrontend(origemHeader?: string) {
+    if (origemHeader) {
+      try {
+        const parsed = new URL(origemHeader);
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+          return parsed.origin;
+        }
+      } catch {
+        // usa fallback
+      }
+    }
+    return process.env.FRONTEND_URL ?? 'http://localhost:3000';
+  }
+
+  async criarCheckout(
+    idUsuario: string,
+    idPacote: string,
+    origemHeader?: string,
+  ) {
     if (!this.stripe)
       throw new BadRequestException('Stripe não configurado no servidor.');
     const pacote = await this.prisma.pacoteRuby.findFirst({
@@ -98,6 +116,7 @@ export class LojaService implements OnModuleInit {
         status_pagamento: 'PENDENTE',
       },
     });
+    const baseUrl = this.resolverUrlBaseFrontend(origemHeader);
     let sessao: Stripe.Checkout.Session;
     try {
       sessao = await this.stripe.checkout.sessions.create({
@@ -112,8 +131,8 @@ export class LojaService implements OnModuleInit {
             quantity: 1,
           },
         ],
-        success_url: `${process.env.FRONTEND_URL ?? 'http://localhost:3000'}/loja?pagamento=sucesso`,
-        cancel_url: `${process.env.FRONTEND_URL ?? 'http://localhost:3000'}/loja?pagamento=cancelado`,
+        success_url: `${baseUrl}/loja?pagamento=sucesso&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/loja?pagamento=cancelado`,
         metadata: { transacaoId: transacao.id, usuarioId: idUsuario },
       });
     } catch (erro) {
@@ -153,6 +172,29 @@ export class LojaService implements OnModuleInit {
     const sessao = evento.data.object;
     const idTransacao = sessao.metadata?.transacaoId;
     if (!idTransacao) return { recebido: true };
+    await this.creditarTransacaoConfirmada(idTransacao);
+    return { recebido: true };
+  }
+
+  async confirmarSessaoCheckout(idUsuario: string, sessionId: string) {
+    if (!this.stripe)
+      throw new BadRequestException('Stripe não configurado no servidor.');
+    const sessao = await this.stripe.checkout.sessions
+      .retrieve(sessionId)
+      .catch(() => null);
+    if (!sessao || sessao.payment_status !== 'paid') {
+      return { confirmado: false };
+    }
+    const idTransacao = sessao.metadata?.transacaoId;
+    const donoSessao = sessao.metadata?.usuarioId;
+    if (!idTransacao || (donoSessao && donoSessao !== idUsuario)) {
+      throw new UnauthorizedException('Sessão de pagamento inválida.');
+    }
+    await this.creditarTransacaoConfirmada(idTransacao);
+    return { confirmado: true };
+  }
+
+  private async creditarTransacaoConfirmada(idTransacao: string) {
     try {
       await this.prisma.$transaction(async (tx) => {
         const transacao = await tx.logTransacao.findUnique({
@@ -185,11 +227,17 @@ export class LojaService implements OnModuleInit {
             descricao: `Compra aprovada: ${transacao.pacote.nome}.`,
           },
         });
+
+        await tx.usuario.update({
+          where: { id: transacao.id_usuario },
+          data: {
+            saldo_rubys_cache: { increment: transacao.pacote.quantidade_rubys },
+          },
+        });
       });
     } catch (erro) {
-      console.error('[Stripe webhook] Falha ao creditar compra:', erro);
+      console.error('[Stripe] Falha ao creditar compra:', erro);
       throw new BadRequestException('Não foi possível creditar os Rubys.');
     }
-    return { recebido: true };
   }
 }

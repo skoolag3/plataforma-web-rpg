@@ -4,10 +4,12 @@ import { Check, Gem, ShieldCheck, ShoppingBag, Sparkles } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import {
+  confirmarSessaoCheckoutRuby,
   iniciarCheckoutRuby,
   listarPacotesRuby,
   type PacoteRuby,
 } from "../../lib/loja";
+import { notificarSaldoAtualizado } from "../../lib/jogo";
 import styles from "../../styles/loja.module.css";
 
 const detalhesPacote: Record<
@@ -50,7 +52,22 @@ function LojaConteudo() {
   const [carregando, setCarregando] = useState(true);
   const [processando, setProcessando] = useState("");
   const [erro, setErro] = useState("");
+  const [confirmado, setConfirmado] = useState(false);
   const pagamento = parametros.get("pagamento");
+  const sessionId = parametros.get("session_id");
+
+  useEffect(() => {
+    if (pagamento === "sucesso" && sessionId) {
+      confirmarSessaoCheckoutRuby(sessionId)
+        .then((res) => {
+          if (res.confirmado) {
+            setConfirmado(true);
+            notificarSaldoAtualizado();
+          }
+        })
+        .catch(() => undefined);
+    }
+  }, [pagamento, sessionId]);
 
   useEffect(() => {
     listarPacotesRuby()
@@ -96,7 +113,9 @@ function LojaConteudo() {
 
       {pagamento === "sucesso" ? (
         <p className={styles.aviso} role="status">
-          Retorno do pagamento recebido. Os Rubys serão liberados após a confirmação do Stripe.
+          {confirmado
+            ? "Pagamento confirmado pelo Stripe! Seus Rubys já foram creditados na sua conta."
+            : "Retorno do pagamento recebido. Os Rubys serão liberados após a confirmação do Stripe."}
         </p>
       ) : pagamento === "cancelado" ? (
         <p className={styles.aviso} role="status">
