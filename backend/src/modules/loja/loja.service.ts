@@ -233,13 +233,6 @@ export class LojaService implements OnModuleInit {
             descricao: `Compra aprovada: ${transacao.pacote.nome}.`,
           },
         });
-
-        await tx.usuario.update({
-          where: { id: transacao.id_usuario },
-          data: {
-            saldo_rubys_cache: { increment: transacao.pacote.quantidade_rubys },
-          },
-        });
       });
     } catch (erro) {
       console.error('[Stripe] Falha ao creditar compra:', erro);
