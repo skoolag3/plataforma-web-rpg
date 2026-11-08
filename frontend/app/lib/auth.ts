@@ -142,6 +142,13 @@ export function updateStoredUser(changes: Partial<Usuario>) {
   const usuario = getStoredUser();
 
   if (!usuario) {
+    if (changes.id && changes.email) {
+      const novo = changes as Usuario;
+      localStorage.setItem(USER_KEY, JSON.stringify(novo));
+      cachedUserText = JSON.stringify(novo);
+      cachedUser = novo;
+      notifyAuthChange();
+    }
     return;
   }
 

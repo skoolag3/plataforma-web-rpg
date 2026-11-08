@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
-import { clearSession, getProfile, getToken } from "../lib/auth";
+import { clearSession, getProfile, getToken, updateStoredUser } from "../lib/auth";
 import styles from "../styles/privateLayout.module.css";
 import { PrivateNavbar } from "../components/privateNavbar";
 import { GuiaPrimeirosPassos } from "../components/guiaPrimeirosPassos";
@@ -22,7 +22,10 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
     }
 
     getProfile(token)
-      .then(() => setValidando(false))
+      .then((usuario) => {
+        if (usuario) updateStoredUser(usuario);
+        setValidando(false);
+      })
       .catch(() => {
         clearSession();
         router.replace("/login");

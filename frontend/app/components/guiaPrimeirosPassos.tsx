@@ -45,18 +45,6 @@ const etapas = [
 
 type Retangulo = { top: number; left: number; width: number; height: number };
 
-function extrairDataCriacaoMs(dataStr?: string | null): number {
-  if (!dataStr) return Date.now();
-  const iso = Date.parse(dataStr);
-  if (Number.isFinite(iso)) return iso;
-  const match = dataStr.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-  if (match) {
-    const [, dia, mes, ano] = match;
-    return new Date(Number(ano), Number(mes) - 1, Number(dia)).getTime();
-  }
-  return Date.now();
-}
-
 export function GuiaPrimeirosPassos() {
   const router = useRouter();
   const pathname = usePathname();
@@ -68,34 +56,46 @@ export function GuiaPrimeirosPassos() {
   // Inicializa a chave e recupera o passo salvo
   useEffect(() => {
     let ativo = true;
-    const usuario = getStoredUser();
-    if (!usuario) return;
 
-    const chaveUsuario = `animecards_guia_inicial_${usuario.id}`;
-    if (localStorage.getItem(chaveUsuario) === "concluido") return;
+    function inicializar() {
+      const usuario = getStoredUser();
+      if (!usuario) return;
 
-    const criadoEm = extrairDataCriacaoMs(usuario.criado_em);
-    // Permite novas contas criadas nos últimos 60 dias ou que nunca concluíram o guia
-    if (Date.now() - criadoEm > 60 * 24 * 60 * 60 * 1000) return;
+      const chaveUsuario = `animecards_guia_inicial_${usuario.id}`;
+      if (localStorage.getItem(chaveUsuario) === "concluido") return;
 
-    const chaveEtapa = `animecards_guia_etapa_${usuario.id}`;
-    const etapaSalva = Number(sessionStorage.getItem(chaveEtapa));
-    const passoInicial =
-      Number.isInteger(etapaSalva) && etapaSalva >= 0 && etapaSalva < etapas.length
-        ? etapaSalva
-        : 0;
+      const chaveEtapa = `animecards_guia_etapa_${usuario.id}`;
+      const etapaSalva = sessionStorage.getItem(chaveEtapa);
+      const passoSalvo = etapaSalva !== null ? Number(etapaSalva) : NaN;
+      const passoPorRota =
+        pathname === "/banners"
+          ? 2
+          : pathname === "/decks"
+            ? 3
+            : pathname === "/expedicao"
+              ? 4
+              : 0;
+      const passoInicial =
+        Number.isInteger(passoSalvo) && passoSalvo >= 0 && passoSalvo < etapas.length
+          ? Math.max(passoSalvo, passoPorRota)
+          : passoPorRota;
 
-    queueMicrotask(() => {
-      if (ativo) {
-        setChave(chaveUsuario);
-        setIndice(passoInicial);
-      }
-    });
+      queueMicrotask(() => {
+        if (ativo) {
+          setChave((atual) => atual || chaveUsuario);
+          setIndice((atual) => (atual === 0 ? passoInicial : atual));
+        }
+      });
+    }
+
+    inicializar();
+    window.addEventListener("card_game_rpg_auth_change", inicializar);
 
     return () => {
       ativo = false;
+      window.removeEventListener("card_game_rpg_auth_change", inicializar);
     };
-  }, []);
+  }, [pathname]);
 
   // Sincroniza o passo caso o usuário mude de rota manualmente
   useEffect(() => {
@@ -263,22 +263,25 @@ export function GuiaPrimeirosPassos() {
     }
   }
 
-  const posicaoTopo =
-    alvo && alvo.top + alvo.height + 210 < window.innerHeight
-      ? alvo.top + alvo.height + 14
-      : alvo
-      ? Math.max(16, alvo.top - 210)
-      : Math.max(80, window.innerHeight / 2 - 100);
+  const rectGrande = Boolean(alvo && alvo.height > window.innerHeight * 0.55);
 
-  const posicaoEsquerda = alvo
-    ? Math.max(16, Math.min(alvo.left, window.innerWidth - 356))
-    : Math.max(16, window.innerWidth / 2 - 170);
+  const posicaoTopo =
+    alvo && !rectGrande && alvo.top + alvo.height + 210 < window.innerHeight
+      ? alvo.top + alvo.height + 14
+      : alvo && !rectGrande
+      ? Math.max(16, alvo.top - 210)
+      : Math.max(80, window.innerHeight - 230);
+
+  const posicaoEsquerda =
+    alvo && !rectGrande
+      ? Math.max(16, Math.min(alvo.left, window.innerWidth - 356))
+      : Math.max(16, window.innerWidth - 364);
 
   return (
     <div className={styles.guia} aria-live="polite">
       {alvo ? (
         <div
-          className={styles.destaque}
+          className={`${styles.destaque} ${rectGrande ? styles.destaqueSubjacente : ""}`}
           style={{
             top: alvo.top,
             left: alvo.left,
@@ -291,6 +294,7 @@ export function GuiaPrimeirosPassos() {
 
       <section
         className={styles.cartao}
+        data-guia-cartao="true"
         style={{ top: posicaoTopo, left: posicaoEsquerda }}
         aria-label="Guia de primeiros passos"
       >

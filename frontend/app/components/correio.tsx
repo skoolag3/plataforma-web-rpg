@@ -95,7 +95,9 @@ export function Correio() {
     if (!aberto) return;
 
     function fechar(evento: MouseEvent) {
-      if (!raizRef.current?.contains(evento.target as Node)) setAberto(false);
+      const alvoClique = evento.target as HTMLElement | null;
+      if (alvoClique?.closest('[data-guia-cartao="true"]')) return;
+      if (!raizRef.current?.contains(alvoClique)) setAberto(false);
     }
     function fecharComEsc(evento: KeyboardEvent) {
       if (evento.key === "Escape") setAberto(false);

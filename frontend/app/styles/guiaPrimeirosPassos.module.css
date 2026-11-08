@@ -1,7 +1,7 @@
 .guia {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  z-index: 300;
   pointer-events: none;
 }
 
@@ -9,9 +9,13 @@
   position: fixed;
   border: 2px solid #bef264;
   border-radius: 0.8rem;
-  box-shadow: 0 0 0 9999px rgba(4, 5, 12, 0.76), 0 0 1.25rem rgba(190, 242, 100, 0.45);
+  box-shadow: 0 0 0 9999px rgba(4, 5, 12, 0.72), 0 0 1.25rem rgba(190, 242, 100, 0.55);
   pointer-events: none;
   transition: top 0.22s ease-out, left 0.22s ease-out, width 0.22s ease-out, height 0.22s ease-out;
+}
+
+.destaqueSubjacente {
+  box-shadow: 0 0 0 4px rgba(190, 242, 100, 0.25), 0 0 1.5rem rgba(190, 242, 100, 0.65);
 }
 
 .cartao {
@@ -24,7 +28,7 @@
   background: #0f1020;
   box-shadow: 0 1.5rem 3.5rem rgba(0, 0, 0, 0.75), 0 0 1px rgba(255, 255, 255, 0.15);
   pointer-events: auto;
-  z-index: 210;
+  z-index: 310;
   animation: surgimentoSuave 0.2s ease-out;
 }
 
