@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { formularioCartaAlterado } from "../app/(admin)/admin/adminCartaEditor.estado.ts";
+import { formularioCartaAlterado } from "../app/(admin)/admin/cartas/adminCartaEditor.estado.ts";
 
 const formulario = {
   nome: "Raika, Lâmina do Eclipse",

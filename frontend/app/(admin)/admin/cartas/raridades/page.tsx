@@ -1,4 +1,4 @@
-import { AdminRaridades } from "../../adminRaridades";
+import { AdminRaridades } from "../adminRaridades";
 
 export default function AdminRaridadesPage() {
   return <AdminRaridades />;

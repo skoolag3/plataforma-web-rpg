@@ -6,7 +6,7 @@ import {
   removerEtapa,
   secoesIniciais,
   separarUltimaEtapa,
-} from "../app/(admin)/admin/adminCampanhaSecoes.estado.ts";
+} from "../app/(admin)/admin/campanha/adminCampanhaSecoes.estado.ts";
 
 test("separar e juntar uma etapa preserva todos os campos dos caminhos", () => {
   const secoes = secoesIniciais();
