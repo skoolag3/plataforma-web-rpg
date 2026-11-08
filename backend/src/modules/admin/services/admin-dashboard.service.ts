@@ -159,7 +159,9 @@ export class AdminDashboardService {
       }),
       this.prisma.logTransacao.aggregate({
         where: {
-          status_pagamento: { in: ['PAGO', 'PAID', 'SUCCEEDED', 'APROVADO'] },
+          status_pagamento: {
+            in: ['CONCLUIDO', 'PAGO', 'PAID', 'SUCCEEDED', 'APROVADO'],
+          },
           ...(filtroDataCriado ? { timestamp_compra: filtroDataCriado } : {}),
         },
         _count: { _all: true },
