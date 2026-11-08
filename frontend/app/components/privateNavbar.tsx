@@ -80,9 +80,12 @@ export function PrivateNavbar() {
 
     carregarResumoPerfil();
     window.addEventListener("perfil-atualizado", carregarResumoPerfil);
-    return () =>
+    window.addEventListener("focus", carregarResumoPerfil);
+    return () => {
       window.removeEventListener("perfil-atualizado", carregarResumoPerfil);
-  }, [usuario?.id]);
+      window.removeEventListener("focus", carregarResumoPerfil);
+    };
+  }, [usuario?.id, pathname]);
 
   const [rotaExpedicaoSessao, setRotaExpedicaoSessao] = useState("/expedicao");
 

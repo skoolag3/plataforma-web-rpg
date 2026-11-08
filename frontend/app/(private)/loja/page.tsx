@@ -61,10 +61,14 @@ function LojaConteudo() {
         .then((res) => {
           if (res.confirmado) {
             setConfirmado(true);
-            window.dispatchEvent(new Event("focus"));
+            window.dispatchEvent(new Event("perfil-atualizado"));
           }
         })
-        .catch(() => undefined);
+        .catch(() => {
+          window.dispatchEvent(new Event("perfil-atualizado"));
+        });
+    } else if (pagamento === "sucesso") {
+      window.dispatchEvent(new Event("perfil-atualizado"));
     }
   }, [pagamento, sessionId]);
 
