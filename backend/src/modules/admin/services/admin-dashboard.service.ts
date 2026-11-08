@@ -200,9 +200,9 @@ export class AdminDashboardService {
       }),
       this.prisma.inventario.groupBy({
         by: ['id_carta'],
-        where: { id_carta: { not: null } },
-        _sum: { quantidade: true },
-        orderBy: { _sum: { quantidade: 'desc' } },
+        where: { id_carta: { not: null }, quantidade: { gt: 0 } },
+        _count: { id_usuario: true },
+        orderBy: { _count: { id_usuario: 'desc' } },
         take: 5,
       }),
       this.prisma.deckCarta.groupBy({
@@ -464,7 +464,7 @@ export class AdminDashboardService {
           nome: carta?.nome ?? 'Carta removida',
           raridade: carta?.raridade ?? '-',
           elemento: carta?.elemento ?? '-',
-          quantidade: item._sum.quantidade ?? 0,
+          quantidade: item._count.id_usuario ?? 0,
         };
       }),
       topDecks: topDeckCartas.map((item) => {

@@ -253,8 +253,8 @@ export function DashboardPainel({
         </header>
         <GraficoDonut
           segmentos={segmentosCombate}
-          centroValor={`${combate?.taxaVitoria ?? 0}%`}
-          centroLabel="vitórias"
+          centroValor={formatarNmr(combate?.partidasPeriodo ?? 0)}
+          centroLabel="batalhas"
         />
       </article>
 
@@ -412,9 +412,10 @@ export function DashboardPainel({
                     {carta.nome}
                   </span>
                   <strong>
-                    {formatarNmr(carta.quantidade)} cópias
+                    {formatarNmr(carta.quantidade)}{" "}
+                    {carta.quantidade === 1 ? "dono" : "donos"}
                     {decksCount > 0
-                      ? ` · ${formatarNmr(decksCount)} decks`
+                      ? ` · ${formatarNmr(decksCount)} ${decksCount === 1 ? "deck" : "decks"}`
                       : ""}
                   </strong>
                 </div>
