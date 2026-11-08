@@ -9,7 +9,6 @@ import {
   listarPacotesRuby,
   type PacoteRuby,
 } from "../../lib/loja";
-import { notificarSaldoAtualizado } from "../../lib/jogo";
 import styles from "../../styles/loja.module.css";
 
 const detalhesPacote: Record<
@@ -62,7 +61,7 @@ function LojaConteudo() {
         .then((res) => {
           if (res.confirmado) {
             setConfirmado(true);
-            notificarSaldoAtualizado();
+            window.dispatchEvent(new Event("focus"));
           }
         })
         .catch(() => undefined);
