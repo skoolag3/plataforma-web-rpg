@@ -59,7 +59,12 @@ export default function RankingPage() {
 
   const jogadoresOrdenados = useMemo(
     () =>
-      [...jogadores]
+      jogadores
+        .filter((jogador) =>
+          criterio === "pontos"
+            ? jogador.pontos > 0 || jogador.partidas > 0
+            : jogador.cartasColecionadas > 0,
+        )
         .sort((a, b) =>
           criterio === "pontos"
             ? b.pontos - a.pontos ||
@@ -163,6 +168,21 @@ export default function RankingPage() {
                 </span>
               </div>
             ) : null}
+            {jogadoresOrdenados.length === 0 ? (
+              <section className={styles.estado}>
+                {criterio === "pontos" ? <Trophy /> : <Layers3 />}
+                <strong>
+                  {criterio === "pontos"
+                    ? "Nenhum invocador pontuou ainda"
+                    : "Nenhuma carta colecionada ainda"}
+                </strong>
+                <p>
+                  {criterio === "pontos"
+                    ? "Vença batalhas na Expedição para aparecer no ranking de pontos."
+                    : "Invoque cartas nos Banners para aparecer no ranking de coleção."}
+                </p>
+              </section>
+            ) : (
             <section className={styles.podio} aria-label="Pódio do ranking">
               {podio.map((jogador) => (
                 <Link
@@ -194,6 +214,7 @@ export default function RankingPage() {
                 </Link>
               ))}
             </section>
+            )}
 
             {classificacao.length > 0 ? (
               <section

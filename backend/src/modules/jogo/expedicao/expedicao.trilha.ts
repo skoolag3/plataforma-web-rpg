@@ -36,7 +36,7 @@ export function secoesPadraoCampanha(recompensas: ConfiguracaoRecompensasExpedic
     grupo: indice < 2 ? 1 : 2,
     caminhos: (['FACIL', 'MEDIA', 'DIFICIL'] as const).map((dificuldade) => ({
       dificuldade, recompensa: recompensas.recompensas[dificuldade], cartas: [],
-      quantidadeCartas: indice + 1, modoCartas: 'ALEATORIO' as const, mixed: false,
+      quantidadeCartas: 1, modoCartas: 'ALEATORIO' as const, mixed: false,
     })),
   })), { tipo: 'BOSS' }];
 }
@@ -144,8 +144,8 @@ export function gerarTrilhaExpedicao(
         recompensa: caminho.recompensa,
         cartas: caminho.cartas,
         quantidadeCartas: (caminho.modoCartas ?? (caminho.cartas.length ? 'MANUAL' : 'ALEATORIO')) === 'MANUAL'
-          ? caminho.quantidadeCartas
-          : Math.min(caminho.quantidadeCartas ?? indice + 1, indice + 1, 6),
+          ? (caminho.quantidadeCartas ?? 1)
+          : Math.min(caminho.quantidadeCartas ?? 1, indice + 1, 6),
         modoCartas: caminho.modoCartas,
         mixed: caminho.mixed,
       };

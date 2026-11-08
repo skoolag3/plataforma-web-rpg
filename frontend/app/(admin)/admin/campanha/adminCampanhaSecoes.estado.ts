@@ -12,7 +12,7 @@ function novaEtapa(grupo: number, quantidadeCartas: number): SecaoCampanha {
 }
 
 export function secoesIniciais(): SecaoCampanha[] {
-  return [novaEtapa(1, 1), novaEtapa(1, 2), novaEtapa(2, 3), { tipo: "BOSS" }];
+  return [novaEtapa(1, 1), novaEtapa(1, 1), novaEtapa(2, 1), { tipo: "BOSS" }];
 }
 
 export function grupoDaEtapa(secao: SecaoCampanha, indice: number) {

@@ -114,7 +114,10 @@ export class PartidasService {
             usuario.perfil?.cartaMolduraSelecionada?.config_visual ?? null,
         };
       })
-      .filter((jogador) => jogador.pontos > 0)
+      .filter(
+        (jogador) =>
+          jogador.pontos > 0 || jogador.cartasColecionadas > 0,
+      )
       .sort(
         (a, b) =>
           b.pontos - a.pontos ||
