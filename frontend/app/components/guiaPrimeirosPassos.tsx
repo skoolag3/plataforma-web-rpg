@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { getStoredUser } from "../lib/auth";
+import { chaveSessaoGuia, obterPassoInicialGuia } from "../lib/guiaPrimeirosPassos.estado";
 import styles from "../styles/guiaPrimeirosPassos.module.css";
 
 const etapas = [
@@ -59,31 +60,26 @@ export function GuiaPrimeirosPassos() {
 
     function inicializar() {
       const usuario = getStoredUser();
-      if (!usuario) return;
+      if (!usuario) {
+        queueMicrotask(() => {
+          if (ativo) setChave("");
+        });
+        return;
+      }
 
       const chaveUsuario = `animecards_guia_inicial_${usuario.id}`;
-      if (localStorage.getItem(chaveUsuario) === "concluido") return;
-
-      const chaveEtapa = `animecards_guia_etapa_${usuario.id}`;
-      const etapaSalva = sessionStorage.getItem(chaveEtapa);
-      const passoSalvo = etapaSalva !== null ? Number(etapaSalva) : NaN;
-      const passoPorRota =
-        pathname === "/banners"
-          ? 2
-          : pathname === "/decks"
-            ? 3
-            : pathname === "/expedicao"
-              ? 4
-              : 0;
-      const passoInicial =
-        Number.isInteger(passoSalvo) && passoSalvo >= 0 && passoSalvo < etapas.length
-          ? Math.max(passoSalvo, passoPorRota)
-          : passoPorRota;
+      const passoInicial = obterPassoInicialGuia(
+        usuario.id,
+        pathname,
+        localStorage,
+        sessionStorage,
+        etapas.length,
+      );
 
       queueMicrotask(() => {
         if (ativo) {
-          setChave((atual) => atual || chaveUsuario);
-          setIndice((atual) => (atual === 0 ? passoInicial : atual));
+          setChave(passoInicial === null ? "" : chaveUsuario);
+          if (passoInicial !== null) setIndice(passoInicial);
         }
       });
     }
@@ -100,12 +96,10 @@ export function GuiaPrimeirosPassos() {
   // Sincroniza o passo caso o usuário mude de rota manualmente
   useEffect(() => {
     if (!chave) return;
-    if (pathname === "/banners" && indice < 2) {
-      setIndice(2);
-    } else if (pathname === "/decks" && indice < 3) {
-      setIndice(3);
-    } else if (pathname === "/expedicao" && indice < 4) {
-      setIndice(4);
+    const passoPorRota =
+      pathname === "/banners" ? 2 : pathname === "/decks" ? 3 : pathname === "/expedicao" ? 4 : 0;
+    if (indice < passoPorRota) {
+      queueMicrotask(() => setIndice(passoPorRota));
     }
   }, [chave, pathname, indice]);
 
@@ -187,12 +181,13 @@ export function GuiaPrimeirosPassos() {
   }, [chave, etapa, pathname]);
 
   useEffect(() => {
-    atualizarPosicao();
+    const primeiraAtualizacao = window.setTimeout(atualizarPosicao, 0);
     const intervalo = window.setInterval(atualizarPosicao, 300);
     window.addEventListener("resize", atualizarPosicao);
     window.addEventListener("scroll", atualizarPosicao, true);
 
     return () => {
+      window.clearTimeout(primeiraAtualizacao);
       window.clearInterval(intervalo);
       window.removeEventListener("resize", atualizarPosicao);
       window.removeEventListener("scroll", atualizarPosicao, true);
@@ -202,6 +197,7 @@ export function GuiaPrimeirosPassos() {
   function finalizar() {
     if (chave) {
       localStorage.setItem(chave, "concluido");
+      sessionStorage.removeItem(chaveSessaoGuia);
       const usuario = getStoredUser();
       if (usuario) {
         sessionStorage.removeItem(`animecards_guia_etapa_${usuario.id}`);

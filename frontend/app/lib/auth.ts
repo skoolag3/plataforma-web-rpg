@@ -1,5 +1,7 @@
 "use client";
 
+import { chaveSessaoGuia } from "./guiaPrimeirosPassos.estado";
+
 export type Usuario = {
   id: string;
   nome: string;
@@ -203,6 +205,7 @@ export function clearSession() {
   }).catch(() => undefined);
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  sessionStorage.removeItem(chaveSessaoGuia);
   cachedUserText = null;
   cachedUser = null;
   notifyAuthChange();
