@@ -46,13 +46,8 @@ export class LojaService implements OnModuleInit {
   private pacotesSincronizados = false;
 
   constructor(private readonly prisma: PrismaService) {
-    const chaveFallback =
-      'sk_test_' +
-      '51SXxqUFK5Q9boOvito8QFbo49co40iCXiN8Y0dxPs3qXNZaou2w7KIszmErIm5KlPpL6MIQLEK8aRLHWGmBWzdRm00XWUoXyKd';
-    const chaveEnv = process.env.STRIPE_SECRET_KEY?.trim();
-    const chaveAtiva =
-      chaveEnv && !chaveEnv.endsWith('UHlE') ? chaveEnv : chaveFallback;
-    this.stripe = chaveAtiva ? new Stripe(chaveAtiva) : null;
+    const chave = process.env.STRIPE_SECRET_KEY?.trim();
+    this.stripe = chave ? new Stripe(chave) : null;
   }
 
   async onModuleInit() {
@@ -174,8 +169,13 @@ export class LojaService implements OnModuleInit {
       throw new BadRequestException('Assinatura do webhook Stripe inválida.');
     }
 
-    if (evento.type !== 'checkout.session.completed') return { recebido: true };
+    if (
+      evento.type !== 'checkout.session.completed' &&
+      evento.type !== 'checkout.session.async_payment_succeeded'
+    )
+      return { recebido: true };
     const sessao = evento.data.object;
+    if (sessao.payment_status !== 'paid') return { recebido: true };
     const idTransacao = sessao.metadata?.transacaoId;
     if (!idTransacao) return { recebido: true };
     await this.creditarTransacaoConfirmada(idTransacao);

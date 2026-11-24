@@ -47,12 +47,14 @@ describe('Rotas críticas - Stripe e webhook', () => {
     await request(app.getHttpServer())
       .post(`/loja/checkout/${idPacote}`)
       .set(comToken)
+      .set('origin', 'https://frontend.test')
       .expect(201)
       .expect({ url: 'https://checkout.test' });
 
     expect(lojaService.criarCheckout).toHaveBeenCalledWith(
       usuarioTeste.id,
       idPacote,
+      'https://frontend.test',
     );
   });
 
